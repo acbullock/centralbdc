@@ -159,7 +159,7 @@ class Sidebar extends React.Component {
         logoImg = (
           <a
             href={logo.outterLink}
-            className="simple-text logo-mini"
+            className="simple-text logo"
             target="_blank"
             onClick={this.props.closeSidebar}
           >
@@ -168,16 +168,16 @@ class Sidebar extends React.Component {
             </div>
           </a>
         );
-        logoText = (
-          <a
-            href={logo.outterLink}
-            className="simple-text logo-normal"
-            target="_blank"
-            onClick={this.props.closeSidebar}
-          >
-            {logo.text}
-          </a>
-        );
+        // logoText = (
+        //   <a
+        //     href={logo.outterLink}
+        //     className="simple-text logo-normal"
+        //     target="_blank"
+        //     onClick={this.props.closeSidebar}
+        //   >
+        //     {logo.text}
+        //   </a>
+        // );
       } else {
         logoImg = (
           <NavLink
@@ -190,15 +190,15 @@ class Sidebar extends React.Component {
             </div>
           </NavLink>
         );
-        logoText = (
-          <NavLink
-            to={logo.innerLink}
-            className="simple-text logo-normal"
-            onClick={this.props.closeSidebar}
-          >
-            {logo.text}
-          </NavLink>
-        );
+        // logoText = (
+        //   <NavLink
+        //     to={logo.innerLink}
+        //     className="simple-text logo-normal"
+        //     onClick={this.props.closeSidebar}
+        //   >
+        //     {logo.text}
+        //   </NavLink>
+        // );
       }
     }
     return (

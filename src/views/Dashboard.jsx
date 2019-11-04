@@ -16,63 +16,127 @@
 */
 import React from "react";
 // nodejs library that concatenates classes
-import classNames from "classnames";
-// react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
-// react plugin for creating vector maps
-import { VectorMap } from "react-jvectormap";
+// import classNames from "classnames";
+// // react plugin used to create charts
+// import { Line, Bar } from "react-chartjs-2";
+// // react plugin for creating vector maps
+// import { VectorMap } from "react-jvectormap";
 
 // reactstrap components
 import {
   Button,
-  ButtonGroup,
+  // ButtonGroup,
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
+  // CardFooter,
   CardTitle,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledDropdown,
-  Label,
-  FormGroup,
-  Input,
-  Progress,
+  // DropdownToggle,
+  // DropdownMenu,
+  // DropdownItem,
+  // UncontrolledDropdown,
+  // Label,
+  // FormGroup,
+  // Input,
+  // Progress,
   Table,
   Row,
   Col,
-  UncontrolledTooltip
+  // UncontrolledTooltip
 } from "reactstrap";
 
 // core components
-import {
-  chartExample1,
-  chartExample2,
-  chartExample3,
-  chartExample4
-} from "../variables/charts.jsx";
+// import {
+//   chartExample1,
+//   chartExample2,
+//   chartExample3,
+//   chartExample4
+// } from "../variables/charts.jsx";
 
-var mapData = {
-  AU: 760,
-  BR: 550,
-  CA: 120,
-  DE: 1300,
-  FR: 540,
-  GB: 690,
-  GE: 200,
-  IN: 200,
-  RO: 600,
-  RU: 300,
-  US: 2920
-};
+// var mapData = {
+//   AU: 760,
+//   BR: 550,
+//   CA: 120,
+//   DE: 1300,
+//   FR: 540,
+//   GB: 690,
+//   GE: 200,
+//   IN: 200,
+//   RO: 600,
+//   RU: 300,
+//   US: 2920
+// };
 
 class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      bigChartData: "data1"
+      bigChartData: "data1",
+      user: {
+        userId:""
+      },
+      agent: {
+
+      },
+      isAdmin: false,
+      appointments: []
     };
+    this.getAppointmentData = this.getAppointmentData.bind(this)
+  }
+  componentDidMount(){
+    let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
+    this.setState({user});
+    this.props.mongo.db.collection("agents")
+    .findOne({userId: user.userId})
+    .then((res)=>{
+      this.setState({agent: res, isAdmin: res.account_type==="admin"})
+      if(res.account_type === "admin"){
+        this.getAppointmentData()
+      }
+    })
+    .catch((err=>{
+      console.log(err)
+    }))
+  }
+  async getAppointmentData(){
+    let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
+    agents = agents.filter((agent)=>{
+      return agent.account_type === "agent"
+    });
+    let appointments = []
+    await agents.map((agent)=>{
+      let appt = {name: agent.name, appointments: agent.appointments}
+      appointments.push(appt);
+      return agent;
+    });
+    appointments = appointments.sort(function(a, b) {
+      return (Object.keys(b.appointments).length - Object.keys(a.appointments).length)
+    });
+    this.setState({appointments});
+  }
+  createdAppointmentsSince(appts, numDays){
+    let someDay = new Date();
+    let ret = 0;
+    someDay.setDate(someDay.getDate() + (-1*numDays)); 
+    for(let i =0; i < Object.keys(appts).length; i++){
+      if(appts[i].created >= someDay && appts[i].isPending === false){
+          ret++;
+      }
+    }
+    return ret;
+  }
+  pendingAppointmentsSince(appts, numDays){
+    let someDay = new Date();
+    let ret = 0;
+    someDay.setDate(someDay.getDate() + (-1*numDays)); 
+    for(let i =0; i < Object.keys(appts).length; i++){
+      if(appts[i].created >= someDay && appts[i].isPending=== true){
+        // console.log(appts)
+          ret++;
+      }
+    }
+    
+        return ret;
   }
   setBgChartData = name => {
     this.setState({
@@ -83,13 +147,14 @@ class Dashboard extends React.Component {
     return (
       <>
         <div className="content">
-          <Row>
+          {/* <Row>
             <Col xs="12">
               <Card className="card-chart">
                 <CardHeader>
                   <Row>
                     <Col className="text-left" sm="6">
-                      <h5 className="card-category">Total Shipments</h5>
+                      <h4 className="card-category">{this.state.agent.name}</h4>
+                      <h5 className="card-category">Type: {this.state.agent.account_type}</h5>
                       <CardTitle tag="h2">Performance</CardTitle>
                     </Col>
                     <Col sm="6">
@@ -322,273 +387,20 @@ class Dashboard extends React.Component {
                 </CardBody>
               </Card>
             </Col>
-          </Row>
+          </Row> */}
           <Row>
-            <Col lg="5">
-              <Card className="card-tasks">
+            <Col lg="12">
+              <Card hidden={!this.state.isAdmin}>
                 <CardHeader>
-                  <h6 className="title d-inline">Tasks(5)</h6>
-                  <p className="card-category d-inline">today</p>
-                  <UncontrolledDropdown>
-                    <DropdownToggle
-                      caret
-                      className="btn-icon"
-                      color="link"
-                      data-toggle="dropdown"
-                      type="button"
+                <div className="tools float-right">
+                    <Button className="btn-icon"
+                    onClick={(e)=>{e.preventDefault(); this.getAppointmentData()}}
                     >
-                      <i className="tim-icons icon-settings-gear-63" />
-                    </DropdownToggle>
-                    <DropdownMenu right>
-                      <DropdownItem
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        Action
-                      </DropdownItem>
-                      <DropdownItem
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        Another action
-                      </DropdownItem>
-                      <DropdownItem
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        Something else
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
-                </CardHeader>
-                <CardBody>
-                  <div className="table-full-width table-responsive">
-                    <Table>
-                      <tbody>
-                        <tr>
-                          <td>
-                            <FormGroup check>
-                              <Label check>
-                                <Input defaultValue="" type="checkbox" />
-                                <span className="form-check-sign">
-                                  <span className="check" />
-                                </span>
-                              </Label>
-                            </FormGroup>
-                          </td>
-                          <td>
-                            <p className="title">Update the Documentation</p>
-                            <p className="text-muted">
-                              Dwuamish Head, Seattle, WA 8:47 AM
-                            </p>
-                          </td>
-                          <td className="td-actions text-right">
-                            <Button
-                              color="link"
-                              id="tooltip786630859"
-                              title=""
-                              type="button"
-                            >
-                              <i className="tim-icons icon-pencil" />
-                            </Button>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip786630859"
-                            >
-                              Edit Task
-                            </UncontrolledTooltip>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <FormGroup check>
-                              <Label check>
-                                <Input
-                                  defaultChecked
-                                  defaultValue=""
-                                  type="checkbox"
-                                />
-                                <span className="form-check-sign">
-                                  <span className="check" />
-                                </span>
-                              </Label>
-                            </FormGroup>
-                          </td>
-                          <td>
-                            <p className="title">GDPR Compliance</p>
-                            <p className="text-muted">
-                              The GDPR is a regulation that requires businesses
-                              to protect the personal data and privacy of Europe
-                              citizens for transactions that occur within EU
-                              member states.
-                            </p>
-                          </td>
-                          <td className="td-actions text-right">
-                            <Button
-                              color="link"
-                              id="tooltip155151810"
-                              title=""
-                              type="button"
-                            >
-                              <i className="tim-icons icon-pencil" />
-                            </Button>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip155151810"
-                            >
-                              Edit Task
-                            </UncontrolledTooltip>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <FormGroup check>
-                              <Label check>
-                                <Input defaultValue="" type="checkbox" />
-                                <span className="form-check-sign">
-                                  <span className="check" />
-                                </span>
-                              </Label>
-                            </FormGroup>
-                          </td>
-                          <td>
-                            <p className="title">Solve the issues</p>
-                            <p className="text-muted">
-                              Fifty percent of all respondents said they would
-                              be more likely to shop at a company
-                            </p>
-                          </td>
-                          <td className="td-actions text-right">
-                            <Button
-                              color="link"
-                              id="tooltip199559448"
-                              title=""
-                              type="button"
-                            >
-                              <i className="tim-icons icon-pencil" />
-                            </Button>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip199559448"
-                            >
-                              Edit Task
-                            </UncontrolledTooltip>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <FormGroup check>
-                              <Label check>
-                                <Input defaultValue="" type="checkbox" />
-                                <span className="form-check-sign">
-                                  <span className="check" />
-                                </span>
-                              </Label>
-                            </FormGroup>
-                          </td>
-                          <td>
-                            <p className="title">Release v2.0.0</p>
-                            <p className="text-muted">
-                              Ra Ave SW, Seattle, WA 98116, SUA 11:19 AM
-                            </p>
-                          </td>
-                          <td className="td-actions text-right">
-                            <Button
-                              color="link"
-                              id="tooltip989676508"
-                              title=""
-                              type="button"
-                            >
-                              <i className="tim-icons icon-pencil" />
-                            </Button>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip989676508"
-                            >
-                              Edit Task
-                            </UncontrolledTooltip>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <FormGroup check>
-                              <Label check>
-                                <Input defaultValue="" type="checkbox" />
-                                <span className="form-check-sign">
-                                  <span className="check" />
-                                </span>
-                              </Label>
-                            </FormGroup>
-                          </td>
-                          <td>
-                            <p className="title">Export the processed files</p>
-                            <p className="text-muted">
-                              The report also shows that consumers will not
-                              easily forgive a company once a breach exposing
-                              their personal data occurs.
-                            </p>
-                          </td>
-                          <td className="td-actions text-right">
-                            <Button
-                              color="link"
-                              id="tooltip557118868"
-                              title=""
-                              type="button"
-                            >
-                              <i className="tim-icons icon-pencil" />
-                            </Button>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip557118868"
-                            >
-                              Edit Task
-                            </UncontrolledTooltip>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <FormGroup check>
-                              <Label check>
-                                <Input defaultValue="" type="checkbox" />
-                                <span className="form-check-sign">
-                                  <span className="check" />
-                                </span>
-                              </Label>
-                            </FormGroup>
-                          </td>
-                          <td>
-                            <p className="title">Arival at export process</p>
-                            <p className="text-muted">
-                              Capitol Hill, Seattle, WA 12:34 AM
-                            </p>
-                          </td>
-                          <td className="td-actions text-right">
-                            <Button
-                              color="link"
-                              id="tooltip143185858"
-                              title=""
-                              type="button"
-                            >
-                              <i className="tim-icons icon-pencil" />
-                            </Button>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip143185858"
-                            >
-                              Edit Task
-                            </UncontrolledTooltip>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </Table>
+                      
+                    <i className="tim-icons icon-refresh-01" />
+                      </Button>
                   </div>
-                </CardBody>
-              </Card>
-            </Col>
-            <Col lg="7">
-              <Card>
-                <CardHeader>
-                  <div className="tools float-right">
+                  {/* <div className="tools float-right">
                     <UncontrolledDropdown>
                       <DropdownToggle
                         caret
@@ -627,358 +439,136 @@ class Dashboard extends React.Component {
                         </DropdownItem>
                       </DropdownMenu>
                     </UncontrolledDropdown>
-                  </div>
-                  <CardTitle tag="h5">Management Table</CardTitle>
+                  </div> */}
+                  <CardTitle tag="h3">Created Appointments</CardTitle>
                 </CardHeader>
                 <CardBody>
                   <Table responsive>
                     <thead className="text-primary">
                       <tr>
-                        <th className="text-center">#</th>
-                        <th>Name</th>
-                        <th>Job Position</th>
-                        <th>Milestone</th>
-                        <th className="text-right">Salary</th>
-                        <th className="text-right">Actions</th>
+                        {/* <th className="text-center"></th> */}
+                        <th>Agent Name</th>
+                        <th>1 day</th>
+                        <th>7 days</th>
+                        <th>30 days</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td className="text-center">
-                          <div className="photo">
-                            <img
-                              alt="..."
-                              src={require("../assets/img/tania.jpg")}
-                            />
-                          </div>
-                        </td>
-                        <td>Tania Mike</td>
-                        <td>Develop</td>
-                        <td className="text-center">
-                          <div className="progress-container progress-sm">
-                            <Progress multi>
-                              <span className="progress-value">25%</span>
-                              <Progress bar max="100" value="25" />
-                            </Progress>
-                          </div>
-                        </td>
-                        <td className="text-right">€ 99,225</td>
-                        <td className="text-right">
-                          <Button
-                            className="btn-link btn-icon btn-neutral"
-                            color="success"
-                            id="tooltip618296632"
-                            size="sm"
-                            title="Refresh"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-refresh-01" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip618296632"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                          <Button
-                            className="btn-link btn-icon btn-neutral"
-                            color="danger"
-                            id="tooltip707467505"
-                            size="sm"
-                            title="Delete"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-simple-remove" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip707467505"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="text-center">
-                          <div className="photo">
-                            <img
-                              alt="..."
-                              src={require("../assets/img/robi.jpg")}
-                            />
-                          </div>
-                        </td>
-                        <td>John Doe</td>
-                        <td>CEO</td>
-                        <td className="text-center">
-                          <div className="progress-container progress-sm">
-                            <Progress multi>
-                              <span className="progress-value">77%</span>
-                              <Progress bar max="100" value="77" />
-                            </Progress>
-                          </div>
-                        </td>
-                        <td className="text-right">€ 89,241</td>
-                        <td className="text-right">
-                          <Button
-                            className="btn-link btn-icon btn-neutral"
-                            color="success"
-                            id="tooltip216846074"
-                            size="sm"
-                            title="Refresh"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-refresh-01" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip216846074"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                          <Button
-                            className="btn-link btn-icon btn-neutral"
-                            color="danger"
-                            id="tooltip391990405"
-                            size="sm"
-                            title="Delete"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-simple-remove" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip391990405"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="text-center">
-                          <div className="photo">
-                            <img
-                              alt="..."
-                              src={require("../assets/img/lora.jpg")}
-                            />
-                          </div>
-                        </td>
-                        <td>Alexa Mike</td>
-                        <td>Design</td>
-                        <td className="text-center">
-                          <div className="progress-container progress-sm">
-                            <Progress multi>
-                              <span className="progress-value">41%</span>
-                              <Progress bar max="100" value="41" />
-                            </Progress>
-                          </div>
-                        </td>
-                        <td className="text-right">€ 92,144</td>
-                        <td className="text-right">
-                          <Button
-                            className="btn-link btn-icon btn-neutral"
-                            color="success"
-                            id="tooltip191500186"
-                            size="sm"
-                            title="Refresh"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-refresh-01" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip191500186"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                          <Button
-                            className="btn-link btn-icon btn-neutral"
-                            color="danger"
-                            id="tooltip320351170"
-                            size="sm"
-                            title="Delete"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-simple-remove" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip320351170"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="text-center">
-                          <div className="photo">
-                            <img
-                              alt="..."
-                              src={require("../assets/img/jana.jpg")}
-                            />
-                          </div>
-                        </td>
-                        <td>Jana Monday</td>
-                        <td>Marketing</td>
-                        <td className="text-center">
-                          <div className="progress-container progress-sm">
-                            <Progress multi>
-                              <span className="progress-value">50%</span>
-                              <Progress bar max="100" value="50" />
-                            </Progress>
-                          </div>
-                        </td>
-                        <td className="text-right">€ 49,990</td>
-                        <td className="text-right">
-                          <Button
-                            className="btn-link btn-icon"
-                            color="success"
-                            id="tooltip345411997"
-                            size="sm"
-                            title="Refresh"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-refresh-01" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip345411997"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                          <Button
-                            className="btn-link btn-icon"
-                            color="danger"
-                            id="tooltip601343171"
-                            size="sm"
-                            title="Delete"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-simple-remove" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip601343171"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="text-center">
-                          <div className="photo">
-                            <img
-                              alt="..."
-                              src={require("../assets/img/mike.jpg")}
-                            />
-                          </div>
-                        </td>
-                        <td>Paul Dickens</td>
-                        <td>Develop</td>
-                        <td className="text-center">
-                          <div className="progress-container progress-sm">
-                            <Progress multi>
-                              <span className="progress-value">100%</span>
-                              <Progress bar max="100" value="100" />
-                            </Progress>
-                          </div>
-                        </td>
-                        <td className="text-right">€ 69,201</td>
-                        <td className="text-right">
-                          <Button
-                            className="btn-link btn-icon"
-                            color="success"
-                            id="tooltip774891382"
-                            size="sm"
-                            title="Refresh"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-refresh-01" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip774891382"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                          <Button
-                            className="btn-link btn-icon"
-                            color="danger"
-                            id="tooltip949929353"
-                            size="sm"
-                            title="Delete"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-simple-remove" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip949929353"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="text-center">
-                          <div className="photo">
-                            <img
-                              alt="..."
-                              src={require("../assets/img/emilyz.jpg")}
-                            />
-                          </div>
-                        </td>
-                        <td>Manuela Rico</td>
-                        <td>Manager</td>
-                        <td className="text-center">
-                          <div className="progress-container progress-sm">
-                            <Progress multi>
-                              <span className="progress-value">15%</span>
-                              <Progress bar max="100" value="15" />
-                            </Progress>
-                          </div>
-                        </td>
-                        <td className="text-right">€ 99,201</td>
-                        <td className="text-right">
-                          <Button
-                            className="btn-link btn-icon"
-                            color="success"
-                            id="tooltip30547133"
-                            size="sm"
-                            title="Refresh"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-refresh-01" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip30547133"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                          <Button
-                            className="btn-link btn-icon"
-                            color="danger"
-                            id="tooltip156899243"
-                            size="sm"
-                            title="Delete"
-                            type="button"
-                          >
-                            <i className="tim-icons icon-simple-remove" />
-                          </Button>
-                          <UncontrolledTooltip
-                            delay={0}
-                            target="tooltip156899243"
-                          >
-                            Tooltip on top
-                          </UncontrolledTooltip>
-                        </td>
-                      </tr>
+                    {
+                        this.state.appointments.map((app, index)=>{
+                          return(
+                            <tr key={index}>
+                              {/* <td className="text-center">
+                              <div className="photo">
+                                <img
+                                  alt="..."
+                                  src={require("../assets/img/tania.jpg")}
+                                />
+                              </div>
+                              </td> */}
+                              <td key={index + "-name"}>{app.name}</td>
+                              <td key={index + "-day"}>{this.createdAppointmentsSince(app.appointments, 1)}</td>
+                              <td key={index + "-week"}>{this.createdAppointmentsSince(app.appointments, 7)}</td>
+                              <td key={index + "-month"}>{this.createdAppointmentsSince(app.appointments, 30)}</td>
+                            </tr>
+                            )
+                        })
+                      }
                     </tbody>
                   </Table>
                 </CardBody>
               </Card>
+              <Card hidden={!this.state.isAdmin}>
+                <CardHeader>
+                  <div className="tools float-right">
+                    <Button className="btn-icon"
+                    onClick={(e)=>{e.preventDefault(); this.getAppointmentData()}}
+                    >
+                      
+                    <i className="tim-icons icon-refresh-01" />
+                      </Button>
+                  </div>
+                  {/* <div className="tools float-right">
+                    <UncontrolledDropdown>
+                      <DropdownToggle
+                        caret
+                        className="btn-icon"
+                        color="link"
+                        data-toggle="dropdown"
+                        type="button"
+                      >
+                        <i className="tim-icons icon-settings-gear-63" />
+                      </DropdownToggle>
+                      <DropdownMenu right>
+                        <DropdownItem
+                          href="#pablo"
+                          onClick={e => e.preventDefault()}
+                        >
+                          Action
+                        </DropdownItem>
+                        <DropdownItem
+                          href="#pablo"
+                          onClick={e => e.preventDefault()}
+                        >
+                          Another action
+                        </DropdownItem>
+                        <DropdownItem
+                          href="#pablo"
+                          onClick={e => e.preventDefault()}
+                        >
+                          Something else
+                        </DropdownItem>
+                        <DropdownItem
+                          className="text-danger"
+                          href="#pablo"
+                          onClick={e => e.preventDefault()}
+                        >
+                          Remove Data
+                        </DropdownItem>
+                      </DropdownMenu>
+                    </UncontrolledDropdown>
+                  </div> */}
+                  <CardTitle tag="h3">Pending Appointments</CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <Table responsive>
+                    <thead className="text-primary">
+                      <tr>
+                        {/* <th className="text-center"></th> */}
+                        <th>Agent Name</th>
+                        <th>1 day</th>
+                        <th>7 days</th>
+                        <th>30 days</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {
+                        this.state.appointments.map((app, index)=>{
+                          return(
+                            <tr key={index}>
+                              {/* <td className="text-center">
+                              <div className="photo">
+                                <img
+                                  alt="..."
+                                  src={require("../assets/img/tania.jpg")}
+                                />
+                              </div>
+                              </td> */}
+                              <td key={index + "-name"}>{app.name}</td>
+                              <td key={index + "-day"}>{this.pendingAppointmentsSince(app.appointments, 1)}</td>
+                              <td key={index + "-week"}>{this.pendingAppointmentsSince(app.appointments, 7)}</td>
+                              <td key={index + "-month"}>{this.pendingAppointmentsSince(app.appointments, 30)}</td>
+                            </tr>
+                            )
+                        })
+                      }
+                    </tbody>
+                  </Table>
+                </CardBody>
+              </Card>
+              
             </Col>
-            <Col lg="12">
+            {/* <Col lg="12">
               <Card>
                 <CardHeader>
                   <CardTitle tag="h4">Global Sales by Top Locations</CardTitle>
@@ -1104,7 +694,7 @@ class Dashboard extends React.Component {
                   </Row>
                 </CardBody>
               </Card>
-            </Col>
+            </Col> */}
           </Row>
         </div>
       </>

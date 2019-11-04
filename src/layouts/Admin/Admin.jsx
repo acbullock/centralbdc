@@ -29,7 +29,7 @@ import FixedPlugin from "../../components/FixedPlugin/FixedPlugin.jsx";
 
 import routes from "../../routes.js";
 
-import logo from "../../assets/img/react-logo.png";
+import logo from "../../assets/img/logo.png";
 
 var ps;
 
@@ -41,6 +41,9 @@ class Admin extends React.Component {
       sidebarMini: true,
       opacity: 0,
       sidebarOpened: false,
+      mongo: props.mongo,
+      isAdmin: false,
+      agent: {}
     };
     // console.log(props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo)
   }
@@ -48,6 +51,11 @@ class Admin extends React.Component {
     if(this.props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo.userId === undefined){
       this.props.history.push("/auth/login")
     }
+    let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
+    this.props.mongo.db.collection("agents").findOne({userId: user.userId})
+    .then((res)=>{
+      this.setState({agent: res, isAdmin: res.account_type === "admin"});
+    })
     if (navigator.platform.indexOf("Win") > -1) {
       document.documentElement.className += " perfect-scrollbar-on";
       document.documentElement.classList.remove("perfect-scrollbar-off");
@@ -101,10 +109,13 @@ class Admin extends React.Component {
         return this.getRoutes(prop.views);
       }
       if (prop.layout === "/admin") {
+        let C = prop.component
         return (
           <Route
             path={prop.layout + prop.path}
-            component={prop.component}
+            // component={prop.component}
+            render={(props) => <C {...props}
+            mongo={this.state.mongo} />}
             key={key}
           />
         );
@@ -192,7 +203,7 @@ class Admin extends React.Component {
           activeColor={this.state.activeColor}
           logo={{
             outterLink: "https://www.creative-tim.com/",
-            text: "Creative Tim",
+            text: "CentralBDC",
             imgSrc: logo
           }}
           closeSidebar={this.closeSidebar}
@@ -205,7 +216,8 @@ class Admin extends React.Component {
           <AdminNavbar
             {...this.props}
             handleMiniClick={this.handleMiniClick}
-            brandText={this.getActiveRoute(routes)}
+            // brandText={this.getActiveRoute(routes)}
+            brandText={this.state.isAdmin ? "Admin Dashboard" : "Agent Dashboard"}
             sidebarOpened={this.state.sidebarOpened}
             toggleSidebar={this.toggleSidebar}
           />
