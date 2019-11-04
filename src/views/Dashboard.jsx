@@ -102,7 +102,7 @@ class Dashboard extends React.Component {
       agents = await this.props.mongo.db.collection("agents").find({}).asArray();
     }
     else{
-      agents = this.state.agent
+      agents = await this.props.mongo.db.collection("agents").findOne({userId:this.state.user.userId});
     }
     // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
     if(this.state.isAdmin === true){
@@ -119,12 +119,14 @@ class Dashboard extends React.Component {
       appointments = appointments.sort(function(a, b) {
         return (Object.keys(b.appointments).length - Object.keys(a.appointments).length)
       });
+      console.log(appointments)
       this.setState({appointments});
     }
     else{
       let appt = {name: agents.name, appointments: agents.appointments}
       let appointments = [];
       appointments.push(appt)
+      console.log(appointments)
       this.setState({appointments})
     }
     
@@ -497,7 +499,7 @@ class Dashboard extends React.Component {
                 <CardHeader>
                   <div className="tools float-right">
                     <Button className="btn-icon"
-                    onClick={(e)=>{e.preventDefault(); this.getAppointmentData()}}
+                    onClick={(e)=>{e.preventDefault(); this.getAppointmentData();}}
                     >
                       
                     <i className="tim-icons icon-refresh-01" />

@@ -37,7 +37,7 @@ class Admin extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeColor: "blue",
+      activeColor: "green",
       sidebarMini: true,
       opacity: 0,
       sidebarOpened: false,
