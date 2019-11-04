@@ -126,7 +126,6 @@ class Dashboard extends React.Component {
       let appt = {name: agents.name, appointments: agents.appointments}
       let appointments = [];
       appointments.push(appt)
-      console.log(appointments)
       this.setState({appointments})
     }
     

@@ -23,7 +23,7 @@ import {
   CardHeader,
   CardBody,
   CardFooter,
-  CardImg,
+  CardText,
   CardTitle,
   Label,
   FormGroup,
@@ -38,11 +38,47 @@ import {
 } from "reactstrap";
 
 class Register extends React.Component {
-  componentDidMount() {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: "",
+      password: "",
+      fullName: "",
+      adminChecked: false,
+      error:""
+    };
+  }
+  async componentDidMount() {
     document.body.classList.toggle("register-page");
+    let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
+    if(user.userId === undefined){
+      this.props.history.push("/auth/login")
+    }
+    else{
+      let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});
+      if(agent.account_type!=="admin"){
+        this.props.history.push("/admin/dashboard")
+      }
+    }
   }
   componentWillUnmount() {
     document.body.classList.toggle("register-page");
+  }
+  async registerUser(){
+    let {db} = this.props.mongo;
+    await this.props.mongo.handleRegister(this.state.email, this.state.password)
+    .then((res)=>{
+      db.collection("agents").insertOne({
+        email: this.state.email,
+        name: this.state.fullName,
+        account_type: this.state.adminChecked === true ?  "admin": "agent",
+        appointments: {}
+      }).catch((err)=>{
+        console.log(err)
+      })
+    })
+    .catch((err)=>{this.setState({error:err})});
+    
   }
   render() {
     return (
@@ -50,52 +86,15 @@ class Register extends React.Component {
         <div className="content">
           <Container>
             <Row>
-              <Col className="ml-auto" md="5">
-                <div className="info-area info-horizontal mt-5">
-                  <div className="icon icon-warning">
-                    <i className="tim-icons icon-wifi" />
-                  </div>
-                  <div className="description">
-                    <h3 className="info-title">Marketing</h3>
-                    <p className="description">
-                      We've created the marketing campaign of the website. It
-                      was a very interesting collaboration.
-                    </p>
-                  </div>
-                </div>
-                <div className="info-area info-horizontal">
-                  <div className="icon icon-primary">
-                    <i className="tim-icons icon-triangle-right-17" />
-                  </div>
-                  <div className="description">
-                    <h3 className="info-title">Fully Coded in HTML5</h3>
-                    <p className="description">
-                      We've developed the website with HTML5 and CSS3. The
-                      client has access to the code using GitHub.
-                    </p>
-                  </div>
-                </div>
-                <div className="info-area info-horizontal">
-                  <div className="icon icon-info">
-                    <i className="tim-icons icon-trophy" />
-                  </div>
-                  <div className="description">
-                    <h3 className="info-title">Built Audience</h3>
-                    <p className="description">
-                      There is also a Fully Customizable CMS Admin Dashboard for
-                      this product.
-                    </p>
-                  </div>
-                </div>
-              </Col>
-              <Col className="mr-auto" md="7">
+
+              <Col className="mr-auto center" md="6">
                 <Card className="card-register card-white">
                   <CardHeader>
-                    <CardImg
-                      alt="..."
-                      src={require("../../assets/img/card-primary.png")}
+                    <img
+                      alt="logo"
+                      src={require("../../assets/img/logo.png")}
+                      style={{padding: 10}}
                     />
-                    <CardTitle tag="h4">Register</CardTitle>
                   </CardHeader>
                   <CardBody>
                     <Form className="form">
@@ -105,7 +104,7 @@ class Register extends React.Component {
                             <i className="tim-icons icon-single-02" />
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input placeholder="Full Name" type="text" />
+                        <Input placeholder="Full Name" type="text" value={this.state.fullName} onChange={(e)=>{e.preventDefault(); this.setState({fullName: e.target.value})}}/>
                       </InputGroup>
                       <InputGroup>
                         <InputGroupAddon addonType="prepend">
@@ -113,7 +112,7 @@ class Register extends React.Component {
                             <i className="tim-icons icon-email-85" />
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input placeholder="Email" type="text" />
+                        <Input placeholder="Email" type="email"   value={this.state.email} onChange={(e)=>{e.preventDefault(); this.setState({email: e.target.value})}} />
                       </InputGroup>
                       <InputGroup>
                         <InputGroupAddon addonType="prepend">
@@ -121,30 +120,40 @@ class Register extends React.Component {
                             <i className="tim-icons icon-lock-circle" />
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input placeholder="Password" type="text" />
+                        <Input placeholder="Password" type="password" value={this.state.password} onChange={(e)=>{e.preventDefault(); this.setState({password: e.target.value})}}/>
                       </InputGroup>
                       <FormGroup check className="text-left">
                         <Label check>
-                          <Input type="checkbox" />
-                          <span className="form-check-sign" />I agree to the{" "}
-                          <a href="#pablo" onClick={e => e.preventDefault()}>
-                            terms and conditions
-                          </a>
-                          .
+                          <Input type="checkbox" checked={this.state.adminChecked} onChange={()=>{ this.setState({adminChecked: !this.state.adminChecked})}}/>
+                          <span className="form-check-sign" />User is ADMIN
                         </Label>
                       </FormGroup>
                     </Form>
                   </CardBody>
                   <CardFooter>
-                    <Button
-                      className="btn-round"
+                  <Button
+                      className="btn-round float-left"
                       color="primary"
                       href="#pablo"
-                      onClick={e => e.preventDefault()}
+                      onClick={e =>{ e.preventDefault(); this.props.history.push("/admin/dashboard")}}
                       size="lg"
                     >
-                      Get Started
+                      Back To Dashboard
                     </Button>
+                    <Button
+                      className="btn-round float-right"
+                      color="success"
+                      href="#pablo"
+                      onClick={e => {e.preventDefault(); this.registerUser()}}
+                      size="lg"
+                    >
+                      Create User
+                    </Button>
+                    <Card color="warning" hidden={this.state.error.length === 0} style={{padding: 10}}>
+                      <CardText color="white">
+                        {this.state.error.message}
+                      </CardText>
+                    </Card>
                   </CardFooter>
                 </Card>
               </Col>

@@ -34,7 +34,9 @@ class Sidebar extends React.Component {
   // this creates the intial state of this component based on the collapse routes
   // that it gets through this.props.routes
   getCollapseStates = routes => {
-    let initialState = {};
+    let initialState = {
+      isAdmin: false
+    };
     routes.map((prop, key) => {
       if (prop.collapse) {
         initialState = {
@@ -47,6 +49,13 @@ class Sidebar extends React.Component {
     });
     return initialState;
   };
+  async getCurrentUser(){
+    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
+    await this.setState({user})
+    let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});
+    await this.setState({agent, isAdmin: agent.account_type === "admin"})
+    console.log(this.state.isAdmin)
+  }
   // this verifies if any of the collapses should be default opened on a rerender of this component
   // for example, on the refresh of the page,
   // while on the src/views/forms/RegularForms.jsx - route /admin/regular-forms
@@ -111,7 +120,7 @@ class Sidebar extends React.Component {
         );
       }
       return (
-        <li className={this.activeRoute(prop.layout + prop.path)} key={key}>
+        <li className={this.activeRoute(prop.layout + prop.path)} key={key} hidden={prop.name === "Login" || prop.adminOnly === true && this.state.isAdmin === false}>
           <NavLink to={prop.layout + prop.path} activeClassName="" onClick={this.props.closeSidebar}>
             {prop.icon !== undefined ? (
               <>
@@ -142,6 +151,7 @@ class Sidebar extends React.Component {
     if (navigator.platform.indexOf("Win") > -1) {
       ps = new PerfectScrollbar(this.refs.sidebar);
     }
+    this.getCurrentUser()
   }
   componentWillUnmount() {
     // we need to destroy the false scrollbar when we navigate
@@ -154,6 +164,7 @@ class Sidebar extends React.Component {
     const { activeColor, logo } = this.props;
     let logoImg = null;
     let logoText = null;
+    console.log(this.props)
     if (logo !== undefined) {
       if (logo.outterLink !== undefined) {
         logoImg = (
@@ -202,6 +213,7 @@ class Sidebar extends React.Component {
       }
     }
     return (
+      
       <div className="sidebar" data={activeColor}>
         <div className="sidebar-wrapper" ref="sidebar">
           {logoImg !== null || logoText !== null ? (

@@ -94,9 +94,9 @@ class Pages extends React.Component {
   };
   componentDidMount() {
     document.documentElement.classList.remove("nav-open");
-    if(this.props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo.userId !== undefined){
-      this.props.history.push("/admin/dashboard")
-    }
+    // if(this.props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo.userId !== undefined){
+    //   this.props.history.push("/admin/dashboard")
+    // }
   }
   render() {
     return (

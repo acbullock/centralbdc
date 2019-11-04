@@ -91,8 +91,10 @@ class AdminNavbar extends React.Component {
   getUserName = () => {
     
     let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
+    console.log(user)
     this.props.mongo.db.collection("agents").findOne({userId: user.userId})
     .then((res)=>{
+      
       this.setState({email:res.email});
     })
     .catch((err)=>{
@@ -233,12 +235,6 @@ class AdminNavbar extends React.Component {
                     <p className="d-lg-none">Log out</p>
                   </DropdownToggle>
                   <DropdownMenu className="dropdown-navbar" right tag="ul">
-                    <NavLink tag="li">
-                      <DropdownItem className="nav-item">Profile</DropdownItem>
-                    </NavLink>
-                    <NavLink tag="li">
-                      <DropdownItem className="nav-item">Settings</DropdownItem>
-                    </NavLink>
                     <DropdownItem divider tag="li" />
                     <NavLink tag="li" onClick={(e)=>{e.preventDefault(); this.props.mongo.handleLogout(this.props.mongo.client).then((res)=>{this.props.history.push("/auth/login")}); }}>
                       <DropdownItem className="nav-item">Log out</DropdownItem>

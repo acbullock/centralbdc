@@ -25,7 +25,7 @@ import NotificationAlert from "react-notification-alert";
 import AdminNavbar from "../../components/Navbars/AdminNavbar.jsx";
 import Footer from "../../components/Footer/Footer.jsx";
 import Sidebar from "../../components/Sidebar/Sidebar.jsx";
-import FixedPlugin from "../../components/FixedPlugin/FixedPlugin.jsx";
+// import FixedPlugin from "../../components/FixedPlugin/FixedPlugin.jsx";
 
 import routes from "../../routes.js";
 
@@ -202,7 +202,7 @@ class Admin extends React.Component {
           routes={routes}
           activeColor={this.state.activeColor}
           logo={{
-            outterLink: "https://www.creative-tim.com/",
+            outterLink: "https://www.centralbdc.com/",
             text: "CentralBDC",
             imgSrc: logo
           }}
@@ -228,12 +228,12 @@ class Admin extends React.Component {
             <Footer fluid />
           )}
         </div>
-        <FixedPlugin
+        {/* <FixedPlugin
           activeColor={this.state.activeColor}
           sidebarMini={this.state.sidebarMini}
           handleActiveClick={this.handleActiveClick}
           handleMiniClick={this.handleMiniClick}
-        />
+        /> */}
       </div>
     );
   }
