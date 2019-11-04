@@ -24,7 +24,6 @@ import {
   CardBody,
   CardFooter,
   CardText,
-  // CardTitle,
   Form,
   Input,
   InputGroupAddon,
@@ -80,8 +79,10 @@ class Login extends React.Component {
                 <Card className="card-login card-white">
                   <CardHeader>
                     <img
-                      alt="..."
+                      alt="logo"
+                      className="center"
                       src={require("../../assets/img/logo.png")}
+                      style={{padding: 10}}
                     />
                   </CardHeader>
                   <CardBody>
