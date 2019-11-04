@@ -90,37 +90,53 @@ class Dashboard extends React.Component {
     .findOne({userId: user.userId})
     .then((res)=>{
       this.setState({agent: res, isAdmin: res.account_type==="admin"})
-      if(res.account_type === "admin"){
         this.getAppointmentData()
-      }
     })
     .catch((err=>{
       console.log(err)
     }))
   }
   async getAppointmentData(){
-    let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
-    agents = agents.filter((agent)=>{
-      return agent.account_type === "agent"
-    });
-    let appointments = []
-    await agents.map((agent)=>{
-      let appt = {name: agent.name, appointments: agent.appointments}
-      appointments.push(appt);
-      return agent;
-    });
-    appointments = appointments.sort(function(a, b) {
-      return (Object.keys(b.appointments).length - Object.keys(a.appointments).length)
-    });
-    this.setState({appointments});
+    let agents;
+    if(this.state.isAdmin === true){
+      agents = await this.props.mongo.db.collection("agents").find({}).asArray();
+    }
+    else{
+      agents = this.state.agent
+    }
+    // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
+    if(this.state.isAdmin === true){
+      
+      agents = agents.filter((agent)=>{
+        return agent.account_type === "agent"
+      });
+      let appointments = []
+      await agents.map((agent)=>{
+        let appt = {name: agent.name, appointments: agent.appointments}
+        appointments.push(appt);
+        return agent;
+      });
+      appointments = appointments.sort(function(a, b) {
+        return (Object.keys(b.appointments).length - Object.keys(a.appointments).length)
+      });
+      this.setState({appointments});
+    }
+    else{
+      let appt = {name: agents.name, appointments: agents.appointments}
+      let appointments = [];
+      appointments.push(appt)
+      this.setState({appointments})
+    }
+    
+    
   }
   createdAppointmentsSince(appts, numDays){
     let someDay = new Date();
     let ret = 0;
     someDay.setDate(someDay.getDate() + (-1*numDays)); 
-    for(let i =0; i < Object.keys(appts).length; i++){
-      if(appts[i].created >= someDay && appts[i].isPending === false){
-          ret++;
+    for(let appt in appts){
+      if(appts[appt].verified >= someDay && appts[appt].isPending === false){
+        ret++;
       }
     }
     return ret;
@@ -129,10 +145,9 @@ class Dashboard extends React.Component {
     let someDay = new Date();
     let ret = 0;
     someDay.setDate(someDay.getDate() + (-1*numDays)); 
-    for(let i =0; i < Object.keys(appts).length; i++){
-      if(appts[i].created >= someDay && appts[i].isPending=== true){
-        // console.log(appts)
-          ret++;
+    for(let appt in appts){
+      if(appts[appt].created >= someDay && appts[appt].isPending=== true){
+        ret++;
       }
     }
     
@@ -390,7 +405,7 @@ class Dashboard extends React.Component {
           </Row> */}
           <Row>
             <Col lg="12">
-              <Card hidden={!this.state.isAdmin}>
+              <Card>
                 <CardHeader>
                 <div className="tools float-right">
                     <Button className="btn-icon"
@@ -478,7 +493,7 @@ class Dashboard extends React.Component {
                   </Table>
                 </CardBody>
               </Card>
-              <Card hidden={!this.state.isAdmin}>
+              <Card>
                 <CardHeader>
                   <div className="tools float-right">
                     <Button className="btn-icon"
