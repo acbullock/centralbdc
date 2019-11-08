@@ -16,17 +16,54 @@
 */
 import React from "react";
 // react plugin used to create DropdownMenu for selecting items
-import Select from "react-select";
+
 
 // reactstrap components
-import { FormGroup, Input, Row, Col } from "reactstrap";
+import {  Row, Col } from "reactstrap";
 
-class Wizard extends React.Component {
+class CreateAppointment extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      step3Select: null
+      step3Select: null,
+      internal_msg: "",
+      data: this.props.wizardData,
     };
+    // this.generateInternalMessage = this.generateInternalMessage.bind(this)
+  }
+  componentDidMount(){
+    this.generateInternalMessage()
+  }
+  componentWillReceiveProps(){
+    this.generateInternalMessage()
+  }
+  generateInternalMessage(){
+    let data = this.props.wizardData
+    if(data.customer == undefined || data.appointment == undefined ) return
+    else{
+      let message = `${data.appointment.dealership.label}\n`
+      message += `${data.customer.firstname} ${data.customer.lastname}\n`
+      message += `(${data.customer.phone.substring(0, 3)}) ${data.customer.phone.substring(3,6)} - ${data.customer.phone.substring(6,10)}\n`
+      let tempDate = new Date(data.appointment.date)
+      message += tempDate.toLocaleDateString() + " " + tempDate.toLocaleString([],{hour: '2-digit', minute:'2-digit'}) + "\n"
+      message += data.appointment.scenario.label + "\n"
+      message += data.appointment.source != null && data.appointment.source.label.length > 0 && data.appointment.source.label !== "None"? `Source: ${data.appointment.source.label}\n`: ""
+      message += `${data.appointment.department.label}`
+      return message
+    }
+  }
+  
+  generateCustomerMessage(){
+    let data = this.props.wizardData
+    if(data.customer === undefined || data.appointment === undefined ) return
+    else{
+      let message = `Hi ${data.customer.firstname}, `
+      message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} for `
+      let tempDate = new Date(data.appointment.date)
+      message += tempDate.toLocaleDateString()+ " @ " + tempDate.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) + ". "
+      message += "We are excited to assist you! Please ask for the VIP manager at the receptionist desk."
+      return message
+    }
   }
   render() {
     return (
@@ -34,54 +71,17 @@ class Wizard extends React.Component {
         <form>
           <Row className="justify-content-center">
             <Col sm="12">
-              <h5 className="info-text">Are you living in a nice area?</h5>
+              <h5 className="info-text">Review </h5>
             </Col>
-            <Col sm="7">
-              <FormGroup>
-                <label>Street Name</label>
-                <Input type="text" />
-              </FormGroup>
+            <Col sm="6">
+              <h5 className="justify-content-center">Internal Text</h5>
+              <blockquote className="blockquote" style={{whiteSpace: "pre-wrap"}}>
+                {this.generateInternalMessage()}</blockquote>
             </Col>
-            <Col sm="3">
-              <FormGroup>
-                <label>Street No.</label>
-                <Input type="text" />
-              </FormGroup>
-            </Col>
-            <Col sm="5">
-              <FormGroup>
-                <label>City</label>
-                <Input type="text" />
-              </FormGroup>
-            </Col>
-            <Col sm="5">
-              <FormGroup>
-                <label>Country</label>
-                <Select
-                  className="react-select info"
-                  classNamePrefix="react-select"
-                  name=""
-                  onChange={value => this.setState({ step3Select: value })}
-                  value={this.state.step3Select}
-                  options={[
-                    {
-                      value: "Afghanistan",
-                      label: " Afghanistan "
-                    },
-                    { value: "Albania", label: " Albania " },
-                    { value: "Algeria", label: " Algeria " },
-                    {
-                      value: "American Samoa",
-                      label: " American Samoa "
-                    },
-                    { value: "Andorra", label: " Andorra " },
-                    { value: "Angola", label: " Angola " },
-                    { value: "Anguilla", label: " Anguilla " },
-                    { value: "Antarctica", label: " Antarctica " }
-                  ]}
-                  placeholder="Single Select"
-                />
-              </FormGroup>
+            <Col sm="6">
+              <h5 className="justify-content-center">Customer Text</h5>
+              <blockquote className="blockquote" style={{whiteSpace: "pre-wrap"}}>
+                {this.generateCustomerMessage()}</blockquote>
             </Col>
           </Row>
         </form>
@@ -90,4 +90,4 @@ class Wizard extends React.Component {
   }
 }
 
-export default Wizard;
+export default CreateAppointment;

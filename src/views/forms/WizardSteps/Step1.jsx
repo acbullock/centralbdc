@@ -26,7 +26,7 @@ import {
   Col
 } from "reactstrap";
 
-class Wizard extends React.Component {
+class CreateAppointment extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -56,7 +56,7 @@ class Wizard extends React.Component {
   // function that verifies if value contains only numbers
   verifyNumber = value => {
     var numberRex = new RegExp("^[0-9]+$");
-    if (numberRex.test(value)) {
+    if (numberRex.test(value) && value.length === 10) {
       return true;
     }
     return false;
@@ -78,7 +78,7 @@ class Wizard extends React.Component {
         }
         break;
       case "number":
-        if (this.verifyNumber(event.target.value, stateNameEqualTo)) {
+        if (this.verifyNumber(event.target.value, stateNameEqualTo) ) {
           this.setState({ [stateName + "State"]: "has-success" });
         } else {
           this.setState({ [stateName + "State"]: "has-danger" });
@@ -93,7 +93,6 @@ class Wizard extends React.Component {
     if (
       this.state.firstnameState === "has-success" &&
       this.state.lastnameState === "has-success" &&
-      this.state.emailState === "has-success" &&
       this.state.phoneState === "has-success"
     ) {
       return true;
@@ -117,7 +116,7 @@ class Wizard extends React.Component {
     return (
       <>
         <h5 className="info-text">
-          Let's start with the basic information (with validation)
+          Let's start with the customer's information
         </h5>
         <Row className="justify-content-center mt-5">
           <Col sm="5">
@@ -140,28 +139,6 @@ class Wizard extends React.Component {
                 onBlur={e => this.setState({ firstnameFocus: false })}
               />
               {this.state.firstnameState === "has-danger" ? (
-                <label className="error">This field is required.</label>
-              ) : null}
-            </InputGroup>
-            <InputGroup
-              className={classnames(this.state.emailState, {
-                "input-group-focus": this.state.emailFocus
-              })}
-            >
-              <InputGroupAddon addonType="prepend">
-                <InputGroupText>
-                  <i className="tim-icons icon-email-85" />
-                </InputGroupText>
-              </InputGroupAddon>
-              <Input
-                name="email"
-                placeholder="Email..."
-                type="email"
-                onChange={e => this.change(e, "email", "email")}
-                onFocus={e => this.setState({ emailFocus: true })}
-                onBlur={e => this.setState({ emailFocus: false })}
-              />
-              {this.state.emailState === "has-danger" ? (
                 <label className="error">This field is required.</label>
               ) : null}
             </InputGroup>
@@ -189,48 +166,30 @@ class Wizard extends React.Component {
                 <label className="error">This field is required.</label>
               ) : null}
             </InputGroup>
-            <InputGroup
-              className={classnames(this.state.phoneState, {
-                "input-group-focus": this.state.phoneFocus
-              })}
-            >
-              <InputGroupAddon addonType="prepend">
-                <InputGroupText>
-                  <i className="tim-icons icon-mobile" />
-                </InputGroupText>
-              </InputGroupAddon>
-              <Input
-                name="number"
-                placeholder="Phone..."
-                type="number"
-                onChange={e => this.change(e, "phone", "number")}
-                onFocus={e => this.setState({ phoneFocus: true })}
-                onBlur={e => this.setState({ phoneFocus: false })}
-              />
-              {this.state.phoneState === "has-danger" ? (
-                <label className="error">This field is required.</label>
-              ) : null}
-            </InputGroup>
           </Col>
           <Col sm="10">
             <InputGroup
-              className={classnames({
-                "input-group-focus": this.state.addressFocus
-              })}
-            >
-              <InputGroupAddon addonType="prepend">
-                <InputGroupText>
-                  <i className="tim-icons icon-square-pin" />
-                </InputGroupText>
-              </InputGroupAddon>
-              <Input
-                name="address"
-                placeholder="Address"
-                type="text"
-                onFocus={e => this.setState({ addressFocus: true })}
-                onBlur={e => this.setState({ addressFocus: false })}
-              />
-            </InputGroup>
+                className={classnames(this.state.phoneState, {
+                  "input-group-focus": this.state.phoneFocus
+                })}
+              >
+                <InputGroupAddon addonType="prepend">
+                  <InputGroupText>
+                    <i className="tim-icons icon-mobile" />
+                  </InputGroupText>
+                </InputGroupAddon>
+                <Input
+                  name="number"
+                  placeholder="Phone..."
+                  type="number"
+                  onChange={e => this.change(e, "phone", "number")}
+                  onFocus={e => this.setState({ phoneFocus: true })}
+                  onBlur={e => this.setState({ phoneFocus: false })}
+                />
+                {this.state.phoneState === "has-danger" ? (
+                  <label className="error">This field is required.</label>
+                ) : null}
+              </InputGroup>
           </Col>
         </Row>
       </>
@@ -238,4 +197,4 @@ class Wizard extends React.Component {
   }
 }
 
-export default Wizard;
+export default CreateAppointment;
