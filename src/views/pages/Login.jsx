@@ -45,7 +45,8 @@ class Login extends React.Component {
       error: "",
       user:{
       },
-      isLoggedIn: false
+      isLoggedIn: false,
+      loading: false
     };
     this.onLogin = this.onLogin.bind(this);
   }
@@ -55,17 +56,15 @@ class Login extends React.Component {
     console.log(agent)
   }
   onLogin(email, password){
-
+    this.setState({loading: true})
     Mongo.handleLogin(email, password)
     .then((user) => {
-      this.setState({user, isLoggedIn: user.isLoggedIn})
+      
+      this.setState({user, isLoggedIn: user.isLoggedIn, loading:false})
       this.props.history.push('/admin/dashboard')
     })
     .catch((err)=>{
-      this.setState({error: err})
-      setTimeout(()=>{
-        this.setState({error:""})
-      }, 3000)
+      this.setState({error: err, loading: false})
     })
   }
   componentWillUnmount() {
@@ -113,6 +112,7 @@ class Login extends React.Component {
                       href="#pablo"
                       onClick={e => {e.preventDefault(); this.onLogin(this.state.email.toLowerCase(), this.state.password)}}
                       size="lg"
+                      disabled={this.state.loading}
                     >
                       Log In
                       
