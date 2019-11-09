@@ -101,7 +101,7 @@ class AdminNavbar extends React.Component {
     this.props.mongo.db.collection("agents").findOne({userId: user.userId})
     .then((res)=>{
       
-      this.setState({email:res.email});
+      this.setState({email:res.email, name: res.name});
     })
     .catch((err)=>{
       this.props.history.push("/auth/login")
@@ -233,7 +233,7 @@ class AdminNavbar extends React.Component {
                     {/* <div className="photo"> */}
                     <div>
                       {/* <img alt="..." src={require("../../assets/img/mike.jpg")} /> */}
-                      <h4>Logged in as: {this.state.email}</h4>>
+                      <h4>Logged in as: {this.state.name}</h4>>
                     </div>
                     <b className="caret d-none d-lg-block d-xl-block" />
                     <p className="d-lg-none">Log out</p>
