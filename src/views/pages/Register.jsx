@@ -134,7 +134,7 @@ class Register extends React.Component {
                   <CardFooter>
                   <Button
                       className="btn-round float-left"
-                      color="primary"
+                      color="info"
                       href="#pablo"
                       onClick={e =>{ e.preventDefault(); this.props.history.push("/admin/dashboard")}}
                       size="lg"
@@ -143,7 +143,7 @@ class Register extends React.Component {
                     </Button>
                     <Button
                       className="btn-round float-right"
-                      color="success"
+                      color="primary"
                       href="#pablo"
                       onClick={e => {e.preventDefault(); this.registerUser()}}
                       size="lg"

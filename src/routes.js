@@ -41,6 +41,7 @@ import Register from "./views/pages/Register.jsx";
 // import User from "./views/pages/User.jsx";
 import Login from "./views/pages/Login.jsx";
 import CreateAppointment from "./views/pages/CreateAppointment.jsx"
+import Approve from "./views/pages/Approve.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -57,7 +58,7 @@ const routes = [
     collapse: true,
     name: "Registration",
     // rtlName: "صفحات",
-    icon: "tim-icons icon-notes",
+    icon: "tim-icons icon-badge",
     state: "pagesCollapse",
     views: [
       // {
@@ -149,6 +150,14 @@ const routes = [
         adminOnly: false,
         icon: "tim-icons icon-simple-add",
       },
+      {
+        path: "/approve",
+        name: "Pending Appointments",
+        component: Approve,
+        layout: "/admin",
+        adminOnly: false,
+        icon: "tim-icons icon-notes"
+      }
     ]
   },
   // {

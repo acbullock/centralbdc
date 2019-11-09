@@ -73,7 +73,7 @@ class Dashboard extends React.Component {
     this.state = {
       bigChartData: "data1",
       user: {
-        userId:""
+        userId: ""
       },
       agent: {
 
@@ -83,76 +83,76 @@ class Dashboard extends React.Component {
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
   }
-  componentDidMount(){
+  componentDidMount() {
     let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
-    this.setState({user});
+    this.setState({ user });
     this.props.mongo.db.collection("agents")
-    .findOne({userId: user.userId})
-    .then((res)=>{
-      this.setState({agent: res, isAdmin: res.account_type==="admin"})
+      .findOne({ userId: user.userId })
+      .then((res) => {
+        this.setState({ agent: res, isAdmin: res.account_type === "admin" })
         this.getAppointmentData()
-    })
-    .catch((err=>{
-      console.log(err)
-    }))
+      })
+      .catch((err => {
+        console.log(err)
+      }))
   }
-  async getAppointmentData(){
+  async getAppointmentData() {
     let agents;
-    if(this.state.isAdmin === true){
+    if (this.state.isAdmin === true) {
       agents = await this.props.mongo.db.collection("agents").find({}).asArray();
     }
-    else{
-      agents = await this.props.mongo.db.collection("agents").findOne({userId:this.state.user.userId});
+    else {
+      agents = await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
     }
     // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
-    if(this.state.isAdmin === true){
-      
+    if (this.state.isAdmin === true) {
+
       // agents = agents.filter((agent)=>{
       //   return agent.account_type === "agent"
       // });
       let appointments = []
-      await agents.map((agent)=>{
-        let appt = {name: agent.name, appointments: agent.appointments}
+      await agents.map((agent) => {
+        let appt = { name: agent.name, appointments: agent.appointments }
         appointments.push(appt);
         return agent;
       });
-      appointments = appointments.sort(function(a, b) {
+      appointments = appointments.sort(function (a, b) {
         return (b.appointments.length - a.appointments.length)
       });
       console.log(appointments)
-      this.setState({appointments});
+      this.setState({ appointments });
     }
-    else{
-      let appt = {name: agents.name, appointments: agents.appointments}
+    else {
+      let appt = { name: agents.name, appointments: agents.appointments }
       let appointments = [];
       appointments.push(appt)
-      this.setState({appointments})
+      this.setState({ appointments })
     }
-    
-    
+
+
   }
-  createdAppointmentsSince(appts, numDays){
+  createdAppointmentsSince(appts, numDays) {
     let someDay = new Date();
     let ret = 0;
-    someDay.setDate(someDay.getDate() + (-1*numDays)); 
-    for(let appt in appts){
-      if(appts[appt].verified >= someDay && appts[appt].isPending === false){
+    someDay.setDate(someDay.getDate() + (-1 * numDays));
+    for (let appt in appts) {
+      if (appts[appt].verified >= someDay && appts[appt].isPending === false) {
         ret++;
       }
     }
     return ret;
   }
-  pendingAppointmentsSince(appts, numDays){
+  pendingAppointmentsSince(appts, numDays) {
     let someDay = new Date();
     let ret = 0;
-    someDay.setDate(someDay.getDate() + (-1*numDays)); 
-    for(let appt in appts){
-      if(appts[appt].created >= someDay && appts[appt].isPending=== true){
+    someDay.setDate(someDay.getDate() + (-1 * numDays));
+    for (let appt in appts) {
+      if (appts[appt].created >= someDay && appts[appt].isPending === true) {
         ret++;
       }
     }
-    
-        return ret;
+
+    return ret;
   }
   setBgChartData = name => {
     this.setState({
@@ -408,13 +408,13 @@ class Dashboard extends React.Component {
             <Col lg="12">
               <Card>
                 <CardHeader>
-                <div className="tools float-right">
+                  <div className="tools float-right">
                     <Button className="btn-icon"
-                    onClick={(e)=>{e.preventDefault(); this.getAppointmentData()}}
+                      onClick={(e) => { e.preventDefault(); this.getAppointmentData() }}
                     >
-                      
-                    <i className="tim-icons icon-refresh-01" />
-                      </Button>
+
+                      <i className="tim-icons icon-refresh-01" />
+                    </Button>
                   </div>
                   {/* <div className="tools float-right">
                     <UncontrolledDropdown>
@@ -470,9 +470,9 @@ class Dashboard extends React.Component {
                       </tr>
                     </thead>
                     <tbody>
-                    {
-                        this.state.appointments.map((app, index)=>{
-                          return(
+                      {
+                        this.state.appointments.map((app, index) => {
+                          return (
                             <tr key={index}>
                               {/* <td className="text-center">
                               <div className="photo">
@@ -487,7 +487,7 @@ class Dashboard extends React.Component {
                               <td key={index + "-week"}>{this.createdAppointmentsSince(app.appointments, 7)}</td>
                               <td key={index + "-month"}>{this.createdAppointmentsSince(app.appointments, 30)}</td>
                             </tr>
-                            )
+                          )
                         })
                       }
                     </tbody>
@@ -498,11 +498,11 @@ class Dashboard extends React.Component {
                 <CardHeader>
                   <div className="tools float-right">
                     <Button className="btn-icon"
-                    onClick={(e)=>{e.preventDefault(); this.getAppointmentData();}}
+                      onClick={(e) => { e.preventDefault(); this.getAppointmentData(); }}
                     >
-                      
-                    <i className="tim-icons icon-refresh-01" />
-                      </Button>
+
+                      <i className="tim-icons icon-refresh-01" />
+                    </Button>
                   </div>
                   {/* <div className="tools float-right">
                     <UncontrolledDropdown>
@@ -558,9 +558,9 @@ class Dashboard extends React.Component {
                       </tr>
                     </thead>
                     <tbody>
-                    {
-                        this.state.appointments.map((app, index)=>{
-                          return(
+                      {
+                        this.state.appointments.map((app, index) => {
+                          return (
                             <tr key={index}>
                               {/* <td className="text-center">
                               <div className="photo">
@@ -575,14 +575,14 @@ class Dashboard extends React.Component {
                               <td key={index + "-week"}>{this.pendingAppointmentsSince(app.appointments, 7)}</td>
                               <td key={index + "-month"}>{this.pendingAppointmentsSince(app.appointments, 30)}</td>
                             </tr>
-                            )
+                          )
                         })
                       }
                     </tbody>
                   </Table>
                 </CardBody>
               </Card>
-              
+
             </Col>
             {/* <Col lg="12">
               <Card>
