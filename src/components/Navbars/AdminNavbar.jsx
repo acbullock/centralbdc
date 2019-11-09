@@ -48,9 +48,15 @@ class AdminNavbar extends React.Component {
     };
     // console.log(props.mongo.mongodb)
   }
-  componentDidMount() {
+  async componentWillMount(){
+    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+    if(user.userId == undefined){
+      this.props.history.push("/auth/login")
+    }
+  }
+  async componentDidMount() {
     window.addEventListener("resize", this.updateColor);
-    this.getUserName()
+     await this.getUserName()
   }
   componentWillUnmount() {
     window.removeEventListener("resize", this.updateColor);
@@ -99,8 +105,6 @@ class AdminNavbar extends React.Component {
     })
     .catch((err)=>{
       this.props.history.push("/auth/login")
-      this.setState({email: ""})
-      console.log(err)
     })
   }
   render() {

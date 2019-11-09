@@ -50,6 +50,7 @@ class Sidebar extends React.Component {
     return initialState;
   };
   async getCurrentUser(){
+    console.log("why")
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
     await this.setState({user})
     let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});
@@ -146,7 +147,20 @@ class Sidebar extends React.Component {
   activeRoute = routeName => {
     return this.props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
   };
-  componentDidMount() {
+  async componentWillMount(){
+    
+    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+    if(user.userId == undefined){
+      this.props.history.push("/auth/login")
+      return;
+    }
+  }
+  async componentDidMount() {
+    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+    if(user.userId == undefined){
+      this.props.history.push("/auth/login")
+      return
+    }
     // if you are using a Windows Machine, the scrollbars will have a Mac look
     if (navigator.platform.indexOf("Win") > -1) {
       ps = new PerfectScrollbar(this.refs.sidebar);
