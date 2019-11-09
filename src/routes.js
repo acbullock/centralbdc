@@ -104,7 +104,7 @@ const routes = [
         mini: "R",
         rtlMini: "صع",
         component: Register,
-        layout: "/auth",
+        layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-notes",
       },

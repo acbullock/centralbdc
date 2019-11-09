@@ -32,7 +32,7 @@ import {
 import Step1 from "../forms/WizardSteps/Step1.jsx";
 import Step2 from "../forms/WizardSteps/Step2.jsx";
 import Step3 from "../forms/WizardSteps/Step3.jsx";
-
+import axios from 'axios'
 
 
 class Approve extends React.Component {
@@ -52,7 +52,7 @@ class Approve extends React.Component {
         agent = await agent.findOne({ userId: currUser.userId })
         this.setState({ isApprover: agent.isApprover })
         if (agent.isApprover === true) {
-            
+
             this.getPendingAppointments()
         }
 
@@ -114,9 +114,10 @@ class Approve extends React.Component {
         agent.appointments = apps
         // agent.appointments = x
         agent.appointments.push(new_app)
-
         await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
         await this.getPendingAppointments()
+        await this.sendText(appointment)
+        await this.sendCustText(appointment)
     }
     async rejectAppointment(appointment) {
         //update appointment to be ispending false, verified is now
@@ -138,6 +139,41 @@ class Approve extends React.Component {
         await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
         await this.getPendingAppointments()
     }
+    async sendText(appointment) {
+        let data = new FormData();
+        // await this.setState({loading: true})
+
+        data.set("Body", appointment.internal_msg)
+        //fix later to be dealer phone
+        // data.set("To", "+15614260916")
+        data.set("To", "+19548646379")
+        data.set("From", '+19542450865')
+        axios.post("https://api.twilio.com/2010-04-01/Accounts/ACd6a8a602e3ce9b28abe0a3948b3e7a26/Messages.json", data, {
+            headers: {
+                "Content-Type": "multipart/form-data; boundary",
+                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
+            }
+        }).then((res) => {
+            this.setState({ loading: false })
+            alert("Success!")
+        }).catch((err) => { this.setState({ loading: false }); alert("Error sending internal text."); })
+    }
+    async sendCustText(appointment) {
+        let data = new FormData();
+        // await this.setState({loading: true})
+        data.set("Body", appointment.customer_msg)
+        data.set("To", `+1${appointment.customer_phone}`)
+        data.set("From", '+19542450865')
+        axios.post("https://api.twilio.com/2010-04-01/Accounts/ACd6a8a602e3ce9b28abe0a3948b3e7a26/Messages.json", data, {
+          headers: {
+            "Content-Type": "multipart/form-data; boundary",
+            "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
+          }
+        }).then((res)=>{
+          this.setState({loading: false})
+          alert("Success!")
+        }).catch((err)=>{this.setState({loading: false}); alert("Error sending customer text."); })
+      }
     render() {
         return (
             <>
@@ -224,7 +260,7 @@ class Approve extends React.Component {
 
                             }
                             <h2 hidden={this.state.isApprover}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending appointments</h2>
-                            <h2 hidden={!this.state.isApprover || this.state.pendingAppointments.length >0}>No appointments pending approval</h2>
+                            <h2 hidden={!this.state.isApprover || this.state.pendingAppointments.length > 0}>No appointments pending approval</h2>
                         </div>
                     </Col>
                 </div>
