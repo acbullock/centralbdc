@@ -43,6 +43,7 @@ import Login from "./views/pages/Login.jsx";
 import CreateAppointment from "./views/pages/CreateAppointment.jsx"
 import Approve from "./views/pages/Approve.jsx"
 import RemoveUser from "./views/pages/RemoveUser.jsx"
+import Rejected from "./views/pages/Rejected.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -100,14 +101,14 @@ const routes = [
       },
       {
         path: "/register",
-        name: "Register New User",
+        name: "Add User",
         rtlName: "تسجيل",
         mini: "R",
         rtlMini: "صع",
         component: Register,
         layout: "/admin",
         adminOnly: true,
-        icon: "tim-icons icon-notes",
+        icon: "tim-icons icon-simple-add",
       },
       {
         path: "/remove_user",
@@ -158,6 +159,14 @@ const routes = [
         layout: "/admin",
         adminOnly: false,
         icon: "tim-icons icon-notes"
+      },
+      {
+        path: "/rejected",
+        name: "Rejected Appointments",
+        component: Rejected,
+        layout: "/admin",
+        adminOnly: false,
+        icon: "tim-icons icon-settings"
       }
     ]
   },

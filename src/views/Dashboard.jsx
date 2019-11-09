@@ -79,11 +79,13 @@ class Dashboard extends React.Component {
 
       },
       isAdmin: false,
-      appointments: []
+      appointments: [],
+      loading:false
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
   }
   componentDidMount() {
+    this.setState({loading: true})
     let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
     this.setState({ user });
     this.props.mongo.db.collection("agents")
@@ -91,12 +93,15 @@ class Dashboard extends React.Component {
       .then((res) => {
         this.setState({ agent: res, isAdmin: res.account_type === "admin" })
         this.getAppointmentData()
+        this.setState({loading: false})
       })
       .catch((err => {
+        this.setState({loading: false})
         console.log(err)
       }))
   }
   async getAppointmentData() {
+    this.setState({loading: true})
     let agents;
     if (this.state.isAdmin === true) {
       agents = await this.props.mongo.db.collection("agents").find({}).asArray();
@@ -112,17 +117,16 @@ class Dashboard extends React.Component {
         appointments.push(appt);
         return agent;
       });
-      appointments = appointments.sort(function (a, b) {
+      appointments = await  appointments.sort(function (a, b) {
         return (b.appointments.length - a.appointments.length)
       });
-      console.log(appointments)
-      this.setState({ appointments });
+      this.setState({ appointments, loading: false });
     }
     else {
       let appt = { name: agents.name, appointments: agents.appointments }
       let appointments = [];
       appointments.push(appt)
-      this.setState({ appointments })
+      this.setState({ appointments, loading: false })
     }
 
 
@@ -404,12 +408,13 @@ class Dashboard extends React.Component {
             <Col lg="12">
               <Card>
                 <CardHeader>
+
                   <div className="tools float-right">
-                    <Button className="btn-icon"
+                    <Button 
                       onClick={(e) => { e.preventDefault(); this.getAppointmentData() }}
                     >
 
-                      <i className="tim-icons icon-refresh-01" />
+                      <i className={this.state.loading?"tim-icons icon-refresh-02 tim-icons-is-spinning": "tim-icons icon-refresh-02 "} />
                     </Button>
                   </div>
                   {/* <div className="tools float-right">
@@ -493,11 +498,11 @@ class Dashboard extends React.Component {
               <Card>
                 <CardHeader>
                   <div className="tools float-right">
-                    <Button className="btn-icon"
+                    <Button
                       onClick={(e) => { e.preventDefault(); this.getAppointmentData(); }}
                     >
 
-                      <i className="tim-icons icon-refresh-01" />
+                      <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02"} />
                     </Button>
                   </div>
                   {/* <div className="tools float-right">
@@ -541,6 +546,7 @@ class Dashboard extends React.Component {
                     </UncontrolledDropdown>
                   </div> */}
                   <CardTitle tag="h3">Pending Appointments</CardTitle>
+                  
                 </CardHeader>
                 <CardBody>
                   <Table responsive>
@@ -578,135 +584,7 @@ class Dashboard extends React.Component {
                   </Table>
                 </CardBody>
               </Card>
-
             </Col>
-            {/* <Col lg="12">
-              <Card>
-                <CardHeader>
-                  <CardTitle tag="h4">Global Sales by Top Locations</CardTitle>
-                  <p className="card-category">
-                    All products that were shipped
-                  </p>
-                </CardHeader>
-                <CardBody>
-                  <Row>
-                    <Col md="6">
-                      <Table responsive>
-                        <tbody>
-                          <tr>
-                            <td>
-                              <div className="flag">
-                                <img
-                                  alt="..."
-                                  src={require("../assets/img/US.png")}
-                                />
-                              </div>
-                            </td>
-                            <td>USA</td>
-                            <td className="text-right">2.920</td>
-                            <td className="text-right">53.23%</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <div className="flag">
-                                <img
-                                  alt="..."
-                                  src={require("../assets/img/DE.png")}
-                                />
-                              </div>
-                            </td>
-                            <td>Germany</td>
-                            <td className="text-right">1.300</td>
-                            <td className="text-right">20.43%</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <div className="flag">
-                                <img
-                                  alt="..."
-                                  src={require("../assets/img/AU.png")}
-                                />
-                              </div>
-                            </td>
-                            <td>Australia</td>
-                            <td className="text-right">760</td>
-                            <td className="text-right">10.35%</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <div className="flag">
-                                <img
-                                  alt="..."
-                                  src={require("../assets/img/GB.png")}
-                                />
-                              </div>
-                            </td>
-                            <td>United Kingdom</td>
-                            <td className="text-right">690</td>
-                            <td className="text-right">7.87%</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <div className="flag">
-                                <img
-                                  alt="..."
-                                  src={require("../assets/img/RO.png")}
-                                />
-                              </div>
-                            </td>
-                            <td>Romania</td>
-                            <td className="text-right">600</td>
-                            <td className="text-right">5.94%</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <div className="flag">
-                                <img
-                                  alt="..."
-                                  src={require("../assets/img/BR.png")}
-                                />
-                              </div>
-                            </td>
-                            <td>Brasil</td>
-                            <td className="text-right">550</td>
-                            <td className="text-right">4.34%</td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                    </Col>
-                    <Col className="ml-auto mr-auto" md="6">
-                      <VectorMap
-                        map={"world_mill"}
-                        backgroundColor="transparent"
-                        zoomOnScroll={false}
-                        containerStyle={{
-                          width: "100%",
-                          height: "300px"
-                        }}
-                        regionStyle={{
-                          initial: {
-                            fill: "#e4e4e4",
-                            "fill-opacity": 0.9,
-                            stroke: "none",
-                            "stroke-width": 0,
-                            "stroke-opacity": 0
-                          }
-                        }}
-                        series={{
-                          regions: [
-                            {
-                              values: mapData,
-                              scale: ["#AAAAAA", "#444444"],
-                              normalizeFunction: "polynomial"
-                            }
-                          ]
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                </CardBody>
-              </Card>
-            </Col> */}
           </Row>
         </div>
       </>

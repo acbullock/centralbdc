@@ -44,7 +44,6 @@ ReactDOM.render(
       <Route path="/admin" render={props => <AdminLayout {...props}
         mongo={Mongo}
       />} />
-      <Route path="/rtl" render={props => <RTLLayout {...props} />} />
       <Redirect from="/" to="/auth/login" />
     </Switch>
   </Router>,

@@ -19,7 +19,7 @@ import React from "react";
 import ReactWizard from "react-bootstrap-wizard";
 
 // reactstrap components
-import { Col } from "reactstrap";
+import { Col, Card, CardText } from "reactstrap";
 
 // wizard steps
 import Step1 from "../forms/WizardSteps/Step1.jsx";
@@ -45,8 +45,15 @@ var steps = [
 ];
 
 class CreateAppointment extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            loading: false
+        };
 
+    }
     finished = async (data) => {
+        this.setState({ loading: true })
         let internal_message = this.generateInternalMessage(data)
         let customer_message = this.generateCustomerMessage(data)
         let messages = {
@@ -73,14 +80,14 @@ class CreateAppointment extends React.Component {
             appointment_scenario,
             appointment_source
         }
-        
+
         let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({userId: user.userId})
-        
+        let agent = await agents.findOne({ userId: user.userId })
+
         let agentAppts = [];
         agent.appointments != undefined ? agentAppts = agent.appointments : agentAppts = []
-        console.log(agentAppts)
+
         let new_app = {
             isPending: true,
             isRejected: false,
@@ -97,11 +104,14 @@ class CreateAppointment extends React.Component {
         }
         agentAppts.push(new_app)
         agent.appointments = agentAppts
-        console.log("***********")
-        await agents.findOneAndUpdate({userId: user.userId}, agent)
-        
-        console.log("***********")
-        
+
+        await agents.findOneAndUpdate({ userId: user.userId }, agent)
+
+        this.setState({ loading: false })
+        await this.props.history.push("/admin/dashboard")
+        await this.props.history.push("/admin/new_appointment")
+
+
 
     }
     generateInternalMessage(data) {
@@ -135,20 +145,23 @@ class CreateAppointment extends React.Component {
                 <div className="content">
                     <Col className="mr-auto ml-auto" md="10">
                         <ReactWizard
+                            
                             steps={steps}
                             navSteps
                             validate
                             title="Create New Appointment"
                             description="All new appointments require approval"
                             headerTextCenter
-                            finishButtonClasses="btn-wd btn-info"
+                            finishButtonClasses={this.state.loading ? "btn-wd btn-info disabled" : "btn-wd btn-info"}
                             nextButtonClasses="btn-wd btn-info"
-                            previousButtonClasses="btn-wd"
+                            previousButtonClasses={this.state.loading ? "btn-wd disabled" : "btn-wd"}
                             progressbar
                             color="primary"
                             finishButtonClick={(e) => this.finished(e)}
 
                         />
+                    </Col>
+                    <Col className="mr-auto ml-auto" md="10">
                     </Col>
                 </div>
             </>

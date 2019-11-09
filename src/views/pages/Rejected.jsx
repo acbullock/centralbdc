@@ -25,9 +25,11 @@ import {
     CardBody,
     Collapse,
     CardText,
+    Input,
     Button
 
 } from "reactstrap";
+import { TextField } from '@material-ui/core';
 
 // wizard steps
 import Step1 from "../forms/WizardSteps/Step1.jsx";
@@ -36,14 +38,13 @@ import Step3 from "../forms/WizardSteps/Step3.jsx";
 import axios from 'axios'
 
 
-class Approve extends React.Component {
+class Rejected extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            pendingAppointments: [],
-            openedCollapses: [],
-            isApprover: false,
+            rejectedAppointments: [],
+            openedCollapses: [""],
             loading: true
         };
 
@@ -54,10 +55,7 @@ class Approve extends React.Component {
         let agent = await this.props.mongo.getCollection("agents")
         agent = await agent.findOne({ userId: currUser.userId })
         this.setState({ isApprover: agent.isApprover })
-        if (agent.isApprover === true) {
-
-            await this.getPendingAppointments()
-        }
+        await this.getRejectedAppointments()
         this.setState({ loading: false })
     }
     // with this function we create an array with the opened collapses
@@ -75,24 +73,23 @@ class Approve extends React.Component {
             });
         }
     };
-    async getPendingAppointments() {
+    async getRejectedAppointments() {
         this.setState({ loading: true })
+        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agents = await this.props.mongo.getCollection("agents")
-        agents = await agents.find().toArray()
+        let agent = await agents.findOne({ userId: user.userId })
         let appointments = []
         //loop thru agents
-        for (let agent in agents) {
-            let agent_name = agents[agent].name
-            let agent_email = agents[agent].email
-            for (let a in agents[agent].appointments) {
-                if (agents[agent].appointments[a].isPending === false) {
-                    continue;
-                }
-                let newApp = { agent_name, agent_email }
-                newApp = Object.assign(newApp, agents[agent].appointments[a])
-                appointments.push(newApp)
+
+        for (let a in agent.appointments) {
+
+            if (agent.appointments[a].isRejected === false) {
+                
+                continue;
             }
+            appointments.push(agent.appointments[a])
         }
+
         await appointments.sort((a, b) => {
             if (a.appointment_date > b.appointment_date)
                 return 1;
@@ -100,88 +97,13 @@ class Approve extends React.Component {
                 return -1;
             return 0;
         })
-        this.setState({ pendingAppointments: appointments, loading: false })
+
+        this.setState({ rejectedAppointments: appointments, loading: false })
     }
-    async acceptAppointment(appointment) {
-        //update appointment to be ispending false, verified is now
-        this.setState({loading: true})
-        let new_app = appointment;
-        new_app.isPending = false;
-        new_app.verified = new Date()
-        let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({ email: appointment.agent_email })
-
-        let apps = await agent.appointments.filter((a) => {
-            return a.created.getTime() !== appointment.created.getTime();
-
-        })
-
-        agent.appointments = apps
-        // agent.appointments = x
-        agent.appointments.push(new_app)
-        await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
-        await this.getPendingAppointments()
-        await this.sendText(appointment)
-        await this.sendCustText(appointment)
-        this.setState({loading: false})
+    resendAppointment(app){
+        
     }
-    async rejectAppointment(appointment) {
-        this.setState({loading: true})
-        //update appointment to be ispending false, verified is now
-        let new_app = appointment;
-        new_app.isPending = false;
-        new_app.isRejected = true;
-        let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({ email: appointment.agent_email })
 
-        let apps = await agent.appointments.filter((a) => {
-            return a.created.getTime() !== appointment.created.getTime();
-
-        })
-
-        agent.appointments = apps
-        // agent.appointments = x
-        agent.appointments.push(new_app)
-
-        await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
-        await this.getPendingAppointments()
-        this.setState({loading: false})
-    }
-    async sendText(appointment) {
-        let data = new FormData();
-        // await this.setState({loading: true})
-
-        data.set("Body", appointment.internal_msg)
-        //fix later to be dealer phone
-        // data.set("To", "+15614260916")
-        data.set("To", "+19548646379")
-        data.set("From", '+19542450865')
-        axios.post("https://api.twilio.com/2010-04-01/Accounts/ACd6a8a602e3ce9b28abe0a3948b3e7a26/Messages.json", data, {
-            headers: {
-                "Content-Type": "multipart/form-data; boundary",
-                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
-            }
-        }).then((res) => {
-            this.setState({ loading: false })
-            // alert("Success!")
-        }).catch((err) => { this.setState({ loading: false }); alert("Error sending internal text."); console.log(err)})
-    }
-    async sendCustText(appointment) {
-        let data = new FormData();
-        // await this.setState({loading: true})
-        data.set("Body", appointment.customer_msg)
-        data.set("To", `+1${appointment.customer_phone}`)
-        data.set("From", '+19542450865')
-        axios.post("https://api.twilio.com/2010-04-01/Accounts/ACd6a8a602e3ce9b28abe0a3948b3e7a26/Messages.json", data, {
-            headers: {
-                "Content-Type": "multipart/form-data; boundary",
-                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
-            }
-        }).then((res) => {
-            this.setState({ loading: false })
-            alert("Success!")
-        }).catch((err) => { this.setState({ loading: false }); alert("Error sending customer text."); })
-    }
     render() {
         return (
             <>
@@ -194,9 +116,9 @@ class Approve extends React.Component {
                             role="tablist"
                         >
 
-                            <h1>Approve/Reject Pending Appointments</h1>
+                            <h1>Rejected Appointments</h1>
                             {
-                                this.state.pendingAppointments.map((app, index) => {
+                                this.state.rejectedAppointments.map((app, index) => {
                                     return (
                                         <div key={app.agent_name + "_" + index}>
 
@@ -214,13 +136,14 @@ class Approve extends React.Component {
                                                         <p>
                                                             Agent Name: <strong>{app.agent_name}</strong>
                                                         </p>
-                                                        
+
                                                         <p>Dealer Name: <strong>{app.dealership_name}</strong></p>
                                                         <p>Appointment Date: <strong>{new Date(app.appointment_date).toLocaleDateString() + " " + new Date(app.appointment_date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong></p>
                                                         <p>
                                                             Customer Name: {app.customer_firstname + " " + app.customer_lastname}
                                                         </p>
                                                         <p>Created: {new Date(app.created).toLocaleDateString() + " " + new Date(app.created).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                                                        <p>Rejection reason: </p>
                                                         <i className="tim-icons icon-minimal-down" />
                                                     </a>
                                                 </CardHeader>
@@ -235,7 +158,7 @@ class Approve extends React.Component {
                                                             <Col sm="6">
                                                                 <h3>Internal Message</h3>
                                                                 <blockquote className="blockquote" sylte={{ whiteSpace: "pre-wrap" }}>
-                                                                    <p >{app.internal_msg}</p></blockquote>
+                                                                    <p style={{ whiteSpace: "pre-wrap" }}>{app.internal_msg}</p></blockquote>
                                                             </Col>
                                                             <Col sm="6">
                                                                 <h3>Customer Message</h3>
@@ -249,13 +172,9 @@ class Approve extends React.Component {
                                                         </Row>
                                                         <Row>
                                                             <Col sm="12">
-                                                                <Button color="success" className="float-righ" disabled={this.state.loading} onClick={() => {
-                                                                    this.acceptAppointment(app)
-                                                                }}>Accept</Button>
-                                                                <Button color="danger" className="float-right" disabled={this.state.loading} onClick={() => {
-                                                                    this.rejectAppointment(app)
-                                                                }}>Reject</Button>
-
+                                                                <Button color="success" className="float-right" disabled={this.state.loading} onClick={() => {
+                                                                    this.resendAppointment(app)
+                                                                }}>Resubmit for Approval</Button>
                                                             </Col>
                                                         </Row>
                                                         {/* <p>Internal Message</p>
@@ -274,8 +193,8 @@ class Approve extends React.Component {
                                 })
 
                             }
-                            <h2 hidden={this.state.isApprover || this.state.loading}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending appointments</h2>
-                            <h2 hidden={!this.state.isApprover || this.state.pendingAppointments.length > 0 || this.state.loading}>No appointments pending approval</h2>
+                            <h2 hidden={!this.state.loading}>Loading..</h2>
+                            <h2 hidden={this.state.rejectedAppointments.length > 0 || this.state.loading}>None of your pending appointments are rejected.</h2>
                         </div>
                     </Col>
                 </div>
@@ -284,4 +203,4 @@ class Approve extends React.Component {
     }
 }
 
-export default Approve;
+export default Rejected;
