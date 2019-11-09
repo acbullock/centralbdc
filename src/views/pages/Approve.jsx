@@ -25,7 +25,8 @@ import {
     CardBody,
     Collapse,
     CardText,
-    Button
+    Button,
+    Input
 
 } from "reactstrap";
 
@@ -44,7 +45,8 @@ class Approve extends React.Component {
             pendingAppointments: [],
             openedCollapses: [],
             isApprover: false,
-            loading: true
+            loading: true,
+            rejected_reason: ""
         };
 
     }
@@ -65,6 +67,7 @@ class Approve extends React.Component {
     collapsesToggle = collapse => {
 
         let openedCollapses = this.state.openedCollapses;
+        this.setState({rejected_reason:""})
         if (openedCollapses.includes(collapse)) {
             this.setState({
                 openedCollapses: []
@@ -126,11 +129,13 @@ class Approve extends React.Component {
         this.setState({loading: false})
     }
     async rejectAppointment(appointment) {
+        
         this.setState({loading: true})
         //update appointment to be ispending false, verified is now
         let new_app = appointment;
         new_app.isPending = false;
         new_app.isRejected = true;
+        new_app.rejectedReason = this.state.rejected_reason
         let agents = await this.props.mongo.getCollection("agents")
         let agent = await agents.findOne({ email: appointment.agent_email })
 
@@ -255,7 +260,7 @@ class Approve extends React.Component {
                                                                 <Button color="danger" className="float-right" disabled={this.state.loading} onClick={() => {
                                                                     this.rejectAppointment(app)
                                                                 }}>Reject</Button>
-
+                                                                <Input placeholder="Rejected Reason" value={this.state.rejected_reason} onChange={(e)=>this.setState({rejected_reason: e.target.value})}></Input>
                                                             </Col>
                                                         </Row>
                                                         {/* <p>Internal Message</p>
@@ -274,6 +279,7 @@ class Approve extends React.Component {
                                 })
 
                             }
+                            <h2 hidden={!this.state.loading}>Loading..</h2>
                             <h2 hidden={this.state.isApprover || this.state.loading}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending appointments</h2>
                             <h2 hidden={!this.state.isApprover || this.state.pendingAppointments.length > 0 || this.state.loading}>No appointments pending approval</h2>
                         </div>

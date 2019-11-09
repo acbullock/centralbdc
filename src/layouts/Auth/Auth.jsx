@@ -21,6 +21,7 @@ import AuthNavbar from "../../components/Navbars/AuthNavbar.jsx";
 import Footer from "../../components/Footer/Footer.jsx";
 
 import routes from "../../routes.js";
+import { isFunction } from "util";
 
 class Pages extends React.Component {
   constructor(props) {
@@ -92,6 +93,12 @@ class Pages extends React.Component {
         return "Default Brand Text";
     }
   };
+  async componentWillMount(){
+    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+    if(user.userId == undefined){
+      this.props.history.push("/auth/login")
+    }
+  }
   componentDidMount() {
     document.documentElement.classList.remove("nav-open");
     // if(this.props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo.userId !== undefined){

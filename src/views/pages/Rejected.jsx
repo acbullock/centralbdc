@@ -143,7 +143,7 @@ class Rejected extends React.Component {
                                                             Customer Name: {app.customer_firstname + " " + app.customer_lastname}
                                                         </p>
                                                         <p>Created: {new Date(app.created).toLocaleDateString() + " " + new Date(app.created).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                                                        <p>Rejection reason: </p>
+                                                        <p>Rejection reason: {app.rejectedReason}</p>
                                                         <i className="tim-icons icon-minimal-down" />
                                                     </a>
                                                 </CardHeader>
@@ -157,12 +157,12 @@ class Rejected extends React.Component {
 
                                                             <Col sm="6">
                                                                 <h3>Internal Message</h3>
-                                                                <blockquote className="blockquote" sylte={{ whiteSpace: "pre-wrap" }}>
-                                                                    <p style={{ whiteSpace: "pre-wrap" }}>{app.internal_msg}</p></blockquote>
+                                                                <textarea className="blockquote" style={{ whiteSpace: "pre-wrap", height:300}} defaultValue={app.internal_msg} value={this.state.internalMsg} onChange={(e)=>{this.setState({internalMsg: e.target.value})}}>
+                                                                    </textarea>
                                                             </Col>
                                                             <Col sm="6">
                                                                 <h3>Customer Message</h3>
-                                                                <blockquote className="blockquote" sylte={{ whiteSpace: "pre-wrap" }}>
+                                                                <blockquote className="blockquote" style={{ whiteSpace: "pre-wrap" }}>
                                                                     <p style={{ whiteSpace: "pre-wrap" }}>{app.customer_msg}</p></blockquote>
                                                             </Col>
                                                             <Col sm="6">
