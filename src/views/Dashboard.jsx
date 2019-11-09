@@ -107,9 +107,9 @@ class Dashboard extends React.Component {
     // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
     if(this.state.isAdmin === true){
       
-      agents = agents.filter((agent)=>{
-        return agent.account_type === "agent"
-      });
+      // agents = agents.filter((agent)=>{
+      //   return agent.account_type === "agent"
+      // });
       let appointments = []
       await agents.map((agent)=>{
         let appt = {name: agent.name, appointments: agent.appointments}
@@ -117,7 +117,7 @@ class Dashboard extends React.Component {
         return agent;
       });
       appointments = appointments.sort(function(a, b) {
-        return (Object.keys(b.appointments).length - Object.keys(a.appointments).length)
+        return (b.appointments.length - a.appointments.length)
       });
       console.log(appointments)
       this.setState({appointments});

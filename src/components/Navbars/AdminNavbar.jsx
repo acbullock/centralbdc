@@ -91,7 +91,7 @@ class AdminNavbar extends React.Component {
   getUserName = () => {
     
     let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
-    console.log(user)
+    // console.log(user)
     this.props.mongo.db.collection("agents").findOne({userId: user.userId})
     .then((res)=>{
       

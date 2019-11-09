@@ -24,7 +24,7 @@ import {
   CardBody,
   CardFooter,
   CardText,
-  CardTitle,
+  // CardTitle,
   Label,
   FormGroup,
   Form,
@@ -72,7 +72,8 @@ class Register extends React.Component {
         email: this.state.email,
         name: this.state.fullName,
         account_type: this.state.adminChecked === true ?  "admin": "agent",
-        appointments: {}
+        appointments: [],
+        isApprover: this.state.adminChecked === true,
       }).catch((err)=>{
         console.log(err)
       })

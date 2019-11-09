@@ -54,7 +54,7 @@ class Sidebar extends React.Component {
     await this.setState({user})
     let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});
     await this.setState({agent, isAdmin: agent.account_type === "admin"})
-    console.log(this.state.isAdmin)
+    // console.log(this.state.isAdmin)
   }
   // this verifies if any of the collapses should be default opened on a rerender of this component
   // for example, on the refresh of the page,
@@ -164,7 +164,6 @@ class Sidebar extends React.Component {
     const { activeColor, logo } = this.props;
     let logoImg = null;
     let logoText = null;
-    console.log(this.props)
     if (logo !== undefined) {
       if (logo.outterLink !== undefined) {
         logoImg = (

@@ -40,6 +40,7 @@ import Register from "./views/pages/Register.jsx";
 // import Timeline from "./views/pages/Timeline.jsx";
 // import User from "./views/pages/User.jsx";
 import Login from "./views/pages/Login.jsx";
+import CreateAppointment from "./views/pages/CreateAppointment.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -54,9 +55,9 @@ const routes = [
   },
   {
     collapse: true,
-    name: "Pages",
-    rtlName: "صفحات",
-    icon: "tim-icons icon-image-02",
+    name: "Registration",
+    // rtlName: "صفحات",
+    icon: "tim-icons icon-notes",
     state: "pagesCollapse",
     views: [
       // {
@@ -107,6 +108,14 @@ const routes = [
         icon: "tim-icons icon-notes",
       },
       // {
+      //   path: "/remove_user",
+      //   name: "Remove User",
+      //   component: RemoveUser,
+      //   layout: "/auth",
+      //   adminOnly: true,
+      //   icon: "tim-icons icon-simple-remove",
+      // },
+      // {
       //   path: "/lock-screen",
       //   name: "Lock Screen",
       //   rtlName: "اقفل الشاشة",
@@ -124,6 +133,22 @@ const routes = [
       //   component: User,
       //   layout: "/admin"
       // }
+    ]
+  },
+  {
+    collapse: true,
+    name: "Appointments",
+    icon: "tim-icons icon-calendar-60",
+    state: "appointmentsCollapse",
+    views: [
+      {
+        path: "/new_appointment",
+        name: "Create New Appointmennt",
+        component: CreateAppointment,
+        layout: "/admin",
+        adminOnly: false,
+        icon: "tim-icons icon-simple-add",
+      },
     ]
   },
   // {
