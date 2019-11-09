@@ -42,6 +42,7 @@ import Register from "./views/pages/Register.jsx";
 import Login from "./views/pages/Login.jsx";
 import CreateAppointment from "./views/pages/CreateAppointment.jsx"
 import Approve from "./views/pages/Approve.jsx"
+import RemoveUser from "./views/pages/RemoveUser.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -108,14 +109,14 @@ const routes = [
         adminOnly: true,
         icon: "tim-icons icon-notes",
       },
-      // {
-      //   path: "/remove_user",
-      //   name: "Remove User",
-      //   component: RemoveUser,
-      //   layout: "/auth",
-      //   adminOnly: true,
-      //   icon: "tim-icons icon-simple-remove",
-      // },
+      {
+        path: "/remove_user",
+        name: "Remove User",
+        component: RemoveUser,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-simple-remove",
+      },
       // {
       //   path: "/lock-screen",
       //   name: "Lock Screen",

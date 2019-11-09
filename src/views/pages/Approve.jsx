@@ -24,6 +24,7 @@ import {
     CardHeader,
     CardBody,
     Collapse,
+    CardText,
     Button
 
 } from "reactstrap";
@@ -42,20 +43,22 @@ class Approve extends React.Component {
         this.state = {
             pendingAppointments: [],
             openedCollapses: ["Alexander Bullock"],
-            isApprover: false
+            isApprover: false,
+            loading: true
         };
 
     }
     async componentWillMount() {
+        this.setState({ loading: true })
         let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agent = await this.props.mongo.getCollection("agents")
         agent = await agent.findOne({ userId: currUser.userId })
         this.setState({ isApprover: agent.isApprover })
         if (agent.isApprover === true) {
 
-            this.getPendingAppointments()
+            await this.getPendingAppointments()
         }
-
+        this.setState({ loading: false })
     }
     // with this function we create an array with the opened collapses
     // it is like a toggle function for all collapses from this page
@@ -73,6 +76,7 @@ class Approve extends React.Component {
         }
     };
     async getPendingAppointments() {
+        this.setState({ loading: true })
         let agents = await this.props.mongo.getCollection("agents")
         agents = await agents.find().toArray()
         let appointments = []
@@ -89,14 +93,14 @@ class Approve extends React.Component {
                 appointments.push(newApp)
             }
         }
-        appointments.sort((a, b) => {
+        await appointments.sort((a, b) => {
             if (a.appointment_date > b.appointment_date)
                 return 1;
             if (a.appointment_date < b.appointment_date)
                 return -1;
             return 0;
         })
-        this.setState({ pendingAppointments: appointments })
+        this.setState({ pendingAppointments: appointments, loading: false })
     }
     async acceptAppointment(appointment) {
         //update appointment to be ispending false, verified is now
@@ -155,7 +159,7 @@ class Approve extends React.Component {
             }
         }).then((res) => {
             this.setState({ loading: false })
-            alert("Success!")
+            // alert("Success!")
         }).catch((err) => { this.setState({ loading: false }); alert("Error sending internal text."); })
     }
     async sendCustText(appointment) {
@@ -165,15 +169,15 @@ class Approve extends React.Component {
         data.set("To", `+1${appointment.customer_phone}`)
         data.set("From", '+19542450865')
         axios.post("https://api.twilio.com/2010-04-01/Accounts/ACd6a8a602e3ce9b28abe0a3948b3e7a26/Messages.json", data, {
-          headers: {
-            "Content-Type": "multipart/form-data; boundary",
-            "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
-          }
-        }).then((res)=>{
-          this.setState({loading: false})
-          alert("Success!")
-        }).catch((err)=>{this.setState({loading: false}); alert("Error sending customer text."); })
-      }
+            headers: {
+                "Content-Type": "multipart/form-data; boundary",
+                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
+            }
+        }).then((res) => {
+            this.setState({ loading: false })
+            alert("Success!")
+        }).catch((err) => { this.setState({ loading: false }); alert("Error sending customer text."); })
+    }
     render() {
         return (
             <>
@@ -185,7 +189,13 @@ class Approve extends React.Component {
                             id="accordion"
                             role="tablist"
                         >
+
                             <h1>Approve/Reject Pending Appointments</h1>
+                            <Card color="info" style={{ padding: 10 }} hidden={!this.state.loading}>
+                                <CardText color="white">
+                                    <h1>Loading..</h1>
+                                </CardText>
+                            </Card>
                             {
                                 this.state.pendingAppointments.map((app, index) => {
                                     return (
@@ -203,8 +213,14 @@ class Approve extends React.Component {
                                                         onClick={(e) => { e.preventDefault(); this.collapsesToggle(app.agent_name + "_" + index) }}
                                                     >
                                                         <p>
-                                                            Agent Name: <strong>{app.agent_name}</strong></p>
+                                                            Agent Name: <strong>{app.agent_name}</strong>
+                                                        </p>
+                                                        
                                                         <p>Dealer Name: <strong>{app.dealership_name}</strong></p>
+                                                        <p>Appointment Date: <strong>{new Date(app.appointment_date).toLocaleDateString() + " " + new Date(app.appointment_date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong></p>
+                                                        <p>
+                                                            Customer Name: {app.customer_firstname + " " + app.customer_lastname}
+                                                        </p>
                                                         <p>Created: {new Date(app.created).toLocaleDateString() + " " + new Date(app.created).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
                                                         <i className="tim-icons icon-minimal-down" />
                                                     </a>
@@ -259,8 +275,8 @@ class Approve extends React.Component {
                                 })
 
                             }
-                            <h2 hidden={this.state.isApprover}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending appointments</h2>
-                            <h2 hidden={!this.state.isApprover || this.state.pendingAppointments.length > 0}>No appointments pending approval</h2>
+                            <h2 hidden={this.state.isApprover || this.state.loading}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending appointments</h2>
+                            <h2 hidden={!this.state.isApprover || this.state.pendingAppointments.length > 0 || this.state.loading}>No appointments pending approval</h2>
                         </div>
                     </Col>
                 </div>

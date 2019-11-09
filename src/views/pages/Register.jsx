@@ -43,8 +43,10 @@ class Register extends React.Component {
     this.state = {
       email: "",
       password: "",
+      phone: "",
       fullName: "",
       adminChecked: false,
+      approverChecked: false,
       error:""
     };
   }
@@ -70,10 +72,11 @@ class Register extends React.Component {
     .then((res)=>{
       db.collection("agents").insertOne({
         email: this.state.email,
+        phone: this.state.phone,
         name: this.state.fullName,
         account_type: this.state.adminChecked === true ?  "admin": "agent",
         appointments: [],
-        isApprover: this.state.adminChecked === true,
+        isApprover: this.state.adminChecked === true || this.state.approverChecked === true,
       }).catch((err)=>{
         console.log(err)
       })
@@ -118,6 +121,14 @@ class Register extends React.Component {
                       <InputGroup>
                         <InputGroupAddon addonType="prepend">
                           <InputGroupText>
+                            <i className="tim-icons icon-mobile" />
+                          </InputGroupText>
+                        </InputGroupAddon>
+                        <Input placeholder="Phone" type="tel"   value={this.state.phone} onChange={(e)=>{e.preventDefault(); this.setState({phone: e.target.value})}} />
+                      </InputGroup>
+                      <InputGroup>
+                        <InputGroupAddon addonType="prepend">
+                          <InputGroupText>
                             <i className="tim-icons icon-lock-circle" />
                           </InputGroupText>
                         </InputGroupAddon>
@@ -127,6 +138,12 @@ class Register extends React.Component {
                         <Label check>
                           <Input type="checkbox" checked={this.state.adminChecked} onChange={()=>{ this.setState({adminChecked: !this.state.adminChecked})}}/>
                           <span className="form-check-sign" />User is ADMIN
+                        </Label>
+                      </FormGroup>
+                      <FormGroup check className="text-left">
+                        <Label check>
+                          <Input type="checkbox" checked={this.state.approverChecked} onChange={()=>{ this.setState({approverChecked: !this.state.approverChecked})}}/>
+                          <span className="form-check-sign" />User is an APPROVER
                         </Label>
                       </FormGroup>
                     </Form>

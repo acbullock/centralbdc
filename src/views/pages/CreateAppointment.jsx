@@ -101,8 +101,7 @@ class CreateAppointment extends React.Component {
         await agents.findOneAndUpdate({userId: user.userId}, agent)
         
         console.log("***********")
-        this.props.history.push("/admin/dashboard")
-        this.props.history.push("/admin/new_appointment")
+        
 
     }
     generateInternalMessage(data) {

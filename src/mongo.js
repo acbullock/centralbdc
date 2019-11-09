@@ -31,6 +31,11 @@ async function handleLogin(email, password){
     }
     return auth;
 }
+async function handleRemoveUser(email){
+    let agents = await this.getCollection("agents")
+    await agents.findOneAndDelete({email})
+        console.log("delete done")
+}
 async function handleRegister(email, password){
     const emailPasswordClient = Stitch.defaultAppClient.auth
     .getProviderClient(UserPasswordAuthProviderClient.factory);
@@ -54,5 +59,6 @@ export default {
     handleLogin,
     handleLogout,
     getActiveUser,
-    handleRegister
+    handleRegister,
+    handleRemoveUser
 }
