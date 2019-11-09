@@ -106,10 +106,6 @@ class Dashboard extends React.Component {
     }
     // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
     if (this.state.isAdmin === true) {
-
-      // agents = agents.filter((agent)=>{
-      //   return agent.account_type === "agent"
-      // });
       let appointments = []
       await agents.map((agent) => {
         let appt = { name: agent.name, appointments: agent.appointments }

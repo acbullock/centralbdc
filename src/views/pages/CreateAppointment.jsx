@@ -101,6 +101,7 @@ class CreateAppointment extends React.Component {
         await agents.findOneAndUpdate({userId: user.userId}, agent)
         
         console.log("***********")
+        this.forceUpdate()
 
     }
     generateInternalMessage(data) {

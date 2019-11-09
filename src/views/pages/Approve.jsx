@@ -41,12 +41,21 @@ class Approve extends React.Component {
         super(props);
         this.state = {
             pendingAppointments: [],
-            openedCollapses: ["Alexander Bullock"]
+            openedCollapses: ["Alexander Bullock"],
+            isApprover: false
         };
-        console.log(this.props.mongo)
+
     }
-    componentWillMount() {
-        this.getPendingAppointments()
+    async componentWillMount() {
+        let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let agent = await this.props.mongo.getCollection("agents")
+        agent = await agent.findOne({ userId: currUser.userId })
+        this.setState({ isApprover: agent.isApprover })
+        if (agent.isApprover === true) {
+            
+            this.getPendingAppointments()
+        }
+
     }
     // with this function we create an array with the opened collapses
     // it is like a toggle function for all collapses from this page
@@ -70,14 +79,13 @@ class Approve extends React.Component {
         //loop thru agents
         for (let agent in agents) {
             let agent_name = agents[agent].name
-            let agent_email  = agents[agent].email
+            let agent_email = agents[agent].email
             for (let a in agents[agent].appointments) {
                 if (agents[agent].appointments[a].isPending === false) {
                     continue;
                 }
                 let newApp = { agent_name, agent_email }
                 newApp = Object.assign(newApp, agents[agent].appointments[a])
-
                 appointments.push(newApp)
             }
         }
@@ -90,24 +98,44 @@ class Approve extends React.Component {
         })
         this.setState({ pendingAppointments: appointments })
     }
-    async acceptAppointment(appointment){
+    async acceptAppointment(appointment) {
         //update appointment to be ispending false, verified is now
         let new_app = appointment;
         new_app.isPending = false;
         new_app.verified = new Date()
         let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({email: appointment.agent_email})
+        let agent = await agents.findOne({ email: appointment.agent_email })
 
-        let apps = agent.appointments.filter((a)=>{
+        let apps = agent.appointments.filter((a) => {
             return a.created.getTime() !== appointment.created.getTime();
 
         })
-        
+
         agent.appointments = apps
         // agent.appointments = x
         agent.appointments.push(new_app)
-        
-        await agents.findOneAndReplace({email: appointment.agent_email}, agent)
+
+        await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
+        await this.getPendingAppointments()
+    }
+    async rejectAppointment(appointment) {
+        //update appointment to be ispending false, verified is now
+        let new_app = appointment;
+        new_app.isPending = false;
+        new_app.isRejected = true;
+        let agents = await this.props.mongo.getCollection("agents")
+        let agent = await agents.findOne({ email: appointment.agent_email })
+
+        let apps = agent.appointments.filter((a) => {
+            return a.created.getTime() !== appointment.created.getTime();
+
+        })
+
+        agent.appointments = apps
+        // agent.appointments = x
+        agent.appointments.push(new_app)
+
+        await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
         await this.getPendingAppointments()
     }
     render() {
@@ -170,11 +198,11 @@ class Approve extends React.Component {
                                                         </Row>
                                                         <Row>
                                                             <Col sm="12">
-                                                                <Button color="success" className="float-right" onClick={()=>{
+                                                                <Button color="success" className="float-right" onClick={() => {
                                                                     this.acceptAppointment(app)
                                                                 }}>Accept</Button>
-                                                                <Button color="danger" className="float-right" onClick={()=>{
-                                                                    alert(JSON.stringify(app.agent_email))
+                                                                <Button color="danger" className="float-right" onClick={() => {
+                                                                    this.rejectAppointment(app)
                                                                 }}>Reject</Button>
 
                                                             </Col>
@@ -195,6 +223,8 @@ class Approve extends React.Component {
                                 })
 
                             }
+                            <h2 hidden={this.state.isApprover}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending appointments</h2>
+                            <h2 hidden={!this.state.isApprover || this.state.pendingAppointments.length >0}>No appointments pending approval</h2>
                         </div>
                     </Col>
                 </div>
