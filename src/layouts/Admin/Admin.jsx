@@ -51,27 +51,21 @@ class Admin extends React.Component {
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
     if(user.userId == undefined){
       this.props.history.push("/auth/login")
-      console.log("1")
       return;
     }
+    let agents = await this.props.mongo.getCollection("agents")
+    let agent = await agents.findOne({userId: user.userId})
+    this.setState({agent, isAdmin: agent.account_type === "admin"})
     
-    // if(this.props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo.userId === undefined){
-    //   this.props.history.push("/auth/login")
-    // }
-    // let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
-    // this.props.mongo.db.collection("agents").findOne({userId: user.userId})
-    // .then((res)=>{
-    //   this.setState({agent: res, isAdmin: res.account_type === "admin"});
-    // })
-    // if (navigator.platform.indexOf("Win") > -1) {
-    //   document.documentElement.className += " perfect-scrollbar-on";
-    //   document.documentElement.classList.remove("perfect-scrollbar-off");
-    //   ps = new PerfectScrollbar(this.refs.mainPanel);
-    //   let tables = document.querySelectorAll(".table-responsive");
-    //   for (let i = 0; i < tables.length; i++) {
-    //     ps = new PerfectScrollbar(tables[i]);
-    //   }
-    // }
+    if (navigator.platform.indexOf("Win") > -1) {
+      document.documentElement.className += " perfect-scrollbar-on";
+      document.documentElement.classList.remove("perfect-scrollbar-off");
+      ps = new PerfectScrollbar(this.refs.mainPanel);
+      let tables = document.querySelectorAll(".table-responsive");
+      for (let i = 0; i < tables.length; i++) {
+        ps = new PerfectScrollbar(tables[i]);
+      }
+    }
     window.addEventListener("scroll", this.showNavbarButton);
     
   }

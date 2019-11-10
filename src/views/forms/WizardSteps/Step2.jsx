@@ -41,9 +41,28 @@ class CreateAppointment extends React.Component {
       date: new Date().addHours(4).setMinutes(0),
       check: "none",
       source: null,
+      dealerships:[]
     };
+    
   }
+  async componentWillMount(){
+    let {mongo} = this.props.wizardData
+    let dealerships = await mongo.getCollection("dealerships")
+    dealerships = await dealerships.find({}).toArray()
+    dealerships.sort((a,b)=>{
+      if(a.label < b.label){
+        return -1
+      }
+      if (a.label > b.label){
+        return 1
+      }
+      return 0
+    })
+    this.setState({dealerships})
+  }
+  
   isValidated(){
+    console.log(this.state.dealership)
     if(this.state.dealership == undefined ||
       this.state.department == undefined ||
       this.state.scenario == undefined)
@@ -87,8 +106,8 @@ class CreateAppointment extends React.Component {
                     classNamePrefix="react-select"
                     name="dealership"
                     value={this.state.dealership}
-                    onChange={value => this.setState({dealership:value})}
-                    options={apptvars.dealerships}
+                    onChange={value => {console.log(value); this.setState({dealership:value})}}
+                    options={this.state.dealerships}
                     placeholder="Dealership (required)"
                   /><br />
                   <Select

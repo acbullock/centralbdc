@@ -44,6 +44,7 @@ import CreateAppointment from "./views/pages/CreateAppointment.jsx"
 import Approve from "./views/pages/Approve.jsx"
 import RemoveUser from "./views/pages/RemoveUser.jsx"
 import Rejected from "./views/pages/Rejected.jsx"
+import AddDealership from "./views/pages/AddDealership"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -117,6 +118,14 @@ const routes = [
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-simple-remove",
+      },
+      {
+        path: "/add_dealership",
+        name: "Add Dealership",
+        component: AddDealership,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-delivery-fast",
       },
       // {
       //   path: "/lock-screen",

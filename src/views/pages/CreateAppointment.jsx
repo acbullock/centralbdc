@@ -48,9 +48,16 @@ class CreateAppointment extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            loading: false
+            loading: false,
+            dealerships: []
         };
 
+    }
+    async componentWillMount(){
+        let dealerships = await this.props.mongo.getCollection("dealerships")
+        let dealers = await dealerships.find({}).toArray().catch((err)=>console.log(err))
+        console.log(dealers)
+        await this.setState({dealerships: dealers})
     }
     finished = async (data) => {
         this.setState({ loading: true })
@@ -158,6 +165,7 @@ class CreateAppointment extends React.Component {
                             progressbar
                             color="primary"
                             finishButtonClick={(e) => this.finished(e)}
+                            wizardData={{mongo: this.props.mongo}}
 
                         />
                     </Col>
