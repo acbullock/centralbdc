@@ -73,7 +73,13 @@ class AddDealership extends React.Component {
   async addDealer(){
     this.setState({loading: true})
    let dealerships = await this.props.mongo.getCollection("dealerships")
-   let added = await dealerships.insertOne({label: this.state.dealership_name, phone: this.state.dealership_phone})
+   let name = this.state.dealership_name.toLowerCase().split(' ')
+   for(let i =0; i < name.length; i++){
+    name[i] = name[i].charAt(0).toUpperCase() + name[i].slice(1);
+   }
+   name = name.join(' ')
+   
+   let added = await dealerships.insertOne({label: name, phone: this.state.dealership_phone})
    let id = added.insertedId.toString()
    await dealerships.findOneAndUpdate({label: this.state.dealership_name, phone: this.state.dealership_phone}, {label: this.state.dealership_name, phone: this.state.dealership_phone, value: id})
   await this.setState({dealership_name: "", dealership_phone:""})

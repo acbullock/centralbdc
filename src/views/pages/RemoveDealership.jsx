@@ -73,8 +73,13 @@ class RemoveDealership extends React.Component {
     }
     async removeDealer() {
         this.setState({ loading: true })
+        let name = this.state.dealership_name.toLowerCase().split(' ')
+        for (let i = 0; i < name.length; i++) {
+            name[i] = name[i].charAt(0).toUpperCase() + name[i].slice(1);
+        }
+        name = name.join(' ')
         let dealerships = await this.props.mongo.getCollection("dealerships")
-        await dealerships.findOneAndDelete({label: this.state.dealership_name})
+        await dealerships.findOneAndDelete({ label: name })
 
         this.setState({ loading: false, dealership_name: "" })
     }
