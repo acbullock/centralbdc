@@ -39,7 +39,10 @@ class CreateAppointment extends React.Component {
   }
   generateInternalMessage(){
     let data = this.props.wizardData
-    if(data.customer == undefined || data.appointment == undefined ) return
+    if(data.customer == undefined || data.appointment == undefined ||
+      data.appointment.dealership == undefined ||
+      data.appointment.department == undefined ||
+      data.appointment.scenario == undefined ) return
     else{
       let message = `${data.appointment.dealership.label}\n`
       message += `${data.customer.firstname} ${data.customer.lastname}\n`
@@ -55,7 +58,10 @@ class CreateAppointment extends React.Component {
   
   generateCustomerMessage(){
     let data = this.props.wizardData
-    if(data.customer === undefined || data.appointment === undefined ) return
+    if(data.customer == undefined || data.appointment == undefined ||
+      data.appointment.dealership == undefined ||
+      data.appointment.department == undefined ||
+      data.appointment.scenario == undefined ) return
     else{
       let message = `Hi ${data.customer.firstname}, `
       message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} for `

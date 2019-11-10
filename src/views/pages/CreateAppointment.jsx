@@ -61,6 +61,7 @@ class CreateAppointment extends React.Component {
     }
     finished = async (data) => {
         this.setState({ loading: true })
+        
         let internal_message = this.generateInternalMessage(data)
         let customer_message = this.generateCustomerMessage(data)
         let messages = {
@@ -111,7 +112,6 @@ class CreateAppointment extends React.Component {
         }
         agentAppts.push(new_app)
         agent.appointments = agentAppts
-
         await agents.findOneAndUpdate({ userId: user.userId }, agent)
 
         this.setState({ loading: false })

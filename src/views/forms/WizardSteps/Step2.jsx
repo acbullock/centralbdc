@@ -88,15 +88,16 @@ class CreateAppointment extends React.Component {
                 <FormGroup>
 
                   <ReactDatetime
-                    timeConstraints={{ hours: { min: 9, max: 18, step: 1 }, minutes: { step: 15 } }}
+                    // timeConstraints={{ hours: { min: 9, max: 18, step: 1 }, minutes: { step: 15 } }}
+                    timeConstraints={{  minutes: { step: 15 } }}
                     inputProps={{
                       className: "form-control primary",
                       placeholder: "Appointment date/time",
                       name: "date"
                     }}
                     value={this.state.date}
-                    onChange={value =>
-                      this.setState({ date: value })
+                    onChange={(value) =>{
+                      this.setState({ date: new Date(value) })}
                     }
                     className="primary"
                   /><br />
