@@ -86,7 +86,12 @@ class Dashboard extends React.Component {
       loading: false,
       agents: {},
       data: {},
-      options: {}
+      options: {},
+      top5: [],
+      mostRecent: {
+        name: "no one",
+        time: new Date(0), dealership: ""
+      }
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
   }
@@ -95,17 +100,18 @@ class Dashboard extends React.Component {
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
     this.setState({ user });
     let agents = await this.props.mongo.db.collection("agents")
-    this.setState({agents: agents})
+    this.setState({ agents: agents })
     let agent = await agents.findOne({ userId: user.userId })
     this.setState({ agent, isAdmin: agent.account_type === "admin" })
     await this.getAppointmentData()
     await this.getChartData()
+    await this.getTop5()
     this.setState({ loading: false })
   }
   async getChartData() {
     // let allAgents = []
-    this.setState({loading: true})
-    let allAgents =await  this.state.agents.find().toArray()
+    this.setState({ loading: true })
+    let allAgents = await this.state.agents.find().toArray()
     const data = (canvas) => {
       var ctx = canvas.getContext("2d");
 
@@ -116,33 +122,32 @@ class Dashboard extends React.Component {
       var gradientFill = ctx.createLinearGradient(0, 170, 0, 50);
       gradientFill.addColorStop(0, "rgba(128, 182, 244, 0)");
       gradientFill.addColorStop(1, "rgba(249, 99, 59, 0.40)");
-      
-      
+
+
       let appointments = []
-      for(let agent in allAgents){
-        for(let a in allAgents[agent].appointments){
+      for (let agent in allAgents) {
+        for (let a in allAgents[agent].appointments) {
           appointments.push(allAgents[agent].appointments[a])
         }
       }
-      let approved_appointments = appointments.filter((a)=>{
-        
+      let approved_appointments = appointments.filter((a) => {
+
         return a.verified != undefined
       })
-      // console.log(approved_appointments)
       let recentLabels = []
       let recentData = []
-      for(let i =14; i>=0; i--){
+      for (let i = 14; i >= 0; i--) {
         let now = new Date()
-        now.setHours(0,0,0,0)
-        let day = 24*3600*1000
-        let currDay = new Date(now.getTime() - (i*day))
+        now.setHours(0, 0, 0, 0)
+        let day = 24 * 3600 * 1000
+        let currDay = new Date(now.getTime() - (i * day))
         recentLabels.push(currDay.toLocaleDateString())
         let count = 0;
-         for(let a in approved_appointments){
+        for (let a in approved_appointments) {
 
-          if(approved_appointments[a].verified.getTime() >= currDay.getTime() && approved_appointments[a].verified.getTime() <= (currDay.getTime() + day) ){
+          if (approved_appointments[a].verified.getTime() >= currDay.getTime() && approved_appointments[a].verified.getTime() <= (currDay.getTime() + day)) {
             count++;
-            
+
           }
         }
         recentData.push(count)
@@ -212,9 +217,50 @@ class Dashboard extends React.Component {
 
 
     };
-    
-    this.setState({options, data, loading: false})
-    
+
+    this.setState({ options, data, loading: false })
+
+  }
+  async getTop5() {
+    this.setState({ loading: true })
+    let allAgents = await this.state.agents.find().toArray()
+
+    let nums = []
+    for (let a in allAgents) {
+      let user = {
+        name: allAgents[a].name,
+        count: 0
+      }
+
+      for (let b in allAgents[a].appointments) {
+        if (allAgents[a].appointments[b].verified != undefined) {
+          if (this.state.mostRecent.time.getTime() < allAgents[a].appointments[b].verified.getTime()) {
+            this.setState({ mostRecent: { name: allAgents[a].name, time: allAgents[a].appointments[b].verified, dealership: allAgents[a].appointments[b].dealership_name } })
+          }
+          let curr = new Date()
+          curr.setHours(0, 0, 0, 0)
+          if (allAgents[a].appointments[b].verified.getTime() > curr.getTime() &&
+            allAgents[a].appointments[b].verified.getTime() < (curr.getTime() + (24 * 3600 * 1000))) {
+            user.count++;
+          }
+
+
+
+        }
+      }
+      nums.push(user)
+    }
+    await nums.sort((a, b) => {
+      if (a.count > b.count) {
+        return -1;
+      }
+      if (a.count < b.count) {
+        return 1
+      }
+      return 0;
+    })
+    this.setState({ top5: nums.slice(0, 5), loading: false })
+
   }
   async getAppointmentData() {
     this.setState({ loading: true })
@@ -270,290 +316,86 @@ class Dashboard extends React.Component {
 
     return ret;
   }
-  setBgChartData = name => {
-    this.setState({
-      bigChartData: name
-    });
-  };
+
   render() {
     return (
       <>
         <div className="content">
-          {/* <Row>
-            <Col xs="12">
-              <Card className="card-chart">
-                <CardHeader>
-                  <Row>
-                    <Col className="text-left" sm="6">
-                      <h4 className="card-category">{this.state.agent.name}</h4>
-                      <h5 className="card-category">Type: {this.state.agent.account_type}</h5>
-                      <CardTitle tag="h2">Performance</CardTitle>
-                    </Col>
-                    <Col sm="6">
-                      <ButtonGroup
-                        className="btn-group-toggle float-right"
-                        data-toggle="buttons"
-                      >
-                        <Button
-                          color="info"
-                          id="0"
-                          size="sm"
-                          tag="label"
-                          className={classNames("btn-simple", {
-                            active: this.state.bigChartData === "data1"
-                          })}
-                          onClick={() => this.setBgChartData("data1")}
-                        >
-                          <input defaultChecked name="options" type="radio" />
-                          <span className="d-none d-sm-block d-md-block d-lg-block d-xl-block">
-                            Accounts
-                          </span>
-                          <span className="d-block d-sm-none">
-                            <i className="tim-icons icon-single-02" />
-                          </span>
-                        </Button>
-                        <Button
-                          color="info"
-                          id="1"
-                          size="sm"
-                          tag="label"
-                          className={classNames("btn-simple", {
-                            active: this.state.bigChartData === "data2"
-                          })}
-                          onClick={() => this.setBgChartData("data2")}
-                        >
-                          <input name="options" type="radio" />
-                          <span className="d-none d-sm-block d-md-block d-lg-block d-xl-block">
-                            Purchases
-                          </span>
-                          <span className="d-block d-sm-none">
-                            <i className="tim-icons icon-gift-2" />
-                          </span>
-                        </Button>
-                        <Button
-                          color="info"
-                          id="2"
-                          size="sm"
-                          tag="label"
-                          className={classNames("btn-simple", {
-                            active: this.state.bigChartData === "data3"
-                          })}
-                          onClick={() => this.setBgChartData("data3")}
-                        >
-                          <input name="options" type="radio" />
-                          <span className="d-none d-sm-block d-md-block d-lg-block d-xl-block">
-                            Sessions
-                          </span>
-                          <span className="d-block d-sm-none">
-                            <i className="tim-icons icon-tap-02" />
-                          </span>
-                        </Button>
-                      </ButtonGroup>
-                    </Col>
-                  </Row>
-                </CardHeader>
-                <CardBody>
-                  <div className="chart-area">
-                    <Line
-                      data={chartExample1[this.state.bigChartData]}
-                      options={chartExample1.options}
-                    />
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
-            <Col lg="3" md="6">
-              <Card className="card-stats">
-                <CardBody>
-                  <Row>
-                    <Col xs="5">
-                      <div className="info-icon text-center icon-warning">
-                        <i className="tim-icons icon-chat-33" />
-                      </div>
-                    </Col>
-                    <Col xs="7">
-                      <div className="numbers">
-                        <p className="card-category">Number</p>
-                        <CardTitle tag="h3">150GB</CardTitle>
-                      </div>
-                    </Col>
-                  </Row>
-                </CardBody>
-                <CardFooter>
-                  <hr />
-                  <div className="stats">
-                    <i className="tim-icons icon-refresh-01" /> Update Now
-                  </div>
-                </CardFooter>
-              </Card>
-            </Col>
-            <Col lg="3" md="6">
-              <Card className="card-stats">
-                <CardBody>
-                  <Row>
-                    <Col xs="5">
-                      <div className="info-icon text-center icon-primary">
-                        <i className="tim-icons icon-shape-star" />
-                      </div>
-                    </Col>
-                    <Col xs="7">
-                      <div className="numbers">
-                        <p className="card-category">Followers</p>
-                        <CardTitle tag="h3">+45k</CardTitle>
-                      </div>
-                    </Col>
-                  </Row>
-                </CardBody>
-                <CardFooter>
-                  <hr />
-                  <div className="stats">
-                    <i className="tim-icons icon-sound-wave" /> Last Research
-                  </div>
-                </CardFooter>
-              </Card>
-            </Col>
-            <Col lg="3" md="6">
-              <Card className="card-stats">
-                <CardBody>
-                  <Row>
-                    <Col xs="5">
-                      <div className="info-icon text-center icon-success">
-                        <i className="tim-icons icon-single-02" />
-                      </div>
-                    </Col>
-                    <Col xs="7">
-                      <div className="numbers">
-                        <p className="card-category">Users</p>
-                        <CardTitle tag="h3">150,000</CardTitle>
-                      </div>
-                    </Col>
-                  </Row>
-                </CardBody>
-                <CardFooter>
-                  <hr />
-                  <div className="stats">
-                    <i className="tim-icons icon-trophy" /> Customers feedback
-                  </div>
-                </CardFooter>
-              </Card>
-            </Col>
-            <Col lg="3" md="6">
-              <Card className="card-stats">
-                <CardBody>
-                  <Row>
-                    <Col xs="5">
-                      <div className="info-icon text-center icon-danger">
-                        <i className="tim-icons icon-molecule-40" />
-                      </div>
-                    </Col>
-                    <Col xs="7">
-                      <div className="numbers">
-                        <p className="card-category">Errors</p>
-                        <CardTitle tag="h3">12</CardTitle>
-                      </div>
-                    </Col>
-                  </Row>
-                </CardBody>
-                <CardFooter>
-                  <hr />
-                  <div className="stats">
-                    <i className="tim-icons icon-watch-time" /> In the last
-                    hours
-                  </div>
-                </CardFooter>
-              </Card>
-            </Col>
-            <Col lg="4">
-              <Card className="card-chart">
-                <CardHeader>
-                  <h5 className="card-category">Total Shipments</h5>
-                  <CardTitle tag="h3">
-                    <i className="tim-icons icon-bell-55 text-primary" />{" "}
-                    763,215
-                  </CardTitle>
-                </CardHeader>
-                <CardBody>
-                  <div className="chart-area">
-                    <Line
-                      data={chartExample2.data}
-                      options={chartExample2.options}
-                    />
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
-            <Col lg="4">
-              <Card className="card-chart">
-                <CardHeader>
-                  <h5 className="card-category">Daily Sales</h5>
-                  <CardTitle tag="h3">
-                    <i className="tim-icons icon-delivery-fast text-info" />{" "}
-                    3,500€
-                  </CardTitle>
-                </CardHeader>
-                <CardBody>
-                  <div className="chart-area">
-                    <Bar
-                      data={chartExample3.data}
-                      options={chartExample3.options}
-                    />
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
-            <Col lg="4">
-              <Card className="card-chart">
-                <CardHeader>
-                  <h5 className="card-category">Completed Tasks</h5>
-                  <CardTitle tag="h3">
-                    <i className="tim-icons icon-send text-success" /> 12,100K
-                  </CardTitle>
-                </CardHeader>
-                <CardBody>
-                  <div className="chart-area">
-                    <Line
-                      data={chartExample4.data}
-                      options={chartExample4.options}
-                    />
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row> */}
           <Row>
-            {/* <Col lg="12">
-            <Card className="card-chart card-chart-pie">
+            <Col lg="6">
+              <Card>
                 <CardHeader>
-                  <h5 className="card-category">Simple Pie Chart</h5>
+                  <div className="tools float-right">
+                    <Button
+                      onClick={(e) => { e.preventDefault(); this.getTop5() }}
+                    >
+
+                      <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
+                      {/* <i className="tim-icons icon-refresh-02 tim-icons-is-spinning" /> */}
+                    </Button>
+                  </div>
+                  <CardTitle tag="h3">Most Recent Appointment</CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <Row>
-                    <Col xs="6">
-                      <div className="chart-area">
-                        <Pie
-                          data={this.state.data}
-                          options={this.state.options}
-                        />
-                      </div>
-                    </Col>
-                    <Col xs="6">
-                      <CardTitle tag="h4">
-                        <i className="tim-icons icon-trophy text-success" />{" "}
-                        10.000$
-                      </CardTitle>
-                      <p className="category">A total of $54000</p>
-                    </Col>
-                  </Row>
+
+                  <h2>
+                    {this.state.mostRecent.time.toLocaleString()}</h2>
+                    <h4>
+                  <small className="text-muted">
+
+                    Dealershp: {this.state.mostRecent.dealership}</small></h4><br/>
+                    <h4>
+                  <small className="text-muted">
+                    Agent: {this.state.mostRecent.name}</small></h4>
                 </CardBody>
               </Card>
-            </Col> */}
+            </Col>
+            <Col lg="6">
+              <Card>
+                <CardHeader>
+                  <div className="tools float-right">
+                    <Button
+                      onClick={(e) => { e.preventDefault(); this.getTop5() }}
+                    >
+
+                      <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
+                      {/* <i className="tim-icons icon-refresh-02 tim-icons-is-spinning" /> */}
+                    </Button>
+                  </div>
+                  <CardTitle tag="h3">Top 5 Agents Today</CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <Table responsive>
+                    <thead className="text-primary">
+                      <tr>
+                        {/* <th className="text-center"></th> */}
+                        <th className="text-center">Agent Name</th>
+                        <th className="text-center"># Approved Appointments</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {
+                        this.state.top5.map((agent, index) => {
+                          return (
+                            <tr key={index} className="text-center">
+                              <td key={index + "-name"}>{agent.name}</td>
+                              <td key={index + "-count"}>{agent.count}</td>
+                            </tr>
+                          )
+                        })
+                      }
+                    </tbody>
+                  </Table>
+                </CardBody>
+              </Card>
+            </Col>
             <Col lg="12">
 
               <Card hidden={!this.state.isAdmin}>
                 <CardHeader>
                   <div className="tools float-right">
                     <Button
-                    onClick={(e) => { e.preventDefault(); this.getChartData() }}
+                      onClick={(e) => { e.preventDefault(); this.getChartData() }}
                     >
 
                       <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
@@ -568,9 +410,9 @@ class Dashboard extends React.Component {
                     data={this.state.data}
                     options={this.state.options}
                     height={50}
-                    
+
                   />
-                {/* </div> */}
+                  {/* </div> */}
                 </CardBody>
               </Card>
               <Card>

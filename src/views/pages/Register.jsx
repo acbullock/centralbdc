@@ -47,7 +47,8 @@ class Register extends React.Component {
       fullName: "",
       adminChecked: false,
       approverChecked: false,
-      error:""
+      error:"",
+      loading: false
     };
   }
   async componentDidMount() {
@@ -67,6 +68,7 @@ class Register extends React.Component {
     document.body.classList.toggle("register-page");
   }
   async registerUser(){
+    this.setState({loading: true})
     let {db} = this.props.mongo;
     await this.props.mongo.handleRegister(this.state.email, this.state.password)
     .then((res)=>{
@@ -82,7 +84,8 @@ class Register extends React.Component {
       })
     })
     .catch((err)=>{this.setState({error:err})});
-    
+    this.setState({loading: false})
+    this.props.history.push("/admin/dashboard")
   }
   render() {
     return (
@@ -155,6 +158,7 @@ class Register extends React.Component {
                       href="#pablo"
                       onClick={e =>{ e.preventDefault(); this.props.history.push("/admin/dashboard")}}
                       size="lg"
+                      disabled={this.state.loading}
                     >
                       Back To Dashboard
                     </Button>
@@ -164,6 +168,7 @@ class Register extends React.Component {
                       href="#pablo"
                       onClick={e => {e.preventDefault(); this.registerUser()}}
                       size="lg"
+                      disabled={this.state.loading}
                     >
                       Create User
                     </Button>
