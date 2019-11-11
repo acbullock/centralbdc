@@ -104,6 +104,15 @@ class Rejected extends React.Component {
         let agent = await this.props.mongo.getCollection("agents")
         let dealerships = await this.props.mongo.getCollection("dealerships")
         dealerships = await dealerships.find().toArray()
+        dealerships.sort((a,b)=>{
+            if(a.label < b.label){
+              return -1
+            }
+            if (a.label > b.label){
+              return 1
+            }
+            return 0
+          })
         await this.setState({ agents: agent, dealerships })
         agent = await agent.findOne({ userId: currUser.userId })
         await this.setState({ agent })

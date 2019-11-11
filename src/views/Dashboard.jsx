@@ -128,10 +128,10 @@ class Dashboard extends React.Component {
         
         return a.verified != undefined
       })
-      console.log(approved_appointments)
+      // console.log(approved_appointments)
       let recentLabels = []
       let recentData = []
-      for(let i =4; i>=0; i--){
+      for(let i =14; i>=0; i--){
         let now = new Date()
         now.setHours(0,0,0,0)
         let day = 24*3600*1000
@@ -553,10 +553,11 @@ class Dashboard extends React.Component {
                 <CardHeader>
                   <div className="tools float-right">
                     <Button
-                    // onClick={(e) => { e.preventDefault(); this.getAppointmentData() }}
+                    onClick={(e) => { e.preventDefault(); this.getChartData() }}
                     >
 
                       <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
+                      {/* <i className="tim-icons icon-refresh-02 tim-icons-is-spinning" /> */}
                     </Button>
                   </div>
                   <CardTitle tag="h3">Approved Appointments</CardTitle>
