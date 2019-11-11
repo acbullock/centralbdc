@@ -17,10 +17,10 @@
 import React from "react";
 // nodejs library that concatenates classes
 // import classNames from "classnames";
-// // react plugin used to create charts
-// import { Line, Bar } from "react-chartjs-2";
-// // react plugin for creating vector maps
-// import { VectorMap } from "react-jvectormap";
+// react plugin used to create charts
+import { Line, Pie } from "react-chartjs-2";
+// react plugin for creating vector maps
+import { VectorMap } from "react-jvectormap";
 
 // reactstrap components
 import {
@@ -46,12 +46,12 @@ import {
 } from "reactstrap";
 
 // core components
-// import {
-//   chartExample1,
-//   chartExample2,
-//   chartExample3,
-//   chartExample4
-// } from "../variables/charts.jsx";
+import {
+  chartExample1,
+  chartExample2,
+  chartExample3,
+  chartExample4
+} from "../variables/charts.jsx";
 
 // var mapData = {
 //   AU: 760,
@@ -79,9 +79,14 @@ class Dashboard extends React.Component {
       agent: {
 
       },
+      labels: [],
+      datasets: [],
       isAdmin: false,
       appointments: [],
-      loading: false
+      loading: false,
+      agents: {},
+      data: {},
+      options: {}
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
   }
@@ -90,10 +95,126 @@ class Dashboard extends React.Component {
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
     this.setState({ user });
     let agents = await this.props.mongo.db.collection("agents")
+    this.setState({agents: agents})
     let agent = await agents.findOne({ userId: user.userId })
     this.setState({ agent, isAdmin: agent.account_type === "admin" })
     await this.getAppointmentData()
+    await this.getChartData()
     this.setState({ loading: false })
+  }
+  async getChartData() {
+    // let allAgents = []
+    this.setState({loading: true})
+    let allAgents =await  this.state.agents.find().toArray()
+    const data = (canvas) => {
+      var ctx = canvas.getContext("2d");
+
+      var gradientStroke = ctx.createLinearGradient(500, 0, 100, 0);
+      gradientStroke.addColorStop(0, '#80b6f4');
+      gradientStroke.addColorStop(1, '#FFFFFF');
+
+      var gradientFill = ctx.createLinearGradient(0, 170, 0, 50);
+      gradientFill.addColorStop(0, "rgba(128, 182, 244, 0)");
+      gradientFill.addColorStop(1, "rgba(249, 99, 59, 0.40)");
+      
+      
+      let appointments = []
+      for(let agent in allAgents){
+        for(let a in allAgents[agent].appointments){
+          appointments.push(allAgents[agent].appointments[a])
+        }
+      }
+      let approved_appointments = appointments.filter((a)=>{
+        
+        return a.verified != undefined
+      })
+      console.log(approved_appointments)
+      let recentLabels = []
+      let recentData = []
+      for(let i =4; i>=0; i--){
+        let now = new Date()
+        now.setHours(0,0,0,0)
+        let day = 24*3600*1000
+        let currDay = new Date(now.getTime() - (i*day))
+        recentLabels.push(currDay.toLocaleDateString())
+        let count = 0;
+         for(let a in approved_appointments){
+
+          if(approved_appointments[a].verified.getTime() >= currDay.getTime() && approved_appointments[a].verified.getTime() <= (currDay.getTime() + day) ){
+            count++;
+            
+          }
+        }
+        recentData.push(count)
+      }
+      return {
+        labels: recentLabels,
+        datasets: [{
+          label: "Approved Count\n",
+          borderColor: "#f96332",
+          pointBorderColor: "#FFF",
+          pointBackgroundColor: "#f96332",
+          pointBorderWidth: 2,
+          pointHoverRadius: 4,
+          pointHoverBorderWidth: 1,
+          pointRadius: 4,
+          fill: true,
+          backgroundColor: gradientFill,
+          borderWidth: 2,
+          data: recentData
+        }]
+      }
+    };
+    const options = {
+      maintainAspectRatio: false,
+      legend: {
+        display: false
+      },
+      tooltips: {
+        bodySpacing: 4,
+        mode: "nearest",
+        intersect: 0,
+        position: "nearest",
+        xPadding: 10,
+        yPadding: 10,
+        caretPadding: 10,
+      },
+      responsive: 1,
+      scales: {
+        yAxes: [{
+          display: 1,
+          ticks: {
+            display: true
+          },
+          gridLines: {
+            zeroLineColor: "transparent",
+            drawTicks: false,
+            display: true,
+            drawBorder: false
+          }
+        }],
+        xAxes: [{
+          display: 1,
+          ticks: {
+            display: false
+          },
+          gridLines: {
+            zeroLineColor: "transparent",
+            drawTicks: false,
+            display: false,
+            drawBorder: false
+          }
+        }]
+      },
+      layout: {
+        padding: { left: 15, right: 15, top: 15, bottom: 15 }
+      }
+
+
+    };
+    
+    this.setState({options, data, loading: false})
+    
   }
   async getAppointmentData() {
     this.setState({ loading: true })
@@ -400,7 +521,57 @@ class Dashboard extends React.Component {
             </Col>
           </Row> */}
           <Row>
+            {/* <Col lg="12">
+            <Card className="card-chart card-chart-pie">
+                <CardHeader>
+                  <h5 className="card-category">Simple Pie Chart</h5>
+                </CardHeader>
+                <CardBody>
+                  <Row>
+                    <Col xs="6">
+                      <div className="chart-area">
+                        <Pie
+                          data={this.state.data}
+                          options={this.state.options}
+                        />
+                      </div>
+                    </Col>
+                    <Col xs="6">
+                      <CardTitle tag="h4">
+                        <i className="tim-icons icon-trophy text-success" />{" "}
+                        10.000$
+                      </CardTitle>
+                      <p className="category">A total of $54000</p>
+                    </Col>
+                  </Row>
+                </CardBody>
+              </Card>
+            </Col> */}
             <Col lg="12">
+
+              <Card hidden={!this.state.isAdmin}>
+                <CardHeader>
+                  <div className="tools float-right">
+                    <Button
+                    // onClick={(e) => { e.preventDefault(); this.getAppointmentData() }}
+                    >
+
+                      <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
+                    </Button>
+                  </div>
+                  <CardTitle tag="h3">Approved Appointments</CardTitle>
+                </CardHeader>
+                <CardBody >
+                  {/* <div className="chart-area" > */}
+                  <Line
+                    data={this.state.data}
+                    options={this.state.options}
+                    height={50}
+                    
+                  />
+                {/* </div> */}
+                </CardBody>
+              </Card>
               <Card>
                 <CardHeader>
 
