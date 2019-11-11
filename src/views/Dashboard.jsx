@@ -91,7 +91,8 @@ class Dashboard extends React.Component {
       mostRecent: {
         name: "no one",
         time: new Date(0), dealership: ""
-      }
+      },
+      isOld: true
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
   }
@@ -106,7 +107,21 @@ class Dashboard extends React.Component {
     await this.getAppointmentData()
     await this.getChartData()
     await this.getTop5()
+    await this.isOld()
     this.setState({ loading: false })
+  }
+  isOld(){
+    this.setState({loading: true})
+    let  time = this.state.mostRecent.time
+    let twoHoursAgo = new Date(new Date().getTime() - (2* 3600*1000))
+    if(time.getTime() < twoHoursAgo.getTime()){
+      
+      this.setState({isOld: true})
+    }
+    else{
+      
+       this.setState({isOld: false})}
+    this.setState({isLoading: false})
   }
   async getChartData() {
     // let allAgents = []
@@ -323,18 +338,18 @@ class Dashboard extends React.Component {
         <div className="content">
           <Row>
             <Col lg="6">
-              <Card>
+              <Card color={this.state.isOld? "warning": "success"} >
                 <CardHeader>
                   <div className="tools float-right">
                     <Button
-                      onClick={(e) => { e.preventDefault(); this.getTop5() }}
+                      onClick={(e) => { e.preventDefault(); this.isOld() }}
                     >
 
                       <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
                       {/* <i className="tim-icons icon-refresh-02 tim-icons-is-spinning" /> */}
                     </Button>
                   </div>
-                  <CardTitle tag="h3">Most Recent Appointment</CardTitle>
+                  <CardTitle tag="h3" >Most Recent Appointment</CardTitle>
                 </CardHeader>
                 <CardBody>
 
