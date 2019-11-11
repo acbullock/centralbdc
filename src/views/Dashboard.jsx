@@ -68,6 +68,7 @@ import {
 // };
 
 class Dashboard extends React.Component {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -80,28 +81,22 @@ class Dashboard extends React.Component {
       },
       isAdmin: false,
       appointments: [],
-      loading:false
+      loading: false
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
   }
-  componentDidMount() {
-    this.setState({loading: true})
-    let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
+  async componentDidMount() {
+    this.setState({ loading: true })
+    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
     this.setState({ user });
-    this.props.mongo.db.collection("agents")
-      .findOne({ userId: user.userId })
-      .then((res) => {
-        this.setState({ agent: res, isAdmin: res.account_type === "admin" })
-        this.getAppointmentData()
-        this.setState({loading: false})
-      })
-      .catch((err => {
-        this.setState({loading: false})
-        console.log(err)
-      }))
+    let agents = await this.props.mongo.db.collection("agents")
+    let agent = await agents.findOne({ userId: user.userId })
+    this.setState({ agent, isAdmin: agent.account_type === "admin" })
+    await this.getAppointmentData()
+    this.setState({ loading: false })
   }
   async getAppointmentData() {
-    this.setState({loading: true})
+    this.setState({ loading: true })
     let agents;
     if (this.state.isAdmin === true) {
       agents = await this.props.mongo.db.collection("agents").find({}).asArray();
@@ -117,7 +112,7 @@ class Dashboard extends React.Component {
         appointments.push(appt);
         return agent;
       });
-      appointments = await  appointments.sort(function (a, b) {
+      appointments = await appointments.sort(function (a, b) {
         return (b.appointments.length - a.appointments.length)
       });
       this.setState({ appointments, loading: false });
@@ -410,11 +405,11 @@ class Dashboard extends React.Component {
                 <CardHeader>
 
                   <div className="tools float-right">
-                    <Button 
+                    <Button
                       onClick={(e) => { e.preventDefault(); this.getAppointmentData() }}
                     >
 
-                      <i className={this.state.loading?"tim-icons icon-refresh-02 tim-icons-is-spinning": "tim-icons icon-refresh-02 "} />
+                      <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
                     </Button>
                   </div>
                   {/* <div className="tools float-right">
@@ -546,7 +541,7 @@ class Dashboard extends React.Component {
                     </UncontrolledDropdown>
                   </div> */}
                   <CardTitle tag="h3">Pending Appointments</CardTitle>
-                  
+
                 </CardHeader>
                 <CardBody>
                   <Table responsive>

@@ -21,7 +21,7 @@ import AuthNavbar from "../../components/Navbars/AuthNavbar.jsx";
 import Footer from "../../components/Footer/Footer.jsx";
 
 import routes from "../../routes.js";
-import { isFunction } from "util";
+
 
 class Pages extends React.Component {
   constructor(props) {

@@ -91,7 +91,7 @@ class CreateAppointment extends React.Component {
                     // timeConstraints={{ hours: { min: 9, max: 18, step: 1 }, minutes: { step: 15 } }}
                     timeConstraints={{  minutes: { step: 15 } }}
                     inputProps={{
-                      className: "form-control primary",
+                      className: "form-control",
                       placeholder: "Appointment date/time",
                       name: "date"
                     }}

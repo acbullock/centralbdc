@@ -50,7 +50,7 @@ class Sidebar extends React.Component {
     return initialState;
   };
   async getCurrentUser(){
-    console.log("why")
+    // console.log("why")
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
     await this.setState({user})
     let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});

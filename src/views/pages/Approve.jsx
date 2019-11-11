@@ -15,8 +15,6 @@
 
 */
 import React from "react";
-// react plugin used to create a form with multiple steps
-import ReactWizard from "react-bootstrap-wizard";
 
 // reactstrap components
 import {
@@ -24,16 +22,13 @@ import {
     CardHeader,
     CardBody,
     Collapse,
-    CardText,
+    // CardText,
     Button,
     Input
 
 } from "reactstrap";
 
 // wizard steps
-import Step1 from "../forms/WizardSteps/Step1.jsx";
-import Step2 from "../forms/WizardSteps/Step2.jsx";
-import Step3 from "../forms/WizardSteps/Step3.jsx";
 import axios from 'axios'
 
 
@@ -239,12 +234,12 @@ class Approve extends React.Component {
 
                                                             <Col sm="6">
                                                                 <h3>Internal Message</h3>
-                                                                <blockquote className="blockquote" sylte={{ whiteSpace: "pre-wrap" }}>
+                                                                <blockquote className="blockquote" style={{ whiteSpace: "pre-wrap" }}>
                                                                     <p >{app.internal_msg}</p></blockquote>
                                                             </Col>
                                                             <Col sm="6">
                                                                 <h3>Customer Message</h3>
-                                                                <blockquote className="blockquote" sylte={{ whiteSpace: "pre-wrap" }}>
+                                                                <blockquote className="blockquote" style={{ whiteSpace: "pre-wrap" }}>
                                                                     <p style={{ whiteSpace: "pre-wrap" }}>{app.customer_msg}</p></blockquote>
                                                             </Col>
                                                             <Col sm="6">

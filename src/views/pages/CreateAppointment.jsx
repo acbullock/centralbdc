@@ -19,7 +19,7 @@ import React from "react";
 import ReactWizard from "react-bootstrap-wizard";
 
 // reactstrap components
-import { Col, Card, CardText } from "reactstrap";
+import { Col} from "reactstrap";
 
 // wizard steps
 import Step1 from "../forms/WizardSteps/Step1.jsx";
@@ -56,7 +56,6 @@ class CreateAppointment extends React.Component {
     async componentWillMount(){
         let dealerships = await this.props.mongo.getCollection("dealerships")
         let dealers = await dealerships.find({}).toArray().catch((err)=>console.log(err))
-        console.log(dealers)
         await this.setState({dealerships: dealers})
     }
     finished = async (data) => {
@@ -107,6 +106,9 @@ class CreateAppointment extends React.Component {
             dealership_name: appointment.appointment_dealership,
             //fix this later to come from db
             dealership_phone: "9548646379",
+            dealership_source: appointment.appointment_source,
+            dealership_department: appointment.appointment_department,
+            dealership_scenario: appointment.appointment_scenario,
             internal_msg: messages.internal_message,
             customer_msg: messages.customer_message
         }
@@ -114,9 +116,8 @@ class CreateAppointment extends React.Component {
         agent.appointments = agentAppts
         await agents.findOneAndUpdate({ userId: user.userId }, agent)
 
-        this.setState({ loading: false })
+        await this.setState({ loading: false })
         await this.props.history.push("/admin/dashboard")
-        await this.props.history.push("/admin/new_appointment")
 
 
 
