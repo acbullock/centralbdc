@@ -421,14 +421,14 @@ class Dashboard extends React.Component {
                   <CardTitle tag="h3">Approved Appointments</CardTitle>
                 </CardHeader>
                 <CardBody >
-                  {/* <div className="chart-area" > */}
+                  
                   <Line
                     data={this.state.data}
                     options={this.state.options}
-                    // height={50}
+                    height={100}
 
                   />
-                  {/* </div> */}
+                 
                 </CardBody>
               </Card>
               <Card>
