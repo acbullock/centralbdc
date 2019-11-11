@@ -70,22 +70,24 @@ class Register extends React.Component {
   async registerUser(){
     this.setState({loading: true})
     let {db} = this.props.mongo;
-    await this.props.mongo.handleRegister(this.state.email, this.state.password)
-    .then((res)=>{
-      db.collection("agents").insertOne({
+    
+    let pass = true;
+    await this.props.mongo.handleRegister(this.state.email, this.state.password).catch((err)=>{pass = false; console.log(err); this.setState({email: "", phone: "", fullName: "", password: "", error: err})})
+    
+      
+      if(pass){
+      await db.collection("agents").insertOne({
         email: this.state.email,
         phone: this.state.phone,
         name: this.state.fullName,
         account_type: this.state.adminChecked === true ?  "admin": "agent",
         appointments: [],
         isApprover: this.state.adminChecked === true || this.state.approverChecked === true,
-      }).catch((err)=>{
-        console.log(err)
       })
-    })
-    .catch((err)=>{this.setState({error:err})});
+      this.props.history.push("/admin/dashboard")}
     this.setState({loading: false})
-    this.props.history.push("/admin/dashboard")
+    
+    
   }
   render() {
     return (
@@ -119,7 +121,7 @@ class Register extends React.Component {
                             <i className="tim-icons icon-email-85" />
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input placeholder="Email" type="email"   value={this.state.email} onChange={(e)=>{e.preventDefault(); this.setState({email: e.target.value})}} />
+                        <Input placeholder="Email" type="email"   value={this.state.email} onChange={(e)=>{e.preventDefault(); this.setState({email: e.target.value.toLowerCase()})}} />
                       </InputGroup>
                       <InputGroup>
                         <InputGroupAddon addonType="prepend">
@@ -168,7 +170,8 @@ class Register extends React.Component {
                       href="#pablo"
                       onClick={e => {e.preventDefault(); this.registerUser()}}
                       size="lg"
-                      disabled={this.state.loading}
+                      disabled={this.state.loading || this.state.email.length ===0 ||
+                      this.state.fullName.legnth === 0 || this.state.phone.length != 10 || isNaN(this.state.phone)}
                     >
                       Create User
                     </Button>

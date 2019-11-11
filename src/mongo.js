@@ -40,9 +40,8 @@ async function handleRegister(email, password){
     const emailPasswordClient = Stitch.defaultAppClient.auth
     .getProviderClient(UserPasswordAuthProviderClient.factory);
 
-    await emailPasswordClient.registerWithEmail(email, password)
-    .then(() => console.log("Successfully sent account confirmation email!"))
-    .catch(err => console.error("Error registering new user:", err));
+    let result = await emailPasswordClient.registerWithEmail(email, password)
+    return result
 }
 function getActiveUser(mongodb){
     return mongodb.proxy.service.requestClient.activeUserAuthInfo;
