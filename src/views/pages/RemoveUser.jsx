@@ -42,6 +42,7 @@ class RemoveUser extends React.Component {
     super(props);
     this.state = {
       email: "",
+      loading: false
     };
   }
   async componentDidMount() {
@@ -52,9 +53,12 @@ class RemoveUser extends React.Component {
     document.body.classList.toggle("register-page");
   }
   async unregisterUser(){
+    this.setState({loading: true})
     let {db} = this.props.mongo;
     await this.props.mongo.handleRemoveUser(this.state.email)
     this.setState({email:""})
+    this.setState({loading: false})
+    this.props.history.push("/admin/dashboard")
     // await this.props.mongo.handleRegister(this.state.email, this.state.password)
     // .then((res)=>{
     //   db.collection("agents").insertOne({
