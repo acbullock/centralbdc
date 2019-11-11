@@ -179,8 +179,8 @@ class Approve extends React.Component {
             }
         }).then((res) => {
             this.setState({ loading: false })
-            alert("Success!")
-        }).catch((err) => { this.setState({ loading: false }); alert("Error sending customer text."); })
+            // alert("Success!")
+        }).catch((err) => {  })
     }
     render() {
         return (

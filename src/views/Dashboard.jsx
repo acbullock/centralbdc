@@ -113,15 +113,16 @@ class Dashboard extends React.Component {
   isOld(){
     this.setState({loading: true})
     let  time = this.state.mostRecent.time
-    let twoHoursAgo = new Date(new Date().getTime() - (2* 3600*1000))
+    let twoHoursAgo = new Date(new Date().getTime() - (3600*1000 + 1800 * 1000))
     if(time.getTime() < twoHoursAgo.getTime()){
       
       this.setState({isOld: true})
     }
     else{
       
-       this.setState({isOld: false})}
-    this.setState({isLoading: false})
+       this.setState({isOld: false})
+    }
+    this.setState({loading: false})
   }
   async getChartData() {
     // let allAgents = []
@@ -166,6 +167,7 @@ class Dashboard extends React.Component {
           }
         }
         recentData.push(count)
+        
       }
       return {
         labels: recentLabels,
@@ -338,11 +340,11 @@ class Dashboard extends React.Component {
         <div className="content">
           <Row>
             <Col lg="6">
-              <Card color={this.state.isOld? "warning": "success"} >
+              <Card color={this.state.isOld? "red": "success"}  >
                 <CardHeader>
                   <div className="tools float-right">
                     <Button
-                      onClick={(e) => { e.preventDefault(); this.isOld() }}
+                      onClick={(e) => { e.preventDefault(); this.getChartData(); this.getTop5(); this.isOld() }}
                     >
 
                       <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
@@ -358,10 +360,9 @@ class Dashboard extends React.Component {
                     <h4>
                   <small className="text-muted">
 
-                    Dealershp: {this.state.mostRecent.dealership}</small></h4><br/>
-                    <h4>
-                  <small className="text-muted">
-                    Agent: {this.state.mostRecent.name}</small></h4>
+                    Dealershp: {this.state.mostRecent.dealership}<br/>
+                    Agent: {this.state.mostRecent.name}</small></h4><br/>
+                    
                 </CardBody>
               </Card>
             </Col>
@@ -424,7 +425,7 @@ class Dashboard extends React.Component {
                   <Line
                     data={this.state.data}
                     options={this.state.options}
-                    height={50}
+                    // height={50}
 
                   />
                   {/* </div> */}
