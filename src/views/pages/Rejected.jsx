@@ -47,11 +47,12 @@ class Rejected extends React.Component {
             fixed_customer_first_name: "",
             fixed_customer_last_name: "",
             fixed_customer_phone: "",
-            fixed_date: "",
+            fixed_date: new Date(),
             feedback: "Loading..",
             agents: {},
             agent: {},
             dealerships: [],
+            sources: [],
             scenarios: [
                 {
                     value: "50", isDisabled: true, label: "Data-Mining"
@@ -85,7 +86,6 @@ class Rejected extends React.Component {
                 },
                 
             ],
-            sources: [{ value: "val2", label: "Hyundai USA" }, { value: "val1", label: "Data-Mining" }, { value: "", label: "None" }],
             fixed_dealership: "",
             fixed_department: "",
             fixed_scenario: "",
@@ -98,11 +98,39 @@ class Rejected extends React.Component {
         };
 
     }
+    isValidDate (current) {
+
+        let x = new Date(current);
+        let now = new Date()
+        let nowAnd3Days = new Date(now.getTime() + (4* 24*60*60*1000))
+        
+        if(x.getTime() > nowAnd3Days.getTime()){
+            return false;
+        }
+        if (x.getTime() < now.getTime()){
+            return false
+        }
+        
+        let open = new Date(x)
+        open.setHours(9,30)
+    
+        let close = new Date(x)
+        close.setHours(18,30)
+        if(x.getTime() < open.getTime()){
+            return false
+        }
+        if(x > close){
+            return false
+        }
+        return true
+      }
     async componentWillMount() {
         this.setState({ loading: true })
         let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agent = await this.props.mongo.getCollection("agents")
         let dealerships = await this.props.mongo.getCollection("dealerships")
+        let sources = await this.props.mongo.getCollection("sources")
+        sources = await sources.find().toArray()
         dealerships = await dealerships.find().toArray()
         dealerships.sort((a,b)=>{
             if(a.label < b.label){
@@ -113,7 +141,16 @@ class Rejected extends React.Component {
             }
             return 0
           })
-        await this.setState({ agents: agent, dealerships })
+          sources.sort((a,b)=>{
+            if(a.label < b.label){
+              return -1
+            }
+            if (a.label > b.label){
+              return 1
+            }
+            return 0
+          })
+        await this.setState({ agents: agent, dealerships, sources })
         agent = await agent.findOne({ userId: currUser.userId })
         await this.setState({ agent })
         await this.getRejectedAppointments()
@@ -121,7 +158,7 @@ class Rejected extends React.Component {
     }
     // with this function we create an array with the opened collapses
     // it is like a toggle function for all collapses from this page
-    collapsesToggle = async (collapse) => {
+    collapsesToggle = async (collapse, app) => {
 
 
         let openedCollapses = this.state.openedCollapses;
@@ -144,6 +181,14 @@ class Rejected extends React.Component {
             await this.setState({
                 openedCollapses: [collapse],
                 index: parseInt(collapse[collapse.length - 1]),
+                fixed_customer_first_name: app.customer_firstname,
+                fixed_customer_last_name: app.customer_lastname,
+                fixed_customer_phone: app.customer_phone,
+                fixed_date: app.appointment_date,
+                fixed_dealership: {label: app.dealership_name, value:""},
+                fixed_department: {label: app.dealership_department, value:""},
+                fixed_scenario: {label: app.dealership_scenario, value:""},
+                fixed_source: {label: app.dealership_source, value:""}
             });
         }
 
@@ -266,7 +311,7 @@ class Rejected extends React.Component {
                                                         href="#pablo"
                                                         data-parent="#accordion"
                                                         data-toggle="collapse"
-                                                        onClick={(e) => { e.preventDefault(); this.collapsesToggle(app.agent_name + "_" + index) }}
+                                                        onClick={(e) => { e.preventDefault(); this.collapsesToggle(app.agent_name + "_" + index, app) }}
                                                     >
                                                         <p>
                                                             Agent Name: <strong>{app.agent_name}</strong>
@@ -306,8 +351,13 @@ class Rejected extends React.Component {
                                                                 <Label  >Appointment Date/Time: </Label>
 
                                                                 <ReactDatetime
-                                                                    // timeConstraints={{ hours: { min: 9, max: 18, step: 1 }, minutes: { step: 15 } }}
-                                                                    timeConstraints={{ minutes: { step: 15 } }}
+                                                                    isValidDate = {(current) => {
+                                                                        let x = new Date(current);
+                                                                        let now = new Date()
+                                                                        let nowAnd3Days = new Date(now.getTime() + (4* 24*60*60*1000))
+                                                                        return x < nowAnd3Days && x > now 
+                                                                      }}
+                                                                      timeConstraints={{ hours: { min: 9, max: 18, step: 1 }, minutes: { step: 15 } }}
                                                                     inputProps={{
                                                                         className: "form-control primary",
                                                                         placeholder: "Appointment date/time",
@@ -347,6 +397,7 @@ class Rejected extends React.Component {
                                                                     options={this.state.departments}
                                                                     placeholder="Department"
                                                                 /><br />
+                                                                <Label>Scenario</Label>
                                                                 <Select
                                                                     className="react-select primary"
                                                                     classNamePrefix="react-select"
@@ -356,6 +407,7 @@ class Rejected extends React.Component {
                                                                     options={this.state.scenarios}
                                                                     placeholder="Scenario"
                                                                 /><br />
+                                                                <Label>Source</Label>
                                                                 <Select
                                                                     className="react-select primary"
                                                                     classNamePrefix="react-select"
@@ -371,7 +423,9 @@ class Rejected extends React.Component {
 
                                                         <Row>
                                                             <Col sm="12">
-                                                                <Button color="success" className="float-right" disabled={this.state.loading ||
+                                                                <Button color="success" className="float-right" disabled={
+                                                                    !this.isValidDate(this.state.fixed_date) ||
+                                                                    this.state.loading ||
                                                                     this.state.fixed_customer_first_name.length === 0 ||
                                                                     this.state.fixed_customer_last_name.length === 0 ||
                                                                     this.state.fixed_customer_phone.length != 10 ||
