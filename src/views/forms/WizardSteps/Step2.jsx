@@ -38,7 +38,7 @@ class CreateAppointment extends React.Component {
       dealership: null,
       department: null,
       scenario: null,
-      date: new Date().addHours(4).setMinutes(0),
+      date: new Date().addHours(24).setHours(9,30),
       check: "none",
       source: null,
       dealerships:[]
@@ -62,15 +62,38 @@ class CreateAppointment extends React.Component {
   }
   
   isValidated(){
-    console.log(this.state.dealership)
+    if(this.state.date == "Invalid Date"){
+      return false
+    }
+    if (this.state.date < (new Date().getTime() + (2*3600*1000))){
+      return false
+    }
+    if (this.state.date > (new Date().getTime() + (4*24* 3600*1000))){
+      return false
+    }
+    let dup = new Date(this.state.date)
+    dup.setHours(9,30)
+    if(dup.getTime() > new Date(this.state.date).getTime()){
+      console.log("1")
+      return false
+    }
+    dup.setHours(18,30)
+    if(dup.getTime() < new Date(this.state.date).getTime()){
+      console.log("12")
+      return false
+    }
+    
+    
     if(this.state.dealership == undefined ||
       this.state.department == undefined ||
       this.state.scenario == undefined)
       return false;
+      
     if(this.state.dealership.label.length > 0 && 
       this.state.department.label.length > 0 &&
       this.state.scenario.label.length > 0)
       return true;
+    
     
   }
   
@@ -88,8 +111,15 @@ class CreateAppointment extends React.Component {
                 <FormGroup>
 
                   <ReactDatetime
-                    // timeConstraints={{ hours: { min: 9, max: 18, step: 1 }, minutes: { step: 15 } }}
-                    timeConstraints={{  minutes: { step: 15 } }}
+                  // input={false}
+                    isValidDate = {(current) => {
+                      let x = new Date(current);
+                      let now = new Date()
+                      let nowAnd3Days = new Date(now.getTime() + (4* 24*60*60*1000))
+                      return x < nowAnd3Days && x > now 
+                    }}
+                    timeConstraints={{ hours: { min: 9, max: 18, step: 1 }, minutes: { step: 15 } }}
+                    // timeConstraints={{  minutes: { step: 15 } }}
                     inputProps={{
                       className: "form-control",
                       placeholder: "Appointment date/time",

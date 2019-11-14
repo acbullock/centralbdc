@@ -421,6 +421,7 @@ class Users extends React.Component {
                                                             <p>{a.email}</p>
                                                             <p>{a.phone}</p>
                                                             <p>{a.team}</p>
+                                                            <p>Total Number of Appointmnents (Pending + Approved): {a.appointments.length}</p>
                                                             <i className="tim-icons icon-minimal-down" />
                                                             
                                                         </a>
