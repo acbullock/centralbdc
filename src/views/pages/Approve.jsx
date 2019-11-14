@@ -119,8 +119,8 @@ class Approve extends React.Component {
         agent.appointments.push(new_app)
         await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
         await this.getPendingAppointments()
-        await this.sendText(appointment)
-        await this.sendCustText(appointment)
+        // await this.sendText(appointment)
+        // await this.sendCustText(appointment)
         this.setState({loading: false})
     }
     async rejectAppointment(appointment) {

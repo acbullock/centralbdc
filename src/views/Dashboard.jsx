@@ -99,9 +99,8 @@ class Dashboard extends React.Component {
   async componentDidMount() {
     this.setState({ loading: true })
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    this.setState({ user });
     let agents = await this.props.mongo.db.collection("agents")
-    this.setState({ agents: agents })
+    this.setState({ user, agents: agents })
     let agent = await agents.findOne({ userId: user.userId })
     this.setState({ agent, isAdmin: agent.account_type === "admin" })
     await this.getAppointmentData()

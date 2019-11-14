@@ -45,9 +45,11 @@ class Admin extends React.Component {
       isAdmin: false,
       agent: {}
     };
+    this._isMounted = false
     // console.log(props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo)
   }
   async componentWillMount() {
+    
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
     if(user.userId == undefined){
       this.props.history.push("/auth/login")
@@ -55,6 +57,7 @@ class Admin extends React.Component {
     }
     let agents = await this.props.mongo.getCollection("agents")
     let agent = await agents.findOne({userId: user.userId})
+    
     this.setState({agent, isAdmin: agent.account_type === "admin"})
     
     if (navigator.platform.indexOf("Win") > -1) {
@@ -67,15 +70,22 @@ class Admin extends React.Component {
       }
     }
     window.addEventListener("scroll", this.showNavbarButton);
-    
+    if(agent.isActive === false){
+      this.props.history.push("/auth/login")
+      return;
+    }
   }
   componentWillUnmount() {
+    this._isMounted = false;
     if (navigator.platform.indexOf("Win") > -1) {
       ps.destroy();
       document.documentElement.className += " perfect-scrollbar-off";
       document.documentElement.classList.remove("perfect-scrollbar-on");
     }
     window.removeEventListener("scroll", this.showNavbarButton);
+  }
+  componentDidMount(){
+    this._isMounted = true;
   }
   componentDidUpdate(e) {
     if (e.location.pathname !== e.history.location.pathname) {
@@ -96,16 +106,17 @@ class Admin extends React.Component {
       document.scrollingElement.scrollTop > 50 ||
       this.refs.mainPanel.scrollTop > 50
     ) {
-      this.setState({ opacity: 1 });
+      this._isMounted && this.setState({ opacity: 1 });
     } else if (
       document.documentElement.scrollTop <= 50 ||
       document.scrollingElement.scrollTop <= 50 ||
       this.refs.mainPanel.scrollTop <= 50
     ) {
-      this.setState({ opacity: 0 });
+      this._isMounted && this.setState({ opacity: 0 });
     }
   };
   getRoutes = routes => {
+    
     return routes.map((prop, key) => {
       if (prop.collapse) {
         return this.getRoutes(prop.views);
@@ -147,15 +158,15 @@ class Admin extends React.Component {
     return activeRoute;
   };
   handleActiveClick = color => {
-    this.setState({ activeColor: color });
+    this._isMounted && this.setState({ activeColor: color });
   };
   handleMiniClick = () => {
     let notifyMessage = "Sidebar mini ";
     if (document.body.classList.contains("sidebar-mini")) {
-      this.setState({ sidebarMini: false });
+      this._isMounted && this.setState({ sidebarMini: false });
       notifyMessage += "deactivated...";
     } else {
-      this.setState({ sidebarMini: true });
+      this._isMounted && this.setState({ sidebarMini: true });
       notifyMessage += "activated...";
     }
     let options = {};
@@ -170,13 +181,13 @@ class Admin extends React.Component {
     document.body.classList.toggle("sidebar-mini");
   };
   toggleSidebar = () => {
-    this.setState({
+    this._isMounted && this.setState({
       sidebarOpened: !this.state.sidebarOpened
     });
     document.documentElement.classList.toggle("nav-open");
   };
   closeSidebar = () => {
-    this.setState({
+    this._isMounted && this.setState({
       sidebarOpened: false
     });
     document.documentElement.classList.remove("nav-open");
@@ -237,7 +248,7 @@ class Admin extends React.Component {
           handleMiniClick={this.handleMiniClick}
         /> */}
       </div>
-    );
+    )
   }
 }
 
