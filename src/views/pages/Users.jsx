@@ -188,7 +188,7 @@ class Users extends React.Component {
                                     </Button>
                                     <Modal
                                         className="modal-login"
-                                        modalClassName="modal-primary"
+                                        modalClassName="modal-secondary"
                                         isOpen={this.state.addUserModal}
                                         toggle={this.addModalToggle}
                                     >
@@ -418,7 +418,9 @@ class Users extends React.Component {
                                                             <p>{a.name}</p>
                                                             <p>{a.email}</p>
                                                             <p>{a.phone}</p>
+                                                            <p>{a.team}</p>
                                                             <i className="tim-icons icon-minimal-down" />
+                                                            <hr />
                                                         </a>
                                                     </CardHeader>
                                                     <Collapse
@@ -432,13 +434,13 @@ class Users extends React.Component {
                                                             <p><strong>Account Type: </strong>{a.account_type}</p>
                                                             <p><strong>Approver: </strong>{a.isApprover ? "User IS an approver" : "User IS NOT an approver"}</p>
                                                             <p><strong>Active: </strong>{a.isActive ? "User IS active" : "User IS NOT active"}</p>
-                                                            <Button color="info" disabled={this.state.loading} onClick={() => this.editModalToggle(a)}>
+                                                            <Button color="primary" disabled={this.state.loading} onClick={() => this.editModalToggle(a)}>
                                                                 <i className="nc-icon nc-ruler-pencil" />
                                                                 Edit User
                                                             </Button>
                                                             <Modal isOpen={this.state.editUserModal} toggle={(e) => this.editModalToggle(a || { name: "", phone: "", account_type: "agent", isActive: false, email: "", team: "", isApprover: false, editID: null })}>
                                                                 <div className="modal-header">
-                                                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.editModalToggle}>
+                                                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={(e)=>this.editModalToggle({ name: "", phone: "", account_type: "agent", isActive: false, email: "", team: "", isApprover: false, editID: null })}>
                                                                         <i className="tim-icons icon-simple-remove"></i>
                                                                     </button>
                                                                     <h4 className="modal-title">Edit User</h4>
@@ -469,7 +471,7 @@ class Users extends React.Component {
 
                                                                                 <label className="form-check-label">
                                                                                     <Input className="form-check-input" type="checkbox" checked={this.state.editIsAdmin} onChange={(e) => { this.setState({ editIsAdmin: !this.state.editIsAdmin }) }} />
-                                                                                        Admin User
+                                                                                    Admin User
                                                                                         <span className="form-check-sign">
                                                                                         <span className="check"></span>
                                                                                     </span>
@@ -479,7 +481,7 @@ class Users extends React.Component {
 
                                                                                 <label className="form-check-label">
                                                                                     <Input className="form-check-input" type="checkbox" checked={this.state.editIsApprover} onChange={(e) => { this.setState({ editIsAdmin: !this.state.editIsAdmin }) }} />
-                                                                                        Approver
+                                                                                    Approver
                                                                                         <span className="form-check-sign">
                                                                                         <span className="check"></span>
                                                                                     </span>
@@ -488,8 +490,8 @@ class Users extends React.Component {
                                                                             <div className="form-check">
 
                                                                                 <label className="form-check-label">
-                                                                                    <Input className="form-check-input" type="checkbox" checked={this.state.editIsActive}  onChange={(e)=>{this.setState({editIsActive: !this.state.editIsActive})}}/>
-                                                                                        Active
+                                                                                    <Input className="form-check-input" type="checkbox" checked={this.state.editIsActive} onChange={(e) => { this.setState({ editIsActive: !this.state.editIsActive }) }} />
+                                                                                    Active
                                                                                         <span className="form-check-sign">
                                                                                         <span className="check"></span>
                                                                                     </span>
@@ -499,33 +501,6 @@ class Users extends React.Component {
 
                                                                         </div>
                                                                     </Form>
-
-                                                                    {/* <label>Full Name:<br/>
-                                                                    </label>
-                                                                    <label>Phone:<br/>
-                                                                    <input placeholder="Edit phone number" type="tel" onChange={(e)=>{this.setState({editPhone: e.target.value})}}></input>
-                                                                    </label>
-                                                                    <label>Email:<br/>
-                                                                    <input placeholder="Edit email" type="email" onChange={(e)=>{this.setState({editEmail: e.target.value})}}></input>
-                                                                    </label>
-                                                                    <label>Team:<br/>
-                                                                    <input placeholder="Edit team" type="text" onChange={(e)=>{this.setState({editTeam: e.target.value})}}></input>
-                                                                    </label>
-                                                                    <label>Admin:<br/>
-                                                                    <input placeholder="Edit Admin" type="checkbox" checked={this.state.editIsAdmin} onChange={(e)=>{this.setState({editIsAdmin: !this.state.editIsAdmin})}}></input>
-                                                                    </label>
-                                                                    <label>Approver:<br/>
-                                                                    <input placeholder="Edit Approver" type="checkbox" checked={this.state.editIsApprover} onChange={(e)=>{this.setState({editIsApprover: !this.state.editIsApprover})}}></input>
-                                                                    </label>
-                                                                    <label>Active:<br/>
-                                                                    <input placeholder="Edit Active" type="checkbox" checked={this.state.editIsActive} onChange={(e)=>{this.setState({editIsActive: !this.state.editIsActive})}}></input>
-                                                                    </label>
-                                                                    <p>Name: {this.state.editFullName}</p>
-                                                                    <p>Phone: {this.state.editPhone}</p>
-                                                                    <p>Email: {this.state.editEmail}</p>
-                                                                    <p>Admin: {this.state.editIsAdmin.toString()}</p>
-                                                                    <p>Approver: {this.state.editIsApprover.toString()}</p>
-                                                                    <p>Team: {this.state.editTeam}</p> */}
                                                                 </ModalBody>
                                                                 <ModalFooter>
                                                                     <Button color="secondary" onClick={(e) => this.editModalToggle({ name: "", phone: "", account_type: "agent", isActive: false, email: "", team: "", isApprover: false, editID: null })}>
@@ -543,10 +518,10 @@ class Users extends React.Component {
                                                                     </Button>
                                                                 </ModalFooter>
                                                             </Modal>
-                                                            <Button color="danger" onClick={(e) => this.handleRemove(a)} disabled={!a.isActive || this.state.loading} >
+                                                            {/* <Button onClick={(e) => this.handleRemove(a)} disabled={!a.isActive || this.state.loading} >
                                                                 <i className="tim-icons icon-simple-remove" />
                                                                 Make User Inactive
-                                                    </Button>
+                                                            </Button> */}
 
                                                         </CardBody>
                                                     </Collapse>
