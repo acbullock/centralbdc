@@ -41,12 +41,16 @@ class Approve extends React.Component {
             openedCollapses: [],
             isApprover: false,
             loading: true,
-            rejected_reason: ""
+            rejected_reason: "",
+            twil: {}
         };
 
     }
     async componentWillMount() {
         this.setState({ loading: true })
+        let twil = await this.props.mongo.getCollection("utils")
+        twil =  await twil.find().toArray()
+        await this.setState({twil: twil[0].twilio})
         let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agent = await this.props.mongo.getCollection("agents")
         agent = await agent.findOne({ userId: currUser.userId })
@@ -156,7 +160,7 @@ class Approve extends React.Component {
         // data.set("To", "+15614260916")
         data.set("To", "+19548646379")
         data.set("From", '+19542450865')
-        axios.post("https://api.twilio.com/2010-04-01/Accounts/ACd6a8a602e3ce9b28abe0a3948b3e7a26/Messages.json", data, {
+        axios.post(`https://api.twilio.com/2010-04-01/Accounts/${this.state.twil.AccountSID}/Messages.json`, data, {
             headers: {
                 "Content-Type": "multipart/form-data; boundary",
                 "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
@@ -167,12 +171,13 @@ class Approve extends React.Component {
         }).catch((err) => { this.setState({ loading: false }); alert("Error sending internal text."); console.log(err)})
     }
     async sendCustText(appointment) {
+        
         let data = new FormData();
         // await this.setState({loading: true})
         data.set("Body", appointment.customer_msg)
         data.set("To", `+1${appointment.customer_phone}`)
         data.set("From", '+19542450865')
-        axios.post("https://api.twilio.com/2010-04-01/Accounts/ACd6a8a602e3ce9b28abe0a3948b3e7a26/Messages.json", data, {
+        axios.post(`https://api.twilio.com/2010-04-01/Accounts/${this.state.twil.AccountSID}/Messages.json`, data, {
             headers: {
                 "Content-Type": "multipart/form-data; boundary",
                 "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
