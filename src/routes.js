@@ -47,6 +47,7 @@ import Rejected from "./views/pages/Rejected.jsx"
 import AddDealership from "./views/pages/AddDealership"
 import RemoveDealership from "./views/pages/RemoveDealership"
 import Users from "./views/pages/Users.jsx"
+import Sources from "./views/pages/Sources.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -61,7 +62,7 @@ const routes = [
   },
   {
     collapse: true,
-    name: "Registration",
+    name: "Management",
     // rtlName: "صفحات",
     icon: "tim-icons icon-badge",
     state: "pagesCollapse",
@@ -128,6 +129,14 @@ const routes = [
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-single-02"
+      },
+      {
+        path: "/sources",
+        name: "Sources",
+        component: Sources,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-vector"
       }
       // {
       //   path: "/add_dealership",

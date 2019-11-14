@@ -41,13 +41,26 @@ class CreateAppointment extends React.Component {
       date: new Date().addHours(24).setHours(9,30),
       check: "none",
       source: null,
-      dealerships:[]
+      dealerships:[],
+      sources: []
     };
     
   }
   async componentWillMount(){
     let {mongo} = this.props.wizardData
     let dealerships = await mongo.getCollection("dealerships")
+    let sources = await mongo.getCollection("sources")
+    sources = await sources.find({}).toArray()
+    sources.sort((a,b)=>{
+      if(a.label < b.label){
+        return -1
+      }
+      if (a.label > b.label){
+        return 1
+      }
+      return 0
+    })
+    
     dealerships = await dealerships.find({}).toArray()
     dealerships.sort((a,b)=>{
       if(a.label < b.label){
@@ -58,7 +71,7 @@ class CreateAppointment extends React.Component {
       }
       return 0
     })
-    this.setState({dealerships})
+    this.setState({dealerships, sources})
   }
   
   isValidated(){
@@ -165,7 +178,8 @@ class CreateAppointment extends React.Component {
                     name="source"
                     value={this.state.source}
                     onChange={value=> this.setState({source: value})}
-                    options={[{value: "val2", label:"Hyundai USA"}, {value: "val1", label:"Data-Mining"}, {value:"", label:"None"}]}
+                    // options={[{value: "val2", label:"Hyundai USA"}, {value: "val1", label:"Data-Mining"}, {value:"", label:"None"}]}
+                    options={this.state.sources}
                     placeholder="Source (optional)"
                   />
                 </FormGroup>
