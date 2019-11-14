@@ -406,7 +406,9 @@ class Users extends React.Component {
                                     {this.state.agents.map((a, i) => {
                                         return (
                                             <div key={a.name}>
+                                                <hr />
                                                 <Card className="card-plain">
+                                                
                                                     <CardHeader role="tab">
                                                         <a
                                                             aria-expanded={this.state.openedCollapses.includes(a.name)}
@@ -420,7 +422,7 @@ class Users extends React.Component {
                                                             <p>{a.phone}</p>
                                                             <p>{a.team}</p>
                                                             <i className="tim-icons icon-minimal-down" />
-                                                            <hr />
+                                                            
                                                         </a>
                                                     </CardHeader>
                                                     <Collapse
@@ -460,7 +462,7 @@ class Users extends React.Component {
                                                                             <Label>
                                                                                 Email:
                                                                                 </Label>
-                                                                            <Input placeholder="Edit email" type="email" value={this.state.editEmail} onChange={(e) => { this.setState({ editEmail: e.target.value }) }}></Input>
+                                                                            <Input placeholder="Edit email" type="email" value={this.state.editEmail} ></Input>
 
                                                                             <Label>
                                                                                 Team:
@@ -525,7 +527,7 @@ class Users extends React.Component {
 
                                                         </CardBody>
                                                     </Collapse>
-                                                </Card><br /></div>
+                                                </Card><hr /><br /></div>
                                         );
                                     })}
 
