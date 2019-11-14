@@ -42,10 +42,8 @@ import Register from "./views/pages/Register.jsx";
 import Login from "./views/pages/Login.jsx";
 import CreateAppointment from "./views/pages/CreateAppointment.jsx"
 import Approve from "./views/pages/Approve.jsx"
-import RemoveUser from "./views/pages/RemoveUser.jsx"
 import Rejected from "./views/pages/Rejected.jsx"
-import AddDealership from "./views/pages/AddDealership"
-import RemoveDealership from "./views/pages/RemoveDealership"
+import Dealerships from "./views/pages/Dealerships.jsx"
 import Users from "./views/pages/Users.jsx"
 import Sources from "./views/pages/Sources.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
@@ -103,25 +101,6 @@ const routes = [
         component: Login,
         layout: "/auth",
       },
-      // {
-      //   path: "/register",
-      //   name: "Add User",
-      //   rtlName: "تسجيل",
-      //   mini: "R",
-      //   rtlMini: "صع",
-      //   component: Register,
-      //   layout: "/admin",
-      //   adminOnly: true,
-      //   icon: "tim-icons icon-simple-add",
-      // },
-      // {
-      //   path: "/remove_user",
-      //   name: "Remove User",
-      //   component: RemoveUser,
-      //   layout: "/admin",
-      //   adminOnly: true,
-      //   icon: "tim-icons icon-simple-remove",
-      // },
       {
         path: "/users",
         name: "Users",
@@ -131,29 +110,22 @@ const routes = [
         icon: "tim-icons icon-single-02"
       },
       {
+        path: "/dealerships",
+        name: "Dealerships",
+        component: Dealerships,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-delivery-fast"
+      },
+      {
         path: "/sources",
         name: "Sources",
         component: Sources,
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-vector"
-      }
-      // {
-      //   path: "/add_dealership",
-      //   name: "Add Dealership",
-      //   component: AddDealership,
-      //   layout: "/admin",
-      //   adminOnly: true,
-      //   icon: "tim-icons icon-delivery-fast",
-      // },
-      // {
-      //   path: "/remove_dealership",
-      //   name: "Remove Dealership",
-      //   component: RemoveDealership,
-      //   layout: "/admin",
-      //   adminOnly: true,
-      //   icon: "tim-icons icon-simple-remove",
-      // },
+      },
+      
       // {
       //   path: "/lock-screen",
       //   name: "Lock Screen",

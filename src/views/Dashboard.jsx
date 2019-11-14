@@ -255,10 +255,13 @@ class Dashboard extends React.Component {
           }
           let curr = new Date()
           curr.setHours(0, 0, 0, 0)
-          if (allAgents[a].appointments[b].verified.getTime() > curr.getTime() &&
+          if (allAgents[a].appointments[b].verified.getTime() >= curr.getTime() &&
             allAgents[a].appointments[b].verified.getTime() < (curr.getTime() + (24 * 3600 * 1000))) {
             user.count++;
+            console.log(allAgents[a].name)
+            console.log(new Date(allAgents[a].appointments[b].verified.getTime()))
           }
+          
 
 
 
@@ -334,7 +337,11 @@ class Dashboard extends React.Component {
   }
 
   render() {
+    if(this.state.loading){
+      return (<div className="content"><h1>Loading</h1></div>)
+    }
     return (
+
       <>
         <div className="content">
           <Row>

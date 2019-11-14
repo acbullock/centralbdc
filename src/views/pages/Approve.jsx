@@ -123,8 +123,8 @@ class Approve extends React.Component {
         agent.appointments.push(new_app)
         await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
         await this.getPendingAppointments()
-        // await this.sendText(appointment)
-        // await this.sendCustText(appointment)
+        await this.sendText(appointment)
+        await this.sendCustText(appointment)
         this.setState({loading: false})
     }
     async rejectAppointment(appointment) {
@@ -163,7 +163,7 @@ class Approve extends React.Component {
         axios.post(`https://api.twilio.com/2010-04-01/Accounts/${this.state.twil.AccountSID}/Messages.json`, data, {
             headers: {
                 "Content-Type": "multipart/form-data; boundary",
-                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
+                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjo5OWYwMzQxMTg3ZTFjOTVhODQxNTk0N2VhZDliOWNhYQ=="
             }
         }).then((res) => {
             this.setState({ loading: false })
@@ -180,7 +180,7 @@ class Approve extends React.Component {
         axios.post(`https://api.twilio.com/2010-04-01/Accounts/${this.state.twil.AccountSID}/Messages.json`, data, {
             headers: {
                 "Content-Type": "multipart/form-data; boundary",
-                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjowZTM2MzVhOTFjMTczYTZjZDc2OTI3NjFkZTRiMTY5Ng=="
+                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjo5OWYwMzQxMTg3ZTFjOTVhODQxNTk0N2VhZDliOWNhYQ=="
             }
         }).then((res) => {
             this.setState({ loading: false })
