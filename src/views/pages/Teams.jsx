@@ -22,36 +22,36 @@ import {
 
 import classnames from "classnames";
 
-class Sources extends React.Component {
+class Teams extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
             modalDemo: false,
             agents: [],
-            sources: [],
+            teams: [],
             openedCollapses: [],
-            addSourceModal: false,
-            editSourceModal: false,
-            editSourceValue: "",
-            newSourceName: "",
+            addTeamModal: false,
+            editTeamModal: false,
+            editTeamValue: "",
+            newTeamName: "",
             loading: false,
             err: {
                 message: ""
             },
-            editSourceName: "",
+            editTeamName: "",
         }
-        this.editSource = this.editSource.bind(this)
+        this.editTeam = this.editTeam.bind(this)
     }
     addModalToggle = () => {
-        this.setState({ addSourceModal: !this.state.addSourceModal })
+        this.setState({ addTeamModal: !this.state.addTeamModal })
     }
     editModalToggle = (s) => {
         this.setState({
-            editSourceName: s.label,
-            editSourceValue: s.value
+            editTeamName: s.label,
+            editTeamValue: s.value
         })
-        this.setState({ editSourceModal: !this.state.editSourceModal })
-        console.log(this.state.editSourceModal)
+        this.setState({ editTeamModal: !this.state.editTeamModal })
+        console.log(this.state.editTeamModal)
     }
     async componentWillMount() {
         // let x = await this.props.mongo.db.getUsers()
@@ -66,19 +66,26 @@ class Sources extends React.Component {
 
             this.props.history.push("/admin/dashboard")
         }
-        let sources = await this.props.mongo.getCollection("sources")
-        sources = await sources.find().toArray()
-        this.setState({ sources })
-        await this.getSources()
+        let teams = await this.props.mongo.getCollection("teams")
+        teams = await teams.find().toArray()
+        this.setState({ teams })
+        await this.getTeams()
     }
     async componentWillUnmount() {
         // document.body.classList.toggle("white-content");
     }
-    async getSources() {
+    async getTeams() {
         this.setState({ loading: true })
-        let sources = await this.props.mongo.getCollection("sources")
-        sources = await sources.find().toArray()
-        await this.setState({ sources, loading: false })
+        let teams = await this.props.mongo.getCollection("teams")
+        teams = await teams.find().toArray()
+        teams.sort((a,b)=>{
+            if(a.label < b.label)
+                return -1;
+            if(b.label < a.label)
+                return 1
+            return 0
+        })
+        await this.setState({ teams, loading: false })
 
     }
     async handleRemove(agent) {
@@ -89,32 +96,32 @@ class Sources extends React.Component {
         await agents.findOneAndUpdate({ email: agent.email }, newAgent)
         this.setState({ loading: false })
     }
-    async editSource() {
+    async editTeam() {
         
         this.setState({loading: true})
-        let update = await this.props.mongo.getCollection("sources")
-        await update.findOneAndUpdate({_id: this.state.editSourceValue}, {value: this.state.editSourceValue, label: this.state.editSourceName})
-        await this.getSources()
+        let update = await this.props.mongo.getCollection("teams")
+        await update.findOneAndUpdate({_id: this.state.editTeamValue}, {value: this.state.editTeamValue, label: this.state.editTeamName})
+        await this.getTeams()
         await this.editModalToggle({value:"", label:""})
         this.setState({loading:false})
     }
     
-    addSource = async () => {
+    addTeam = async () => {
 
         this.setState({ loading: true, err: { message: "" } })
-        let sources = await this.props.mongo.getCollection("sources")
-        let x = await sources.insertOne({
-            label: this.state.newSourceName,
+        let teams = await this.props.mongo.getCollection("teams")
+        let x = await teams.insertOne({
+            label: this.state.newTeamName,
             value: ""
         })
-        await sources.findOneAndUpdate({ _id: x.insertedId }, {
-            label: this.state.newSourceName,
+        await teams.findOneAndUpdate({ _id: x.insertedId }, {
+            label: this.state.newTeamName,
             value: x.insertedId
         })
         this.addModalToggle()
-        sources = await this.props.mongo.getCollection("sources")
-        sources = await sources.find().toArray()
-        this.setState({ sources })
+        teams = await this.props.mongo.getCollection("teams")
+        teams = await teams.find().toArray()
+        this.setState({ teams })
         this.setState({ loading: false })
     }
     render() {
@@ -125,22 +132,22 @@ class Sources extends React.Component {
                         <Card>
                             <CardHeader>
                                 <CardTitle>
-                                    <h1>Source Management</h1>
+                                    <h1>Team Management</h1>
                                     <Button
                                         className="btn-round"
                                         color="primary"
-                                        data-target="#addSourceModal"
+                                        data-target="#addTeamModal"
                                         data-toggle="modal"
                                         onClick={this.addModalToggle}
                                         disabled={this.state.loading}
                                     >
                                         <i className="nc-icon nc-lock-circle-open" />
-                                        Add Source
+                                        Add Team
                                     </Button>
                                     <Modal
                                         className="modal-login"
                                         modalClassName="modal-secondary"
-                                        isOpen={this.state.addSourceModal}
+                                        isOpen={this.state.addTeamModal}
                                         toggle={this.addModalToggle}
                                     >
                                         <Card className="card-login card-plain" >
@@ -175,11 +182,11 @@ class Sources extends React.Component {
                                                             </InputGroupAddon>
                                                             <Input
 
-                                                                placeholder="Source Name"
+                                                                placeholder="Team Name"
                                                                 type="text"
                                                                 onFocus={e => this.setState({ sourceNameFocus: true })}
                                                                 onBlur={e => this.setState({ sourceNameFocus: false })}
-                                                                onChange={e => this.setState({ newSourceName: e.target.value })}
+                                                                onChange={e => this.setState({ newTeamName: e.target.value })}
                                                             />
                                                         </InputGroup>
 
@@ -192,14 +199,14 @@ class Sources extends React.Component {
                                                     block
                                                     className="btn-neutral btn-round"
                                                     href="#pablo"
-                                                    onClick={this.addSource}
+                                                    onClick={this.addTeam}
                                                     size="lg"
                                                     disabled={
                                                         this.state.loading ||
-                                                        this.state.newSourceName.length === 0
+                                                        this.state.newTeamName.length === 0
                                                     }
                                                 >
-                                                    Create Source
+                                                    Create Team
                                         </Button>
 
                                             </div>
@@ -218,7 +225,7 @@ class Sources extends React.Component {
                                     className="card-collapse"
                                     id="accordian"
                                     role="tablist">
-                                    {this.state.sources.map((s, i) => {
+                                    {this.state.teams.map((s, i) => {
                                         if (s.label === "None") {
                                             return null
                                         }
@@ -246,20 +253,20 @@ class Sources extends React.Component {
                                                     </Button> */}
 
 
-                                                    <Modal isOpen={this.state.editSourceModal} toggle={(e) => this.editModalToggle(s || {value:"", label: "" })}>
+                                                    <Modal isOpen={this.state.editTeamModal} toggle={(e) => this.editModalToggle(s || {value:"", label: "" })}>
                                                         <div className="modal-header">
                                                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={(e) => this.editModalToggle({ value: "", label: "" })}>
                                                                 <i className="tim-icons icon-simple-remove"></i>
                                                             </button>
-                                                            <h4 className="modal-title">Update Source</h4>
+                                                            <h4 className="modal-title">Update Team</h4>
                                                         </div>
                                                         <ModalBody >
                                                             <Form action="" className="form" method="">
                                                                 <div className="card-content">
                                                                     <Label >
-                                                                        Source Name:
+                                                                        Team Name:
                                                                     </Label>
-                                                                    <Input placeholder="Edit source" type="text" value={this.state.editSourceName} onChange={(e) => { this.setState({ editSourceName: e.target.value }) }}></Input>
+                                                                    <Input placeholder="Edit source" type="text" value={this.state.editTeamName} onChange={(e) => { this.setState({ editTeamName: e.target.value }) }}></Input>
 
                                                                 </div>
                                                             </Form>
@@ -269,23 +276,24 @@ class Sources extends React.Component {
                                                             <Button color="secondary" onClick={(e) => this.editModalToggle({value:"", label: "" })}>
                                                                 Close
                                                                     </Button>
-                                                            <Button color="primary" onClick={this.editSource} disabled={
+                                                                    <Button className="btn btn-round" color="danger" disabled={this.state.loading} onClick={async (e) => {
+                                                                        this.setState({loading: true})
+                                                                       let teams =  await this.props.mongo.getCollection("teams");
+                                                                       await teams.findOneAndDelete({_id: this.state.editTeamValue})
+                                                                       await this.editModalToggle({label: "", value: ""})
+                                                                       await this.getTeams()
+                                                                       this.setState({loading: false})
+                                                                    }}>
+                                                                 Remove Team
+
+                                                            </Button>
+                                                            <Button color="primary" onClick={this.editTeam} disabled={
                                                                 this.state.loading ||
-                                                                this.state.editSourceName.length == 0
+                                                                this.state.editTeamName.length == 0
                                                             }>
                                                              Save changes
                                                                     </Button>
-                                                                    <Button className="btn btn-round" color="danger" disabled={this.state.loading} onClick={async (e) => {
-                                                                        this.setState({loading: true})
-                                                                       let sources =  await this.props.mongo.getCollection("sources");
-                                                                       await sources.findOneAndDelete({_id: this.state.editSourceValue})
-                                                                       await this.editModalToggle({label: "", value: ""})
-                                                                       await this.getSources()
-                                                                       this.setState({loading: false})
-                                                                    }}>
-                                                                <i className="tim-icons icon-simple-remove" />
-
-                                                            </Button>
+                                                                    
                                                                     
                                                         </ModalFooter>
                                                     </Modal>
@@ -304,4 +312,4 @@ class Sources extends React.Component {
     }
 }
 
-export default Sources;
+export default Teams;

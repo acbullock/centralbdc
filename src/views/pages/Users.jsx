@@ -17,9 +17,10 @@ import {
     ModalBody,
     ModalFooter,
     Input,
+    // Select
     // UncontrolledTooltip
 } from "reactstrap";
-
+import Select from 'react-select'
 import classnames from "classnames";
 
 class Users extends React.Component {
@@ -50,11 +51,18 @@ class Users extends React.Component {
             editIsApprover: "",
             editTeam: "",
             editIsActive: "",
-            editID: null
+            editID: null,
+            teams: []
         }
     }
     addModalToggle = () => {
         this.setState({ addUserModal: !this.state.addUserModal })
+    }
+    getTeams = async (id) => {
+        this.setState({ loading: true })
+        let t = await this.props.mongo.getCollection("teams")
+        t = await t.find().toArray()
+        await this.setState({ teams: t, loading: false })
     }
     editModalToggle = (a) => {
         this.setState({
@@ -68,7 +76,7 @@ class Users extends React.Component {
             editTeam: a.team
         })
         this.setState({ editUserModal: !this.state.editUserModal })
-        console.log(this.state.editUserModal)
+        // console.log(this.state.editUserModal)
     }
     async componentWillMount() {
         // let x = await this.props.mongo.db.getUsers()
@@ -85,7 +93,9 @@ class Users extends React.Component {
         }
         // let agent = await agents.findOne({userId: })
         // document.body.classList.toggle("white-content");
+        await this.getTeams()
         await this.getAgents()
+
     }
     async componentWillUnmount() {
         // document.body.classList.toggle("white-content");
@@ -105,7 +115,7 @@ class Users extends React.Component {
         await agents.findOneAndUpdate({ email: agent.email }, newAgent)
         this.setState({ loading: false })
     }
-    async editUser(agent, index) {
+    async editUser() {
         this.setState({ loading: true })
         let x = await this.props.mongo.getCollection("agents")
         let currCopy = await x.findOne({ _id: this.state.editID })
@@ -119,7 +129,7 @@ class Users extends React.Component {
             isActive: this.state.editIsActive
         }
         currCopy = Object.assign(currCopy, merge)
-        console.log(currCopy)
+        // console.log(currCopy)
         x = await x.findOneAndUpdate({ _id: this.state.editID }, currCopy)
         await this.editModalToggle({ name: "", phone: "", account_type: "agent", isActive: false, email: "", team: "", isApprover: false, editID: null })
         await this.getAgents()
@@ -267,24 +277,20 @@ class Users extends React.Component {
                                                                 onChange={e => this.setState({ newEmail: e.target.value.toLowerCase() })}
                                                             />
                                                         </InputGroup>
-                                                        <InputGroup
-                                                            className={classnames("no-border form-control-lg", {
-                                                                "input-group-focus": this.state.teamNameFocus
-                                                            })}
-                                                        >
-                                                            <InputGroupAddon addonType="prepend">
-                                                                <InputGroupText>
-                                                                    <i className="tim-icons icon-trophy" />
-                                                                </InputGroupText>
-                                                            </InputGroupAddon>
-                                                            <Input
-                                                                placeholder="Team Name"
-                                                                type="text"
-                                                                onFocus={e => this.setState({ teamNameFocus: true })}
-                                                                onBlur={e => this.setState({ teamNameFocus: false })}
-                                                                onChange={e => this.setState({ newTeam: e.target.value })}
-                                                            />
-                                                        </InputGroup>
+
+
+                                                        <Select
+                                                            className="react-select secondary"
+                                                            // className={classnames(this.state.firstnameState) primary}
+                                                            classNamePrefix="react-select"
+                                                            name="team"
+                                                            value={this.state.newTeam}
+                                                            onChange={value => { console.log(value); this.setState({ newTeam: value }) }}
+                                                            options={this.state.teams}
+                                                            placeholder="Team Name"
+                                                        />
+                                                        <br />
+
 
                                                         <InputGroup
                                                             className={classnames("no-border form-control-lg", {
@@ -404,11 +410,13 @@ class Users extends React.Component {
                                     id="accordian"
                                     role="tablist">
                                     {this.state.agents.map((a, i) => {
+
                                         return (
                                             <div key={a.name}>
+
                                                 <hr />
                                                 <Card className="card-plain">
-                                                
+
                                                     <CardHeader role="tab">
                                                         <a
                                                             aria-expanded={this.state.openedCollapses.includes(a.name)}
@@ -420,10 +428,10 @@ class Users extends React.Component {
                                                             <p>{a.name}</p>
                                                             <p>{a.email}</p>
                                                             <p>{a.phone}</p>
-                                                            <p>{a.team}</p>
+                                                            <p>{a.team.label}</p>
                                                             <p>Total Number of Appointmnents (Pending + Approved): {a.appointments.length}</p>
                                                             <i className="tim-icons icon-minimal-down" />
-                                                            
+
                                                         </a>
                                                     </CardHeader>
                                                     <Collapse
@@ -433,7 +441,8 @@ class Users extends React.Component {
                                                             <p><strong>Name:</strong> {a.name}</p>
                                                             <p><strong>Phone:</strong> {a.phone}</p>
                                                             <p><strong>Email:</strong> {a.email}</p>
-                                                            <p><strong>Team: </strong>{a.team}</p>
+
+                                                            <p><strong>Team: </strong> {a.team.label}</p>
                                                             <p><strong>Account Type: </strong>{a.account_type}</p>
                                                             <p><strong>Approver: </strong>{a.isApprover ? "User IS an approver" : "User IS NOT an approver"}</p>
                                                             <p><strong>Active: </strong>{a.isActive ? "User IS active" : "User IS NOT active"}</p>
@@ -443,7 +452,7 @@ class Users extends React.Component {
                                                             </Button>
                                                             <Modal isOpen={this.state.editUserModal} toggle={(e) => this.editModalToggle(a || { name: "", phone: "", account_type: "agent", isActive: false, email: "", team: "", isApprover: false, editID: null })}>
                                                                 <div className="modal-header">
-                                                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={(e)=>this.editModalToggle({ name: "", phone: "", account_type: "agent", isActive: false, email: "", team: "", isApprover: false, editID: null })}>
+                                                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={(e) => this.editModalToggle({ name: "", phone: "", account_type: "agent", isActive: false, email: "", team: "", isApprover: false, editID: null })}>
                                                                         <i className="tim-icons icon-simple-remove"></i>
                                                                     </button>
                                                                     <h4 className="modal-title">Edit User</h4>
@@ -467,9 +476,17 @@ class Users extends React.Component {
 
                                                                             <Label>
                                                                                 Team:
-                                                                                </Label>
-                                                                            <Input placeholder="Edit team" type="text" value={this.state.editTeam} onChange={(e) => { this.setState({ editTeam: e.target.value }) }}></Input>
-
+                                                                            </Label>
+                                                                            <Select
+                                                                                className="react-select secondary"
+                                                                                // className={classnames(this.state.firstnameState) primary}
+                                                                                classNamePrefix="react-select"
+                                                                                name="team"
+                                                                                value={this.state.editTeam}
+                                                                                onChange={value => {console.log(value); this.setState({editTeam:value})}}
+                                                                                options={this.state.teams}
+                                                                                placeholder="Team Name"
+                                                                            />
                                                                             <div className="form-check">
 
                                                                                 <label className="form-check-label">

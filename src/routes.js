@@ -46,6 +46,7 @@ import Rejected from "./views/pages/Rejected.jsx"
 import Dealerships from "./views/pages/Dealerships.jsx"
 import Users from "./views/pages/Users.jsx"
 import Sources from "./views/pages/Sources.jsx"
+import Teams from "./views/pages/Teams.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -125,7 +126,14 @@ const routes = [
         adminOnly: true,
         icon: "tim-icons icon-vector"
       },
-      
+      {
+        path: "/teams",
+        name: "Teams",
+        component: Teams,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-trophy"
+      },
       // {
       //   path: "/lock-screen",
       //   name: "Lock Screen",

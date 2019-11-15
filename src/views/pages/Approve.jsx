@@ -84,13 +84,15 @@ class Approve extends React.Component {
         let appointments = []
         //loop thru agents
         for (let agent in agents) {
+            console.log(agents[agent].team)
             let agent_name = agents[agent].name
             let agent_email = agents[agent].email
+            let agent_team = agents[agent].team.label
             for (let a in agents[agent].appointments) {
                 if (agents[agent].appointments[a].isPending === false) {
                     continue;
                 }
-                let newApp = { agent_name, agent_email }
+                let newApp = { agent_name, agent_email, agent_team }
                 newApp = Object.assign(newApp, agents[agent].appointments[a])
                 appointments.push(newApp)
             }
@@ -219,7 +221,9 @@ class Approve extends React.Component {
                                                         <p>
                                                             Agent Name: <strong>{app.agent_name}</strong>
                                                         </p>
-                                                        
+                                                        <p>
+                                                            Team Name: <strong>{app.agent_team}</strong>
+                                                        </p>
                                                         <p>Dealer Name: <strong>{app.dealership_name}</strong></p>
                                                         <p>Appointment Date: <strong>{new Date(app.appointment_date).toLocaleDateString() + " " + new Date(app.appointment_date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong></p>
                                                         <p>

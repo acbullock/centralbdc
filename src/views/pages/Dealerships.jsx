@@ -26,7 +26,19 @@ class Dealerships extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            
+         modalDemo: false,
+            agents: [],
+            sources: [],
+            openedCollapses: [],
+            addSourceModal: false,
+            editSourceModal: false,
+            editSourceValue: "",
+            newSourceName: "",
+            loading: false,
+            err: {
+                message: ""
+            },
+            editSourceName: "",   
         }
         
     }

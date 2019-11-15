@@ -316,7 +316,9 @@ class Rejected extends React.Component {
                                                         <p>
                                                             Agent Name: <strong>{app.agent_name}</strong>
                                                         </p>
-
+                                                        <p>
+                                                            Agent Team: <strong>{app.agent_team}</strong>
+                                                        </p>
                                                         <p>Dealer Name: <strong>{app.dealership_name}</strong></p>
                                                         <p>Appointment Date: <strong>{new Date(app.appointment_date).toLocaleDateString() + " " + new Date(app.appointment_date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong></p>
                                                         <p>

@@ -94,7 +94,6 @@ class CreateAppointment extends React.Component {
 
         let agentAppts = [];
         agent.appointments != undefined ? agentAppts = agent.appointments : agentAppts = []
-
         let new_app = {
             isPending: true,
             isRejected: false,
@@ -110,7 +109,8 @@ class CreateAppointment extends React.Component {
             dealership_department: appointment.appointment_department,
             dealership_scenario: appointment.appointment_scenario,
             internal_msg: messages.internal_message,
-            customer_msg: messages.customer_message
+            customer_msg: messages.customer_message,
+            agent_id: agent._id
         }
         agentAppts.push(new_app)
         agent.appointments = agentAppts

@@ -95,38 +95,50 @@ class Dashboard extends React.Component {
       isOld: true
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
+    
   }
+  _isMounted = false;
   async componentDidMount() {
-    this.setState({ loading: true })
-    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    let agents = await this.props.mongo.db.collection("agents")
-    this.setState({ user, agents: agents })
-    let agent = await agents.findOne({ userId: user.userId })
-    this.setState({ agent, isAdmin: agent.account_type === "admin" })
-    await this.getAppointmentData()
-    await this.getChartData()
-    await this.getTop5()
-    await this.isOld()
-    this.setState({ loading: false })
+    this._isMounted = true
+    this._isMounted && this.setState({ loading: true })
+    let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+    console.log(user.userId)
+    if(user.userId == undefined){
+      this.props.history.push("/auth/login")
+    }
+    let agents = this._isMounted &&  await this.props.mongo.db.collection("agents")
+    this._isMounted && this.setState({ user, agents: agents })
+    let agent = this._isMounted && await agents.findOne({ userId: user.userId })
+    this._isMounted && this.setState({ agent, isAdmin: agent.account_type === "admin" })
+    this._isMounted && await this.getAppointmentData()
+    this._isMounted && await this.getChartData()
+    this._isMounted && await this.getTop5()
+    this._isMounted && await this.isOld()
+    this._isMounted && this.setState({ loading: false })
   }
+  componentWillUnmount(){
+    this._isMounted = false
+  }
+
+
   isOld(){
-    this.setState({loading: true})
+    this._isMounted && this.setState({loading: true})
     let  time = this.state.mostRecent.time
     let twoHoursAgo = new Date(new Date().getTime() - (3600*1000 + 1800 * 1000))
     if(time.getTime() < twoHoursAgo.getTime()){
       
-      this.setState({isOld: true})
+      this._isMounted && this.setState({isOld: true})
     }
     else{
       
-       this.setState({isOld: false})
+      this._isMounted && this.setState({isOld: false})
     }
-    this.setState({loading: false})
+    this._isMounted && this.setState({loading: false})
   }
   async getChartData() {
     // let allAgents = []
-    this.setState({ loading: true })
-    let allAgents = await this.state.agents.find().toArray()
+    this._isMounted && this.setState({ loading: true })
+    let allAgents = this._isMounted && await this.state.agents.find().toArray()
     const data = (canvas) => {
       var ctx = canvas.getContext("2d");
 
@@ -234,12 +246,12 @@ class Dashboard extends React.Component {
 
     };
 
-    this.setState({ options, data, loading: false })
+    this._isMounted && this.setState({ options, data, loading: false })
 
   }
   async getTop5() {
-    this.setState({ loading: true })
-    let allAgents = await this.state.agents.find().toArray()
+    this._isMounted && this.setState({ loading: true })
+    let allAgents = this._isMounted && await this.state.agents.find().toArray()
 
     let nums = []
     for (let a in allAgents) {
@@ -251,7 +263,7 @@ class Dashboard extends React.Component {
       for (let b in allAgents[a].appointments) {
         if (allAgents[a].appointments[b].verified != undefined) {
           if (this.state.mostRecent.time.getTime() < allAgents[a].appointments[b].verified.getTime()) {
-            this.setState({ mostRecent: { name: allAgents[a].name, time: allAgents[a].appointments[b].verified, dealership: allAgents[a].appointments[b].dealership_name } })
+            this._isMounted && this.setState({ mostRecent: { name: allAgents[a].name, time: allAgents[a].appointments[b].verified, dealership: allAgents[a].appointments[b].dealership_name } })
           }
           let curr = new Date()
           curr.setHours(0, 0, 0, 0)
@@ -269,7 +281,7 @@ class Dashboard extends React.Component {
       }
       nums.push(user)
     }
-    await nums.sort((a, b) => {
+    this._isMounted && await nums.sort((a, b) => {
       if (a.count > b.count) {
         return -1;
       }
@@ -278,36 +290,36 @@ class Dashboard extends React.Component {
       }
       return 0;
     })
-    this.setState({ top5: nums.slice(0, 5), loading: false })
+    this._isMounted && this.setState({ top5: nums.slice(0, 5), loading: false })
 
   }
   async getAppointmentData() {
-    this.setState({ loading: true })
+    this._isMounted && this.setState({ loading: true })
     let agents;
     if (this.state.isAdmin === true) {
-      agents = await this.props.mongo.db.collection("agents").find({}).asArray();
+      agents = this._isMounted && await this.props.mongo.db.collection("agents").find({}).asArray();
     }
     else {
-      agents = await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
+      agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
     }
     // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
     if (this.state.isAdmin === true) {
       let appointments = []
-      await agents.map((agent) => {
+      this._isMounted && await agents.map((agent) => {
         let appt = { name: agent.name, appointments: agent.appointments }
         appointments.push(appt);
         return agent;
       });
-      appointments = await appointments.sort(function (a, b) {
+      appointments = this._isMounted && await appointments.sort(function (a, b) {
         return (b.appointments.length - a.appointments.length)
       });
-      this.setState({ appointments, loading: false });
+      this._isMounted && this.setState({ appointments, loading: false });
     }
     else {
       let appt = { name: agents.name, appointments: agents.appointments }
       let appointments = [];
       appointments.push(appt)
-      this.setState({ appointments, loading: false })
+      this._isMounted && this.setState({ appointments, loading: false })
     }
 
 
@@ -344,6 +356,7 @@ class Dashboard extends React.Component {
 
       <>
         <div className="content">
+        
           <Row>
             <Col lg="6">
               <Card color={this.state.isOld? "red": "success"}  >
