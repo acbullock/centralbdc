@@ -263,7 +263,7 @@ class Dashboard extends React.Component {
       for (let b in allAgents[a].appointments) {
         if (allAgents[a].appointments[b].verified != undefined) {
           if (this.state.mostRecent.time.getTime() < allAgents[a].appointments[b].verified.getTime()) {
-            this._isMounted && this.setState({ mostRecent: { name: allAgents[a].name, time: allAgents[a].appointments[b].verified, dealership: allAgents[a].appointments[b].dealership_name } })
+            this._isMounted && this.setState({ mostRecent: { name: allAgents[a].name, time: allAgents[a].appointments[b].verified, dealership: allAgents[a].appointments[b].dealership } })
           }
           let curr = new Date()
           curr.setHours(0, 0, 0, 0)
@@ -379,7 +379,7 @@ class Dashboard extends React.Component {
                     <h4>
                   <small className="text-muted">
 
-                    Dealershp: {this.state.mostRecent.dealership}<br/>
+                    Dealershp: {this.state.mostRecent.dealership.label}<br/>
                     Agent: {this.state.mostRecent.name}</small></h4><br/>
                     
                 </CardBody>
