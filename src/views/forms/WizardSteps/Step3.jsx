@@ -64,7 +64,7 @@ class CreateAppointment extends React.Component {
       data.appointment.scenario == undefined ) return
     else{
       let message = `Hi ${data.customer.firstname}, `
-      message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} for `
+      message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address} for `
       let tempDate = new Date(data.appointment.date)
       message += tempDate.toLocaleDateString()+ " @ " + tempDate.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) + ". "
       message += "We are excited to assist you! Please ask for the VIP manager at the receptionist desk."

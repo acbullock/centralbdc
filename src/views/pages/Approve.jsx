@@ -49,8 +49,8 @@ class Approve extends React.Component {
     async componentWillMount() {
         this.setState({ loading: true })
         let twil = await this.props.mongo.getCollection("utils")
-        twil =  await twil.find().toArray()
-        await this.setState({twil: twil[0].twilio})
+        twil = await twil.find().toArray()
+        await this.setState({ twil: twil[0].twilio })
         let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agent = await this.props.mongo.getCollection("agents")
         agent = await agent.findOne({ userId: currUser.userId })
@@ -66,7 +66,7 @@ class Approve extends React.Component {
     collapsesToggle = collapse => {
 
         let openedCollapses = this.state.openedCollapses;
-        this.setState({rejected_reason:""})
+        this.setState({ rejected_reason: "" })
         if (openedCollapses.includes(collapse)) {
             this.setState({
                 openedCollapses: []
@@ -84,7 +84,7 @@ class Approve extends React.Component {
         let appointments = []
         //loop thru agents
         for (let agent in agents) {
-            console.log(agents[agent].team)
+            
             let agent_name = agents[agent].name
             let agent_email = agents[agent].email
             let agent_team = agents[agent].team.label
@@ -108,7 +108,7 @@ class Approve extends React.Component {
     }
     async acceptAppointment(appointment) {
         //update appointment to be ispending false, verified is now
-        this.setState({loading: true})
+        this.setState({ loading: true })
         let new_app = appointment;
         new_app.isPending = false;
         new_app.verified = new Date()
@@ -127,11 +127,11 @@ class Approve extends React.Component {
         await this.getPendingAppointments()
         await this.sendText(appointment)
         await this.sendCustText(appointment)
-        this.setState({loading: false})
+        this.setState({ loading: false })
     }
     async rejectAppointment(appointment) {
-        
-        this.setState({loading: true})
+
+        this.setState({ loading: true })
         //update appointment to be ispending false, verified is now
         let new_app = appointment;
         new_app.isPending = false;
@@ -151,29 +151,33 @@ class Approve extends React.Component {
 
         await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
         await this.getPendingAppointments()
-        this.setState({loading: false})
+        this.setState({ loading: false })
     }
     async sendText(appointment) {
         let data = new FormData();
         // await this.setState({loading: true})
+        console.log("!@#")
+        console.log(appointment)
+        let contacts = appointment.dealership.contacts
+        for (let i = 0; i < contacts.length; i++) {
+            
+            data.set("Body", appointment.internal_msg)
+            data.set("To", `+1${contacts[i]}`)
+            data.set("From", '+19542450865')
+            await axios.post(`https://api.twilio.com/2010-04-01/Accounts/${this.state.twil.AccountSID}/Messages.json`, data, {
+                headers: {
+                    "Content-Type": "multipart/form-data; boundary",
+                    "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjo5OWYwMzQxMTg3ZTFjOTVhODQxNTk0N2VhZDliOWNhYQ=="
+                }
+            })
 
-        data.set("Body", appointment.internal_msg)
-        //fix later to be dealer phone
-        // data.set("To", "+15614260916")
-        data.set("To", "+19548646379")
-        data.set("From", '+19542450865')
-        axios.post(`https://api.twilio.com/2010-04-01/Accounts/${this.state.twil.AccountSID}/Messages.json`, data, {
-            headers: {
-                "Content-Type": "multipart/form-data; boundary",
-                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjo5OWYwMzQxMTg3ZTFjOTVhODQxNTk0N2VhZDliOWNhYQ=="
-            }
-        }).then((res) => {
-            this.setState({ loading: false })
-            // alert("Success!")
-        }).catch((err) => { this.setState({ loading: false }); alert("Error sending internal text."); console.log(err)})
+
+        }
+
+        
     }
     async sendCustText(appointment) {
-        
+
         let data = new FormData();
         // await this.setState({loading: true})
         data.set("Body", appointment.customer_msg)
@@ -187,7 +191,7 @@ class Approve extends React.Component {
         }).then((res) => {
             this.setState({ loading: false })
             // alert("Success!")
-        }).catch((err) => {  })
+        }).catch((err) => { })
     }
     render() {
         return (
@@ -224,7 +228,7 @@ class Approve extends React.Component {
                                                         <p>
                                                             Team Name: <strong>{app.agent_team}</strong>
                                                         </p>
-                                                        <p>Dealer Name: <strong>{app.dealership_name}</strong></p>
+                                                        <p>Dealer Name: <strong>{app.dealership? app.dealership.label:"" }</strong></p>
                                                         <p>Appointment Date: <strong>{new Date(app.appointment_date).toLocaleDateString() + " " + new Date(app.appointment_date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong></p>
                                                         <p>
                                                             Customer Name: {app.customer_firstname + " " + app.customer_lastname}
@@ -264,7 +268,7 @@ class Approve extends React.Component {
                                                                 <Button color="danger" className="float-right" disabled={this.state.loading} onClick={() => {
                                                                     this.rejectAppointment(app)
                                                                 }}>Reject</Button>
-                                                                <Input placeholder="Rejected Reason" value={this.state.rejected_reason} onChange={(e)=>this.setState({rejected_reason: e.target.value})}></Input>
+                                                                <Input placeholder="Rejected Reason" value={this.state.rejected_reason} onChange={(e) => this.setState({ rejected_reason: e.target.value })}></Input>
                                                             </Col>
                                                         </Row>
                                                         {/* <p>Internal Message</p>

@@ -61,6 +61,7 @@ class CreateAppointment extends React.Component {
     finished = async (data) => {
         this.setState({ loading: true })
         
+
         let internal_message = this.generateInternalMessage(data)
         let customer_message = this.generateCustomerMessage(data)
         let messages = {
@@ -102,9 +103,7 @@ class CreateAppointment extends React.Component {
             customer_firstname: customer_first_name,
             customer_lastname: customer_last_name,
             customer_phone: customer_phone,
-            dealership_name: appointment.appointment_dealership,
-            //fix this later to come from db
-            dealership_phone: "9548646379",
+            dealership: data.appointment.dealership,
             dealership_source: appointment.appointment_source,
             dealership_department: appointment.appointment_department,
             dealership_scenario: appointment.appointment_scenario,

@@ -185,7 +185,7 @@ class Rejected extends React.Component {
                 fixed_customer_last_name: app.customer_lastname,
                 fixed_customer_phone: app.customer_phone,
                 fixed_date: app.appointment_date,
-                fixed_dealership: {label: app.dealership_name, value:""},
+                fixed_dealership: {label: app.dealership.label, value:""},
                 fixed_department: {label: app.dealership_department, value:""},
                 fixed_scenario: {label: app.dealership_scenario, value:""},
                 fixed_source: {label: app.dealership_source, value:""}
@@ -319,7 +319,7 @@ class Rejected extends React.Component {
                                                         <p>
                                                             Agent Team: <strong>{app.agent_team}</strong>
                                                         </p>
-                                                        <p>Dealer Name: <strong>{app.dealership_name}</strong></p>
+                                                        <p>Dealer Name: <strong>{app.dealership.label}</strong></p>
                                                         <p>Appointment Date: <strong>{new Date(app.appointment_date).toLocaleDateString() + " " + new Date(app.appointment_date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong></p>
                                                         <p>
                                                             Customer Name: {app.customer_firstname + " " + app.customer_lastname}

@@ -472,7 +472,7 @@ class Users extends React.Component {
                                                                             <Label>
                                                                                 Email:
                                                                                 </Label>
-                                                                            <Input placeholder="Edit email" type="email" value={this.state.editEmail} ></Input>
+                                                                            <Input placeholder="Edit email" type="email" value={this.state.editEmail} readOnly></Input>
 
                                                                             <Label>
                                                                                 Team:
@@ -483,7 +483,7 @@ class Users extends React.Component {
                                                                                 classNamePrefix="react-select"
                                                                                 name="team"
                                                                                 value={this.state.editTeam}
-                                                                                onChange={value => {console.log(value); this.setState({editTeam:value})}}
+                                                                                onChange={value => {this.setState({editTeam:value})}}
                                                                                 options={this.state.teams}
                                                                                 placeholder="Team Name"
                                                                             />
