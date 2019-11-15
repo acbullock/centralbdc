@@ -86,7 +86,7 @@ class Rejected extends React.Component {
                 },
                 
             ],
-            fixed_dealership: { label: "", value:"", address:""},
+            fixed_dealership: { label: "", value:"", address:"", contacts: []},
             fixed_department:{ label: "", value:""},
             fixed_scenario: { label: "", value:""},
             fixed_source: { label: "", value:""},
@@ -170,7 +170,7 @@ class Rejected extends React.Component {
                 fixed_customer_last_name: "",
                 fixed_customer_phone: "",
                 fixed_date: "",
-                fixed_dealership: {label:"", value:"", address:""},
+                fixed_dealership: {label:"", value:"", address:"", contacts: []},
                 fixed_department: {label:"", value:""},
                 fixed_scenario: {label:"", value:""},
                 fixed_source: {label:"", value:""}
@@ -185,7 +185,7 @@ class Rejected extends React.Component {
                 fixed_customer_last_name: app.customer_lastname,
                 fixed_customer_phone: app.customer_phone,
                 fixed_date: app.appointment_date,
-                fixed_dealership: {label: app.dealership.label, value:app.dealership.value, address: app.dealership.address},
+                fixed_dealership: app.dealership,
                 fixed_department: {label: app.dealership_department, value:app},
                 fixed_scenario: {label: app.dealership_scenario, value:""},
                 fixed_source: {label: app.dealership_source, value:""}
