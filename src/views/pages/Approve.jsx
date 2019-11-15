@@ -156,8 +156,6 @@ class Approve extends React.Component {
     async sendText(appointment) {
         let data = new FormData();
         // await this.setState({loading: true})
-        console.log("!@#")
-        console.log(appointment)
         let contacts = appointment.dealership.contacts
         for (let i = 0; i < contacts.length; i++) {
             

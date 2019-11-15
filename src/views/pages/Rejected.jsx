@@ -220,7 +220,7 @@ class Rejected extends React.Component {
     }
     generateInternalMessage(app) {
 
-        let message = `${app.dealership_name}\n`
+        let message = `${app.dealership.label}\n`
         message += `${app.customer_firstname} ${app.customer_lastname}\n`
         message += `(${app.customer_phone.substring(0, 3)}) ${app.customer_phone.substring(3, 6)} - ${app.customer_phone.substring(6, 10)}\n`
         let tempDate = new Date(app.appointment_date)
@@ -234,10 +234,10 @@ class Rejected extends React.Component {
     generateCustomerMessage(app) {
 
         let message = `Hi ${app.customer_firstname}, `
-        message += `I scheduled your VIP appointment at ${app.dealership_name} for `
+        message += `I scheduled your VIP appointment at ${app.dealership_name} located at ${app.dealership.address} for `
         let tempDate = new Date(app.appointment_date)
         message += tempDate.toLocaleDateString() + " @ " + tempDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ". "
-        message += "We are excited to assist you! Please ask for the VIP manager at the receptionist desk."
+        message += "We are excited to assist you! Please ask for the VIP manager at the receptionist desk.\n\nReply STOP to stop receiving messages"
         return message
 
     }
@@ -251,10 +251,10 @@ class Rejected extends React.Component {
             customer_lastname: this.state.fixed_customer_last_name,
             customer_phone: this.state.fixed_customer_phone,
             appointment_date: this.state.fixed_date,
-            dealership_name: this.state.fixed_dealership.label,
             dealership_department: this.state.fixed_department.label,
             dealership_scenario: this.state.fixed_scenario.label,
             dealership_source: this.state.fixed_source.label,
+            dealership: this.state.fixed_dealership,
             isRejected: false,
             isPending: true,
             rejectedReason: "",
