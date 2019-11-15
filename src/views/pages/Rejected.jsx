@@ -86,10 +86,10 @@ class Rejected extends React.Component {
                 },
                 
             ],
-            fixed_dealership: "",
-            fixed_department: "",
-            fixed_scenario: "",
-            fixed_source: "",
+            fixed_dealership: { label: "", value:"", address:""},
+            fixed_department:{ label: "", value:""},
+            fixed_scenario: { label: "", value:""},
+            fixed_source: { label: "", value:""},
             departments: [
                 { value: "47", label: "Sales" },
                 { value: "48", label: "Data-Mining" },
@@ -170,13 +170,13 @@ class Rejected extends React.Component {
                 fixed_customer_last_name: "",
                 fixed_customer_phone: "",
                 fixed_date: "",
-                fixed_dealership: "",
-                fixed_department: "",
-                fixed_scenario: "",
-                fixed_source: ""
+                fixed_dealership: {label:"", value:"", address:""},
+                fixed_department: {label:"", value:""},
+                fixed_scenario: {label:"", value:""},
+                fixed_source: {label:"", value:""}
             });
         } else {
-
+            console.log(app)
 
             await this.setState({
                 openedCollapses: [collapse],
@@ -185,7 +185,7 @@ class Rejected extends React.Component {
                 fixed_customer_last_name: app.customer_lastname,
                 fixed_customer_phone: app.customer_phone,
                 fixed_date: app.appointment_date,
-                fixed_dealership: {label: app.dealership.label, value:app.dealership.value},
+                fixed_dealership: {label: app.dealership.label, value:app.dealership.value, address: app.dealership.address},
                 fixed_department: {label: app.dealership_department, value:app},
                 fixed_scenario: {label: app.dealership_scenario, value:""},
                 fixed_source: {label: app.dealership_source, value:""}
@@ -232,7 +232,6 @@ class Rejected extends React.Component {
 
     }
     generateCustomerMessage(app) {
-
         let message = `Hi ${app.customer_firstname}, `
         message += `I scheduled your VIP appointment at ${app.dealership.label} located at ${app.dealership.address} for `
         let tempDate = new Date(app.appointment_date)
@@ -268,6 +267,7 @@ class Rejected extends React.Component {
 
         })
         new_app = Object.assign(old, new_app)
+        
         new_app.internal_msg = this.generateInternalMessage(new_app)
         new_app.customer_msg = this.generateCustomerMessage(new_app)
         this.setState({ fixed_internal_msg: new_app.internal_msg, fixed_customer_msg: new_app.customer_msg })
@@ -277,7 +277,8 @@ class Rejected extends React.Component {
         // console.log(a)
         let asdf = await this.state.agents.findOneAndUpdate({ email: this.state.agent.email }, a)
         await this.getRejectedAppointments()
-        this.setState({ loading: false })
+        
+        this.setState({ loading: false,openedCollapses: [] })
         //    console.log("done!")
         //    console.log(asdf)
 
@@ -393,7 +394,7 @@ class Rejected extends React.Component {
                                                                     className="react-select primary"
                                                                     // className={classnames(this.state.firstnameState) primary}
                                                                     classNamePrefix="react-select"
-                                                                    name="dealership"
+                                                                    name="department"
                                                                     value={this.state.fixed_department}
                                                                     onChange={value => {  this.setState({ fixed_department: value }) }}
                                                                     options={this.state.departments}
