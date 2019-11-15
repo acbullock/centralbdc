@@ -185,8 +185,8 @@ class Rejected extends React.Component {
                 fixed_customer_last_name: app.customer_lastname,
                 fixed_customer_phone: app.customer_phone,
                 fixed_date: app.appointment_date,
-                fixed_dealership: {label: app.dealership.label, value:""},
-                fixed_department: {label: app.dealership_department, value:""},
+                fixed_dealership: {label: app.dealership.label, value:app.dealership.value},
+                fixed_department: {label: app.dealership_department, value:app},
                 fixed_scenario: {label: app.dealership_scenario, value:""},
                 fixed_source: {label: app.dealership_source, value:""}
             });
@@ -234,7 +234,7 @@ class Rejected extends React.Component {
     generateCustomerMessage(app) {
 
         let message = `Hi ${app.customer_firstname}, `
-        message += `I scheduled your VIP appointment at ${app.dealership_name} located at ${app.dealership.address} for `
+        message += `I scheduled your VIP appointment at ${app.dealership.label} located at ${app.dealership.address} for `
         let tempDate = new Date(app.appointment_date)
         message += tempDate.toLocaleDateString() + " @ " + tempDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ". "
         message += "We are excited to assist you! Please ask for the VIP manager at the receptionist desk.\n\nReply STOP to stop receiving messages"
@@ -432,7 +432,6 @@ class Rejected extends React.Component {
                                                                     this.state.fixed_customer_last_name.length === 0 ||
                                                                     this.state.fixed_customer_phone.length != 10 ||
                                                                     isNaN(this.state.fixed_customer_phone) ||
-                                                                    this.state.fixed_dealership.length === 0 ||
                                                                     this.state.fixed_department.length === 0 ||
                                                                     this.state.fixed_scenario.length === 0 ||
                                                                     this.state.fixed_date.length == 0} onClick={() => {
