@@ -157,11 +157,12 @@ class Approve extends React.Component {
         let data = new FormData();
         // await this.setState({loading: true})
         let contacts = appointment.dealership.contacts
-        
+        let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
+        token = token.data
         for (let i = 0; i < contacts.length; i++) {
             
             
-            let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=14243162268`, {
+            let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=14243162268&token=${token}`, {
                 text: appointment.internal_msg
             }, {
                 headers: {
@@ -169,7 +170,7 @@ class Approve extends React.Component {
                 }
             })
             console.log(x)
-
+            
 
         }
 
@@ -177,11 +178,10 @@ class Approve extends React.Component {
     }
     async sendCustText(appointment) {
 
-        let data = new FormData();
-        // await this.setState({loading: true})
-        
+        let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
+        token = token.data
 
-        let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${appointment.customer_phone}&fromNumber=14243162268`, {
+        let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${appointment.customer_phone}&fromNumber=14243162268&token=${token}`, {
                 text: appointment.customer_msg
             }, {
                 headers: {
