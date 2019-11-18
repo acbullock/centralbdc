@@ -59,7 +59,7 @@ let scenarios = [
         value: "51", label: "High Interest"
     },
     {
-        value: "52", label: "Easy Lease Upgrade"
+        value: "52", label: "Early Lease Upgrade"
     },
     {
         value: "53", label: "Buy Back Offer"

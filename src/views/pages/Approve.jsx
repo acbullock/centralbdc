@@ -160,15 +160,15 @@ class Approve extends React.Component {
         
         for (let i = 0; i < contacts.length; i++) {
             
-            data.set("Body", appointment.internal_msg)
-            data.set("To", `+1${contacts[i]}`)
-            data.set("From", '+19542450865')
-            await axios.post(`https://api.twilio.com/2010-04-01/Accounts/${this.state.twil.AccountSID}/Messages.json`, data, {
+            
+            let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=14243162268`, {
+                text: appointment.internal_msg
+            }, {
                 headers: {
-                    "Content-Type": "multipart/form-data; boundary",
-                    "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjo5OWYwMzQxMTg3ZTFjOTVhODQxNTk0N2VhZDliOWNhYQ=="
+                    "Content-Type": "application/json",
                 }
             })
+            console.log(x)
 
 
         }
@@ -179,18 +179,16 @@ class Approve extends React.Component {
 
         let data = new FormData();
         // await this.setState({loading: true})
-        data.set("Body", appointment.customer_msg)
-        data.set("To", `+1${appointment.customer_phone}`)
-        data.set("From", '+19542450865')
-        axios.post(`https://api.twilio.com/2010-04-01/Accounts/${this.state.twil.AccountSID}/Messages.json`, data, {
-            headers: {
-                "Content-Type": "multipart/form-data; boundary",
-                "Authorization": "Basic QUNkNmE4YTYwMmUzY2U5YjI4YWJlMGEzOTQ4YjNlN2EyNjo5OWYwMzQxMTg3ZTFjOTVhODQxNTk0N2VhZDliOWNhYQ=="
-            }
-        }).then((res) => {
-            this.setState({ loading: false })
-            // alert("Success!")
-        }).catch((err) => { })
+        
+
+        let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${appointment.customer_phone}&fromNumber=14243162268`, {
+                text: appointment.customer_msg
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+            console.log(x)
     }
     render() {
         return (
