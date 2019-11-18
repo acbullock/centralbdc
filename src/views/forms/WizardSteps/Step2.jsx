@@ -38,7 +38,7 @@ class CreateAppointment extends React.Component {
       dealership: null,
       department: null,
       scenario: null,
-      date: new Date().addHours(24).setHours(9,30),
+      date: new Date().addHours(24).setHours(8,0),
       check: "none",
       source: null,
       dealerships:[],
@@ -85,12 +85,12 @@ class CreateAppointment extends React.Component {
       return false
     }
     let dup = new Date(this.state.date)
-    dup.setHours(9,30)
+    dup.setHours(8,0)
     if(dup.getTime() > new Date(this.state.date).getTime()){
       console.log("1")
       return false
     }
-    dup.setHours(18,30)
+    dup.setHours(20,30)
     if(dup.getTime() < new Date(this.state.date).getTime()){
       console.log("12")
       return false
@@ -131,7 +131,7 @@ class CreateAppointment extends React.Component {
                       let nowAnd3Days = new Date(now.getTime() + (4* 24*60*60*1000))
                       return x < nowAnd3Days && x > now 
                     }}
-                    timeConstraints={{ hours: { min: 9, max: 18, step: 1 }, minutes: { step: 15 } }}
+                    timeConstraints={{ hours: { min: 8, max: 20, step: 1 }, minutes: { step: 15 } }}
                     // timeConstraints={{  minutes: { step: 15 } }}
                     inputProps={{
                       className: "form-control",

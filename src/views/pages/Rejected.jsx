@@ -112,10 +112,10 @@ class Rejected extends React.Component {
         }
         
         let open = new Date(x)
-        open.setHours(9,30)
+        open.setHours(8,0)
     
         let close = new Date(x)
-        close.setHours(18,30)
+        close.setHours(20,30)
         if(x.getTime() < open.getTime()){
             return false
         }
@@ -360,7 +360,7 @@ class Rejected extends React.Component {
                                                                         let nowAnd3Days = new Date(now.getTime() + (4* 24*60*60*1000))
                                                                         return x < nowAnd3Days && x > now 
                                                                       }}
-                                                                      timeConstraints={{ hours: { min: 9, max: 18, step: 1 }, minutes: { step: 15 } }}
+                                                                      timeConstraints={{ hours: { min: 8, max: 20, step: 1 }, minutes: { step: 15 } }}
                                                                     inputProps={{
                                                                         className: "form-control primary",
                                                                         placeholder: "Appointment date/time",
