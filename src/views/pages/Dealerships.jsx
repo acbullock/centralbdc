@@ -34,6 +34,7 @@ class Dealerships extends React.Component {
             editDealershipModal: false,
             newDealershipName: "",
             newAddress: "",
+            newRingCentral: "",
             newContacts: [],
             loading: false,
             err: {
@@ -44,6 +45,7 @@ class Dealerships extends React.Component {
             editContacts: [],
             dealerships: [],
             editDealershipValue: "",
+            editDealershipTextFrom: "",
             addContact:"",
             removeContact:""
         }
@@ -75,7 +77,7 @@ class Dealerships extends React.Component {
         ref.contacts.push(contact)
         await d.findOneAndUpdate({_id: dealer._id}, ref)
         await this.setState({editDealershipAddress: ref.address, editContacts: ref.contacts,
-        editDealershipName: ref.label, addContact: "", loading: false})
+        editDealershipName: ref.label, addContact: "", editDealershipTextFrom: "", loading: false})
         await this.getDealerships()
         this.setState({loading: false})
     }
@@ -96,7 +98,8 @@ class Dealerships extends React.Component {
             editDealershipName: a.label,
             editDealershipAddress: a.address,
             editDealershipValue: a.value,
-            editContacts: a.contacts
+            editContacts: a.contacts,
+            editDealershipTextFrom: ""
             //contax
         })
         this.setState({ editDealershipModal: !this.state.editDealershipModal })
@@ -154,7 +157,8 @@ class Dealerships extends React.Component {
         let merge = {
             label: this.state.editDealershipName,
             address: this.state.editDealershipAddress,
-            contacts: this.state.editContacts
+            contacts: this.state.editContacts,
+            textFrom: this.state.editDealershipTextFrom
         }
         
         currCopy = Object.assign(currCopy, merge)
@@ -175,7 +179,8 @@ class Dealerships extends React.Component {
             this.setState({
                 openedCollapses: [],
                 editDealershipName:"",
-                editDealershipAddress: ""
+                editDealershipAddress: "",
+                editDealershipTextFrom: ""
             })
         }
         else {
@@ -183,6 +188,7 @@ class Dealerships extends React.Component {
             this.setState({ openedCollapses: [collapse] ,
             editDealershipName: a.label,
             editDealershipAddress: a.address,
+            editDealershipTextFrom: a.textFrom,
             editContacts: a.contacts
          })
 
@@ -195,13 +201,15 @@ class Dealerships extends React.Component {
         let id = await db.collection("dealerships").insertOne({
             label: this.state.newDealershipName,
             address: this.state.newAddress,
-            contacts: this.state.newContacts
+            contacts: this.state.newContacts,
+            textFrom: this.state.newRingCentral
         })
         await db.collection("dealerships").findOneAndUpdate({ _id: id.insertedId }, {
             label: this.state.newDealershipName,
             address: this.state.newAddress,
             value: id.insertedId,
-            contacts: this.state.newContacts
+            contacts: this.state.newContacts,
+            textFrom: this.state.newRingCentral
         })
 
 
@@ -294,6 +302,24 @@ class Dealerships extends React.Component {
                                                                 onBlur={e => this.setState({ phoneFocus: false })}
                                                                 onChange={e => this.setState({ newAddress: e.target.value })}
                                                             />
+                                                        </InputGroup><hr/>
+                                                        <InputGroup
+                                                            className={classnames("no-border form-control-lg", {
+                                                                "input-group-focus": this.state.ringCentralFocus
+                                                            })}
+                                                        >
+                                                            <InputGroupAddon addonType="prepend">
+                                                                <InputGroupText>
+                                                                    <i className="tim-icons icon-mobile" />
+                                                                </InputGroupText>
+                                                            </InputGroupAddon>
+                                                            <Input
+                                                                placeholder="Ring Central #"
+                                                                type="tel"
+                                                                onFocus={e => this.setState({ ringCentralFocus: true })}
+                                                                onBlur={e => this.setState({ ringCentralFocus: false })}
+                                                                onChange={e => this.setState({ newRingCentral: e.target.value })}
+                                                            />
                                                         </InputGroup>
                                                     </div>
                                                 </Form>
@@ -308,7 +334,9 @@ class Dealerships extends React.Component {
                                                     disabled={
                                                         this.state.loading ||
                                                         this.state.newDealershipName.length === 0 ||
-                                                        this.state.newAddress.length == 0
+                                                        this.state.newAddress.length == 0 || 
+                                                        this.state.newRingCentral.length != 10 ||
+                                                        isNaN(this.state.newRingCentral)
 
 
                                                     }
@@ -350,6 +378,7 @@ class Dealerships extends React.Component {
                                                         >
                                                             <p><strong>Name:</strong> {a.label}</p>
                                                             <p><strong>Address: </strong>{a.address}</p>
+                                                            <p><strong>Ringcentral number: </strong>{a.textFrom}</p>
                                                             <i className="tim-icons icon-minimal-down" />
 
                                                         </a>
@@ -360,9 +389,12 @@ class Dealerships extends React.Component {
                                                         <CardBody>
                                                             <Col lg="6">
                                                                 <Card color="secondary card">
+                                                                <p><strong>Ring Central #:</strong> {a.textFrom}</p>
+                                                                <hr/>
                                                                 <p><strong>Name:</strong> {a.label}</p>
                                                                 <p><strong>Address: </strong>{a.address}</p>
                                                                 <p><strong>Contacts: </strong></p>
+                                                                
                                                                 
                                                                 {a.contacts.map((c)=>{
                                                                     return <p key={c}>{c}</p>
@@ -376,6 +408,7 @@ class Dealerships extends React.Component {
                                                             <h3>Edit Dealership</h3>
                                                             <Input placeholder="Edit Dealership Name" value={this.state.editDealershipName} onChange={(e)=>{this.setState({editDealershipName:e.target.value})}}/>
                                                             <Input placeholder="Edit Dealership Address" value={this.state.editDealershipAddress} onChange={(e)=>{this.setState({editDealershipAddress:e.target.value})}}/>
+                                                            <Input placeholder="Edit Ring Central #" value={this.state.editDealershipTextFrom} onChange={(e)=>{this.setState({editDealershipTextFrom:e.target.value})}}/>
                                                             <hr/>
                                                             <h3>Add to Contacts</h3>
                                                             <Input placeholder="Add Contact to Dealership" value={this.state.addContact} onChange={(e)=>{this.setState({addContact:e.target.value})}}/>

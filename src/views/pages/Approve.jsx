@@ -154,41 +154,38 @@ class Approve extends React.Component {
         this.setState({ loading: false })
     }
     async sendText(appointment) {
+        this.setState({loading: true})
         let data = new FormData();
         // await this.setState({loading: true})
         let contacts = appointment.dealership.contacts
         let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
         token = token.data
         for (let i = 0; i < contacts.length; i++) {
-            
-            
-            let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=14243162268&token=${token}`, {
+            let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
                 text: appointment.internal_msg
             }, {
                 headers: {
                     "Content-Type": "application/json",
                 }
             })
-            console.log(x)
-            
-
         }
-
+        
+        this.setState({loading: false})
         
     }
     async sendCustText(appointment) {
-
+        this.setState({loading: true})
         let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
         token = token.data
 
-        let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${appointment.customer_phone}&fromNumber=14243162268&token=${token}`, {
+        let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${appointment.customer_phone}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
                 text: appointment.customer_msg
             }, {
                 headers: {
                     "Content-Type": "application/json",
                 }
             })
-            console.log(x)
+        this.setState({loading:false})
     }
     render() {
         return (
