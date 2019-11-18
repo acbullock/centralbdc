@@ -236,7 +236,7 @@ class Rejected extends React.Component {
         message += `I scheduled your VIP appointment at ${app.dealership.label} located at ${app.dealership.address} for `
         let tempDate = new Date(app.appointment_date)
         message += tempDate.toLocaleDateString() + " @ " + tempDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ". "
-        message += "We are excited to assist you! Please ask for the VIP manager at the receptionist desk.\n\nReply STOP to stop receiving messages"
+        message += "We are excited to assist you! Please ask for the VIP manager at the receptionist desk."
         return message
 
     }
