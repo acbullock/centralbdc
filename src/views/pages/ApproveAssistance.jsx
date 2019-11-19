@@ -32,12 +32,12 @@ import {
 import axios from 'axios'
 
 
-class Approve extends React.Component {
+class ApproveAssistance extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            pendingAppointments: [],
+            pendingAssistance: [],
             openedCollapses: [],
             isApprover: false,
             loading: true,
@@ -48,16 +48,13 @@ class Approve extends React.Component {
     }
     async componentWillMount() {
         this.setState({ loading: true })
-        let twil = await this.props.mongo.getCollection("utils")
-        twil = await twil.find().toArray()
-        await this.setState({ twil: twil[0].twilio })
         let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agent = await this.props.mongo.getCollection("agents")
         agent = await agent.findOne({ userId: currUser.userId })
         this.setState({ isApprover: agent.isApprover })
         if (agent.isApprover === true) {
 
-            await this.getPendingAppointments()
+            await this.getPendingAssistance()
         }
         this.setState({ loading: false })
     }
@@ -77,91 +74,89 @@ class Approve extends React.Component {
             });
         }
     };
-    async getPendingAppointments() {
+    async getPendingAssistance() {
         this.setState({ loading: true })
         let agents = await this.props.mongo.getCollection("agents")
         agents = await agents.find().toArray()
-        let appointments = []
+        let assistance = []
         //loop thru agents
         for (let agent in agents) {
             
             let agent_name = agents[agent].name
             let agent_email = agents[agent].email
             let agent_team = agents[agent].team.label
-            for (let a in agents[agent].appointments) {
-                if (agents[agent].appointments[a].isPending === false) {
+            for (let a in agents[agent].assistance) {
+                if (agents[agent].assistance[a].isPending === false) {
                     continue;
                 }
                 let newApp = { agent_name, agent_email, agent_team }
-                newApp = Object.assign(newApp, agents[agent].appointments[a])
-                appointments.push(newApp)
+                newApp = Object.assign(newApp, agents[agent].assistance[a])
+                assistance.push(newApp)
             }
         }
-        await appointments.sort((a, b) => {
-            if (a.appointment_date > b.appointment_date)
+        await assistance.sort((a, b) => {
+            if (a.created.getTime() > b.created.getTime())
                 return 1;
-            if (a.appointment_date < b.appointment_date)
+            if (a.created.getTime() < b.created.getTime())
                 return -1;
             return 0;
         })
-        this.setState({ pendingAppointments: appointments, loading: false })
+        this.setState({ pendingAssistance: assistance, loading: false })
     }
-    async acceptAppointment(appointment) {
-        //update appointment to be ispending false, verified is now
-        this.setState({ loading: true })
-        let new_app = appointment;
-        new_app.isPending = false;
-        new_app.verified = new Date()
-        let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({ email: appointment.agent_email })
+    async acceptAssistance(assistance) {
+        this.setState({loading: true})
+       //find user that has that assistance record
+       //update that record to be isRejected = false, isPending=false
+       let newAssistance = assistance
+       newAssistance.isPending = false
+       newAssistance.isRejected = false
+       let agents = await this.props.mongo.getCollection("agents")
+       let owner = await agents.findOne({userId: newAssistance.userId})
+       console.log(owner)
+       let ownerAssistance = await owner.assistance.filter((a)=>{
+           return a.text == assistance.text
+       })
+       console.log(assistance.text)
+       let index = owner.assistance.indexOf(ownerAssistance[0])
+       if (index !== -1) {
+           owner.assistance[index] = newAssistance
+        }
+       await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
+       await this.sendText(newAssistance)
 
-        let apps = await agent.appointments.filter((a) => {
-            return a.created.getTime() !== appointment.created.getTime();
-
-        })
-
-        agent.appointments = apps
-        // agent.appointments = x
-        agent.appointments.push(new_app)
-        await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
-        await this.getPendingAppointments()
-        await this.sendText(appointment)
-        await this.sendCustText(appointment)
-        this.setState({ loading: false })
+       await this.getPendingAssistance()
+       this.setState({loading: false})
     }
-    async rejectAppointment(appointment) {
+    async rejectAssistance(assistance) {
 
-        this.setState({ loading: true })
-        //update appointment to be ispending false, verified is now
-        let new_app = appointment;
-        new_app.isPending = false;
-        new_app.isRejected = true;
-        new_app.rejectedReason = this.state.rejected_reason
-        let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({ email: appointment.agent_email })
-
-        let apps = await agent.appointments.filter((a) => {
-            return a.created.getTime() !== appointment.created.getTime();
-
-        })
-
-        agent.appointments = apps
-        // agent.appointments = x
-        agent.appointments.push(new_app)
-
-        await agents.findOneAndReplace({ email: appointment.agent_email }, agent)
-        await this.getPendingAppointments()
-        this.setState({ loading: false })
+        this.setState({loading: true})
+       //find user that has that assistance record
+       //update that record to be isRejected = true, isPending=false
+       let newAssistance = assistance
+       newAssistance.isPending = false
+       newAssistance.isRejected = true
+       let agents = await this.props.mongo.getCollection("agents")
+       let owner = await agents.findOne({userId: newAssistance.userId})
+       let ownerAssistance = await owner.assistance.filter((a)=>{
+           return a.text == assistance.text
+       })
+       let index = owner.assistance.indexOf(ownerAssistance[0])
+       if (index !== -1) {
+           owner.assistance[index] = newAssistance
+        }
+       await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
+       await this.getPendingAssistance()
+       this.setState({loading: false})
     }
-    async sendText(appointment) {
+    async sendText(assistance) {
         this.setState({loading: true})
         // await this.setState({loading: true})
-        let contacts = appointment.dealership.contacts
+        let contacts = assistance.dealership.contacts
         let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
         token = token.data
         for (let i = 0; i < contacts.length; i++) {
-            await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
-                text: appointment.internal_msg
+            await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${assistance.dealership.textFrom}&token=${token}`, {
+                text: assistance.text
             }, {
                 headers: {
                     "Content-Type": "application/json",
@@ -172,13 +167,13 @@ class Approve extends React.Component {
         this.setState({loading: false})
         
     }
-    async sendCustText(appointment) {
+    async sendCustText(assistance) {
         this.setState({loading: true})
         let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
         token = token.data
 
-        await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${appointment.customer_phone}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
-                text: appointment.customer_msg
+        await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${assistance.customer_phone}&fromNumber=1${assistance.dealership.textFrom}&token=${token}`, {
+                text: assistance.customer_msg
             }, {
                 headers: {
                     "Content-Type": "application/json",
@@ -198,9 +193,9 @@ class Approve extends React.Component {
                             role="tablist"
                         >
 
-                            <h1>Approve/Reject Pending Appointments</h1>
+                            <h1>Approve/Reject Pending Assistance</h1>
                             {
-                                this.state.pendingAppointments.map((app, index) => {
+                                this.state.pendingAssistance.map((app, index) => {
                                     return (
                                         <div key={app.agent_name + "_" + index}>
 
@@ -222,7 +217,7 @@ class Approve extends React.Component {
                                                             Team Name: <strong>{app.agent_team}</strong>
                                                         </p>
                                                         <p>Dealer Name: <strong>{app.dealership? app.dealership.label:"" }</strong></p>
-                                                        <p>Appointment Date: <strong>{new Date(app.appointment_date).toLocaleDateString() + " " + new Date(app.appointment_date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong></p>
+                                                        <p>Created: <strong>{new Date(app.created).toLocaleDateString() + " " + new Date(app.created).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong></p>
                                                         <p>
                                                             Customer Name: {app.customer_firstname + " " + app.customer_lastname}
                                                         </p>
@@ -238,16 +233,12 @@ class Approve extends React.Component {
                                                     <CardBody>
                                                         <Row>
 
-                                                            <Col sm="6">
-                                                                <h3>Internal Message</h3>
+                                                            <Col sm="12">
+                                                                <h3>Assistance Message</h3>
                                                                 <blockquote className="blockquote" style={{ whiteSpace: "pre-wrap" }}>
-                                                                    <p >{app.internal_msg}</p></blockquote>
+                                                                    <p >{app.text}</p></blockquote>
                                                             </Col>
-                                                            <Col sm="6">
-                                                                <h3>Customer Message</h3>
-                                                                <blockquote className="blockquote" style={{ whiteSpace: "pre-wrap" }}>
-                                                                    <p style={{ whiteSpace: "pre-wrap" }}>{app.customer_msg}</p></blockquote>
-                                                            </Col>
+                                                            
                                                             <Col sm="6">
                                                                 <br />
 
@@ -256,10 +247,10 @@ class Approve extends React.Component {
                                                         <Row>
                                                             <Col sm="12">
                                                                 <Button color="success" className="float-righ" disabled={this.state.loading} onClick={() => {
-                                                                    this.acceptAppointment(app)
+                                                                    this.acceptAssistance(app)
                                                                 }}>Accept</Button>
                                                                 <Button color="danger" className="float-right" disabled={this.state.loading} onClick={() => {
-                                                                    this.rejectAppointment(app)
+                                                                    this.rejectAssistance(app)
                                                                 }}>Reject</Button>
                                                                 <Input placeholder="Rejected Reason" value={this.state.rejected_reason} onChange={(e) => this.setState({ rejected_reason: e.target.value })}></Input>
                                                             </Col>
@@ -281,8 +272,8 @@ class Approve extends React.Component {
 
                             }
                             <h2 hidden={!this.state.loading}>Loading..</h2>
-                            <h2 hidden={this.state.isApprover || this.state.loading}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending appointments</h2>
-                            <h2 hidden={!this.state.isApprover || this.state.pendingAppointments.length > 0 || this.state.loading}>No appointments pending approval</h2>
+                            <h2 hidden={this.state.isApprover || this.state.loading}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending assistance messages</h2>
+                            <h2 hidden={!this.state.isApprover || this.state.pendingAssistance.length > 0 || this.state.loading}>No assistance messages pending approval</h2>
                         </div>
                     </Col>
                 </div>
@@ -291,4 +282,4 @@ class Approve extends React.Component {
     }
 }
 
-export default Approve;
+export default ApproveAssistance;

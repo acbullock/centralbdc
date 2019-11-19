@@ -165,6 +165,7 @@ class Users extends React.Component {
                 name: this.state.newFullName,
                 account_type: this.state.newIsAdmin === true ? "admin" : "agent",
                 appointments: [],
+                assistance: [],
                 isApprover: this.state.newIsAdmin === true || this.state.newIsApprover,
                 team: this.state.newTeam,
                 isActive: true
@@ -500,7 +501,7 @@ class Users extends React.Component {
                                                                             <div className="form-check">
 
                                                                                 <label className="form-check-label">
-                                                                                    <Input className="form-check-input" type="checkbox" checked={this.state.editIsApprover} onChange={(e) => { this.setState({ editIsAdmin: !this.state.editIsAdmin }) }} />
+                                                                                    <Input className="form-check-input" type="checkbox" checked={this.state.editIsApprover} onChange={(e) => { this.setState({ editIsApprover: !this.state.editIsApprover }) }} />
                                                                                     Approver
                                                                                         <span className="form-check-sign">
                                                                                         <span className="check"></span>

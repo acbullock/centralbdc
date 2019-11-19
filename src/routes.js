@@ -47,6 +47,9 @@ import Dealerships from "./views/pages/Dealerships.jsx"
 import Users from "./views/pages/Users.jsx"
 import Sources from "./views/pages/Sources.jsx"
 import Teams from "./views/pages/Teams.jsx"
+import Assistance from "./views/pages/Assistance.jsx"
+import ApproveAssistance from "./views/pages/ApproveAssistance.jsx"
+import RejectedAssistance from "./views/pages/RejectedAssistance.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -186,32 +189,38 @@ const routes = [
       }
     ]
   },
-  // {
-  //   collapse: true,
-  //   name: "Components",
-  //   rtlName: "المكونات",
-  //   icon: "tim-icons icon-molecule-40",
-  //   state: "componentsCollapse",
-  //   views: [
-  //     {
-  //       collapse: true,
-  //       name: "Multi Level Collapse",
-  //       rtlName: "انهيار متعدد المستويات",
-  //       mini: "MLT",
-  //       rtlMini: "ر",
-  //       state: "multiCollapse",
-  //       views: [
-  //         {
-  //           path: "/buttons",
-  //           name: "Buttons",
-  //           rtlName: "وصفت",
-  //           mini: "B",
-  //           rtlMini: "ب",
-  //           component: Buttons,
-  //           layout: "/admin"
-  //         }
-  //       ]
-  //     },
+  {
+    collapse: true,
+    name: "Customer Assistance",
+    icon: "tim-icons icon-alert-circle-exc",
+    state: "componentsCollapse",
+    views: [
+      {
+        path: "/assistance",
+        name: "Create Assistance Message",
+        component: Assistance,
+        layout: "/admin",
+        adminOnly: false,
+        icon: "tim-icons icon-simple-add"
+      },
+      {
+        path: "/approve_assistance",
+        name: "Pending Assistance",
+        component: ApproveAssistance,
+        layout: "/admin",
+        adminOnly: false,
+        icon: "tim-icons icon-notes"
+      },
+      {
+        path: "/rejected_assistance",
+        name: "Rejected Assistance",
+        component: RejectedAssistance,
+        layout: "/admin",
+        adminOnly: false,
+        icon: "tim-icons icon-settings"
+      }
+    ]
+  },
   //     {
   //       path: "/buttons",
   //       name: "Buttons",
