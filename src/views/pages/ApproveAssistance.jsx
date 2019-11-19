@@ -42,7 +42,8 @@ class ApproveAssistance extends React.Component {
             isApprover: false,
             loading: true,
             rejected_reason: "",
-            twil: {}
+            twil: {},
+            feedback: "Loading.."
         };
 
     }
@@ -122,10 +123,11 @@ class ApproveAssistance extends React.Component {
            owner.assistance[index] = newAssistance
         }
        await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
+       await this.setState({feedback: "Sending texts to dealers"})
        await this.sendText(newAssistance)
 
        await this.getPendingAssistance()
-       this.setState({loading: false})
+       this.setState({loading: false, feedback: "Loading.."})
     }
     async rejectAssistance(assistance) {
 
@@ -135,6 +137,7 @@ class ApproveAssistance extends React.Component {
        let newAssistance = assistance
        newAssistance.isPending = false
        newAssistance.isRejected = true
+       newAssistance.rejectedReason = this.state.rejected_reason
        let agents = await this.props.mongo.getCollection("agents")
        let owner = await agents.findOne({userId: newAssistance.userId})
        let ownerAssistance = await owner.assistance.filter((a)=>{
@@ -271,7 +274,7 @@ class ApproveAssistance extends React.Component {
                                 })
 
                             }
-                            <h2 hidden={!this.state.loading}>Loading..</h2>
+                            <h2 hidden={!this.state.loading}>{this.state.feedback}</h2>
                             <h2 hidden={this.state.isApprover || this.state.loading}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending assistance messages</h2>
                             <h2 hidden={!this.state.isApprover || this.state.pendingAssistance.length > 0 || this.state.loading}>No assistance messages pending approval</h2>
                         </div>

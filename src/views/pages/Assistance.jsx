@@ -228,7 +228,7 @@ class Assistance extends React.Component {
                                         }
                                         onClick={this.addToPending}
                                     >
-                                        Send Message to Dealership
+                                        Finish
                                     </Button>
                                 </Form>
                             </CardBody>
