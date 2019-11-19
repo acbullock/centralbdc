@@ -124,7 +124,7 @@ class RejectedAssistance extends React.Component {
 
     };
     async getRejectedAssistance() {
-        this.setState({ loading: true, feedback: "Getting assistance messages.." })
+        this.setState({ loading: true, feedback: "Getting assistance requests.." })
         let assistance = []
         //loop thru agents
 
@@ -201,7 +201,7 @@ class RejectedAssistance extends React.Component {
                             role="tablist"
                         >
 
-                            <h1>Rejected Assistance Messages</h1>
+                            <h1>Rejected Assistance Requests</h1>
                             {
                                 this.state.rejectedAssistance.map((app, index) => {
                                     return (

@@ -196,7 +196,7 @@ class ApproveAssistance extends React.Component {
                             role="tablist"
                         >
 
-                            <h1>Approve/Reject Pending Assistance</h1>
+                            <h1>Approve/Reject Pending Assistance Requests</h1>
                             {
                                 this.state.pendingAssistance.map((app, index) => {
                                     return (
@@ -275,8 +275,8 @@ class ApproveAssistance extends React.Component {
 
                             }
                             <h2 hidden={!this.state.loading}>{this.state.feedback}</h2>
-                            <h2 hidden={this.state.isApprover || this.state.loading}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending assistance messages</h2>
-                            <h2 hidden={!this.state.isApprover || this.state.pendingAssistance.length > 0 || this.state.loading}>No assistance messages pending approval</h2>
+                            <h2 hidden={this.state.isApprover || this.state.loading}><strong>Unauthorized</strong>: Must be an Approver to approve/reject pending assistance requests</h2>
+                            <h2 hidden={!this.state.isApprover || this.state.pendingAssistance.length > 0 || this.state.loading}>No assistance requests pending approval</h2>
                         </div>
                     </Col>
                 </div>

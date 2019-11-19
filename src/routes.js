@@ -197,7 +197,7 @@ const routes = [
     views: [
       {
         path: "/assistance",
-        name: "Create Assistance Message",
+        name: "Create Assistance Request",
         component: Assistance,
         layout: "/admin",
         adminOnly: false,
