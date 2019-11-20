@@ -13,7 +13,7 @@ let mongodb = client.getServiceClient(
     RemoteMongoClient.factory,
     "mongodb-atlas"
 );
-let db = mongodb.db("CentralBDC");
+let db = mongodb.db("CentralBDC2");
 
 async function getCollection(name){
     const collection = await db.collection(name);
