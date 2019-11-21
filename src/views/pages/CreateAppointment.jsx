@@ -25,7 +25,7 @@ import { Col} from "reactstrap";
 import Step1 from "../forms/WizardSteps/Step1.jsx";
 import Step2 from "../forms/WizardSteps/Step2.jsx";
 import Step3 from "../forms/WizardSteps/Step3.jsx";
-
+import axios from 'axios'
 var steps = [
     {
         stepName: "customer",
@@ -115,6 +115,11 @@ class CreateAppointment extends React.Component {
         agent.appointments = agentAppts
         await agents.findOneAndUpdate({ userId: user.userId }, agent)
 
+        
+        //hotfix!!
+        await this.acceptAppointment(new_app)
+
+
         await this.setState({ loading: false })
         await this.props.history.push("/admin/dashboard")
 
@@ -146,6 +151,68 @@ class CreateAppointment extends React.Component {
             return message
         }
     }
+
+    //HOT FIX
+    async acceptAppointment(appointment) {
+        //update appointment to be ispending false, verified is now
+        this.setState({ loading: true })
+        let new_app = appointment;
+        new_app.isPending = false;
+        new_app.verified = new Date()
+        let agents = await this.props.mongo.getCollection("agents")
+        let agent = await agents.findOne({ _id: appointment.agent_id })
+
+        let apps = await agent.appointments.filter((a) => {
+            return a.created.getTime() !== appointment.created.getTime();
+
+        })
+
+        agent.appointments = apps
+        // agent.appointments = x
+        agent.appointments.push(new_app)
+        await agents.findOneAndReplace({ _id: appointment.agent_id }, agent)
+        // await this.getPendingAppointments()
+        await this.sendText(appointment)
+        await this.sendCustText(appointment)
+        this.setState({ loading: false })
+    }
+    async sendText(appointment) {
+        this.setState({loading: true})
+        // await this.setState({loading: true})
+        let contacts = appointment.dealership.contacts
+        let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
+        token = token.data
+        for (let i = 0; i < contacts.length; i++) {
+            await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
+                text: appointment.internal_msg
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+        }
+        
+        this.setState({loading: false})
+        
+    }
+    async sendCustText(appointment) {
+        this.setState({loading: true})
+        let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
+        token = token.data
+
+        await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${appointment.customer_phone}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
+                text: appointment.customer_msg
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+        this.setState({loading:false})
+    }
+    //HOT FIX
+
+
+
     render() {
         return (
             <>

@@ -171,22 +171,22 @@ const routes = [
         adminOnly: false,
         icon: "tim-icons icon-simple-add",
       },
-      {
-        path: "/approve",
-        name: "Pending Appointments",
-        component: Approve,
-        layout: "/admin",
-        adminOnly: false,
-        icon: "tim-icons icon-notes"
-      },
-      {
-        path: "/rejected",
-        name: "Rejected Appointments",
-        component: Rejected,
-        layout: "/admin",
-        adminOnly: false,
-        icon: "tim-icons icon-settings"
-      }
+      // {
+      //   path: "/approve",
+      //   name: "Pending Appointments",
+      //   component: Approve,
+      //   layout: "/admin",
+      //   adminOnly: false,
+      //   icon: "tim-icons icon-notes"
+      // },
+      // {
+      //   path: "/rejected",
+      //   name: "Rejected Appointments",
+      //   component: Rejected,
+      //   layout: "/admin",
+      //   adminOnly: false,
+      //   icon: "tim-icons icon-settings"
+      // }
     ]
   },
   {
