@@ -1,4 +1,5 @@
 import React from "react";
+
 // reactstrap components
 import {
     Button,
@@ -6,14 +7,14 @@ import {
     Card,
     CardHeader,
     CardBody,
-    CardFooter,
+    // CardFooter,
     CardTitle,
     InputGroup, InputGroupAddon, InputGroupText, Form,
     Collapse,
     Row,
     Col,
     Modal,
-    ModalHeader,
+    // ModalHeader,
     ModalBody,
     ModalFooter,
     Input,
@@ -60,8 +61,9 @@ class Users extends React.Component {
     }
     getTeams = async (id) => {
         this.setState({ loading: true })
-        let t = await this.props.mongo.getCollection("teams")
-        t = await t.find().toArray()
+        // let t = await this.props.mongo.getCollection("teams")
+        // t = await t.find().toArray()
+        let t= await this.props.mongo.find("teams")
         await this.setState({ teams: t, loading: false })
     }
     editModalToggle = (a) => {
@@ -85,8 +87,9 @@ class Users extends React.Component {
         if (user.userId == undefined) {
             this.props.history.push("/admin/dashboard")
         }
-        let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({ userId: user.userId })
+        // let agents = await this.props.mongo.getCollection("agents")
+        // let agent = await agents.findOne({ userId: user.userId })
+        let agent = await this.props.mongo.findOne("agents", {"userId": user.userId})
         if (agent.account_type != "admin") {
 
             this.props.history.push("/admin/dashboard")
@@ -102,8 +105,9 @@ class Users extends React.Component {
     }
     async getAgents() {
         this.setState({ loading: true })
-        let agents = await this.props.mongo.getCollection("agents")
-        agents = await agents.find().toArray()
+        // let agents = await this.props.mongo.getCollection("agents")
+        // agents = await agents.find().toArray()
+        let agents = await this.props.mongo.find("agents")
         await this.setState({ agents, loading: false })
 
     }
@@ -111,14 +115,16 @@ class Users extends React.Component {
         this.setState({ loading: true })
         let newAgent = agent
         newAgent.isActive = false
-        let agents = await this.props.mongo.getCollection("agents")
-        await agents.findOneAndUpdate({ email: agent.email }, newAgent)
+        // let agents = await this.props.mongo.getCollection("agents")
+        // await agents.findOneAndUpdate({ email: agent.email }, newAgent)
+        await this.props.mongo.findOneAndUpdate("agents", {"email": agent.email}, newAgent)
         this.setState({ loading: false })
     }
     async editUser() {
         this.setState({ loading: true })
-        let x = await this.props.mongo.getCollection("agents")
-        let currCopy = await x.findOne({ _id: this.state.editID })
+        // let x = await this.props.mongo.getCollection("agents")
+        // let currCopy = await x.findOne({ _id: this.state.editID })
+        let currCopy = await this.props.mongo.findOne("agents", {_id: this.state.editID})
         let merge = {
             name: this.state.editFullName,
             email: this.state.editEmail.toLowerCase(),
@@ -129,8 +135,7 @@ class Users extends React.Component {
             isActive: this.state.editIsActive
         }
         currCopy = Object.assign(currCopy, merge)
-        // console.log(currCopy)
-        x = await x.findOneAndUpdate({ _id: this.state.editID }, currCopy)
+        await this.props.mongo.findOneAndUpdate("agents", { _id: this.state.editID }, currCopy)
         await this.editModalToggle({ name: "", phone: "", account_type: "agent", isActive: false, email: "", team: "", isApprover: false, editID: null })
         await this.getAgents()
 
@@ -150,16 +155,27 @@ class Users extends React.Component {
     }
     registerUser = async () => {
         this.setState({ loading: true, err: { message: "" } })
-        let { db } = this.props.mongo;
+        // let { db } = this.props.mongo;
         // let pass = true;
-        let reg = await this.props.mongo.handleRegister(this.state.newEmail, this.state.newPassword).catch((err => this.setState({ err })))
+        await this.props.mongo.handleRegister(this.state.newEmail, this.state.newPassword).catch((err => this.setState({ err })))
         this.setState({ loading: false })
         let pass = this.state.err.message.length === 0
 
 
 
         if (pass) {
-            await db.collection("agents").insertOne({
+            // await db.collection("agents").insertOne({
+            //     email: this.state.newEmail,
+            //     phone: this.state.newPhone,
+            //     name: this.state.newFullName,
+            //     account_type: this.state.newIsAdmin === true ? "admin" : "agent",
+            //     appointments: [],
+            //     assistance: [],
+            //     isApprover: this.state.newIsAdmin === true || this.state.newIsApprover,
+            //     team: this.state.newTeam,
+            //     isActive: true
+            // })
+            await this.props.mongo.insertOne("agents", {
                 email: this.state.newEmail,
                 phone: this.state.newPhone,
                 name: this.state.newFullName,

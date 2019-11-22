@@ -50,8 +50,9 @@ class ApproveAssistance extends React.Component {
     async componentWillMount() {
         this.setState({ loading: true })
         let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = await this.props.mongo.getCollection("agents")
-        agent = await agent.findOne({ userId: currUser.userId })
+        // let agent = await this.props.mongo.getCollection("agents")
+        // agent = await agent.findOne({ userId: currUser.userId })
+        let agent = await this.props.mongo.findOne("agents", {userId: currUser.userId})
         this.setState({ isApprover: agent.isApprover })
         if (agent.isApprover === true) {
 
@@ -77,8 +78,9 @@ class ApproveAssistance extends React.Component {
     };
     async getPendingAssistance() {
         this.setState({ loading: true })
-        let agents = await this.props.mongo.getCollection("agents")
-        agents = await agents.find().toArray()
+        // let agents = await this.props.mongo.getCollection("agents")
+        // agents = await agents.find().toArray()
+        let agents = await this.props.mongo.find("agents")
         let assistance = []
         //loop thru agents
         for (let agent in agents) {
@@ -96,9 +98,9 @@ class ApproveAssistance extends React.Component {
             }
         }
         await assistance.sort((a, b) => {
-            if (a.created.getTime() > b.created.getTime())
+            if (new Date(a.created).getTime() > new Date(b.created).getTime())
                 return 1;
-            if (a.created.getTime() < b.created.getTime())
+            if (new Date(a.created).getTime() < new Date(b.created).getTime())
                 return -1;
             return 0;
         })
@@ -111,8 +113,9 @@ class ApproveAssistance extends React.Component {
        let newAssistance = assistance
        newAssistance.isPending = false
        newAssistance.isRejected = false
-       let agents = await this.props.mongo.getCollection("agents")
-       let owner = await agents.findOne({userId: newAssistance.userId})
+    //    let agents = await this.props.mongo.getCollection("agents")
+    //    let owner = await agents.findOne({userId: newAssistance.userId})
+        let owner = await this.props.mongo.findOne("agents", {userId: newAssistance.userId})
        console.log(owner)
        let ownerAssistance = await owner.assistance.filter((a)=>{
            return a.text == assistance.text
@@ -122,7 +125,12 @@ class ApproveAssistance extends React.Component {
        if (index !== -1) {
            owner.assistance[index] = newAssistance
         }
-       await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
+    //    await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
+        await this.props.mongo.findOneAndUpdate("agents", {userId: newAssistance.userId}, {
+            assistance: owner.assistance,
+            isPending: false,
+            isRejected: false
+        })
        await this.setState({feedback: "Sending texts to dealers"})
        await this.sendText(newAssistance)
 
@@ -138,8 +146,9 @@ class ApproveAssistance extends React.Component {
        newAssistance.isPending = false
        newAssistance.isRejected = true
        newAssistance.rejectedReason = this.state.rejected_reason
-       let agents = await this.props.mongo.getCollection("agents")
-       let owner = await agents.findOne({userId: newAssistance.userId})
+    //    let agents = await this.props.mongo.getCollection("agents")
+    //    let owner = await agents.findOne({userId: newAssistance.userId})
+    let owner = await this.props.mongo.findOne("agents", {userId: newAssistance.userId})
        let ownerAssistance = await owner.assistance.filter((a)=>{
            return a.text == assistance.text
        })
@@ -147,7 +156,13 @@ class ApproveAssistance extends React.Component {
        if (index !== -1) {
            owner.assistance[index] = newAssistance
         }
-       await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
+    //    await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
+    await this.props.mongo.findOneAndUpdate("agents", {userId: newAssistance.userId},{
+        assistance: owner.assistance, 
+        isPending: false, 
+        isRejected: true, 
+        rejectedReason: this.state.rejected_reason
+    })
        await this.getPendingAssistance()
        this.setState({loading: false})
     }

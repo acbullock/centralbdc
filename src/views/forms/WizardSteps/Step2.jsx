@@ -48,9 +48,10 @@ class CreateAppointment extends React.Component {
   }
   async componentWillMount(){
     let {mongo} = this.props.wizardData
-    let dealerships = await mongo.getCollection("dealerships")
-    let sources = await mongo.getCollection("sources")
-    sources = await sources.find({}).toArray()
+    // let dealerships = await mongo.getCollection("dealerships")
+    // let sources = await mongo.getCollection("sources")
+    // sources = await sources.find({}).toArray()
+    let sources = await mongo.find("sources")
     sources.sort((a,b)=>{
       if(a.label < b.label){
         return -1
@@ -61,7 +62,8 @@ class CreateAppointment extends React.Component {
       return 0
     })
     
-    dealerships = await dealerships.find({}).toArray()
+    // dealerships = await dealerships.find({}).toArray()
+    let dealerships = await mongo.find("dealerships")
     dealerships.sort((a,b)=>{
       if(a.label < b.label){
         return -1

@@ -30,7 +30,6 @@ import Sidebar from "../../components/Sidebar/Sidebar.jsx";
 import routes from "../../routes.js";
 
 import logo from "../../assets/img/logo.png";
-
 var ps;
 
 class Admin extends React.Component {
@@ -55,10 +54,10 @@ class Admin extends React.Component {
       this.props.history.push("/auth/login")
       return;
     }
-    let agents = await this.props.mongo.getCollection("agents")
-    let agent = await agents.findOne({userId: user.userId})
-    
-    this.setState({agent, isAdmin: agent.account_type === "admin"})
+    // let agents = await this.props.mongo.getCollection("agents")
+    // let agent = await agents.findOne({userId: user.userId})
+    let agent =await this.props.mongo.findOne("agents", {"userId": user.userId})
+    this.setState({agent: agent, isAdmin: agent.account_type === "admin"})
     
     if (navigator.platform.indexOf("Win") > -1) {
       document.documentElement.className += " perfect-scrollbar-on";

@@ -15,57 +15,20 @@
 
 */
 import React from "react";
-// nodejs library that concatenates classes
-// import classNames from "classnames";
-// react plugin used to create charts
-import { Line, Pie } from "react-chartjs-2";
-// react plugin for creating vector maps
-import { VectorMap } from "react-jvectormap";
 
+// react plugin used to create charts
+import { Line } from "react-chartjs-2";
 // reactstrap components
 import {
   Button,
-  // ButtonGroup,
   Card,
   CardHeader,
   CardBody,
-  // CardFooter,
   CardTitle,
-  // DropdownToggle,
-  // DropdownMenu,
-  // DropdownItem,
-  // UncontrolledDropdown,
-  // Label,
-  // FormGroup,
-  // Input,
-  // Progress,
   Table,
   Row,
   Col,
-  // UncontrolledTooltip
 } from "reactstrap";
-
-// core components
-import {
-  chartExample1,
-  chartExample2,
-  chartExample3,
-  chartExample4
-} from "../variables/charts.jsx";
-
-// var mapData = {
-//   AU: 760,
-//   BR: 550,
-//   CA: 120,
-//   DE: 1300,
-//   FR: 540,
-//   GB: 690,
-//   GE: 200,
-//   IN: 200,
-//   RO: 600,
-//   RU: 300,
-//   US: 2920
-// };
 
 class Dashboard extends React.Component {
 
@@ -102,13 +65,13 @@ class Dashboard extends React.Component {
     this._isMounted = true
     this._isMounted && this.setState({ loading: true })
     let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    console.log(user.userId)
     if(user.userId == undefined){
       this.props.history.push("/auth/login")
     }
-    let agents = this._isMounted &&  await this.props.mongo.db.collection("agents")
-    this._isMounted && this.setState({ user, agents: agents })
-    let agent = this._isMounted && await agents.findOne({ userId: user.userId })
+    // let agents = this._isMounted &&  await this.props.mongo.db.collection("agents")
+    // this._isMounted && this.setState({ user, agents: agents })
+    // let agent = this._isMounted && await agents.findOne({ userId: user.userId })
+    let agent = this._isMounted && await this.props.mongo.findOne("agents", {"userId": user.userId})
     this._isMounted && this.setState({ agent, isAdmin: agent.account_type === "admin" })
     this._isMounted && await this.getAppointmentData()
     this._isMounted && await this.getChartData()
@@ -125,7 +88,7 @@ class Dashboard extends React.Component {
     this._isMounted && this.setState({loading: true})
     let  time = this.state.mostRecent.time
     let twoHoursAgo = new Date(new Date().getTime() - (3600*1000 + 1800 * 1000))
-    if(time.getTime() < twoHoursAgo.getTime()){
+    if(new Date(time).getTime() < twoHoursAgo.getTime()){
       
       this._isMounted && this.setState({isOld: true})
     }
@@ -138,7 +101,8 @@ class Dashboard extends React.Component {
   async getChartData() {
     // let allAgents = []
     this._isMounted && this.setState({ loading: true })
-    let allAgents = this._isMounted && await this.state.agents.find().toArray()
+    // let allAgents = this._isMounted && await this.state.agents.find().toArray()
+    let allAgents = this._isMounted && await this.props.mongo.find("agents")
     const data = (canvas) => {
       var ctx = canvas.getContext("2d");
 
@@ -172,7 +136,7 @@ class Dashboard extends React.Component {
         let count = 0;
         for (let a in approved_appointments) {
 
-          if (approved_appointments[a].verified.getTime() >= currDay.getTime() && approved_appointments[a].verified.getTime() <= (currDay.getTime() + day)) {
+          if (new Date(approved_appointments[a].verified).getTime() >= currDay.getTime() && new Date(approved_appointments[a].verified).getTime() <= (currDay.getTime() + day)) {
             count++;
 
           }
@@ -251,8 +215,8 @@ class Dashboard extends React.Component {
   }
   async getTop5() {
     this._isMounted && this.setState({ loading: true })
-    let allAgents = this._isMounted && await this.state.agents.find().toArray()
-
+    // let allAgents = this._isMounted && await this.state.agents.find().toArray()
+    let allAgents = this._isMounted && await this.props.mongo.find("agents")
     let nums = []
     for (let a in allAgents) {
       let user = {
@@ -262,16 +226,14 @@ class Dashboard extends React.Component {
 
       for (let b in allAgents[a].appointments) {
         if (allAgents[a].appointments[b].verified != undefined) {
-          if (this.state.mostRecent.time.getTime() < allAgents[a].appointments[b].verified.getTime()) {
+          if (new Date(this.state.mostRecent.time).getTime() < new Date(allAgents[a].appointments[b].verified).getTime()) {
             this._isMounted && this.setState({ mostRecent: { name: allAgents[a].name, time: allAgents[a].appointments[b].verified, dealership: allAgents[a].appointments[b].dealership } })
           }
           let curr = new Date()
           curr.setHours(0, 0, 0, 0)
-          if (allAgents[a].appointments[b].verified.getTime() >= curr.getTime() &&
-            allAgents[a].appointments[b].verified.getTime() < (curr.getTime() + (24 * 3600 * 1000))) {
+          if (new Date(allAgents[a].appointments[b].verified).getTime() >= curr.getTime() &&
+            new Date(allAgents[a].appointments[b].verified).getTime() < (curr.getTime() + (24 * 3600 * 1000))) {
             user.count++;
-            console.log(allAgents[a].name)
-            console.log(new Date(allAgents[a].appointments[b].verified.getTime()))
           }
           
 
@@ -297,15 +259,19 @@ class Dashboard extends React.Component {
     this._isMounted && this.setState({ loading: true })
     let agents;
     if (this.state.isAdmin === true) {
-      agents = this._isMounted && await this.props.mongo.db.collection("agents").find({}).asArray();
+      // agents = this._isMounted && await this.props.mongo.db.collection("agents").find({}).asArray();
+      agents = this._isMounted && await this.props.mongo.find("agents")
+      
     }
     else {
-      agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
+      // agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
+      agents = this._isMounted && await this.props.mongo.findOne("agents", {"userId": this.state.user.userId})
     }
     // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
     if (this.state.isAdmin === true) {
       let appointments = []
       this._isMounted && await agents.map((agent) => {
+        
         let appt = { name: agent.name, appointments: agent.appointments }
         appointments.push(appt);
         return agent;
@@ -329,7 +295,7 @@ class Dashboard extends React.Component {
     let ret = 0;
     someDay.setDate(someDay.getDate() + (-1 * numDays));
     for (let appt in appts) {
-      if (appts[appt].verified >= someDay && appts[appt].isPending === false) {
+      if (new Date(appts[appt].verified).getTime() >= someDay.getTime() && appts[appt].isPending === false) {
         ret++;
       }
     }
@@ -340,7 +306,7 @@ class Dashboard extends React.Component {
     let ret = 0;
     someDay.setDate(someDay.getDate() + (-1 * numDays));
     for (let appt in appts) {
-      if (appts[appt].created >= someDay && appts[appt].isPending === true) {
+      if (new Date(appts[appt].created).getTime() >= someDay.getTime() && appts[appt].isPending === true) {
         ret++;
       }
     }
@@ -375,7 +341,7 @@ class Dashboard extends React.Component {
                 <CardBody>
 
                   <h2>
-                    {this.state.mostRecent.time.toLocaleString()}</h2>
+                    {new Date(this.state.mostRecent.time).toLocaleString()}</h2>
                     <h4>
                   <small className="text-muted">
 

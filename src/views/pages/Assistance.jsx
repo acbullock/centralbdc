@@ -59,10 +59,12 @@ class Assistance extends React.Component {
         this.addToPending = this.addToPending.bind(this)
     }
     async componentWillMount(){
-        let d = await this.props.mongo.getCollection("dealerships")
-        let s = await this.props.mongo.getCollection("sources")
-        d = await d.find({}).toArray()
-        s = await  s.find({}).toArray()
+        // let d = await this.props.mongo.getCollection("dealerships")
+        // let s = await this.props.mongo.getCollection("sources")
+        // d = await d.find({}).toArray()
+        // s = await  s.find({}).toArray()
+        let d = await this.props.mongo.find("dealerships")
+        let s = await this.props.mongo.find("sources")
         d.sort((a,b)=>{
             if(a.label < b.label) return -1;
             if(a.label > b.label) return 1;
@@ -76,12 +78,13 @@ class Assistance extends React.Component {
         this.setState({dealerships: d, sources: s})
     }
     async addToPending(e){
-        e.preventDefault()
+        e.preventDefault();
         this.setState({loading: true})
         //get active user..
         let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agents = await this.props.mongo.getCollection("agents");
-        let activeAgent = await agents.findOne({userId: user.userId})
+        // let agents = await this.props.mongo.getCollection("agents");
+        // let activeAgent = await agents.findOne({userId: user.userId})
+        let activeAgent = await this.props.mongo.findOne("agents", {userId: user.userId})
         let newAssistanceArray = activeAgent.assistance
         
         let newAssistanceObject = {
@@ -99,15 +102,15 @@ class Assistance extends React.Component {
         }
         newAssistanceArray.push(newAssistanceObject)
         activeAgent.assistance = newAssistanceArray
-        await agents.findOneAndUpdate({userId: user.userId}, activeAgent)
-
+        // await agents.findOneAndUpdate({userId: user.userId}, activeAgent)
+        await this.props.mongo.findOneAndUpdate("agents", {userId: user.userId}, {assistance: newAssistanceArray})
         await this.setState({
             loading: false,
             firstName: "",
             lastName: "",
             phone: "",
-            dealership: {},
-            source: {},
+            dealership: {label:"", value:""},
+            source: {label:"", value:""},
             message: "",
             text: ""})
 
@@ -161,6 +164,7 @@ class Assistance extends React.Component {
                                     </Label>
                                     <Select
                                         placeholder="Dealership"
+                                        value={this.state.dealership}
                                         options={this.state.dealerships}
                                         onChange={async (e)=>{ await this.setState({dealership: e}); this.makeAssistanceMessage()}}
                                     /><br/>
@@ -195,6 +199,7 @@ class Assistance extends React.Component {
                                     <Select
                                         placeholder="Source"
                                         options={this.state.sources}
+                                        value={this.state.source}
                                         onChange={async (e)=>{ await this.setState({source: e}); this.makeAssistanceMessage()}}
                                     /><br/>
                                     <Label for="message">Message</Label>

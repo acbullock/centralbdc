@@ -17,7 +17,6 @@
 import React from "react";
 // nodejs library that concatenates classes
 import classNames from "classnames";
-
 // reactstrap components
 import {
   Button,
@@ -98,14 +97,18 @@ class AdminNavbar extends React.Component {
     
     let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
     // console.log(user)
-    this.props.mongo.db.collection("agents").findOne({userId: user.userId})
-    .then((res)=>{
+    // this.props.mongo.db.collection("agents").findOne({userId: user.userId})
+    // .then((res)=>{
       
-      this.setState({email:res.email, name: res.name});
-    })
-    .catch((err)=>{
-      this.props.history.push("/auth/login")
-    })
+    //   this.setState({email:res.email, name: res.name});
+    // })
+    // .catch((err)=>{
+    //   this.props.history.push("/auth/login")
+    // })
+    this.props.mongo.findOne("agents", {"userId": user.userId})
+    .then((res)=>{
+      this.setState({email: res.email, name: res.name})
+    }).catch((err)=>this.props.history.push("/auth/login"))
   }
   render() {
     return (

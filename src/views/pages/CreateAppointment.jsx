@@ -54,8 +54,9 @@ class CreateAppointment extends React.Component {
 
     }
     async componentWillMount(){
-        let dealerships = await this.props.mongo.getCollection("dealerships")
-        let dealers = await dealerships.find({}).toArray().catch((err)=>console.log(err))
+        // let dealerships = await this.props.mongo.getCollection("dealerships")
+        // let dealers = await dealerships.find({}).toArray().catch((err)=>console.log(err))
+        let dealers = await this.props.mongo.find("dealerships")
         await this.setState({dealerships: dealers})
     }
     finished = async (data) => {
@@ -90,8 +91,9 @@ class CreateAppointment extends React.Component {
         }
 
         let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({ userId: user.userId })
+        // let agents = await this.props.mongo.getCollection("agents")
+        // let agent = await agents.findOne({ userId: user.userId })
+        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
 
         let agentAppts = [];
         agent.appointments != undefined ? agentAppts = agent.appointments : agentAppts = []
@@ -113,8 +115,8 @@ class CreateAppointment extends React.Component {
         }
         agentAppts.push(new_app)
         agent.appointments = agentAppts
-        await agents.findOneAndUpdate({ userId: user.userId }, agent)
-
+        // await agents.findOneAndUpdate({ userId: user.userId }, agent)
+        await this.props.mongo.findOneAndUpdate("agents", {userId: user.userId}, {appointments: agent.appointments})
         
         //hotfix!!
         await this.acceptAppointment(new_app)
@@ -159,18 +161,20 @@ class CreateAppointment extends React.Component {
         let new_app = appointment;
         new_app.isPending = false;
         new_app.verified = new Date()
-        let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({ _id: appointment.agent_id })
+        // let agents = await this.props.mongo.getCollection("agents")
+        // let agent = await agents.findOne({ _id: appointment.agent_id })
+        let agent = await this.props.mongo.findOne("agents", {_id: appointment.agent_id})
 
         let apps = await agent.appointments.filter((a) => {
-            return a.created.getTime() !== appointment.created.getTime();
+            return new Date(a.created).getTime() !== new Date(appointment.created).getTime();
 
         })
 
         agent.appointments = apps
         // agent.appointments = x
         agent.appointments.push(new_app)
-        await agents.findOneAndReplace({ _id: appointment.agent_id }, agent)
+        // await agents.findOneAndReplace({ _id: appointment.agent_id }, agent)
+        await this.props.mongo.findOneAndUpdate("agents", {_id: appointment.agent_id}, {appointments: agent.appointments})
         // await this.getPendingAppointments()
         await this.sendText(appointment)
         await this.sendCustText(appointment)

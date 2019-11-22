@@ -57,8 +57,9 @@ class Dealerships extends React.Component {
     }
     getDealerships = async () => {
         this.setState({ loading: true })
-        let d = await this.props.mongo.getCollection("dealerships")
-        d = await d.find().toArray()
+        // let d = await this.props.mongo.getCollection("dealerships")
+        // d = await d.find().toArray()
+        let d = await this.props.mongo.find("dealerships")
         d.sort((a, b) => {
             if (a.label < b.label) return -1
             if (a.label > b.label) return 1
@@ -68,16 +69,18 @@ class Dealerships extends React.Component {
     }
     async addContactToDealer(contact, dealer){
         this.setState({loading: true})
-        let d = await this.props.mongo.getCollection("dealerships")
-        let ref = await d.findOne({_id: dealer._id})
+        // let d = await this.props.mongo.getCollection("dealerships")
+        // let ref = await d.findOne({_id: dealer._id})
+        let ref = await this.props.mongo.findOne("dealerships", {_id: dealer._id})
         if(ref.contacts.includes(contact)){
             await this.setState({loading:false, addContact:""})
             return;
         }
         ref.contacts.push(contact)
-        await d.findOneAndUpdate({_id: dealer._id}, ref)
+        // await d.findOneAndUpdate({_id: dealer._id}, ref)
+        await this.props.mongo.findOneAndUpdate("dealerships", {_id: dealer._id}, ref)
         await this.setState({editDealershipAddress: ref.address, editContacts: ref.contacts,
-        editDealershipName: ref.label, addContact: "", editDealershipTextFrom: "", loading: false})
+        editDealershipName: ref.label, addContact: "", editDealershipTextFrom: ref.textFrom, loading: false})
         await this.getDealerships()
         this.setState({loading: false})
     }
@@ -87,10 +90,11 @@ class Dealerships extends React.Component {
         copy.contacts = copy.contacts.filter((c)=>{
             return c != contact
         })
-        let dealers = await this.props.mongo.getCollection("dealerships")
-        await dealers.findOneAndUpdate({_id: dealer._id}, copy)
-
-        this.setState({loading: false, removeContact: ""})
+        // let dealers = await this.props.mongo.getCollection("dealerships")
+        // await dealers.findOneAndUpdate({_id: dealer._id}, copy)
+        await this.props.mongo.findOneAndUpdate("dealerships", {_id: dealer._id}, copy)
+        await this.getDealerships()
+        this.setState({loading: false, removeContact: "", editContacts: copy.contacts})
     }
     editModalToggle = (a) => {
         this.setState({
@@ -110,10 +114,10 @@ class Dealerships extends React.Component {
         if (user.userId == undefined) {
             this.props.history.push("/admin/dashboard")
         }
-        let agents = await this.props.mongo.getCollection("agents")
+        // let agents = await this.props.mongo.getCollection("agents")
 
-        let agent = await agents.findOne({ userId: user.userId })
-
+        // let agent = await agents.findOne({ userId: user.userId })
+        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
         if (agent.account_type != "admin") {
 
             this.props.history.push("/admin/dashboard")
@@ -130,20 +134,23 @@ class Dealerships extends React.Component {
     }
     async getAgents() {
         this.setState({ loading: true })
-        let agents = await this.props.mongo.getCollection("agents")
-        agents = await agents.find().toArray()
+        // let agents = await this.props.mongo.getCollection("agents")
+        // agents = await agents.find().toArray()
+        let agents = await this.props.mongo.find("agents")
         await this.setState({ agents, loading: false })
 
     }
     async handleRemove(dealership) {
         this.setState({ loading: true })
-        let dealerships = await this.props.mongo.getCollection("dealerships")
-        dealerships = dealerships.findOneAndDelete(dealership)
+        // let dealerships = await this.props.mongo.getCollection("dealerships")
+        // dealerships = dealerships.findOneAndDelete(dealership)
+        await this.props.mongo.findOneAndDelete("dealerships", dealership)
     }
     async removeDealership(a){
         this.setState({loading:true})
-        let x = await this.props.mongo.getCollection("dealerships")
-        let found = await x.findOneAndDelete({_id: a._id})
+        // let x = await this.props.mongo.getCollection("dealerships")
+        // let found = await x.findOneAndDelete({_id: a._id})
+        await this.props.mongo.findOneAndDelete("dealerships", {_id: a._id})
         await this.editModalToggle({ label: "", value: "", address: "", contacts: [] })
         await this.getDealerships()
         this.setState({loading:false})
@@ -151,9 +158,9 @@ class Dealerships extends React.Component {
     async editDealership(a) {
         
         this.setState({ loading: true })
-        let x = await this.props.mongo.getCollection("dealerships")
-        let currCopy = await x.findOne({ _id: a._id })
-        
+        // let x = await this.props.mongo.getCollection("dealerships")
+        // let currCopy = await x.findOne({ _id: a._id })
+        let currCopy = await this.props.mongo.findOne("dealerships", {_id: a._id})
         let merge = {
             label: this.state.editDealershipName,
             address: this.state.editDealershipAddress,
@@ -162,14 +169,13 @@ class Dealerships extends React.Component {
         }
         
         currCopy = Object.assign(currCopy, merge)
-        
-        x = await x.findOneAndUpdate({ _id: a._id }, currCopy)
-        
+        // x = await x.findOneAndUpdate({ _id: a._id }, currCopy)
+        await this.props.mongo.findOneAndUpdate("dealerships", {_id: a._id}, currCopy)
         await this.editModalToggle({ label: "", value: "", address: "", contacts: [] })
         await this.getDealerships()
         // await this.getDealerships()
 
-        this.setState({ loading: false })
+        this.setState({ loading: false, openedCollapses: [] })
         
     }
     collapseToggle = async (collapse, a) => {
@@ -196,22 +202,34 @@ class Dealerships extends React.Component {
     }
     registerDealership = async () => {
         this.setState({ loading: true, err: { message: "" } })
-        let { db } = this.props.mongo;
-        // let pass = true;
-        let id = await db.collection("dealerships").insertOne({
+        // let { db } = this.props.mongo;
+        let pass = true;
+        // let id = await db.collection("dealerships").insertOne({
+        //     label: this.state.newDealershipName,
+        //     address: this.state.newAddress,
+        //     contacts: this.state.newContacts,
+        //     textFrom: this.state.newRingCentral
+        // })
+        let id = await this.props.mongo.insertOne("dealerships", {
             label: this.state.newDealershipName,
             address: this.state.newAddress,
             contacts: this.state.newContacts,
             textFrom: this.state.newRingCentral
         })
-        await db.collection("dealerships").findOneAndUpdate({ _id: id.insertedId }, {
+        // await db.collection("dealerships").findOneAndUpdate({ _id: id.insertedId }, {
+        //     label: this.state.newDealershipName,
+        //     address: this.state.newAddress,
+        //     value: id.insertedId,
+        //     contacts: this.state.newContacts,
+        //     textFrom: this.state.newRingCentral
+        // })
+        await this.props.mongo.findOneAndUpdate("dealerships", {_id: id.insertedId}, {
             label: this.state.newDealershipName,
             address: this.state.newAddress,
             value: id.insertedId,
             contacts: this.state.newContacts,
             textFrom: this.state.newRingCentral
         })
-
 
         await this.getDealerships()
         this.addModalToggle()

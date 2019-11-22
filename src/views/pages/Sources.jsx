@@ -60,15 +60,15 @@ class Sources extends React.Component {
         if (user.userId == undefined) {
             this.props.history.push("/admin/dashboard")
         }
-        let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({ userId: user.userId })
+        // let agents = await this.props.mongo.getCollection("agents")
+        // let agent = await agents.findOne({ userId: user.userId })
+        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
         if (agent.account_type != "admin") {
 
             this.props.history.push("/admin/dashboard")
         }
-        let sources = await this.props.mongo.getCollection("sources")
-        sources = await sources.find().toArray()
-        this.setState({ sources })
+        // let sources = await this.props.mongo.getCollection("sources")
+        // sources = await sources.find().toArray()
         await this.getSources()
     }
     async componentWillUnmount() {
@@ -76,8 +76,14 @@ class Sources extends React.Component {
     }
     async getSources() {
         this.setState({ loading: true })
-        let sources = await this.props.mongo.getCollection("sources")
-        sources = await sources.find().toArray()
+        // let sources = await this.props.mongo.getCollection("sources")
+        // sources = await sources.find().toArray()
+        let sources = await this.props.mongo.find("sources")
+        sources = sources.sort((a,b)=>{
+            if(a.label > b.label) return 1
+            if(a.label < b.label) return -1
+            return 0
+        })
         await this.setState({ sources, loading: false })
 
     }
@@ -85,15 +91,17 @@ class Sources extends React.Component {
         this.setState({ loading: true })
         let newAgent = agent
         newAgent.isActive = false
-        let agents = await this.props.mongo.getCollection("agents")
-        await agents.findOneAndUpdate({ email: agent.email }, newAgent)
+        // let agents = await this.props.mongo.getCollection("agents")
+        // await agents.findOneAndUpdate({ email: agent.email }, newAgent)
+        await this.props.mongo.findOneAndUpdate("agents", {email: agent.email}, newAgent)
         this.setState({ loading: false })
     }
     async editSource() {
         
         this.setState({loading: true})
-        let update = await this.props.mongo.getCollection("sources")
-        await update.findOneAndUpdate({_id: this.state.editSourceValue}, {value: this.state.editSourceValue, label: this.state.editSourceName})
+        // let update = await this.props.mongo.getCollection("sources")
+        // await update.findOneAndUpdate({_id: this.state.editSourceValue}, {value: this.state.editSourceValue, label: this.state.editSourceName})
+        await this.props.mongo.findOneAndUpdate("sources", {_id: this.state.editSourceValue}, {value: this.state.editSourceValue, label: this.state.editSourceName})
         await this.getSources()
         await this.editModalToggle({value:"", label:""})
         this.setState({loading:false})
@@ -102,19 +110,28 @@ class Sources extends React.Component {
     addSource = async () => {
 
         this.setState({ loading: true, err: { message: "" } })
-        let sources = await this.props.mongo.getCollection("sources")
-        let x = await sources.insertOne({
+        // let sources = await this.props.mongo.getCollection("sources")
+        
+        // let x = await sources.insertOne({
+        //     label: this.state.newSourceName,
+        //     value: ""
+        // })
+        let x = await this.props.mongo.insertOne("sources", {
             label: this.state.newSourceName,
             value: ""
         })
-        await sources.findOneAndUpdate({ _id: x.insertedId }, {
+        // await sources.findOneAndUpdate({ _id: x.insertedId }, {
+        //     label: this.state.newSourceName,
+        //     value: x.insertedId
+        // })
+        await this.props.mongo.findOneAndUpdate("sources", {_id: x.insertedId}, {
             label: this.state.newSourceName,
             value: x.insertedId
         })
         this.addModalToggle()
-        sources = await this.props.mongo.getCollection("sources")
-        sources = await sources.find().toArray()
-        this.setState({ sources })
+        // sources = await this.props.mongo.getCollection("sources")
+        // sources = await sources.find().toArray()
+        await this.getSources()
         this.setState({ loading: false })
     }
     render() {
@@ -277,8 +294,9 @@ class Sources extends React.Component {
                                                                     </Button>
                                                                     <Button className="btn btn-round" color="danger" disabled={this.state.loading} onClick={async (e) => {
                                                                         this.setState({loading: true})
-                                                                       let sources =  await this.props.mongo.getCollection("sources");
-                                                                       await sources.findOneAndDelete({_id: this.state.editSourceValue})
+                                                                    //    let sources =  await this.props.mongo.getCollection("sources");
+                                                                    //    await sources.findOneAndDelete({_id: this.state.editSourceValue})
+                                                                        await this.props.mongo.findOneAndDelete("sources", {_id: this.state.editSourceValue})
                                                                        await this.editModalToggle({label: "", value: ""})
                                                                        await this.getSources()
                                                                        this.setState({loading: false})

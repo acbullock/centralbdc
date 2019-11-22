@@ -20,7 +20,6 @@ import { NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
 // javascript plugin used to create scrollbars on windows
 import PerfectScrollbar from "perfect-scrollbar";
-
 // reactstrap components
 import { Nav, Collapse } from "reactstrap";
 
@@ -53,7 +52,8 @@ class Sidebar extends React.Component {
     // console.log("why")
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
     await this.setState({user})
-    let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});
+    // let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});
+    let agent = await this.props.mongo.findOne("agents", {"userId": user.userId})
     await this.setState({agent, isAdmin: agent.account_type === "admin"})
     // console.log(this.state.isAdmin)
   }

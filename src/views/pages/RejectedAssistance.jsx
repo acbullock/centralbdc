@@ -59,11 +59,13 @@ class RejectedAssistance extends React.Component {
     async componentWillMount() {
         this.setState({ loading: true })
         let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = await this.props.mongo.getCollection("agents")
-        let dealerships = await this.props.mongo.getCollection("dealerships")
-        let sources = await this.props.mongo.getCollection("sources")
-        sources = await sources.find().toArray()
-        dealerships = await dealerships.find().toArray()
+        // let agent = await this.props.mongo.getCollection("agents")
+        // let dealerships = await this.props.mongo.getCollection("dealerships")
+        // let sources = await this.props.mongo.getCollection("sources")
+        let dealerships = await this.props.mongo.find("dealerships")
+        let sources = await this.props.mongo.find("sources")
+        // sources = await sources.find().toArray()
+        // dealerships = await dealerships.find().toArray()
         dealerships.sort((a,b)=>{
             if(a.label < b.label){
               return -1
@@ -82,8 +84,9 @@ class RejectedAssistance extends React.Component {
         }
         return 0
         })
-        await this.setState({ agents: agent, dealerships, sources })
-        agent = await agent.findOne({ userId: currUser.userId })
+        await this.setState({ dealerships, sources })
+        // agent = await agent.findOne({ userId: currUser.userId })
+        let agent = await this.props.mongo.findOne("agents", {userId: currUser.userId})
         await this.setState({ agent })
         await this.getRejectedAssistance()
         await this.setState({ loading: false, agent })
@@ -180,7 +183,10 @@ class RejectedAssistance extends React.Component {
         let a = this.state.agent
         a.assistance = x
         // console.log(a)
-        await this.state.agents.findOneAndUpdate({ email: this.state.agent.email }, a)
+        // await this.state.agents.findOneAndUpdate({ email: this.state.agent.email }, a)
+        await this.props.mongo.findOneAndUpdate("agents", {email: this.state.agent.email}, {
+            assistance: a.assistance
+        })
         await this.getRejectedAssistance()
         
         this.setState({ loading: false,openedCollapses: [] })

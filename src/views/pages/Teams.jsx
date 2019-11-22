@@ -60,15 +60,15 @@ class Teams extends React.Component {
         if (user.userId == undefined) {
             this.props.history.push("/admin/dashboard")
         }
-        let agents = await this.props.mongo.getCollection("agents")
-        let agent = await agents.findOne({ userId: user.userId })
+        // let agents = await this.props.mongo.getCollection("agents")
+        // let agent = await agents.findOne({ userId: user.userId })
+        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
         if (agent.account_type != "admin") {
 
             this.props.history.push("/admin/dashboard")
         }
-        let teams = await this.props.mongo.getCollection("teams")
-        teams = await teams.find().toArray()
-        this.setState({ teams })
+        // let teams = await this.props.mongo.getCollection("teams")
+        // teams = await teams.find().toArray()
         await this.getTeams()
     }
     async componentWillUnmount() {
@@ -76,8 +76,9 @@ class Teams extends React.Component {
     }
     async getTeams() {
         this.setState({ loading: true })
-        let teams = await this.props.mongo.getCollection("teams")
-        teams = await teams.find().toArray()
+        // let teams = await this.props.mongo.getCollection("teams")
+        // teams = await teams.find().toArray()
+        let teams = await this.props.mongo.find("teams")
         teams.sort((a,b)=>{
             if(a.label < b.label)
                 return -1;
@@ -92,15 +93,17 @@ class Teams extends React.Component {
         this.setState({ loading: true })
         let newAgent = agent
         newAgent.isActive = false
-        let agents = await this.props.mongo.getCollection("agents")
-        await agents.findOneAndUpdate({ email: agent.email }, newAgent)
+        // let agents = await this.props.mongo.getCollection("agents")
+        // await agents.findOneAndUpdate({ email: agent.email }, newAgent)
+        await this.props.mongo.findOneAndUpdate("agents", {email: agent.email}, newAgent)
         this.setState({ loading: false })
     }
     async editTeam() {
         
         this.setState({loading: true})
-        let update = await this.props.mongo.getCollection("teams")
-        await update.findOneAndUpdate({_id: this.state.editTeamValue}, {value: this.state.editTeamValue, label: this.state.editTeamName})
+        // let update = await this.props.mongo.getCollection("teams")
+        // await update.findOneAndUpdate({_id: this.state.editTeamValue}, {value: this.state.editTeamValue, label: this.state.editTeamName})
+        await this.props.mongo.findOneAndUpdate("teams", {_id: this.state.editTeamValue},{value: this.state.editTeamValue, label: this.state.editTeamName})
         await this.getTeams()
         await this.editModalToggle({value:"", label:""})
         this.setState({loading:false})
@@ -109,19 +112,25 @@ class Teams extends React.Component {
     addTeam = async () => {
 
         this.setState({ loading: true, err: { message: "" } })
-        let teams = await this.props.mongo.getCollection("teams")
-        let x = await teams.insertOne({
+        // let teams = await this.props.mongo.getCollection("teams")
+        // let x = await teams.insertOne({
+        //     label: this.state.newTeamName,
+        //     value: ""
+        // })
+        let x =await this.props.mongo.insertOne("teams", {
             label: this.state.newTeamName,
             value: ""
         })
-        await teams.findOneAndUpdate({ _id: x.insertedId }, {
+        // await teams.findOneAndUpdate({ _id: x.insertedId }, {
+        //     label: this.state.newTeamName,
+        //     value: x.insertedId
+        // })
+        await this.props.mongo.findOneAndUpdate("teams", { _id: x.insertedId }, {
             label: this.state.newTeamName,
             value: x.insertedId
         })
         this.addModalToggle()
-        teams = await this.props.mongo.getCollection("teams")
-        teams = await teams.find().toArray()
-        this.setState({ teams })
+        await this.getTeams()
         this.setState({ loading: false })
     }
     render() {
@@ -278,8 +287,9 @@ class Teams extends React.Component {
                                                                     </Button>
                                                                     <Button className="btn btn-round" color="danger" disabled={this.state.loading} onClick={async (e) => {
                                                                         this.setState({loading: true})
-                                                                       let teams =  await this.props.mongo.getCollection("teams");
-                                                                       await teams.findOneAndDelete({_id: this.state.editTeamValue})
+                                                                    //    let teams =  await this.props.mongo.getCollection("teams");
+                                                                    //    await teams.findOneAndDelete({_id: this.state.editTeamValue})
+                                                                    await this.props.mongo.findOneAndDelete("teams", {_id: this.state.editTeamValue})
                                                                        await this.editModalToggle({label: "", value: ""})
                                                                        await this.getTeams()
                                                                        this.setState({loading: false})
