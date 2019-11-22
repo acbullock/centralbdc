@@ -70,6 +70,7 @@ class Dashboard extends React.Component {
     }
     // let agents = this._isMounted &&  await this.props.mongo.db.collection("agents")
     // this._isMounted && this.setState({ user, agents: agents })
+    this._isMounted && this.setState({ user })
     // let agent = this._isMounted && await agents.findOne({ userId: user.userId })
     let agent = this._isMounted && await this.props.mongo.findOne("agents", {"userId": user.userId})
     this._isMounted && this.setState({ agent, isAdmin: agent.account_type === "admin" })
@@ -264,6 +265,8 @@ class Dashboard extends React.Component {
       
     }
     else {
+      console.log("!")
+      console.log(this.state.user.userId)
       // agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
       agents = this._isMounted && await this.props.mongo.findOne("agents", {"userId": this.state.user.userId})
     }
