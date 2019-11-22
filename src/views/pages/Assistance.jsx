@@ -154,7 +154,7 @@ class Assistance extends React.Component {
                     <Col className="mr-auto ml-auto" md="10">
                         <Card className="card-info">
                             <CardHeader>
-                                <h1>Customer Needs Assistance</h1>
+                                <h1>Dealership Follow-up</h1>
                             </CardHeader>
                             <CardBody>
 
@@ -202,7 +202,7 @@ class Assistance extends React.Component {
                                         value={this.state.source}
                                         onChange={async (e)=>{ await this.setState({source: e}); this.makeAssistanceMessage()}}
                                     /><br/>
-                                    <Label for="message">Message</Label>
+                                    <Label for="message">Follow-up Reason</Label>
                                     <Input 
                                         placeholder="Message/notes"
                                         type="textarea"

@@ -191,13 +191,13 @@ const routes = [
   },
   {
     collapse: true,
-    name: "Customer Assistance",
+    name: "Dealership Follow-up",
     icon: "tim-icons icon-alert-circle-exc",
     state: "componentsCollapse",
     views: [
       {
         path: "/assistance",
-        name: "Create Assistance Request",
+        name: "Create Follow-up",
         component: Assistance,
         layout: "/admin",
         adminOnly: false,
@@ -205,7 +205,7 @@ const routes = [
       },
       {
         path: "/approve_assistance",
-        name: "Pending Assistance",
+        name: "Pending Follow-ups",
         component: ApproveAssistance,
         layout: "/admin",
         adminOnly: false,
@@ -213,7 +213,7 @@ const routes = [
       },
       {
         path: "/rejected_assistance",
-        name: "Rejected Assistance",
+        name: "Rejected Follow-ups",
         component: RejectedAssistance,
         layout: "/admin",
         adminOnly: false,
