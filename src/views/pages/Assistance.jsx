@@ -228,7 +228,7 @@ class Assistance extends React.Component {
                                             this.state.phone.length != 10 ||
                                             isNaN(this.state.phone) ||
                                             this.state.dealership.label.length == 0 ||
-                                            this.state.source.label.length == 0 ||
+                                            // this.state.source.label.length == 0 ||
                                             this.state.message.length == 0
                                         }
                                         onClick={this.addToPending}
