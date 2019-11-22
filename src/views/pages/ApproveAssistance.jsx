@@ -173,7 +173,8 @@ class ApproveAssistance extends React.Component {
         let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
         token = token.data
         for (let i = 0; i < contacts.length; i++) {
-            await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${assistance.dealership.textFrom}&token=${token}`, {
+            //await?
+            axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${assistance.dealership.textFrom}&token=${token}`, {
                 text: assistance.text
             }, {
                 headers: {
