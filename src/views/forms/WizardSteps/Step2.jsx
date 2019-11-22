@@ -129,7 +129,7 @@ class CreateAppointment extends React.Component {
                   // input={false}
                     isValidDate = {(current) => {
                       let x = new Date(current);
-                      let now = new Date()
+                      let now = new Date(new Date().getTime() - (24*3600000))
                       let nowAnd3Days = new Date(now.getTime() + (4* 24*60*60*1000))
                       return x < nowAnd3Days && x > now 
                     }}
