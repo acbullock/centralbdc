@@ -80,9 +80,10 @@ class CreateAppointment extends React.Component {
     if(this.state.date == "Invalid Date"){
       return false
     }
-    if (this.state.date < (new Date().getTime() + (2*3600*1000))){
-      return false
-    }
+    // if (this.state.date < (new Date().getTime())){
+    //   console.log("!@#")
+    //   return false
+    // }
     if (this.state.date > (new Date().getTime() + (4*24* 3600*1000))){
       return false
     }
