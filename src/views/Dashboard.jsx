@@ -265,8 +265,6 @@ class Dashboard extends React.Component {
       
     }
     else {
-      console.log("!")
-      console.log(this.state.user.userId)
       // agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
       agents = this._isMounted && await this.props.mongo.findOne("agents", {"userId": this.state.user.userId})
     }
@@ -290,10 +288,19 @@ class Dashboard extends React.Component {
       appointments.push(appt)
       this._isMounted && this.setState({ appointments, loading: false })
     }
-
-
   }
   createdAppointmentsSince(appts, numDays) {
+    let ct = 0
+    let curr = new Date()
+    curr.setHours(0, 0, 0, 0)
+    if(numDays == 0){
+        for (let appt in appts){
+          if (new Date(appts[appt].verified).getTime() >= curr.getTime()){
+            ct++;
+          }
+        }
+        return ct;
+    }
     let someDay = new Date();
     let ret = 0;
     someDay.setDate(someDay.getDate() + (-1 * numDays));
@@ -497,7 +504,7 @@ class Dashboard extends React.Component {
                               </div>
                               </td> */}
                               <td key={index + "-name"}>{app.name}</td>
-                              <td key={index + "-day"}>{this.createdAppointmentsSince(app.appointments, 1)}</td>
+                              <td key={index + "-day"}>{this.createdAppointmentsSince(app.appointments, 0)}</td>
                               <td key={index + "-week"}>{this.createdAppointmentsSince(app.appointments, 7)}</td>
                               <td key={index + "-month"}>{this.createdAppointmentsSince(app.appointments, 30)}</td>
                             </tr>

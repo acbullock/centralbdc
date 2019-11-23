@@ -82,6 +82,9 @@ let scenarios = [
     {
         value: "59", label: "Meeting with VIP manager to hear buy back offer on current vehicle"
     },
+    {
+        value: "60", label: "Customer in the service lounge and waiting to be approached"
+    },
     
 ]
 let compareLabels = (a, b) => {
