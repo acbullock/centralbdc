@@ -177,7 +177,8 @@ class CreateAppointment extends React.Component {
         await this.props.mongo.findOneAndUpdate("agents", {_id: appointment.agent_id}, {appointments: agent.appointments})
         // await this.getPendingAppointments()
         await this.sendText(appointment)
-        await this.sendCustText(appointment)
+        if(appointment.dealership.label !== "West Palm Beach Nissan")
+            await this.sendCustText(appointment)
         this.setState({ loading: false })
     }
     async sendText(appointment) {
