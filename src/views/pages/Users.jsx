@@ -108,6 +108,11 @@ class Users extends React.Component {
         // let agents = await this.props.mongo.getCollection("agents")
         // agents = await agents.find().toArray()
         let agents = await this.props.mongo.find("agents")
+        agents.sort((a,b)=>{
+            if(a.name < b.name) return -1
+            if(a.name > b.name) return 1
+            return 0
+        })
         await this.setState({ agents, loading: false })
 
     }
