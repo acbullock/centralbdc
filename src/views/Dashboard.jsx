@@ -73,7 +73,8 @@ class Dashboard extends React.Component {
     this._isMounted && this.setState({ user })
     // let agent = this._isMounted && await agents.findOne({ userId: user.userId })
     let agent = this._isMounted && await this.props.mongo.findOne("agents", {"userId": user.userId})
-    this._isMounted && this.setState({ agent, isAdmin: agent.account_type === "admin" })
+    let agents = this._isMounted && await this.props.mongo.find("agents")
+    this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
     this._isMounted && await this.getAppointmentData()
     this._isMounted && await this.getChartData()
     this._isMounted && await this.getTop5()
@@ -103,7 +104,7 @@ class Dashboard extends React.Component {
     // let allAgents = []
     this._isMounted && this.setState({ loading: true })
     // let allAgents = this._isMounted && await this.state.agents.find().toArray()
-    let allAgents = this._isMounted && await this.props.mongo.find("agents")
+    let allAgents = this.state.agents
     const data = (canvas) => {
       var ctx = canvas.getContext("2d");
 
@@ -217,7 +218,7 @@ class Dashboard extends React.Component {
   async getTop5() {
     this._isMounted && this.setState({ loading: true })
     // let allAgents = this._isMounted && await this.state.agents.find().toArray()
-    let allAgents = this._isMounted && await this.props.mongo.find("agents")
+    let allAgents = this.state.agents
     let nums = []
     for (let a in allAgents) {
       let user = {
@@ -261,12 +262,12 @@ class Dashboard extends React.Component {
     let agents;
     if (this.state.isAdmin === true) {
       // agents = this._isMounted && await this.props.mongo.db.collection("agents").find({}).asArray();
-      agents = this._isMounted && await this.props.mongo.find("agents")
+      agents = this.state.agents
       
     }
     else {
       // agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
-      agents = this._isMounted && await this.props.mongo.findOne("agents", {"userId": this.state.user.userId})
+      agents = this.state.agent
     }
     // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
     if (this.state.isAdmin === true) {
@@ -515,7 +516,7 @@ class Dashboard extends React.Component {
                   </Table>
                 </CardBody>
               </Card>
-              <Card>
+              {/* <Card>
                 <CardHeader>
                   <div className="tools float-right">
                     <Button
@@ -525,46 +526,7 @@ class Dashboard extends React.Component {
                       <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02"} />
                     </Button>
                   </div>
-                  {/* <div className="tools float-right">
-                    <UncontrolledDropdown>
-                      <DropdownToggle
-                        caret
-                        className="btn-icon"
-                        color="link"
-                        data-toggle="dropdown"
-                        type="button"
-                      >
-                        <i className="tim-icons icon-settings-gear-63" />
-                      </DropdownToggle>
-                      <DropdownMenu right>
-                        <DropdownItem
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Action
-                        </DropdownItem>
-                        <DropdownItem
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Another action
-                        </DropdownItem>
-                        <DropdownItem
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Something else
-                        </DropdownItem>
-                        <DropdownItem
-                          className="text-danger"
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Remove Data
-                        </DropdownItem>
-                      </DropdownMenu>
-                    </UncontrolledDropdown>
-                  </div> */}
+                  
                   <CardTitle tag="h3">Pending Appointments</CardTitle>
 
                 </CardHeader>
@@ -572,7 +534,6 @@ class Dashboard extends React.Component {
                   <Table responsive>
                     <thead className="text-primary">
                       <tr>
-                        {/* <th className="text-center"></th> */}
                         <th>Agent Name</th>
                         <th>1 day</th>
                         <th>7 days</th>
@@ -584,14 +545,6 @@ class Dashboard extends React.Component {
                         this.state.appointments.map((app, index) => {
                           return (
                             <tr key={index}>
-                              {/* <td className="text-center">
-                              <div className="photo">
-                                <img
-                                  alt="..."
-                                  src={require("../assets/img/tania.jpg")}
-                                />
-                              </div>
-                              </td> */}
                               <td key={index + "-name"}>{app.name}</td>
                               <td key={index + "-day"}>{this.pendingAppointmentsSince(app.appointments, 1)}</td>
                               <td key={index + "-week"}>{this.pendingAppointmentsSince(app.appointments, 7)}</td>
@@ -603,7 +556,7 @@ class Dashboard extends React.Component {
                     </tbody>
                   </Table>
                 </CardBody>
-              </Card>
+              </Card> */}
             </Col>
           </Row>
         </div>

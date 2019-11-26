@@ -183,36 +183,20 @@ class CreateAppointment extends React.Component {
     }
     async sendText(appointment) {
         this.setState({loading: true})
-        // await this.setState({loading: true})
         let contacts = appointment.dealership.contacts
-        let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
-        token = token.data
-        for (let i = 0; i < contacts.length; i++) {
-            //await?
-            axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
-                text: appointment.internal_msg
-            }, {
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            })
+        for(let c in contacts){
+            contacts[c] = "1" + contacts[c]
         }
+        this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, contacts)
         
         this.setState({loading: false})
         
     }
     async sendCustText(appointment) {
         this.setState({loading: true})
-        let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
-        token = token.data
-
-        await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${appointment.customer_phone}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
-                text: appointment.customer_msg
-            }, {
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            })
+        let to = []
+        to.push("1"+appointment.customer_phone)
+        this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.customer_msg, to)
         this.setState({loading:false})
     }
     //HOT FIX

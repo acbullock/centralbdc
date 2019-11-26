@@ -16,6 +16,7 @@ let mongodb = client.getServiceClient(
 let db = mongodb.db("CentralBDC2");
 
 let SERVER_URL = "https://guarded-castle-33109.herokuapp.com"
+// let SERVER_URL = "http://localhost:3001"
 // let db = mongodb.db("CentralBDC2");
 
 // async function getCollection(name){
@@ -80,7 +81,12 @@ async function findOneAndDelete(collection, query){
     let res = await axios.post(`${SERVER_URL}/findOneAndDelete`, {"collection": collection, "query": query})
     return res.data
 }
-
+function sendGroupText(fromNumber, text, toNumber){
+    return axios.post(`${SERVER_URL}/sendGroupText?fromNumber=${fromNumber}`, {
+        text,
+        toNumber
+    })
+}
 export default {
     client,
     mongodb,
@@ -95,5 +101,6 @@ export default {
     findOne,
     findOneAndUpdate,
     findOneAndDelete,
-    insertOne
+    insertOne,
+    sendGroupText
 }
