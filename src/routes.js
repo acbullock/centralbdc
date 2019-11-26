@@ -50,6 +50,7 @@ import Teams from "./views/pages/Teams.jsx"
 import Assistance from "./views/pages/Assistance.jsx"
 import ApproveAssistance from "./views/pages/ApproveAssistance.jsx"
 import RejectedAssistance from "./views/pages/RejectedAssistance.jsx"
+import AppointmentHistory from "./views/pages/AppointmentHistory.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -186,7 +187,15 @@ const routes = [
       //   layout: "/admin",
       //   adminOnly: false,
       //   icon: "tim-icons icon-settings"
-      // }
+      // },
+      {
+        path: "/appointment_history",
+        name: "Appointment History",
+        component: AppointmentHistory,
+        layout: "/admin",
+        adminOnly: false,
+        icon: "tim-icons icon-single-copy-04"
+      }
     ]
   },
   {

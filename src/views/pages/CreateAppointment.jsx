@@ -69,8 +69,8 @@ class CreateAppointment extends React.Component {
             internal_message,
             customer_message
         }
-        let customer_first_name = data.customer.firstname
-        let customer_last_name = data.customer.lastname
+        let customer_first_name = this.makeTitleCase(data.customer.firstname)
+        let customer_last_name = this.makeTitleCase(data.customer.lastname)
         let customer_phone = data.customer.phone
         let customer = {
             customer_first_name,
@@ -128,11 +128,21 @@ class CreateAppointment extends React.Component {
 
 
     }
+    makeTitleCase(name){
+        let title = name
+        title = title.toLowerCase().split(' ')
+        for(var i = 0; i< title.length; i++){
+            if(title[i].length < 1) continue;
+            title[i] = title[i][0].toUpperCase() + title[i].slice(1);
+         }
+         title  = title.join(" ")
+         return title
+    }
     generateInternalMessage(data) {
         if (data.customer == undefined || data.appointment == undefined) return
         else {
             let message = `${data.appointment.dealership.label}\n`
-            message += `${data.customer.firstname} ${data.customer.lastname}\n`
+            message += `${this.makeTitleCase(data.customer.firstname)} ${this.makeTitleCase(data.customer.lastname)}\n`
             message += `(${data.customer.phone.substring(0, 3)}) ${data.customer.phone.substring(3, 6)} - ${data.customer.phone.substring(6, 10)}\n`
             let tempDate = new Date(data.appointment.date)
             message += tempDate.toLocaleDateString() + " " + tempDate.toLocaleString([], { hour: '2-digit', minute: '2-digit' }) + "\n"
@@ -145,7 +155,7 @@ class CreateAppointment extends React.Component {
     generateCustomerMessage(data) {
         if (data.customer === undefined || data.appointment === undefined) return
         else {
-            let message = `Hi ${data.customer.firstname}, `
+            let message = `Hi ${this.makeTitleCase(data.customer.firstname)}, `
             message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address} for `
             let tempDate = new Date(data.appointment.date)
             message += tempDate.toLocaleDateString() + " @ " + tempDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ". "

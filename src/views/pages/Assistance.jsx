@@ -77,6 +77,16 @@ class Assistance extends React.Component {
         })
         this.setState({dealerships: d, sources: s})
     }
+    makeTitleCase(name){
+        let title = name
+        title = title.toLowerCase().split(' ')
+        for(let i = 0; i < title.length; i++){
+            if(title[i].length < 1) continue;
+            title[i] = title[i][0].toUpperCase() + title[i].slice(1);
+         }
+         title  = title.join(" ")
+         return title
+    }
     async addToPending(e){
         e.preventDefault();
         this.setState({loading: true})
@@ -91,8 +101,8 @@ class Assistance extends React.Component {
             isPending: true,
             isRejected: false,
             userId: user.userId,
-            customer_firstname: this.state.firstName,
-            customer_lastname: this.state.lastName,
+            customer_firstname: this.makeTitleCase(this.state.firstName),
+            customer_lastname: this.makeTitleCase(this.state.lastName),
             customer_phone: this.state.phone,
             dealership: this.state.dealership,
             source: this.state.source,
@@ -121,7 +131,7 @@ class Assistance extends React.Component {
     }
     async makeAssistanceMessage(){
         let message = "CUSTOMER NEEDS ASSISTANCE\n"
-        message += `${this.state.dealership.label}\n${this.state.firstName} ${this.state.lastName}\n`
+        message += `${this.state.dealership.label}\n${this.makeTitleCase(this.state.firstName)} ${this.makeTitleCase(this.state.lastName)}\n`
         message += `${this.state.phone}\n${this.state.message}\n`
         message += `Source: ${this.state.source.label}`
         

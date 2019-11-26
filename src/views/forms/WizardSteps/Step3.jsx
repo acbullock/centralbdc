@@ -37,6 +37,16 @@ class CreateAppointment extends React.Component {
   componentWillReceiveProps(){
     this.generateInternalMessage()
   }
+  makeTitleCase(name){
+    let title = name
+    title = title.toLowerCase().split(' ')
+    for(var i = 0; i< title.length; i++){
+        if(title[i].length < 1) continue;
+        title[i] = title[i][0].toUpperCase() + title[i].slice(1);
+     }
+     title  = title.join(" ")
+     return title
+}
   generateInternalMessage(){
     let data = this.props.wizardData
     if(data.customer == undefined || data.appointment == undefined ||
@@ -45,7 +55,7 @@ class CreateAppointment extends React.Component {
       data.appointment.scenario == undefined ) return
     else{
       let message = `${data.appointment.dealership.label}\n`
-      message += `${data.customer.firstname} ${data.customer.lastname}\n`
+      message += `${this.makeTitleCase(data.customer.firstname)} ${this.makeTitleCase(data.customer.lastname)}\n`
       message += `(${data.customer.phone.substring(0, 3)}) ${data.customer.phone.substring(3,6)} - ${data.customer.phone.substring(6,10)}\n`
       let tempDate = new Date(data.appointment.date)
       message += tempDate.toLocaleDateString() + " " + tempDate.toLocaleString([],{hour: '2-digit', minute:'2-digit'}) + "\n"
@@ -63,7 +73,7 @@ class CreateAppointment extends React.Component {
       data.appointment.department == undefined ||
       data.appointment.scenario == undefined ) return
     else{
-      let message = `Hi ${data.customer.firstname}, `
+      let message = `Hi ${this.makeTitleCase(data.customer.firstname)}, `
       message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address} for `
       let tempDate = new Date(data.appointment.date)
       message += tempDate.toLocaleDateString()+ " @ " + tempDate.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) + ". "
