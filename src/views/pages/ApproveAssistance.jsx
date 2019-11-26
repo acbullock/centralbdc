@@ -170,10 +170,16 @@ class ApproveAssistance extends React.Component {
         this.setState({loading: true})
         // await this.setState({loading: true})
         let contacts = assistance.dealership.contacts
+        let token = await this.props.mongo.getToken()
+        let arr = []
         for(let c in contacts){
             contacts[c] = "1" + contacts[c]
+            arr = []
+            arr.push(contacts[c])
+            
+            this.props.mongo.sendGroupText("1"+assistance.dealership.textFrom, assistance.text, arr, token)
         }
-        this.props.mongo.sendGroupText("1"+assistance.dealership.textFrom, assistance.text, contacts)
+        
         
         this.setState({loading: false})
         

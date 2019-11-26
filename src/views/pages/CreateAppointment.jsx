@@ -49,7 +49,8 @@ class CreateAppointment extends React.Component {
         super(props);
         this.state = {
             loading: false,
-            dealerships: []
+            dealerships: [],
+            token: ""
         };
 
     }
@@ -194,10 +195,16 @@ class CreateAppointment extends React.Component {
     async sendText(appointment) {
         this.setState({loading: true})
         let contacts = appointment.dealership.contacts
+        let arr = []
+        let token = await this.props.mongo.getToken()
+        await this.setState({token: token})
         for(let c in contacts){
             contacts[c] = "1" + contacts[c]
+            arr = []
+            arr.push(contacts[c])
+            this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, arr, token)
         }
-        this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, contacts)
+        
         
         this.setState({loading: false})
         
@@ -206,7 +213,8 @@ class CreateAppointment extends React.Component {
         this.setState({loading: true})
         let to = []
         to.push("1"+appointment.customer_phone)
-        this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.customer_msg, to)
+        // let token = await this.props.mongo.getToken()
+        this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.customer_msg, to, this.state.token)
         this.setState({loading:false})
     }
     //HOT FIX

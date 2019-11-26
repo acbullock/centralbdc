@@ -81,11 +81,16 @@ async function findOneAndDelete(collection, query){
     let res = await axios.post(`${SERVER_URL}/findOneAndDelete`, {"collection": collection, "query": query})
     return res.data
 }
-function sendGroupText(fromNumber, text, toNumber){
-    return axios.post(`${SERVER_URL}/sendGroupText?fromNumber=${fromNumber}`, {
+function sendGroupText(fromNumber, text, toNumber, token){
+    return axios.post(`${SERVER_URL}/sendGroupText?fromNumber=${fromNumber}&token=${token}`, {
         text,
         toNumber
     })
+}
+async function getToken(){
+    let token =  await axios.post(`${SERVER_URL}/getToken`, {
+    })
+    return token.data
 }
 export default {
     client,
@@ -102,5 +107,6 @@ export default {
     findOneAndUpdate,
     findOneAndDelete,
     insertOne,
-    sendGroupText
+    sendGroupText,
+    getToken
 }
