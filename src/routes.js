@@ -41,11 +41,12 @@ import Register from "./views/pages/Register.jsx";
 // import User from "./views/pages/User.jsx";
 import Login from "./views/pages/Login.jsx";
 import CreateAppointment from "./views/pages/CreateAppointment.jsx"
-import Approve from "./views/pages/Approve.jsx"
-import Rejected from "./views/pages/Rejected.jsx"
+// import Approve from "./views/pages/Approve.jsx"
+// import Rejected from "./views/pages/Rejected.jsx"
 import Dealerships from "./views/pages/Dealerships.jsx"
 import Users from "./views/pages/Users.jsx"
 import Sources from "./views/pages/Sources.jsx"
+import Scenarios from "./views/pages/Scenarios.jsx"
 import Teams from "./views/pages/Teams.jsx"
 import Assistance from "./views/pages/Assistance.jsx"
 import ApproveAssistance from "./views/pages/ApproveAssistance.jsx"
@@ -137,6 +138,14 @@ const routes = [
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-trophy"
+      },
+      {
+        path: "/scenarios",
+        name: "Scenarios",
+        component: Scenarios,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-laptop"
       },
       // {
       //   path: "/lock-screen",

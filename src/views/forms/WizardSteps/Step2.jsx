@@ -22,7 +22,6 @@ import Select from "react-select";
 import ReactDatetime from "react-datetime";
 
 // core components
-import apptvars from "../apptvars.js"
 Date.prototype.addHours = function (h) {
   this.setTime(this.getTime() + (h * 60 * 60 * 1000));
   return this;
@@ -42,7 +41,9 @@ class CreateAppointment extends React.Component {
       check: "none",
       source: null,
       dealerships:[],
-      sources: []
+      sources: [],
+      scenarios: [],
+      departments: []
     };
     
   }
@@ -61,7 +62,6 @@ class CreateAppointment extends React.Component {
       }
       return 0
     })
-    
     // dealerships = await dealerships.find({}).toArray()
     let dealerships = await mongo.find("dealerships")
     dealerships.sort((a,b)=>{
@@ -73,7 +73,17 @@ class CreateAppointment extends React.Component {
       }
       return 0
     })
-    this.setState({dealerships, sources})
+    let departments = await mongo.find("departments")
+    departments.sort((a,b)=>{
+      if(a.label < b.label){
+        return -1
+      }
+      if (a.label > b.label){
+        return 1
+      }
+      return 0
+    })
+    this.setState({dealerships, sources, departments})
   }
   
   isValidated(){
@@ -162,17 +172,26 @@ class CreateAppointment extends React.Component {
                     classNamePrefix="react-select"
                     name="department"
                     value={this.state.department}
-                    onChange={e => this.setState({ department: e})}
-                    options={apptvars.departments}
+                    onChange={async(e) => {
+                      await this.setState({ department: e});
+                      await this.setState({scenario: null})
+                      let scenarios = await this.props.wizardData.mongo.find("scenarios")
+                      scenarios = await scenarios.filter((s)=>{
+                        return s.type == this.state.department.label
+                      })
+                      await this.setState({scenarios})
+                    }}
+                    options={this.state.departments}
                     placeholder="Department (required)"
                   /><br />
                   <Select
+                    isDisabled={this.state.department == null}
                     className="react-select primary"
                     classNamePrefix="react-select"
                     name="scenarios"
                     value={this.state.scenario}
                     onChange={value=> this.setState({scenario: value})}
-                    options={apptvars.scenarios}
+                    options={this.state.scenarios}
                     placeholder="Scenario (required)"
                   /><br/>
                  <Select
