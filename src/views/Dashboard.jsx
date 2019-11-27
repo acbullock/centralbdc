@@ -290,6 +290,12 @@ class Dashboard extends React.Component {
       this._isMounted && this.setState({ appointments, loading: false })
     }
   }
+  getMonday(d) {
+    d = new Date(d);
+    var day = d.getDay(),
+        diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+    return new Date(d.setDate(diff));
+  }
   createdAppointmentsSince(appts, numDays) {
     let ct = 0
     let curr = new Date()
@@ -302,15 +308,35 @@ class Dashboard extends React.Component {
         }
         return ct;
     }
-    let someDay = new Date();
-    let ret = 0;
-    someDay.setDate(someDay.getDate() + (-1 * numDays));
-    for (let appt in appts) {
-      if (new Date(appts[appt].verified).getTime() >= someDay.getTime() && appts[appt].isPending === false) {
-        ret++;
+    if(numDays == 7){
+      let monday = this.getMonday(new Date())
+      for (let appt in appts){
+        if (new Date(appts[appt].verified).getTime() >= monday.getTime()){
+          ct++;
+        }
       }
+      return ct;
     }
-    return ret;
+    if( numDays == 30){
+      let date = new Date()
+      var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+      for (let appt in appts){
+        if (new Date(appts[appt].verified).getTime() >= firstDay.getTime()){
+          ct++;
+        }
+      }
+      return ct;
+    }
+    return 0
+    // let someDay = new Date();
+    // let ret = 0;
+    // someDay.setDate(someDay.getDate() + (-1 * numDays));
+    // for (let appt in appts) {
+    //   if (new Date(appts[appt].verified).getTime() >= someDay.getTime() && appts[appt].isPending === false) {
+    //     ret++;
+    //   }
+    // }
+    // return ret;
   }
   pendingAppointmentsSince(appts, numDays) {
     let someDay = new Date();
@@ -486,9 +512,9 @@ class Dashboard extends React.Component {
                       <tr>
                         {/* <th className="text-center"></th> */}
                         <th>Agent Name</th>
-                        <th>1 day</th>
-                        <th>7 days</th>
-                        <th>30 days</th>
+                        <th>Today</th>
+                        <th>This Week</th>
+                        <th>This Month</th>
                       </tr>
                     </thead>
                     <tbody>
