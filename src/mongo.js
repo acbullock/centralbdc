@@ -3,7 +3,7 @@ import {
     UserPasswordCredential,
     UserPasswordAuthProviderClient,
     RemoteMongoClient
-  } from "mongodb-stitch-browser-sdk";
+} from "mongodb-stitch-browser-sdk";
 import axios from "axios"
 // Initialize the App Client
 let client = Stitch.initializeDefaultAppClient("centralbdc-bwpmi");
@@ -24,73 +24,83 @@ let SERVER_URL = "https://guarded-castle-33109.herokuapp.com"
 //     return collection;
 // }
 
-async function handleLogin(email, password){
+async function handleLogin(email, password) {
     const credential = new UserPasswordCredential(email, password);
     let auth = await client.auth.loginWithCredential(credential);
-    let {userId} = await this.getActiveUser(mongodb);
+    let { userId } = await this.getActiveUser(mongodb);
     // let agent = await db.collection("agents").findOne({email});
-    let agent = await axios.post(`${SERVER_URL}/findOne`, {"collection": "agents", "query": {email}}).catch((err)=>{console.log(err)})
+    let agent = await axios.post(`${SERVER_URL}/findOne`, { "collection": "agents", "query": { email } }).catch((err) => { console.log(err) })
     agent = agent.data
-    if(agent.userId === undefined){
-        await axios.post(`${SERVER_URL}/findOneAndUpdate`, {"collection": "agents", "query": {email}, "update": {userId}}).catch((err)=>{console.log(err)})
+    if (agent.userId === undefined) {
+        await axios.post(`${SERVER_URL}/findOneAndUpdate`, { "collection": "agents", "query": { email }, "update": { userId } }).catch((err) => { console.log(err) })
         // agent = Object.assign(agent, {userId})
         // await db.collection("agents").findOneAndUpdate({email}, agent)
     }
     return auth;
 }
-async function handleRemoveUser(email){
+async function handleRemoveUser(email) {
     let agents = await this.getCollection("agents")
-    await axios.post(`${SERVER_URL}/findOneAndDelete`, {"collection": "agents", "query": {email}}).catch((err)=>console.log(err))
+    await axios.post(`${SERVER_URL}/findOneAndDelete`, { "collection": "agents", "query": { email } }).catch((err) => console.log(err))
     // await agents.findOneAndDelete({email})
     console.log("delete done")
 }
-async function handleRegister(email, password){
+async function handleRegister(email, password) {
     const emailPasswordClient = Stitch.defaultAppClient.auth
-    .getProviderClient(UserPasswordAuthProviderClient.factory);
+        .getProviderClient(UserPasswordAuthProviderClient.factory);
 
     let result = await emailPasswordClient.registerWithEmail(email, password)
     return result
 }
-function getActiveUser(mongodb){
+
+function getActiveUser(mongodb) {
     return mongodb.proxy.service.requestClient.activeUserAuthInfo;
 }
-async function handleLogout(client){
+
+async function handleLogout(client) {
     let auth = await client.auth.logout();
     return auth;
 }
 
 async function find(collection) {
-    let arr = await axios.post(`${SERVER_URL}/find`, {"collection": collection})
+    let arr = await axios.post(`${SERVER_URL}/find`, { "collection": collection })
     return arr.data
 }
 
 async function findOne(collection, query) {
-    let res = await axios.post(`${SERVER_URL}/findOne`, {"collection": collection, "query": query})
+    let res = await axios.post(`${SERVER_URL}/findOne`, { "collection": collection, "query": query })
     return res.data
 }
 
 async function findOneAndUpdate(collection, query, update) {
-    let res = await axios.post(`${SERVER_URL}/findOneAndUpdate`, {"collection": collection, "query": query, "update": update})
+    let res = await axios.post(`${SERVER_URL}/findOneAndUpdate`, { "collection": collection, "query": query, "update": update })
     return res.data
 }
 async function insertOne(collection, newObject) {
-    let res = await axios.post(`${SERVER_URL}/insertOne`, {"collection": collection, "item": newObject})
+    let res = await axios.post(`${SERVER_URL}/insertOne`, { "collection": collection, "item": newObject })
     return res.data
 }
-async function findOneAndDelete(collection, query){
-    let res = await axios.post(`${SERVER_URL}/findOneAndDelete`, {"collection": collection, "query": query})
+async function findOneAndDelete(collection, query) {
+    let res = await axios.post(`${SERVER_URL}/findOneAndDelete`, { "collection": collection, "query": query })
     return res.data
 }
-function sendGroupText(fromNumber, text, toNumber, token){
+function sendGroupText(fromNumber, text, toNumber, token) {
     return axios.post(`${SERVER_URL}/sendGroupText?fromNumber=${fromNumber}&token=${token}`, {
         text,
         toNumber
     })
 }
-async function getToken(){
-    let token =  await axios.post(`${SERVER_URL}/getToken`, {
+async function getToken() {
+    let token = await axios.post(`${SERVER_URL}/getToken`, {
     })
     return token.data
+}
+async function handlePasswordReset(email) {
+    // let agent = await this.findOne("agents", {email: email})
+    const emailPassClient = Stitch.defaultAppClient.auth
+        .getProviderClient(UserPasswordAuthProviderClient.factory);
+
+    let reset = await emailPassClient.sendResetPasswordEmail(email)
+    return reset
 }
 export default {
     client,
@@ -108,5 +118,6 @@ export default {
     findOneAndDelete,
     insertOne,
     sendGroupText,
-    getToken
+    getToken,
+    handlePasswordReset,
 }

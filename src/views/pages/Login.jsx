@@ -31,6 +31,7 @@ import {
   InputGroup,
   Container,
   Col,
+  Label
 } from "reactstrap";
 
 import Mongo from "../../mongo";
@@ -66,6 +67,11 @@ class Login extends React.Component {
     .catch((err)=>{
       this.setState({error: err, loading: false})
     })
+  }
+  async resetPassword(){
+    this.setState({loading: true, error: ""})
+    await this.props.mongo.handlePasswordReset(this.state.email).then((res)=>{alert("Successfully sent password reset email.")}).catch(err=>this.setState({error: err}))
+    this.setState({loading: false})
   }
   componentWillUnmount() {
     document.body.classList.toggle("login-page");
@@ -117,11 +123,21 @@ class Login extends React.Component {
                       Log In
                       
                     </Button>
+                    <Button 
+                      block
+                      className="mb-3"
+                      color="info"
+                      href="#pablo"
+                      onClick={()=>this.resetPassword()}
+                      disabled={this.state.loading || this.state.email.length == 0}
+                    >
+                      Reset Password</Button>
                     <Card color="warning" hidden={this.state.error.length === 0} style={{padding: 10}}>
                       <CardText color="white">
                         {this.state.error.message}
                       </CardText>
                     </Card>
+                    <Label>To reset password: Enter your email, and then click "Reset Password"</Label>
                     {/* <div className="pull-left">
                       <h6>
                         <a
