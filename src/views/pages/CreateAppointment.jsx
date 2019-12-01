@@ -196,13 +196,34 @@ class CreateAppointment extends React.Component {
         this.setState({loading: true})
         let contacts = appointment.dealership.contacts
         let arr = []
+        let used_arr = []
         let token = await this.props.mongo.getToken()
+        let USED_DEALERS = [
+            "Acura of Brooklyn",
+            "Plaza Honda",
+            "Plaza Hyundai",
+            "Plaza Kia",
+            "Plaza Toyota",
+        ]
+        let USED_CONTACTS = [
+            "3474142585",
+            "6465490627",
+            "5163294629",
+            "3475769827"
+        ]
         await this.setState({token: token})
         for(let c in contacts){
             contacts[c] = "1" + contacts[c]
             arr = []
             arr.push(contacts[c])
             this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, arr, token)
+            if((USED_DEALERS.indexOf(appointment.dealership.label != -1) && (appointment.dealership_scenario.toLowerCase().includes("used")===true))){
+                for(let u in USED_CONTACTS){
+                    used_arr = []
+                    used_arr.push(USED_CONTACTS[u])
+                    this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, used_arr, token)
+                }
+            }
         }
         
         

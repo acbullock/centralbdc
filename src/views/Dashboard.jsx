@@ -365,13 +365,13 @@ class Dashboard extends React.Component {
               <Card color={this.state.isOld? "red": "success"}  >
                 <CardHeader>
                   <div className="tools float-right">
-                    <Button
+                    {/* <Button
                       onClick={(e) => { e.preventDefault(); this.getChartData(); this.getTop5(); this.isOld() }}
                     >
 
                       <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
-                      {/* <i className="tim-icons icon-refresh-02 tim-icons-is-spinning" /> */}
-                    </Button>
+                      
+                    </Button> */}
                   </div>
                   <CardTitle tag="h3" >Most Recent Appointment</CardTitle>
                 </CardHeader>
@@ -392,13 +392,13 @@ class Dashboard extends React.Component {
               <Card>
                 <CardHeader>
                   <div className="tools float-right">
-                    <Button
+                    {/* <Button
                       onClick={(e) => { e.preventDefault(); this.getTop5() }}
                     >
 
                       <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
-                      {/* <i className="tim-icons icon-refresh-02 tim-icons-is-spinning" /> */}
-                    </Button>
+                      
+                    </Button> */}
                   </div>
                   <CardTitle tag="h3">Top 5 Agents Today</CardTitle>
                 </CardHeader>
@@ -432,13 +432,13 @@ class Dashboard extends React.Component {
               <Card hidden={!this.state.isAdmin}>
                 <CardHeader>
                   <div className="tools float-right">
-                    <Button
+                    {/* <Button
                       onClick={(e) => { e.preventDefault(); this.getChartData() }}
                     >
 
                       <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
-                      {/* <i className="tim-icons icon-refresh-02 tim-icons-is-spinning" /> */}
-                    </Button>
+                      
+                    </Button> */}
                   </div>
                   <CardTitle tag="h3">Approved Appointments</CardTitle>
                 </CardHeader>
@@ -456,14 +456,14 @@ class Dashboard extends React.Component {
               <Card>
                 <CardHeader>
 
-                  <div className="tools float-right">
+                  {/* <div className="tools float-right">
                     <Button
                       onClick={(e) => { e.preventDefault(); this.getAppointmentData() }}
                     >
 
                       <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
                     </Button>
-                  </div>
+                  </div> */}
                   {/* <div className="tools float-right">
                     <UncontrolledDropdown>
                       <DropdownToggle
