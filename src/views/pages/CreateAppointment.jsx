@@ -206,10 +206,11 @@ class CreateAppointment extends React.Component {
             "Plaza Toyota",
         ]
         let USED_CONTACTS = [
-            "3474142585",
-            "6465490627",
-            "5163294629",
-            "3475769827"
+            // "3474142585",
+            // "6465490627",
+            // "5163294629",
+            // "3475769827"
+            "9548646379"
         ]
         await this.setState({token: token})
         for(let c in contacts){
