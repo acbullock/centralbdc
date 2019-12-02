@@ -219,11 +219,13 @@ class CreateAppointment extends React.Component {
             arr.push(contacts[c])
             this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, arr, token)
         }
-        if((USED_DEALERS.indexOf(appointment.dealership.label != -1) && (appointment.dealership_scenario.toLowerCase().indexOf("used") != -1))){
-            for(let u in USED_CONTACTS){
-                used_arr = []
-                used_arr.push(USED_CONTACTS[u])
-                this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, used_arr, token)
+        if(USED_DEALERS.indexOf(appointment.dealership.label) != -1){
+            if(appointment.dealership_scenario.toLowerCase().indexOf("used") != -1){
+                for(let u in USED_CONTACTS){
+                    used_arr = []
+                    used_arr.push(USED_CONTACTS[u])
+                    this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, used_arr, token)
+                }
             }
         }
         
