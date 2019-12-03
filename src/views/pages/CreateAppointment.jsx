@@ -206,10 +206,10 @@ class CreateAppointment extends React.Component {
             "Plaza Toyota",
         ]
         let USED_CONTACTS = [
-            // "3474142585",
-            // "6465490627",
-            // "5163294629",
-            // "3475769827"
+            "3474142585",
+            "6465490627",
+            "5163294629",
+            "3475769827",
             "9548646379"
         ]
         await this.setState({token: token})
@@ -219,6 +219,7 @@ class CreateAppointment extends React.Component {
             arr.push(contacts[c])
             this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, arr, token)
         }
+        //generate new token?
         if(USED_DEALERS.indexOf(appointment.dealership.label) != -1){
             if(appointment.dealership_scenario.toLowerCase().indexOf("used") != -1){
                 for(let u in USED_CONTACTS){
