@@ -27,6 +27,8 @@ import {
   ListGroupItem,
   ListGroup,
   Progress,
+  Input,
+  Label,
   Container,
   Row,
   Col
@@ -41,7 +43,8 @@ class DealershipHistory extends React.Component {
             appointments:[],
             loading: true,
             currDealer: {},
-            dealerAppts: []
+            dealerAppts: [],
+            numDays:0
         };
 
     }
@@ -66,18 +69,39 @@ class DealershipHistory extends React.Component {
         if(new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1
         return 0
     })
+    // appts = appts.filter((a)=>{
+    //     let today = new Date()
+    //     today.setHours(0,0,0,0)
+    //     return new Date(a.verified).getTime() > today.getTime()
+    // })
+    
 
     this.setState({appointments: appts, dealerships: dealerships, loading:false})
 
   }
-  async refreshList(e){
+  async refreshList(){
       let appts = []
       this.setState({loading: true})
       appts = await this.state.appointments.filter((d)=>{
           
-          return d.dealership.label == e.label
+          return d.dealership.label == this.state.currDealer.label
       })
+      let today = new Date()
+    today.setHours(0,0,0,0)
+    let day = new Date(today.getTime() - (24*3600000 * this.state.numDays))
+    appts = appts.filter((a)=>{
+        return new Date(a.verified).getTime() > day.getTime()
+    })
+      for(let z in appts){
+        appts[z].agent_name = await this.getAgentFromId(appts[z].agent_id)
+    }
+
+    
       this.setState({dealerAppts: appts, loading: false})
+  }
+  async getAgentFromId(id){
+      let agent = await this.props.mongo.findOne("agents", {_id: id})
+      return agent.name
   }
   componentWillUnmount() {
       this._isMounted = false
@@ -92,10 +116,19 @@ class DealershipHistory extends React.Component {
               <Col className="ml-auto mr-auto text-center" md="6">
                 <h1 className="title">Dealership History</h1>
                 <h1 hidden={!this.state.loading}>Loading</h1>
+                <Label>Dealership</Label>
                 <Select
                     isDisabled={this.state.loading}
                     options={this.state.dealerships}
-                    onChange={(e)=>{this.setState({currDealer: e}); this.refreshList(e)}}
+                    onChange={async (e)=>{await this.setState({currDealer: e}); this.refreshList()}}
+                />
+                <br/>
+                <Label>
+                    Number of Days in the Past (choose 0 for today only)
+                </Label>
+                <Input
+                    type="number"
+                    onChange={(e)=>{this.setState({numDays: e.target.value}); this.refreshList()}}
                 />
               </Col>
             </Row>
@@ -111,8 +144,9 @@ class DealershipHistory extends React.Component {
                         this.state.dealerAppts.map((appt, i) =>{
                             return (
                                 <div key={i} style={{whiteSpace: "pre-wrap"}} >
+                                    <p>Agent Name: <strong>{appt.agent_name}</strong></p>
                                     <p>{appt.internal_msg}</p>
-                                    <p>{new Date(appt.verified).toLocaleDateString()} {new Date(appt.verified).toLocaleTimeString()}</p>
+                                    <p><strong>{new Date(appt.verified).toLocaleDateString()} {new Date(appt.verified).toLocaleTimeString()}</strong></p>
                                     <hr/>
                                 </div>
                             )
