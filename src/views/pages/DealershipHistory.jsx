@@ -92,9 +92,9 @@ class DealershipHistory extends React.Component {
     appts = appts.filter((a)=>{
         return new Date(a.verified).getTime() > day.getTime()
     })
-      for(let z in appts){
-        appts[z].agent_name = await this.getAgentFromId(appts[z].agent_id)
-    }
+    //   for(let z in appts){
+    //     appts[z].agent_name = await this.getAgentFromId(appts[z].agent_id)
+    // }
 
     
       this.setState({dealerAppts: appts, loading: false})
@@ -124,10 +124,11 @@ class DealershipHistory extends React.Component {
                 />
                 <br/>
                 <Label>
-                    Number of Days in the Past (choose 0 for today only)
+                    Number of Days in the Past (choose 0, or leave blank for <strong>today</strong> only)
                 </Label>
                 <Input
                     type="number"
+                    disabled={this.state.loading}
                     onChange={(e)=>{this.setState({numDays: e.target.value}); this.refreshList()}}
                 />
               </Col>
@@ -144,9 +145,10 @@ class DealershipHistory extends React.Component {
                         this.state.dealerAppts.map((appt, i) =>{
                             return (
                                 <div key={i} style={{whiteSpace: "pre-wrap"}} >
-                                    <p>Agent Name: <strong>{appt.agent_name}</strong></p>
+                                    {/* <p>Agent Name: <strong>{appt.agent_name}</strong></p> */}
                                     <p>{appt.internal_msg}</p>
                                     <p><strong>{new Date(appt.verified).toLocaleDateString()} {new Date(appt.verified).toLocaleTimeString()}</strong></p>
+                                    <p>Agent Id: {appt.agent_id}</p>
                                     <hr/>
                                 </div>
                             )
