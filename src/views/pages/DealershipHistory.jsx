@@ -41,6 +41,7 @@ class DealershipHistory extends React.Component {
         this.state = {
             agent: {},
             appointments: [],
+            dealershps: [],
             assistance: [],
             loading: true,
             currDealer: {},
@@ -55,7 +56,7 @@ class DealershipHistory extends React.Component {
         this._isMounted = true
         let agents = this._isMounted && await this.props.mongo.find("agents")
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
-        dealerships.sort((a, b) => {
+        this._isMounted && dealerships.sort((a, b) => {
             if (a.label > b.label) return 1
             if (a.label < b.label) return -1
             return 0
@@ -125,6 +126,46 @@ class DealershipHistory extends React.Component {
         this._isMounted = false
 
     }
+    async refreshButton(){
+        this.setState({loading:true})
+        let agents = this._isMounted && await this.props.mongo.find("agents")
+        let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
+        this._isMounted && dealerships.sort((a, b) => {
+            if (a.label > b.label) return 1
+            if (a.label < b.label) return -1
+            return 0
+        })
+        let appts = []
+        let assistance = []
+        for (let a in agents) {
+            for (let b in agents[a].appointments) {
+                appts.push(agents[a].appointments[b])
+            }
+            for( let c in agents[a].assistance){
+                assistance.push(agents[a].assistance[c])
+            }
+        }
+        this._isMounted && appts.sort((a, b) => {
+            if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return -1
+            if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1
+            return 0
+        })
+        this._isMounted && assistance.sort((a, b) => {
+            if (new Date(a.created).getTime() > new Date(b.created).getTime()) return -1
+            if (new Date(a.created).getTime() < new Date(b.created).getTime()) return 1
+            return 0
+        })
+        // appts = appts.filter((a)=>{
+        //     let today = new Date()
+        //     today.setHours(0,0,0,0)
+        //     return new Date(a.verified).getTime() > today.getTime()
+        // })
+
+
+        this._isMounted && await this.setState({ appointments: appts, dealerships: dealerships, assistance: assistance })
+        this._isMounted && await this.refreshList()
+        this.setState({loading: false})
+    }
     render() {
         return (
             <>
@@ -148,7 +189,8 @@ class DealershipHistory extends React.Component {
                                     type="number"
                                     disabled={this.state.loading}
                                     onChange={(e) => { this.setState({ numDays: e.target.value }); this.refreshList() }}
-                                />
+                                /><br/>
+                                <Button disabled = {this.state.loading} onClick={()=>{this.refreshButton()}}>Refresh</Button>
                             </Col>
                         </Row>
                         <br /><br /><br />

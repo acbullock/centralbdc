@@ -82,7 +82,7 @@ class Login extends React.Component {
         <div className="content">
           <Container>
             <Col className="ml-auto mr-auto" lg="4" md="6">
-              <Form className="form" >
+              <Form className="form" onSubmit={e => {e.preventDefault(); this.onLogin(this.state.email.toLowerCase(), this.state.password)}}>
                 <Card className="card-login card-white">
                   <CardHeader>
                     <img
@@ -115,10 +115,11 @@ class Login extends React.Component {
                       block
                       className="mb-3"
                       color="primary"
-                      href="#pablo"
-                      onClick={e => {e.preventDefault(); this.onLogin(this.state.email.toLowerCase(), this.state.password)}}
+                      // href="#pablo"
+                      // onClick={e => {e.preventDefault(); this.onLogin(this.state.email.toLowerCase(), this.state.password)}}
                       size="lg"
                       disabled={this.state.loading}
+                      type="submit"
                     >
                       Log In
                       
