@@ -53,6 +53,7 @@ import ApproveAssistance from "./views/pages/ApproveAssistance.jsx"
 import RejectedAssistance from "./views/pages/RejectedAssistance.jsx"
 import AppointmentHistory from "./views/pages/AppointmentHistory.jsx"
 import DealershipHistory from "./views/pages/DealershipHistory.jsx"
+import FailedTexts from "./views/pages/FailedTexts.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -154,7 +155,15 @@ const routes = [
         component: DealershipHistory,
         layout: "/admin",
         adminOnly: true,
-        icon: "time-icons icon-notes"
+        icon: "tim-icons icon-notes"
+      },
+      {
+        path: "/failed_texts",
+        name: "Failed Texts",
+        component: FailedTexts,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-alert-circle-exc"
       },
       // {
       //   path: "/lock-screen",
