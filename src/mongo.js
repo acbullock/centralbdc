@@ -93,6 +93,8 @@ async function getToken() {
     let token = await axios.post(`${SERVER_URL}/getToken`, {
     })
     return token.data
+    // let utils = await this.find("utils")
+    // return utils[0].ring_central_token
 }
 async function handlePasswordReset(email) {
     // let agent = await this.findOne("agents", {email: email})
