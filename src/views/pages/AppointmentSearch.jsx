@@ -51,10 +51,15 @@ class AppointmnetSearch extends React.Component {
     _isMounted = false
     async componentDidMount() {
         this._isMounted = true
+        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let agent = await this.props.mongo.findOne("agents", {_id: user.userId})
+        if(agent.account_type !== "admin"){
+            this._isMounted = false
+            this.props.history.push("/admin/dashboard")
+        }
 
 
-
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
 
     }
     onInputChange(key, value) {

@@ -93,12 +93,13 @@ class Users extends React.Component {
         let agent = await this.props.mongo.findOne("agents", {"userId": user.userId})
         if (agent.account_type != "admin") {
 
-            this.props.history.push("/admin/dashboard")
+            this.props.history.push("/admin/dashboard");
+            this._isMounted = false;
         }
         // let agent = await agents.findOne({userId: })
         // document.body.classList.toggle("white-content");
-        await this.getTeams()
-        await this.getAgents()
+        this._isMounted && await this.getTeams()
+        this._isMounted && await this.getAgents()
 
     }
     componentWillUnmount() {

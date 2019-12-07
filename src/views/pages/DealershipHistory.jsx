@@ -52,6 +52,15 @@ class DealershipHistory extends React.Component {
 
     }
     _isMounted = false
+    async componentWillMount(){
+        this._isMounted = true;
+        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let agent = await this.props.mongo.findOne("agents", {_id: user.userId})
+        if(agent.account_type !== "admin"){
+            this._isMounted = false
+            this.props.history.push('/admin/dashboard')
+        }
+    }
     async componentDidMount() {
         this._isMounted = true
         let agents = this._isMounted && await this.props.mongo.find("agents")

@@ -229,7 +229,7 @@ const routes = [
         name: "Appointment Search",
         component: AppointmentSearch,
         layout: "/admin",
-        adminOnly: false,
+        adminOnly: true,
         icon: "tim-icons icon-light-3"
       }
     ]
