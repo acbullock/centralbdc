@@ -73,11 +73,13 @@ class FailedTexts extends React.Component {
        this.setState({  failed_texts: failed_texts, loading: false })
     }
     async resendText(failed_text){
+        let query = {_id: failed_text._id}
         this.setState({loading: true})
         let token = this._isMounted && await this.props.mongo.getToken()
-        this._isMounted && await this.props.mongo.sendGroupText(failed_text.from.phoneNumber, failed_text.text, [failed_text.to[0].phoneNumber], token) 
+        this._isMounted && await this.props.mongo.sendGroupText(failed_text.item.body.from.phoneNumber, failed_text.item.body.text, [failed_text.item.body.to[0].phoneNumber], token) 
+        
         //remove from list..
-        this._isMounted && await this.props.mongo.findOneAndDelete("failed_texts", {_id: failed_text._id})
+        this._isMounted && await this.props.mongo.findOneAndDelete("failed_texts", query)
         this._isMounted && await this.refreshList()
         this.setState({loading:false})
     }
@@ -115,16 +117,15 @@ class FailedTexts extends React.Component {
                                     <CardBody >
                                         {
                                             this.state.failed_texts.map((f, i) => {
-                                                console.log(f.item.body.to[0].phoneNumber)
                                                 return (
-                                                    <div key={i} style={{ whiteSpace: "pre-wrap" }} >
+                                                    <div key={f._id} style={{ whiteSpace: "pre-wrap" }} >
                                                         {/* <p>Agent Name: <strong>{appt.agent_name}</strong></p> */}
                                                         <p><strong>To: </strong>{f.item.body.to[0].phoneNumber}</p>
                                                         <p><strong>From: </strong>{f.item.body.from.phoneNumber}</p>
                                                         <blockquote>{f.item.body.text}</blockquote>
 
                                                         <p><strong>Error Message: </strong> {f.item.message}</p>
-                                                        <Button disabled={this.state.loading} color="primary" onClick={()=>{this.resendText(f.item.body)}}>Resend Text</Button>
+                                                        <Button disabled={this.state.loading} color="primary" onClick={()=>{this.resendText(f)}}>Resend Text</Button>
                                                         <Button disabled={this.state.loading} color="warning" onClick={()=>this.removeText(f)}>Cancel Text</Button>
                                                         <hr />
                                                     </div>
