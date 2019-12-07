@@ -52,7 +52,7 @@ class AppointmnetSearch extends React.Component {
     async componentDidMount() {
         this._isMounted = true
         let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = await this.props.mongo.findOne("agents", {_id: user.userId})
+        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
         if(agent.account_type !== "admin"){
             this._isMounted = false
             this.props.history.push("/admin/dashboard")
