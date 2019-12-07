@@ -55,6 +55,7 @@ class Users extends React.Component {
             editID: null,
             teams: []
         }
+        this._isMounted = false
     }
     addModalToggle = () => {
         this.setState({ addUserModal: !this.state.addUserModal })
@@ -100,11 +101,15 @@ class Users extends React.Component {
         await this.getAgents()
 
     }
-    async componentWillUnmount() {
+    componentWillUnmount() {
+        this._isMounted = false;
         // document.body.classList.toggle("white-content");
     }
+    componentDidMount(){
+        this._isMounted = true
+    }
     async getAgents() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         // let agents = await this.props.mongo.getCollection("agents")
         // agents = await agents.find().toArray()
         let agents = await this.props.mongo.find("agents")
@@ -113,7 +118,7 @@ class Users extends React.Component {
             if(a.name > b.name) return 1
             return 0
         })
-        await this.setState({ agents, loading: false })
+        this._isMounted && await this.setState({ agents, loading: false })
 
     }
     async handleRemove(agent) {
@@ -123,7 +128,7 @@ class Users extends React.Component {
         // let agents = await this.props.mongo.getCollection("agents")
         // await agents.findOneAndUpdate({ email: agent.email }, newAgent)
         await this.props.mongo.findOneAndUpdate("agents", {"email": agent.email}, newAgent)
-        this.setState({ loading: false })
+        this._isMounted &&  this.setState({ loading: false })
     }
     async editUser() {
         this.setState({ loading: true })
@@ -144,7 +149,7 @@ class Users extends React.Component {
         await this.editModalToggle({ name: "", phone: "", account_type: "agent", isActive: false, email: "", team: "", isApprover: false, editID: null })
         await this.getAgents()
 
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
         // console.log(index + " !@#")
     }
     collapseToggle = collapse => {
@@ -159,11 +164,11 @@ class Users extends React.Component {
         }
     }
     registerUser = async () => {
-        this.setState({ loading: true, err: { message: "" } })
+        this._isMounted && this.setState({ loading: true, err: { message: "" } })
         // let { db } = this.props.mongo;
         // let pass = true;
         await this.props.mongo.handleRegister(this.state.newEmail, this.state.newPassword).catch((err => this.setState({ err })))
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
         let pass = this.state.err.message.length === 0
 
 

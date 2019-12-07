@@ -88,13 +88,13 @@ class DealershipHistory extends React.Component {
         // })
 
 
-        this.setState({ appointments: appts, dealerships: dealerships, assistance: assistance, loading: false })
+        this._isMounted && this.setState({ appointments: appts, agents: agents, dealerships: dealerships, assistance: assistance, loading: false })
 
     }
     async refreshList() {
         let appts = []
         let assistance = []
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         appts = await this.state.appointments.filter((d) => {
 
             return d.dealership.label == this.state.currDealer.label
@@ -115,8 +115,14 @@ class DealershipHistory extends React.Component {
         //     appts[z].agent_name = await this.getAgentFromId(appts[z].agent_id)
         // }
 
-
-        this.setState({ dealerAppts: appts, dealerFollow: assistance, loading: false })
+        for(let a in appts){
+            for(let b in this.state.agents){
+                if(this.state.agents[b]._id == appts[a].agent_id){
+                    appts[a].agent_name = this.state.agents[b].name
+                }
+            }
+        }
+        this._isMounted && this.setState({ dealerAppts: appts, dealerFollow: assistance, loading: false })
     }
     async getAgentFromId(id) {
         let agent = await this.props.mongo.findOne("agents", { _id: id })
@@ -127,7 +133,7 @@ class DealershipHistory extends React.Component {
 
     }
     async refreshButton(){
-        this.setState({loading:true})
+        this._isMounted && this.setState({loading:true})
         let agents = this._isMounted && await this.props.mongo.find("agents")
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
         this._isMounted && dealerships.sort((a, b) => {
@@ -162,9 +168,8 @@ class DealershipHistory extends React.Component {
         // })
 
 
-        this._isMounted && await this.setState({ appointments: appts, dealerships: dealerships, assistance: assistance })
+        this._isMounted && await this.setState({ appointments: appts, dealerships: dealerships, assistance: assistance, loading: false })
         this._isMounted && await this.refreshList()
-        this.setState({loading: false})
     }
     render() {
         return (
@@ -179,7 +184,7 @@ class DealershipHistory extends React.Component {
                                 <Select
                                     isDisabled={this.state.loading}
                                     options={this.state.dealerships}
-                                    onChange={async (e) => { await this.setState({ currDealer: e }); this.refreshList() }}
+                                    onChange={async (e) => { this._isMounted && await this.setState({ currDealer: e }); this.refreshList() }}
                                 />
                                 <br />
                                 <Label>
@@ -188,7 +193,7 @@ class DealershipHistory extends React.Component {
                                 <Input
                                     type="number"
                                     disabled={this.state.loading}
-                                    onChange={(e) => { this.setState({ numDays: e.target.value }); this.refreshList() }}
+                                    onChange={(e) => { this._isMounted && this.setState({ numDays: e.target.value }); this.refreshList() }}
                                 /><br/>
                                 <Button disabled = {this.state.loading} onClick={()=>{this.refreshButton()}}>Refresh</Button>
                             </Col>
@@ -208,7 +213,7 @@ class DealershipHistory extends React.Component {
                                                         {/* <p>Agent Name: <strong>{appt.agent_name}</strong></p> */}
                                                         <p>{appt.internal_msg}</p>
                                                         <p>Created: <strong>{new Date(appt.verified).toLocaleDateString()} {new Date(appt.verified).toLocaleTimeString()}</strong></p>
-                                                        <p>Agent Id: {appt.agent_id}</p>
+                                                        <p>Agent Name: {appt.agent_name}</p>
                                                         <hr />
                                                     </div>
                                                 )

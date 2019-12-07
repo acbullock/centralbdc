@@ -54,6 +54,7 @@ import RejectedAssistance from "./views/pages/RejectedAssistance.jsx"
 import AppointmentHistory from "./views/pages/AppointmentHistory.jsx"
 import DealershipHistory from "./views/pages/DealershipHistory.jsx"
 import FailedTexts from "./views/pages/FailedTexts.jsx"
+import AppointmentSearch from "./views/pages/AppointmentSearch.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -222,12 +223,20 @@ const routes = [
         layout: "/admin",
         adminOnly: false,
         icon: "tim-icons icon-single-copy-04"
+      },
+      {
+        path: "/appointment_search",
+        name: "Appointment Search",
+        component: AppointmentSearch,
+        layout: "/admin",
+        adminOnly: false,
+        icon: "tim-icons icon-light-3"
       }
     ]
   },
   {
     collapse: true,
-    name: "Dealership Follow-up",
+    name: "Follow-ups",
     icon: "tim-icons icon-alert-circle-exc",
     state: "componentsCollapse",
     views: [
