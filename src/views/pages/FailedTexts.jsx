@@ -83,11 +83,17 @@ class FailedTexts extends React.Component {
         this._isMounted && await this.refreshList()
         this.setState({loading:false})
     }
+    timeout(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
     async resendAll(){
         this.setState({loading: true})
         let failed_texts = this.state.failed_texts;
         for(let t in failed_texts){
+            this.setState({loading: true})
             await this.resendText(failed_texts[t])
+            this.setState({loading: true})
+            await this.timeout(1000)
         }
         this.setState({loading: false})
     }
