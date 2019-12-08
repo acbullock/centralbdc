@@ -83,6 +83,14 @@ class FailedTexts extends React.Component {
         this._isMounted && await this.refreshList()
         this.setState({loading:false})
     }
+    async resendAll(){
+        this.setState({loading: true})
+        let failed_texts = this.state.failed_texts;
+        for(let t in failed_texts){
+            await this.resendText(failed_texts[t])
+        }
+        this.setState({loading: false})
+    }
     async removeText(failed_text){
         this.setState({loading: true})
         this._isMounted && await this.props.mongo.findOneAndDelete("failed_texts", {_id: failed_text._id})
@@ -112,7 +120,8 @@ class FailedTexts extends React.Component {
                             
                             <Col lg="12" md="12">
                                 <h2>Failed Text Count: {this.state.failed_texts.length}</h2>
-                                <Button onClick={()=>{this.refreshList()}}>Refresh</Button>
+                                <Button  disabled={this.state.loading} onClick={()=>{this.refreshList()}}>Refresh</Button>
+                                <Button disabled={this.state.loading || this.state.failed_texts.length == 0} color="info" onClick={()=>{this.resendAll()}}>Resend All</Button>
                                 <Card className="card-warning card-raised card-white" >
                                     <CardBody >
                                         {
