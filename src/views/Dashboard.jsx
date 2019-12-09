@@ -22,6 +22,8 @@ import { Line, Bar } from "react-chartjs-2";
 import {
   Button,
   Card,
+  CardImg,
+  Container,
   CardHeader,
   CardBody,
   CardTitle,
@@ -73,10 +75,7 @@ class Dashboard extends React.Component {
     if(user.userId == undefined){
       this.props.history.push("/auth/login")
     }
-    // let agents = this._isMounted &&  await this.props.mongo.db.collection("agents")
-    // this._isMounted && this.setState({ user, agents: agents })
     this._isMounted && this.setState({ user })
-    // let agent = this._isMounted && await agents.findOne({ userId: user.userId })
     let agent = this._isMounted && await this.props.mongo.findOne("agents", {"userId": user.userId})
     let agents = this._isMounted && await this.props.mongo.find("agents")
     this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
@@ -473,6 +472,7 @@ class Dashboard extends React.Component {
   }
   getMonday(d) {
     d = new Date(d);
+    d.setHours(0,0,0,0)
     var day = d.getDay(),
         diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
     return new Date(d.setDate(diff));
@@ -533,9 +533,21 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    if(this.state.loading){
-      return (<div className="content"><h1>Loading</h1></div>)
-    }
+    if (this.state.loading) {
+      return (
+          <>
+              <div className="content">
+                  <Container>
+                      <Col className="ml-auto mr-auto text-center" md="6">
+                          <Card color="transparent" >
+                              <CardImg top width="100%" src={this.props.utils.loading} />
+                          </Card>
+                      </Col>
+                  </Container>
+              </div>
+          </>
+      );
+  }
     return (
 
       <>
