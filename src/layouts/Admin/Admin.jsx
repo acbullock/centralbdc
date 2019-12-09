@@ -41,6 +41,7 @@ class Admin extends React.Component {
       opacity: 0,
       sidebarOpened: false,
       mongo: props.mongo,
+      utils: props.utils,
       isAdmin: false,
       agent: {}
     };
@@ -127,7 +128,7 @@ class Admin extends React.Component {
             path={prop.layout + prop.path}
             // component={prop.component}
             render={(props) => <C {...props}
-            mongo={this.state.mongo} />}
+            mongo={this.state.mongo} utils={this.state.utils }/>}
             key={key}
           />
         );

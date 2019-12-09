@@ -28,6 +28,7 @@ import {
     ListGroup,
     Progress,
     Input,
+    Image,
     Label,
     Form,
     Container,
@@ -52,8 +53,8 @@ class AppointmnetSearch extends React.Component {
     async componentDidMount() {
         this._isMounted = true
         let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
-        if(agent.account_type !== "admin"){
+        let agent = await this.props.mongo.findOne("agents", { userId: user.userId })
+        if (agent.account_type !== "admin") {
             this._isMounted = false
             this.props.history.push("/admin/dashboard")
         }
@@ -67,7 +68,7 @@ class AppointmnetSearch extends React.Component {
     }
     async searchAppt(e) {
         e.preventDefault()
-        this.setState({ loading: true, results:[] })
+        this.setState({ loading: true, results: [] })
         let agents = await this.props.mongo.find("agents")
         let appts = []
         for (let a in agents) {
@@ -96,6 +97,21 @@ class AppointmnetSearch extends React.Component {
 
     }
     render() {
+        if (this.state.loading) {
+            return (
+                <>
+                    <div className="content">
+                        <Container>
+                            <Col className="ml-auto mr-auto text-center" md="6" >
+                                <Card color="transparent">
+                                    <CardImg top width="100%" src={this.props.utils.loading}/>
+                                </Card>
+                            </Col>
+                        </Container>
+                    </div>
+                </>
+            );
+        }
         return (
             <>
                 <div className="content">
@@ -112,9 +128,9 @@ class AppointmnetSearch extends React.Component {
                         <Row>
                             <Col lg="6" md="6">
                                 <Card>
-                                    
+
                                     <CardBody>
-                                    
+
                                         <Form onSubmit={(e) => { this.searchAppt(e) }}>
                                             <Label>
                                                 Customer First Name
@@ -144,15 +160,15 @@ class AppointmnetSearch extends React.Component {
                                             <Button type="submit" disabled={this.state.loading || (this.state.searchFirst.length == 0 && this.state.searchLast.length == 0 && this.state.searchPhone.length == 0)}>
                                                 Search
                                             </Button>
-                                            <Button color="warning" disabled={this.state.loading || (this.state.searchFirst.length == 0 && this.state.searchLast.length == 0 && this.state.searchPhone.length == 0)} onClick={(e)=>{
+                                            <Button color="warning" disabled={this.state.loading || (this.state.searchFirst.length == 0 && this.state.searchLast.length == 0 && this.state.searchPhone.length == 0)} onClick={(e) => {
                                                 e.preventDefault();
                                                 this.setState({
                                                     searchFirst: "",
-                                                    searchLast:"",
+                                                    searchLast: "",
                                                     searchPhone: ""
                                                 })
                                             }}>Clear Form</Button>
-                                            
+
                                         </Form>
                                     </CardBody>
 
@@ -170,7 +186,7 @@ class AppointmnetSearch extends React.Component {
                                             <div key={a.agent_id + "_" + i} style={{ whiteSpace: "pre-wrap" }} >
                                                 <Card>
                                                     <CardBody>
-                                                        <p> {a.internal_msg}</p><br/>
+                                                        <p> {a.internal_msg}</p><br />
                                                         <p><strong>Agent Name: </strong>{a.agent_name}</p>
                                                         <p><strong>Appointment Created: </strong>{new Date(a.verified).toLocaleDateString() + " " + new Date(a.verified).toLocaleTimeString()}</p>
                                                     </CardBody>

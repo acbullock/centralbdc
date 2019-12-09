@@ -34,40 +34,57 @@ import {
 
 
 class AppointmentHistory extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            agent: {},
-            appointments:[]
-        };
+  constructor(props) {
+    super(props);
+    this.state = {
+      agent: {},
+      appointments: [],
+      loading: false
+    };
 
-    }
-    _isMounted = false
+  }
+  _isMounted = false
   async componentDidMount() {
-      this._isMounted = true
+    this.setState({loading: true})
+    this._isMounted = true
     let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    let agent = this._isMounted && await this.props.mongo.findOne("agents", {userId: user.userId})
-    this._isMounted && await this.setState({agent: agent})
+    let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
+    this._isMounted && await this.setState({ agent: agent })
     let appts = this.state.agent.appointments
-    this._isMounted && appts.sort((a,b)=>{
-        if(new Date(a.verified).getTime() > new Date(b.verified).getTime()) return -1
-        if(new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1
-        return 0
+    this._isMounted && appts.sort((a, b) => {
+      if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return -1
+      if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1
+      return 0
     })
     let today = new Date()
-    today.setHours(0,0,0,0)
-    appts = appts.filter((a)=>{
-        return new Date(a.verified).getTime() > today.getTime()
+    today.setHours(0, 0, 0, 0)
+    appts = appts.filter((a) => {
+      return new Date(a.verified).getTime() > today.getTime()
     })
 
-    this.setState({appointments: appts})
+    this.setState({ appointments: appts, loading: false })
 
   }
   componentWillUnmount() {
-      this._isMounted = false
-    
+    this._isMounted = false
+
   }
   render() {
+    if (this.state.loading) {
+      return (
+        <>
+          <div className="content">
+            <Container>
+              <Col className="ml-auto mr-auto text-center" md="6">
+                <Card color="transparent">
+                  <CardImg top width="100%" src={this.props.utils.loading} />
+                </Card>
+              </Col>
+            </Container>
+          </div>
+        </>
+      );
+    }
     return (
       <>
         <div className="content">
@@ -80,24 +97,24 @@ class AppointmentHistory extends React.Component {
                 </h4>
               </Col>
             </Row>
-            <br/><br/><br/>
+            <br /><br /><br />
             <Row>
               <Col lg="6" md="12">
-              <h2>Appointment Count: {this.state.appointments.length}</h2>
+                <h2>Appointment Count: {this.state.appointments.length}</h2>
                 <Card className="card-warning card-raised card-white" >
-                
+
                   <CardBody >
-                  
+
                     {
-                        this.state.appointments.map((appt, i) =>{
-                            return (
-                                <div key={i} style={{whiteSpace: "pre-wrap"}} >
-                                    <p>{appt.internal_msg}</p>
-                                    <p>{new Date(appt.verified).toLocaleDateString()} {new Date(appt.verified).toLocaleTimeString()}</p>
-                                    <hr/>
-                                </div>
-                            )
-                        })
+                      this.state.appointments.map((appt, i) => {
+                        return (
+                          <div key={i} style={{ whiteSpace: "pre-wrap" }} >
+                            <p>{appt.internal_msg}</p>
+                            <p>{new Date(appt.verified).toLocaleDateString()} {new Date(appt.verified).toLocaleTimeString()}</p>
+                            <hr />
+                          </div>
+                        )
+                      })
                     }
                   </CardBody>
                 </Card>

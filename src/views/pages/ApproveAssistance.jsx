@@ -24,7 +24,8 @@ import {
     Collapse,
     // CardText,
     Button,
-    Input
+    Input,
+    CardImg, Container,
 
 } from "reactstrap";
 
@@ -185,6 +186,21 @@ class ApproveAssistance extends React.Component {
         
     }
     render() {
+        if (this.state.loading) {
+            return (
+                <>
+                    <div className="content">
+                        <Container>
+                            <Col className="ml-auto mr-auto text-center" md="6">
+                                <Card color="transparent">
+                                    <CardImg top width="100%" src={this.props.utils.loading} />
+                                </Card>
+                            </Col>
+                        </Container>
+                    </div>
+                </>
+            );
+        }
         return (
             <>
                 <div className="content">

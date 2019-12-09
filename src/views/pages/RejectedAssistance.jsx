@@ -29,6 +29,7 @@ import {
     Input,
     Button,
     FormGroup,
+    Container, CardImg,
 
 
 } from "reactstrap";
@@ -195,6 +196,21 @@ class RejectedAssistance extends React.Component {
     }
 
     render() {
+        if (this.state.loading) {
+            return (
+                <>
+                    <div className="content">
+                        <Container>
+                            <Col className="ml-auto mr-auto text-center" md="6">
+                                <Card color="transparent">
+                                    <CardImg top width="100%" src={this.props.utils.loading} />
+                                </Card>
+                            </Col>
+                        </Container>
+                    </div>
+                </>
+            );
+        }
         return (
             <>
                 <div className="content">

@@ -28,6 +28,7 @@ import "./assets/demo/demo.css";
 import "react-notification-alert/dist/animate.css";
 import Mongo from "./mongo.js"
 
+import Utils from "./utils.js"
 const hist = createBrowserHistory();
 
 document.body.classList.toggle("white-content");
@@ -38,10 +39,10 @@ ReactDOM.render(
   <Router history={hist}>
     <Switch>
       <Route path="/auth" render={props => <AuthLayout {...props} 
-      mongo={Mongo}
+      mongo={Mongo} utils={Utils}
       />} />
       <Route path="/admin" render={props => <AdminLayout {...props}
-        mongo={Mongo}
+        mongo={Mongo} utils={Utils}
       />} />
       <Redirect from="/" to="/auth/login" />
     </Switch>

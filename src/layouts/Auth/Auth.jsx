@@ -31,7 +31,8 @@ class Pages extends React.Component {
       sidebarMini: true,
       opacity: 0,
       sidebarOpened: false,
-      mongo: props.mongo
+      mongo: props.mongo,
+      utils: props.utils,
     };
   }
   
@@ -49,6 +50,7 @@ class Pages extends React.Component {
             // component={prop.component}
             render={(props) => <C {...props} 
             mongo={this.state.mongo}
+            utils={this.state.utils}
             />}
             key={key}
           />
