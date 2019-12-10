@@ -55,6 +55,7 @@ import AppointmentHistory from "./views/pages/AppointmentHistory.jsx"
 import DealershipHistory from "./views/pages/DealershipHistory.jsx"
 import FailedTexts from "./views/pages/FailedTexts.jsx"
 import AppointmentSearch from "./views/pages/AppointmentSearch.jsx"
+import DealershipManagement from "./views/pages/DealershipManagement.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -165,6 +166,14 @@ const routes = [
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-alert-circle-exc"
+      },
+      {
+        path: "/new_dealer_mgmt",
+        name: "Dealer Mangement",
+        component: DealershipManagement,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-delivery-fast"
       },
       // {
       //   path: "/lock-screen",
