@@ -111,14 +111,14 @@ const routes = [
         component: Login,
         layout: "/auth",
       },
-      {
-        path: "/new_dealer_mgmt",
-        name: "Dealer Mangement",
-        component: DealershipManagement,
-        layout: "/admin",
-        adminOnly: true,
-        icon: "tim-icons icon-delivery-fast"
-      },
+      // {
+      //   path: "/new_dealer_mgmt",
+      //   name: "Dealer Mangement",
+      //   component: DealershipManagement,
+      //   layout: "/admin",
+      //   adminOnly: true,
+      //   icon: "tim-icons icon-delivery-fast"
+      // },
       {
         path: "/users",
         name: "Users",
@@ -127,14 +127,14 @@ const routes = [
         adminOnly: true,
         icon: "tim-icons icon-single-02"
       },
-      // {
-      //   path: "/dealerships",
-      //   name: "Dealerships",
-      //   component: Dealerships,
-      //   layout: "/admin",
-      //   adminOnly: true,
-      //   icon: "tim-icons icon-delivery-fast"
-      // },
+      {
+        path: "/dealerships",
+        name: "Dealerships",
+        component: Dealerships,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-delivery-fast"
+      },
       {
         path: "/sources",
         name: "Sources",
