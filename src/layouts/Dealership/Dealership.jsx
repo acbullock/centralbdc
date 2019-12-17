@@ -66,7 +66,7 @@ class Dealership extends React.Component {
     }
     this.setState({ agent: agent })
 
-    if (this.refs.mainPanel != undefined && navigator.platform.indexOf("Mac") > -1) {
+    if (this.refs.mainPanel != undefined && navigator.platform.indexOf("Win") > -1) {
       document.documentElement.className += " perfect-scrollbar-on";
       document.documentElement.classList.remove("perfect-scrollbar-off");
       ps = new PerfectScrollbar(this.refs.mainPanel);
