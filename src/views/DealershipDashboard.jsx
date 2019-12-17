@@ -299,7 +299,7 @@ class DealershipDashboard extends React.Component {
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{this.state.thisMonthCount}</strong></h1>
+                    <h1><strong>{isNaN(this.state.thisMonthCount)? "Loading.." :2 * this.state.thisMonthCount}</strong></h1>
 
                   </CardBody>
                 </Card>
@@ -332,7 +332,7 @@ class DealershipDashboard extends React.Component {
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{this.state.lastMonthCount}</strong></h1>
+                    <h1><strong>{isNaN(this.state.lastMonthCount) ? "Loading..":2 * this.state.lastMonthCount}</strong></h1>
 
                   </CardBody>
                 </Card>

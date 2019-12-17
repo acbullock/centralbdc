@@ -263,6 +263,8 @@ class Dealership extends React.Component {
             toggleSidebar={this.toggleSidebar}
           />
           <br />
+          <br />
+          <br />
           <h2 className="text-center"><strong>{this.state.dealership_group}</strong></h2>
 
           <Switch>{this.getRoutes(routes)}</Switch>
