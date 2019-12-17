@@ -113,12 +113,13 @@ class CustomerSearch extends React.Component {
         let token = this._isMounted && await this.props.mongo.findOne("utils", { _id: "5df2b825f195a16a1dbd4bf5" })
         token = token.voice_token;
         let lastMonth = new Date()
-        lastMonth = new Date(lastMonth.setMonth(lastMonth.getMonth() - 1))
-
+        lastMonth = new Date(lastMonth.setDate(lastMonth.getDate() - 10))
+        
         let nextMonth = new Date()
-        nextMonth = new Date(nextMonth.setMonth(nextMonth.getMonth() + 1))
+        console.log(lastMonth, nextMonth)
+        // nextMonth = new Date(nextMonth.setMonth(nextMonth.getMonth() + 1))
 
-        let results = this._isMounted && await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/call-log?access_token=${token}&phoneNumber=${this.state.searchPhone}&withRecording=true&view=Detailed&dateFrom=${lastMonth.getFullYear()}-${lastMonth.getMonth() + 1}-01&dateTo=${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}-01&perPage=1000&page=1`)
+        let results = this._isMounted && await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/call-log?access_token=${token}&phoneNumber=${this.state.searchPhone}&withRecording=true&view=Detailed&dateFrom=${lastMonth.getFullYear()}-${lastMonth.getMonth() + 1}-${lastMonth.getDate()}&dateTo=${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}-${nextMonth.getDate()}&perPage=1000&page=1`)
 
 
 
@@ -126,6 +127,9 @@ class CustomerSearch extends React.Component {
         results = results.filter((r) => {
             let useMe = false;
             for (let v in validNumbers) {
+                if(r.to.phoneNumber == undefined || r.from.phoneNumber == undefined){
+                    continue;
+                }
                 useMe = r.to.phoneNumber.indexOf(validNumbers[v]) != -1 ||
                     r.from.phoneNumber.indexOf(validNumbers[v]) != -1;
                 if (useMe) {
@@ -213,7 +217,7 @@ class CustomerSearch extends React.Component {
                                                     <p><strong>Agent: </strong>{this.state.results[i].from.name || "Not available.."}</p>
                                                     <p><strong>Direction: </strong>{this.state.results[i].direction || "Not available.."}</p>
                                                     <br/>
-                                                    <audio controls src={u} />
+                                                    <audio controls src={u} hidden={u.length < 1}/>
                                                     <br />
                                                     <Button onClick={() => this.loadAudio(i)}>Load Audio</Button>
                                                     <hr />
