@@ -291,7 +291,7 @@ class DealershipDashboard extends React.Component {
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Month-to-Date</legend>
 
-              <Col lg="4">
+              <Col sm="4">
                 <Card className="card-raised card-white">
                   <CardHeader>
                     <CardTitle tag="h3" >
@@ -305,7 +305,7 @@ class DealershipDashboard extends React.Component {
                 </Card>
 
               </Col>
-              <Col lg="4">
+              <Col sm="4">
                 <Card className="card-raised card-white">
                   <CardHeader>
                     <div className="tools float-right">
@@ -324,7 +324,7 @@ class DealershipDashboard extends React.Component {
             </Row>
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Last Month</legend>
-              <Col lg="4">
+              <Col sm="4">
                 <Card className="card-raised card-white">
                   <CardHeader>
                     <CardTitle tag="h3" >
@@ -338,7 +338,7 @@ class DealershipDashboard extends React.Component {
                 </Card>
 
               </Col>
-              <Col lg="4">
+              <Col sm="4">
                 <Card className="card-raised card-white">
                   <CardHeader>
                     <CardTitle tag="h3" >Total Appts: <strong>{this.state.lastMonth}</strong></CardTitle>
