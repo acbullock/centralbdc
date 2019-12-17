@@ -25,7 +25,7 @@ import { Nav, Collapse } from "reactstrap";
 
 var ps;
 
-class Sidebar extends React.Component {
+class DealershipSidebar extends React.Component {
   constructor(props) {
     super(props);
     this.state = this.getCollapseStates(props.routes);
@@ -48,12 +48,13 @@ class Sidebar extends React.Component {
     });
     return initialState;
   };
+  VALID_LINKS = ["Dealership Dashboard", "Recordings", "Customer Search"]
   async getCurrentUser(){
     // console.log("why")
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
     await this.setState({user})
     // let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});
-    let agent = await this.props.mongo.findOne("agents", {"userId": user.userId})
+    let agent = await this.props.mongo.findOne("dealership_users", {"userId": user.userId})
     await this.setState({agent, isAdmin: agent.account_type === "admin"})
     // console.log(this.state.isAdmin)
   }
@@ -77,7 +78,7 @@ class Sidebar extends React.Component {
       if (prop.redirect) {
         return null;
       }
-      if (prop.collapse) {
+      if (prop.collapse && this.VALID_LINKS.indexOf(prop.name) !== -1) {
         var st = {};
         st[prop["state"]] = !this.state[prop.state];
         return (
@@ -120,8 +121,9 @@ class Sidebar extends React.Component {
           </li>
         );
       }
+      if(this.VALID_LINKS.indexOf(prop.name) !== -1){
       return (
-        <li className={this.activeRoute(prop.layout + prop.path)} key={key} hidden={prop.layout !== "/admin" || prop.adminOnly === true && this.state.isAdmin === false}>
+        <li className={this.activeRoute(prop.layout + prop.path)} key={key} hidden={prop.layout != "/dealership" || this.VALID_LINKS.indexOf(prop.name) === -1 || prop.adminOnly === true && this.state.isAdmin === false}>
           <NavLink to={prop.layout + prop.path} activeClassName="" onClick={this.props.closeSidebar}>
             {prop.icon !== undefined ? (
               <>
@@ -140,7 +142,7 @@ class Sidebar extends React.Component {
             )}
           </NavLink>
         </li>
-      );
+      );}
     });
   };
   // verifies if routeName is the one active (in browser input)
@@ -151,14 +153,14 @@ class Sidebar extends React.Component {
     
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
     if(user.userId == undefined){
-      this.props.history.push("/auth/login")
+      this.props.history.push("/authentication/login")
       return;
     }
   }
   async componentDidMount() {
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
     if(user.userId == undefined){
-      this.props.history.push("/auth/login")
+      this.props.history.push("/authentication/login")
       return
     }
     // if you are using a Windows Machine, the scrollbars will have a Mac look
@@ -242,7 +244,7 @@ class Sidebar extends React.Component {
   }
 }
 
-Sidebar.propTypes = {
+DealershipSidebar.propTypes = {
   activeColor: PropTypes.oneOf(["primary", "blue", "green", "orange", "red"]),
   rtlActive: PropTypes.bool,
   routes: PropTypes.array.isRequired,
@@ -262,4 +264,4 @@ Sidebar.propTypes = {
   closeSidebar: PropTypes.func
 };
 
-export default Sidebar;
+export default DealershipSidebar;

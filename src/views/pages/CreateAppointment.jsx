@@ -204,12 +204,17 @@ class CreateAppointment extends React.Component {
             "Plaza Hyundai",
             "Plaza Kia",
             "Plaza Toyota",
+            "Aaaa Test"
         ]
         let USED_CONTACTS = [
             "3474142585",
             "6465490627",
             "5163294629",
             "3475769827",
+            // "9548646379"
+        ]
+        let SERVICE_TO_SALES_CONTACTS = [
+            "3472656027",
             "9548646379"
         ]
         await this.setState({token: token})
@@ -227,6 +232,16 @@ class CreateAppointment extends React.Component {
                     used_arr.push(USED_CONTACTS[u])
                     this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, used_arr, token)
                 }
+            }
+            if(appointment.dealership_department == "Service to Sales"){
+                for(let u in SERVICE_TO_SALES_CONTACTS){
+                    used_arr = []
+                    used_arr.push(SERVICE_TO_SALES_CONTACTS[u])
+                    this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, used_arr, token)
+                }
+            }
+            else{
+                console.log("appointment.dealership_department")
             }
         }
         

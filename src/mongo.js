@@ -38,6 +38,21 @@ async function handleLogin(email, password) {
     }
     return auth;
 }
+async function handleDealerLogin(email, password) {
+    const credential = new UserPasswordCredential(email, password);
+    let auth = await client.auth.loginWithCredential(credential);
+    let { userId } = await this.getActiveUser(mongodb);
+    // let agent = await db.collection("agents").findOne({email});
+    let agent = await axios.post(`${SERVER_URL}/findOne`, { "collection": "dealership_users", "query": { email } }).catch((err) => { console.log(err) })
+    agent = agent.data
+    if (agent.userId === undefined) {
+        await axios.post(`${SERVER_URL}/findOneAndUpdate`, { "collection": "dealership_users", "query": { email }, "update": { userId } }).catch((err) => { console.log(err) })
+        // agent = Object.assign(agent, {userId})
+        // await db.collection("agents").findOneAndUpdate({email}, agent)
+    }
+    return auth;
+}
+
 async function handleRemoveUser(email) {
     let agents = await this.getCollection("agents")
     await axios.post(`${SERVER_URL}/findOneAndDelete`, { "collection": "agents", "query": { email } }).catch((err) => console.log(err))
@@ -104,12 +119,17 @@ async function handlePasswordReset(email) {
     let reset = await emailPassClient.sendResetPasswordEmail(email)
     return reset
 }
+async function callsForMonth(token, month, year, phoneNumber, page) {
+    let result = await axios.get(`${SERVER_URL}/callsForMonth?access_token=${token}&month=${month}&year=${year}&phoneNumber=${phoneNumber}&page=${page}`);
+    return result.data;
+}
 export default {
     client,
     mongodb,
     // db,
     // getCollection,
     handleLogin,
+    handleDealerLogin,
     handleLogout,
     getActiveUser,
     handleRegister,
@@ -122,4 +142,5 @@ export default {
     sendGroupText,
     getToken,
     handlePasswordReset,
+    callsForMonth,
 }

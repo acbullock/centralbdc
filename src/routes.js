@@ -56,6 +56,10 @@ import DealershipHistory from "./views/pages/DealershipHistory.jsx"
 import FailedTexts from "./views/pages/FailedTexts.jsx"
 import AppointmentSearch from "./views/pages/AppointmentSearch.jsx"
 import DealershipManagement from "./views/pages/DealershipManagement.jsx"
+import DealershipLogin from "./views/pages/DealershipLogin.jsx"
+import DealershipDashboard from "./views/DealershipDashboard.jsx"
+// import Recordings from "./views/pages/Recordings.jsx"
+import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -67,6 +71,28 @@ const routes = [
     icon: "tim-icons icon-chart-pie-36",
     component: Dashboard,
     layout: "/admin"
+  },
+  {
+    path: "/dashboard",
+    name: "Dealership Dashboard",
+    rtlName: "لوحة القيادة",
+    icon: "tim-icons icon-chart-pie-36",
+    component: DealershipDashboard,
+    layout: "/dealership"
+  },
+  // {
+  //   path: "/recordings",
+  //   name: "Recordings",
+  //   icon: "tim-icons icon-headphones",
+  //   component: Recordings,
+  //   layout: "/dealership"
+  // },
+  {
+    path: "/customer_search",
+    name: "Customer Search",
+    icon: "tim-icons icon-light-3",
+    component: CustomerSearch,
+    layout: "/dealership"
   },
   {
     collapse: true,
@@ -111,14 +137,20 @@ const routes = [
         component: Login,
         layout: "/auth",
       },
-      // {
-      //   path: "/new_dealer_mgmt",
-      //   name: "Dealer Mangement",
-      //   component: DealershipManagement,
-      //   layout: "/admin",
-      //   adminOnly: true,
-      //   icon: "tim-icons icon-delivery-fast"
-      // },
+      {
+        path: "/login",
+        name: "Dealership Login",
+        component: DealershipLogin,
+        layout: "/authentication",
+      },
+      {
+        path: "/new_dealer_mgmt",
+        name: "Dealer Mangement",
+        component: DealershipManagement,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-delivery-fast"
+      },
       {
         path: "/users",
         name: "Users",

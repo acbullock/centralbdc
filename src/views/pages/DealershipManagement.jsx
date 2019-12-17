@@ -80,6 +80,7 @@ class DealershipManagement extends React.Component {
         this.addToEditTextList = this.addToEditTextList.bind(this)
         this.removeFromEditTextList = this.removeFromEditTextList.bind(this)
         this.removeFromTextList = this.removeFromTextList.bind(this)
+        this.getGroup = this.getGroup.bind(this)
         this._isMounted = false
     }
     async componentWillMount() {
@@ -111,6 +112,10 @@ class DealershipManagement extends React.Component {
             this.clearAddValues()
         }
         this.setState({ [modal_name]: !this.state[modal_name] })
+    }
+    async getGroup(id){
+        let g = await this.props.mongo.findOne("dealership_groups", {_id: id})
+        return g
     }
     addToTextList(phoneNumber) {
         let arr = this.state.addTextList
@@ -637,12 +642,13 @@ class DealershipManagement extends React.Component {
                                     <Button color="primary" disabled={this.state.editDealership.label.length == 0} onClick={async () => {
                                         this.setState({ loading: true })
                                         let d = await this.props.mongo.findOne("dealerships", { value: this.state.editDealership.value })
+                                        let group = await this.getGroup(this.state.editDealership.group)
                                         this.setState({ editDealership: d })
                                         this.setState({
                                             editDealershipName: this.state.editDealership.label,
                                             editDealershipPhone: this.state.editDealership.phone || "",
                                             editDealershipAddress: this.state.editDealership.address || "",
-                                            editDealershipGroup2: this.state.editDealership.group || { label: "", value: "" },
+                                            editDealershipGroup2: group || { label: "", value: "" },
                                             editAvgMonthlyLeadCount: this.state.editDealership.average_monthly_lead_count || "",
                                             editAvgMonthlyRO: this.state.editDealership.average_montly_ro_count || "",
                                             editPrimaryContactName: this.state.editDealership.primary_contact ? this.state.editDealership.primary_contact.name || "" : "",
