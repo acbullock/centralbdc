@@ -54,6 +54,7 @@ class CustomerSearch extends React.Component {
     _isMounted = false
     async componentWillMount() {
         this._isMounted = true;
+        let mappings = this._isMounted && await this.props.mongo.find("dealer_mappings")
         this._isMounted && this.setState({ loading: true })
         //get user..
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
@@ -61,7 +62,7 @@ class CustomerSearch extends React.Component {
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
         //get user's dealership
         let dealership = this._isMounted && await this.props.mongo.findOne("dealerships", { "_id": agent.dealership })
-        this._isMounted && await this.setState({ loading: false, agent: agent, dealership: dealership, dealerships: dealerships });
+        this._isMounted && await this.setState({ loading: false, agent: agent, dealership: dealership, dealerships: dealerships, mappings: mappings[0] });
 
 
     }
@@ -107,7 +108,7 @@ class CustomerSearch extends React.Component {
                 validNumbers.push(this.state.dealerships[d].sales.substring(1, 12))
             }
         }
-        console.log("valid", validNumbers)
+        // console.log("valid", validNumbers)
 
         //get token
         let token = this._isMounted && await this.props.mongo.findOne("utils", { _id: "5df2b825f195a16a1dbd4bf5" })
@@ -116,7 +117,7 @@ class CustomerSearch extends React.Component {
         lastMonth = new Date(lastMonth.setDate(lastMonth.getDate() - 10))
         
         let nextMonth = new Date()
-        console.log(lastMonth, nextMonth)
+        // console.log(lastMonth, nextMonth)
         // nextMonth = new Date(nextMonth.setMonth(nextMonth.getMonth() + 1))
 
         let results = this._isMounted && await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/call-log?access_token=${token}&phoneNumber=${this.state.searchPhone}&withRecording=true&view=Detailed&dateFrom=${lastMonth.getFullYear()}-${lastMonth.getMonth() + 1}-${lastMonth.getDate()}&dateTo=${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}-${nextMonth.getDate()}&perPage=1000&page=1`)
@@ -138,7 +139,7 @@ class CustomerSearch extends React.Component {
             }
             return useMe;
         })
-        console.log("!@#", results)
+        // console.log("!@#", results)
         let urls = []
         for (let r in results) {
             urls[r] = ""
@@ -213,7 +214,7 @@ class CustomerSearch extends React.Component {
                                                     <p><strong>Call Started: </strong>{new Date(this.state.results[i].startTime).toLocaleString()}</p>
                                                     <p><strong>To: </strong>{this.state.results[i].to.phoneNumber}</p>
                                                     <p><strong>From: </strong>{this.state.results[i].from.phoneNumber}</p>
-                                                    {/* <p><strong>Dealership: </strong> {this.state.mappings[this.state.results[i].direction === "Inbound" ? this.state.records[i].to.phoneNumber : this.state.records[i].from.phoneNumber] || "Unavailable"}</p> */}
+                                                    <p><strong>Dealership: </strong> {this.state.mappings[this.state.results[i].direction === "Inbound" ? this.state.results[i].to.phoneNumber : this.state.results[i].from.phoneNumber] || "Unavailable"}</p>
                                                     <p><strong>Agent: </strong>{this.state.results[i].from.name || "Not available.."}</p>
                                                     <p><strong>Direction: </strong>{this.state.results[i].direction || "Not available.."}</p>
                                                     <br/>
