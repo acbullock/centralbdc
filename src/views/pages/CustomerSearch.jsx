@@ -174,8 +174,8 @@ class CustomerSearch extends React.Component {
             <>
                 <div className="content">
                     <Container >
-                        <Row>
-                            <Col lg="8" md={{ size: 6, offset: 3 }}>
+                        <Row style={{justifyContent: "center"}}>
+                            <Col lg="8" >
                                 <Card className="card-raised card-white">
                                     <CardBody>
                                         <Form onSubmit={(e) => { this.searchRecords(e) }}>
@@ -199,8 +199,8 @@ class CustomerSearch extends React.Component {
                             </Col>
                         </Row>
 
-                        <Row>
-                            <Col lg="8" md={{ size: 6, offset: 3 }}>
+                        <Row style={{justifyContent: "center"}}>
+                            <Col lg="8">
                                 <Card className="card-raised card-white">
                                     <CardTitle className="text-center">
                                         <legend>
