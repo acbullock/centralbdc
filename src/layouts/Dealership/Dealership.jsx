@@ -90,7 +90,8 @@ class Dealership extends React.Component {
   componentWillUnmount() {
     this._isMounted = false;
     if (navigator.platform.indexOf("Win") > -1) {
-      ps.destroy();
+      if(ps !== undefined)
+        ps.destroy();
       document.documentElement.className += " perfect-scrollbar-off";
       document.documentElement.classList.remove("perfect-scrollbar-on");
     }
