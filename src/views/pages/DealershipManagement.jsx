@@ -242,8 +242,8 @@ class DealershipManagement extends React.Component {
             average_montly_ro_count: this.state.editAvgMonthlyRO,
             textFrom: this.state.editRingCentral,
             contacts: this.state.editTextList,
-            dataMining: "+1"+this.state.editDataMining,
-            sales: "+1"+this.state.editSales,
+            dataMining: "+1" + this.state.editDataMining,
+            sales: "+1" + this.state.editSales,
             isActive: this.state.editIsActive === "active"
         }
         //update dealer
@@ -299,7 +299,7 @@ class DealershipManagement extends React.Component {
                                     <Button color="primary" onClick={() => { this.toggle("addModal") }}>
                                         <i className="tim-icons icon-simple-add"></i>
                                     </Button>
-                                    <Modal isOpen={this.state.addModal} toggle={() => { this.toggle("addModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto' }}>
+                                    <Modal isOpen={this.state.addModal} toggle={() => { this.toggle("addModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("addModal") }}>Add Dealership</ModalHeader>
                                         <ModalBody>
                                             <Form>
@@ -461,7 +461,7 @@ class DealershipManagement extends React.Component {
                                     <Button color="primary" onClick={() => { this.toggle("addDealerModal") }}>
                                         <i className="tim-icons icon-simple-add"></i>
                                     </Button>
-                                    <Modal isOpen={this.state.addDealerModal} toggle={() => { this.toggle("addDealerModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto' }}>
+                                    <Modal isOpen={this.state.addDealerModal} toggle={() => { this.toggle("addDealerModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("addDealerModal") }}>Add Dealership Group</ModalHeader>
                                         <ModalBody>
                                             <Form onSubmit={(e) => { e.preventDefault(); this.addNewGroup() }}>
@@ -498,7 +498,7 @@ class DealershipManagement extends React.Component {
                                     <br />
                                     <Button color="warning" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.deleteGroup() }}>Delete Group Name</Button>
                                     <Button color="primary" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.toggle("editGroupModal"); this.setState({ editGroupName: this.state.editDealershipGroup.label }) }}>Edit Group Name</Button>
-                                    <Modal isOpen={this.state.editGroupModal} toggle={() => { this.toggle("editGroupModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto' }}>
+                                    <Modal isOpen={this.state.editGroupModal} toggle={() => { this.toggle("editGroupModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("editGroupModal") }}>Edit Group</ModalHeader>
                                         <ModalBody>
                                             <Input
@@ -538,14 +538,14 @@ class DealershipManagement extends React.Component {
                                             editAvgMonthlyRO: this.state.editDealership.average_montly_ro_count || "",
                                             editTextList: this.state.editDealership.contacts || [],
                                             editRingCentral: this.state.editDealership.textFrom || "",
-                                            editDataMining: this.state.editDealership.dataMining.substring(2,12) || "",
-                                            editSales: this.state.editDealership.sales.substring(2,12) || "",
-                                            editIsActive: this.state.editDealership.isActive == true ? "active": "inactive"
+                                            editDataMining: this.state.editDealership.dataMining.substring(2, 12) || "",
+                                            editSales: this.state.editDealership.sales.substring(2, 12) || "",
+                                            editIsActive: this.state.editDealership.isActive == true ? "active" : "inactive"
                                         })
                                         this.setState({ loading: false })
                                         this.toggle("editDealerModal");
                                     }}>Edit Dealership</Button>
-                                    <Modal isOpen={this.state.editDealerModal} toggle={() => { this.toggle("editDealerModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto' }}>
+                                    <Modal isOpen={this.state.editDealerModal} toggle={() => { this.toggle("editDealerModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("editDealerModal") }}>
                                             Edit Dealership
                                         </ModalHeader>
@@ -670,13 +670,13 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup tag="fieldset">
                                                     <FormGroup check>
                                                         <Label check>
-                                                            <Input type="radio" name="editIsActive" value="active" checked={this.state.editIsActive === "active"} onChange={(e)=>{this.onValueChange("editIsActive",e.target.value)}} />
+                                                            <Input type="radio" name="editIsActive" value="active" checked={this.state.editIsActive === "active"} onChange={(e) => { this.onValueChange("editIsActive", e.target.value) }} />
                                                             {' Yes'}
                                                         </Label>
                                                     </FormGroup>
                                                     <FormGroup check>
                                                         <Label check>
-                                                            <Input type="radio" name="editIsActive" value="inactive" checked={this.state.editIsActive === "inactive"} onChange={(e)=>{this.onValueChange("editIsActive",e.target.value)}}/>
+                                                            <Input type="radio" name="editIsActive" value="inactive" checked={this.state.editIsActive === "inactive"} onChange={(e) => { this.onValueChange("editIsActive", e.target.value) }} />
                                                             {' No'}
                                                         </Label>
                                                     </FormGroup>

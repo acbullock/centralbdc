@@ -200,7 +200,7 @@ class UserManagement extends React.Component {
             return 0;
         })
         let users = []
-        for(let a in agents){
+        for (let a in agents) {
             users[a] = {
                 label: agents[a].name,
                 value: agents[a]._id
@@ -234,7 +234,7 @@ class UserManagement extends React.Component {
                                     <Button color="primary" onClick={() => { this.toggle("addModal") }}>
                                         <i className="tim-icons icon-simple-add"></i>
                                     </Button>
-                                    <Modal isOpen={this.state.addModal} toggle={() => { this.toggle("addModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto' }}>
+                                    <Modal isOpen={this.state.addModal} toggle={() => { this.toggle("addModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("addModal") }}>Add User</ModalHeader>
                                         <ModalBody>
                                             <Form>
@@ -364,7 +364,7 @@ class UserManagement extends React.Component {
                                         this.setState({ loading: false })
                                         this.toggle("editUserModal");
                                     }}><i className="tim-icons icon-pencil" /></Button>
-                                    <Modal isOpen={this.state.editUserModal} toggle={() => { this.toggle("editUserModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)', 'overflowY': 'auto' }}>
+                                    <Modal isOpen={this.state.editUserModal} toggle={() => { this.toggle("editUserModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("editUserModal") }}>
                                             Edit User
                                         </ModalHeader>
