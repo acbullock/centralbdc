@@ -59,6 +59,7 @@ import DealershipManagement from "./views/pages/DealershipManagement.jsx"
 import UserManagement from "./views/pages/UserManagement.jsx"
 import DealershipLogin from "./views/pages/DealershipLogin.jsx"
 import DealershipDashboard from "./views/DealershipDashboard.jsx"
+import DealershipUsers from "./views/pages/DealershipUsers.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
@@ -156,6 +157,14 @@ const routes = [
         path: "/user_mgmt",
         name: "User Mangement",
         component: UserManagement,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-single-02"
+      },
+      {
+        path: "/dealership_user_mgmt",
+        name: "Dealership Users",
+        component: DealershipUsers,
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-single-02"
