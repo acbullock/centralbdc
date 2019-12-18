@@ -56,6 +56,7 @@ import DealershipHistory from "./views/pages/DealershipHistory.jsx"
 import FailedTexts from "./views/pages/FailedTexts.jsx"
 import AppointmentSearch from "./views/pages/AppointmentSearch.jsx"
 import DealershipManagement from "./views/pages/DealershipManagement.jsx"
+import UserManagement from "./views/pages/UserManagement.jsx"
 import DealershipLogin from "./views/pages/DealershipLogin.jsx"
 import DealershipDashboard from "./views/DealershipDashboard.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
@@ -152,21 +153,29 @@ const routes = [
         icon: "tim-icons icon-delivery-fast"
       },
       {
-        path: "/users",
-        name: "Users",
-        component: Users,
+        path: "/user_mgmt",
+        name: "User Mangement",
+        component: UserManagement,
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-single-02"
       },
-      {
-        path: "/dealerships",
-        name: "Dealerships",
-        component: Dealerships,
-        layout: "/admin",
-        adminOnly: true,
-        icon: "tim-icons icon-delivery-fast"
-      },
+      // {
+      //   path: "/users",
+      //   name: "Users",
+      //   component: Users,
+      //   layout: "/admin",
+      //   adminOnly: true,
+      //   icon: "tim-icons icon-single-02"
+      // },
+      // {
+      //   path: "/dealerships",
+      //   name: "Dealerships",
+      //   component: Dealerships,
+      //   layout: "/admin",
+      //   adminOnly: true,
+      //   icon: "tim-icons icon-delivery-fast"
+      // },
       {
         path: "/sources",
         name: "Sources",
