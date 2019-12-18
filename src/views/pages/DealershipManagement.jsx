@@ -32,19 +32,14 @@ class DealershipManagement extends React.Component {
             addDealershipGroup: {},
             addDealershipPhone: "",
             addRingCentral: "",
+            addDataMining: "",
+            addSales: "",
+            addIsActive: "",
             newTextContact: "",
             dealershipGroups: [],
             avgMonthlyLeadCount: "",
             avgMonthlyRO: "",
             dealershipAddress: "",
-            primaryContactName: "",
-            primaryContactEmail: "",
-            primaryContactPhone: "",
-            primaryAccess: "",
-            secondaryContactName: "",
-            secondaryContactEmail: "",
-            secondaryContactPhone: "",
-            secondaryAccess: "",
             newDealershipGroup: "",
             editDealershipGroup: { label: "", value: "" },
             editGroupName: "",
@@ -58,17 +53,12 @@ class DealershipManagement extends React.Component {
             editDealershipGroup2: { label: "", value: "" },
             editAvgMonthlyLeadCount: "",
             editAvgMonthlyRO: "",
-            editPrimaryContactName: "",
-            editPrimaryContactEmail: "",
-            editPrimaryContactPhone: "",
-            editPrimaryAccess: "",
-            editSecondaryContactName: "",
-            editSecondaryContactEmail: "",
-            editSecondaryContactPhone: "",
-            editSecondaryAccess: "",
             editTextList: [],
             newEditTextContact: "",
-            editRingCentral: ""
+            editRingCentral: "",
+            editDataMining: "",
+            editSales: "",
+            editIsActive: ""
         }
         this.toggle = this.toggle.bind(this)
         this.addToTextList = this.addToTextList.bind(this)
@@ -113,8 +103,8 @@ class DealershipManagement extends React.Component {
         }
         this.setState({ [modal_name]: !this.state[modal_name] })
     }
-    async getGroup(id){
-        let g = await this.props.mongo.findOne("dealership_groups", {_id: id})
+    async getGroup(id) {
+        let g = await this.props.mongo.findOne("dealership_groups", { _id: id })
         return g
     }
     addToTextList(phoneNumber) {
@@ -154,14 +144,6 @@ class DealershipManagement extends React.Component {
             avgMonthlyLeadCount: "",
             dealershipAddress: "",
             avgMonthlyRO: "",
-            primaryContactName: "",
-            primaryContactEmail: "",
-            primaryContactPhone: "",
-            primaryAccess: "",
-            secondaryContactName: "",
-            secondaryContactEmail: "",
-            secondaryContactPhone: "",
-            secondaryAccess: "",
             addRingCentral: "",
             newDealershipGroup: "",
 
@@ -218,30 +200,25 @@ class DealershipManagement extends React.Component {
         this.setState({ loading: true })
         let newDealership = {
             label: this.props.utils.toTitleCase(this.state.addDealershipName),
-            group: this.state.addDealershipGroup,
+            group: this.state.addDealershipGroup.value,
             phone: this.state.addDealershipPhone,
             address: this.state.dealershipAddress,
             average_monthly_lead_count: this.state.avgMonthlyLeadCount,
             average_montly_ro_count: this.state.avgMonthlyRO,
-            primary_contact: {
-                access: this.state.primaryAccess === "primaryStore" ? "store" : "group",
-                name: this.props.utils.toTitleCase(this.state.primaryContactName),
-                email: this.state.primaryContactEmail,
-                phone: this.state.primaryContactPhone
-            },
-            secondary_contact: {
-                access: this.state.secondaryAccess === "secondaryStore" ? "store" : "group",
-                name: this.props.utils.toTitleCase(this.state.secondaryContactName),
-                email: this.state.secondaryContactEmail,
-                phone: this.state.secondaryContactPhone
-            },
             textFrom: this.state.addRingCentral,
-            contacts: this.state.addTextList
+            contacts: this.state.addTextList,
+            dataMining: "+1" + this.state.addDataMining,
+            sales: "+1" + this.state.addSales,
+            isActive: this.state.addIsActive === "active"
         }
         //insert dealer
         let inserted = this._isMounted && await this.props.mongo.insertOne("dealerships", newDealership)
         //update dealer to have 'value'
         this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", newDealership, { value: inserted.insertedId })
+
+        //insert new dealer into appointments and recordings collections..
+        this._isMounted && await this.props.mongo.insertOne("appointments", { dealership: inserted.insertedId, appointments: [] })
+        this._isMounted && await this.props.mongo.insertOne("recordings", { dealership: inserted.insertedId, lastMonthCount: 0, thisMonthCount: 0 })
         //then get dealers and sort..
         let dealers = await this.props.mongo.find("dealerships")
         dealers.sort((a, b) => {
@@ -258,25 +235,16 @@ class DealershipManagement extends React.Component {
         let update_value = this.state.editDealership.value
         let update = {
             label: this.props.utils.toTitleCase(this.state.editDealershipName),
-            group: this.state.editDealershipGroup2,
+            group: this.state.editDealershipGroup2.value,
             phone: this.state.editDealershipPhone,
             address: this.state.editDealershipAddress,
             average_monthly_lead_count: this.state.editAvgMonthlyLeadCount,
             average_montly_ro_count: this.state.editAvgMonthlyRO,
-            primary_contact: {
-                access: this.state.editPrimaryAccess === "editPrimaryStore" ? "store" : "group",
-                name: this.props.utils.toTitleCase(this.state.editPrimaryContactName),
-                email: this.state.editPrimaryContactEmail,
-                phone: this.state.editPrimaryContactPhone
-            },
-            secondary_contact: {
-                access: this.state.editSecondaryAccess === "editSecondaryStore" ? "store" : "group",
-                name: this.props.utils.toTitleCase(this.state.editSecondaryContactName),
-                email: this.state.editSecondaryContactEmail,
-                phone: this.state.editSecondaryContactPhone
-            },
             textFrom: this.state.editRingCentral,
-            contacts: this.state.editTextList
+            contacts: this.state.editTextList,
+            dataMining: "+1"+this.state.editDataMining,
+            sales: "+1"+this.state.editSales,
+            isActive: this.state.editIsActive === "active"
         }
         //update dealer
         this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: update_value }, update)
@@ -292,8 +260,10 @@ class DealershipManagement extends React.Component {
     }
     async deleteDealership() {
         this.setState({ loading: true })
-        //delete dealership
+        //delete dealership, also delete from appts and recordings..
         this._isMounted && await this.props.mongo.findOneAndDelete("dealerships", this.state.editDealership)
+        this._isMounted && await this.props.mongo.findOneAndDelete("recordings", { dealership: this.state.editDealership.value })
+        this._isMounted && await this.props.mongo.findOneAndDelete("appointments", { dealership: this.state.editDealership.value })
         //get dealerships
         let dealers = this._isMounted && await this.props.mongo.find("dealerships")
         dealers.sort((a, b) => {
@@ -311,9 +281,7 @@ class DealershipManagement extends React.Component {
                     <div className="content">
                         <Container>
                             <Col className="ml-auto mr-auto text-center" md="6">
-                                <Card color="transparent" >
-                                    <CardImg top width="100%" src={this.props.utils.loading} />
-                                </Card>
+                                <CardImg top width="100%" src={this.props.utils.loading} />
                             </Col>
                         </Container>
                     </div>
@@ -404,120 +372,6 @@ class DealershipManagement extends React.Component {
                                                     />
                                                 </FormGroup>
                                                 <hr />
-                                                <legend>Primary Contact</legend>
-                                                <FormGroup tag="fieldset">
-                                                    <Label for="primaryContactName">Name</Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="primaryContactName"
-                                                        id="primaryContactName"
-                                                        placeholder="Primary Contact Name"
-                                                        value={this.state.primaryContactName}
-                                                        onChange={(e) => { this.onValueChange("primaryContactName", e.target.value) }}
-                                                    />
-                                                    <Label for="primaryContactEmail">Email</Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="primaryContactEmail"
-                                                        id="primaryContactEmail"
-                                                        placeholder="Primary Contact Email"
-                                                        value={this.state.primaryContactEmail}
-                                                        onChange={(e) => this.onValueChange("primaryContactEmail", e.target.value)}
-                                                    />
-                                                    <Label for="primaryContactPhone">Phone</Label>
-                                                    <Input
-                                                        type="number"
-                                                        name="primaryContactPhone"
-                                                        id="primaryContactPhone"
-                                                        placeholder="Primary Contact Phone"
-                                                        value={this.state.primaryContactPhone}
-                                                        onChange={(e) => { this.onValueChange("primaryContactPhone", e.target.value) }}
-                                                    />
-                                                    <FormGroup tag="fieldset">
-                                                        <FormGroup check>
-                                                            <Label check>
-                                                                <Input
-                                                                    type="radio"
-                                                                    name="primaryAccess"
-                                                                    value="primaryStore"
-                                                                    checked={this.state.primaryAccess === "primaryStore"}
-                                                                    onChange={(e) => { this.onValueChange("primaryAccess", e.target.value) }}
-                                                                />{' '}
-                                                                Store Access
-                                                            </Label>
-                                                        </FormGroup>
-                                                        <FormGroup check>
-                                                            <Label check>
-                                                                <Input
-                                                                    type="radio"
-                                                                    name="primaryAccess"
-                                                                    value="primaryGroup"
-                                                                    checked={this.state.primaryAccess === "primaryGroup"}
-                                                                    onChange={(e) => { this.onValueChange("primaryAccess", e.target.value) }}
-                                                                />{' '}
-                                                                Group Access
-                                                            </Label>
-                                                        </FormGroup>
-                                                    </FormGroup>
-                                                </FormGroup>
-                                                <hr />
-                                                <legend>Secondary Contact</legend>
-                                                <FormGroup>
-                                                    <Label for="secondaryContactName">Name</Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="secondaryContactName"
-                                                        id="secondaryContactName"
-                                                        placeholder="Secondary Contact Name"
-                                                        value={this.state.secondaryContactName}
-                                                        onChange={(e) => { this.onValueChange("secondaryContactName", e.target.value) }}
-                                                    />
-                                                    <Label for="secondaryContactEmail">Email</Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="secondaryContactEmail"
-                                                        id="secondaryContactEmail"
-                                                        placeholder="Secondary Contact Email"
-                                                        value={this.state.secondaryContactEmail}
-                                                        onChange={(e) => { this.onValueChange("secondaryContactEmail", e.target.value) }}
-                                                    />
-                                                    <Label for="secondaryContactPhone">Phone</Label>
-                                                    <Input
-                                                        type="number"
-                                                        name="secondaryContactPhone"
-                                                        id="secondaryContactPhone"
-                                                        placeholder="Secondary Contact Phone"
-                                                        value={this.state.secondaryContactPhone}
-                                                        onChange={(e) => { this.onValueChange("secondaryContactPhone", e.target.value) }}
-                                                    />
-                                                    <FormGroup tag="fieldset">
-                                                        <FormGroup check>
-                                                            <Label check>
-                                                                <Input
-                                                                    type="radio"
-                                                                    name="secondaryAccess"
-                                                                    value="secondaryStore"
-                                                                    checked={this.state.secondaryAccess == "secondaryStore"}
-                                                                    onChange={(e) => { this.onValueChange("secondaryAccess", e.target.value) }}
-                                                                />{' '}
-                                                                Store Access
-                                                            </Label>
-                                                        </FormGroup>
-                                                        <FormGroup check>
-                                                            <Label check>
-                                                                <Input
-                                                                    type="radio"
-                                                                    name="secondaryAccess"
-                                                                    value="secondaryGroup"
-                                                                    checked={this.state.secondaryAccess == "secondaryGroup"}
-                                                                    onChange={(e) => { this.onValueChange("secondaryAccess", e.target.value) }}
-                                                                />{' '}
-                                                                Group Access
-                                                            </Label>
-                                                        </FormGroup>
-                                                    </FormGroup>
-                                                </FormGroup>
-                                                <hr />
                                                 <legend>Text List</legend>
                                                 <FormGroup>
                                                     {
@@ -543,6 +397,42 @@ class DealershipManagement extends React.Component {
                                                         type="number"
                                                     />
                                                 </FormGroup>
+                                                <hr />
+                                                <legend>Data Mining Number</legend>
+                                                <FormGroup>
+                                                    <Input
+                                                        value={this.state.addDataMining}
+                                                        onChange={(e) => { this.onValueChange("addDataMining", e.target.value) }}
+                                                        type="number"
+                                                    />
+                                                </FormGroup>
+                                                <hr />
+                                                <legend>Sales Number</legend>
+                                                <FormGroup>
+                                                    <Input
+                                                        value={this.state.addSales}
+                                                        onChange={(e) => { this.onValueChange("addSales", e.target.value) }}
+                                                        type="number"
+                                                    />
+
+                                                </FormGroup>
+                                                <hr />
+                                                <hr />
+                                                <legend>Dealership is Active</legend>
+                                                <FormGroup tag="fieldset">
+                                                    <FormGroup check>
+                                                        <Label check>
+                                                            <Input type="radio" name="addIsActive" value="active" checked={this.state.addIsActive === "active"} onChange={(e) => { this.onValueChange("addIsActive", e.target.value) }} />
+                                                            {' Yes'}
+                                                        </Label>
+                                                    </FormGroup>
+                                                    <FormGroup check>
+                                                        <Label check>
+                                                            <Input type="radio" name="addIsActive" value="inactive" checked={this.state.addIsActive === "inactive"} onChange={(e) => { this.onValueChange("addIsActive", e.target.value) }} />
+                                                            {' No'}
+                                                        </Label>
+                                                    </FormGroup>
+                                                </FormGroup>
                                                 <Button color="warning" onClick={() => { this.toggle("addModal") }}>Cancel</Button>
                                                 <Button onClick={() => {
                                                     this.addNewDealershp()
@@ -550,19 +440,14 @@ class DealershipManagement extends React.Component {
                                                     this.state.addDealershipName.length === 0 ||
                                                     this.state.addDealershipGroup.label == undefined ||
                                                     this.state.addTextList.length === 0 ||
-                                                    this.state.addDealershipPhone.length != 10 ||
-                                                    this.state.avgMonthlyLeadCount.length === 0 ||
+                                                    // this.state.addDealershipPhone.length != 10 ||
+                                                    // this.state.avgMonthlyLeadCount.length === 0 ||
                                                     this.state.dealershipAddress.length === 0 ||
-                                                    this.state.avgMonthlyRO.length === 0 ||
-                                                    this.state.primaryContactName.length === 0 ||
-                                                    this.state.primaryContactEmail.length === 0 ||
-                                                    this.state.primaryContactPhone.length !== 10 ||
-                                                    this.state.primaryAccess.length === 0 ||
-                                                    this.state.secondaryContactName.length === 0 ||
-                                                    this.state.secondaryContactEmail.length === 0 ||
-                                                    this.state.secondaryContactPhone.length !== 10 ||
-                                                    this.state.secondaryAccess.length === 0 ||
-                                                    this.state.addRingCentral.length != 10
+                                                    // this.state.avgMonthlyRO.length === 0 ||
+                                                    this.state.addRingCentral.length != 10 ||
+                                                    this.state.addDataMining.length != 10 ||
+                                                    this.state.addSales.length != 10 ||
+                                                    this.state.addIsActive.length === 0
                                                     // access validation?
                                                 }>Submit</Button>
                                             </Form>
@@ -651,25 +536,12 @@ class DealershipManagement extends React.Component {
                                             editDealershipGroup2: group || { label: "", value: "" },
                                             editAvgMonthlyLeadCount: this.state.editDealership.average_monthly_lead_count || "",
                                             editAvgMonthlyRO: this.state.editDealership.average_montly_ro_count || "",
-                                            editPrimaryContactName: this.state.editDealership.primary_contact ? this.state.editDealership.primary_contact.name || "" : "",
-                                            editPrimaryContactEmail: this.state.editDealership.primary_contact ? this.state.editDealership.primary_contact.email || "" : "",
-                                            editPrimaryContactPhone: this.state.editDealership.primary_contact ? this.state.editDealership.primary_contact.phone || "" : "",
-                                            editSecondaryContactName: this.state.editDealership.secondary_contact ? this.state.editDealership.secondary_contact.name || "" : "",
-                                            editSecondaryContactEmail: this.state.editDealership.secondary_contact ? this.state.editDealership.secondary_contact.email || "" : "",
-                                            editSecondaryContactPhone: this.state.editDealership.secondary_contact ? this.state.editDealership.secondary_contact.phone || "" : "",
                                             editTextList: this.state.editDealership.contacts || [],
-                                            editRingCentral: this.state.editDealership.textFrom || ""
+                                            editRingCentral: this.state.editDealership.textFrom || "",
+                                            editDataMining: this.state.editDealership.dataMining.substring(2,12) || "",
+                                            editSales: this.state.editDealership.sales.substring(2,12) || "",
+                                            editIsActive: this.state.editDealership.isActive == true ? "active": "inactive"
                                         })
-                                        if (this.state.editDealership.primary_contact) {
-                                            if (this.state.editDealership.primary_contact.access) {
-                                                this.state.editDealership.primary_contact.access === "group" ? this.setState({ editPrimaryAccess: "editPrimaryGroup" }) : this.setState({ editPrimaryAccess: "editPrimaryStore" })
-                                            }
-                                        }
-                                        if (this.state.editDealership.secondary_contact) {
-                                            if (this.state.editDealership.secondary_contact.access) {
-                                                this.state.editDealership.secondary_contact.access === "group" ? this.setState({ editSecondaryAccess: "editSecondaryGroup" }) : this.setState({ editSecondaryAccess: "editSecondaryStore" })
-                                            }
-                                        }
                                         this.setState({ loading: false })
                                         this.toggle("editDealerModal");
                                     }}>Edit Dealership</Button>
@@ -749,120 +621,6 @@ class DealershipManagement extends React.Component {
                                                     />
                                                 </FormGroup>
                                                 <hr />
-                                                <legend>Edit Primary Contact</legend>
-                                                <FormGroup tag="fieldset">
-                                                    <Label for="rimaryContactName">Name</Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="editPrimaryContactName"
-                                                        id="editPrimaryContactName"
-                                                        placeholder="Edit Primary Contact Name"
-                                                        value={this.state.editPrimaryContactName}
-                                                        onChange={(e) => { this.onValueChange("editPrimaryContactName", e.target.value) }}
-                                                    />
-                                                    <Label for="editPrimaryContactEmail">Email</Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="editPrimaryContactEmail"
-                                                        id="editPrimaryContactEmail"
-                                                        placeholder="Edit Primary Contact Email"
-                                                        value={this.state.editPrimaryContactEmail}
-                                                        onChange={(e) => this.onValueChange("editPrimaryContactEmail", e.target.value)}
-                                                    />
-                                                    <Label for="editPrimaryContactPhone">Phone</Label>
-                                                    <Input
-                                                        type="number"
-                                                        name="editPrimaryContactPhone"
-                                                        id="editPrimaryContactPhone"
-                                                        placeholder="Edit Primary Contact Phone"
-                                                        value={this.state.editPrimaryContactPhone}
-                                                        onChange={(e) => { this.onValueChange("editPrimaryContactPhone", e.target.value) }}
-                                                    />
-                                                    <FormGroup tag="fieldset">
-                                                        <FormGroup check>
-                                                            <Label check>
-                                                                <Input
-                                                                    type="radio"
-                                                                    name="editPrimaryAccess"
-                                                                    value="editPrimaryStore"
-                                                                    checked={this.state.editPrimaryAccess === "editPrimaryStore"}
-                                                                    onChange={(e) => { this.onValueChange("editPrimaryAccess", e.target.value) }}
-                                                                />{' '}
-                                                                Store Access
-                                                            </Label>
-                                                        </FormGroup>
-                                                        <FormGroup check>
-                                                            <Label check>
-                                                                <Input
-                                                                    type="radio"
-                                                                    name="editPrimaryAccess"
-                                                                    value="editPrimaryGroup"
-                                                                    checked={this.state.editPrimaryAccess === "editPrimaryGroup"}
-                                                                    onChange={(e) => { this.onValueChange("editPrimaryAccess", e.target.value) }}
-                                                                />{' '}
-                                                                Group Access
-                                                            </Label>
-                                                        </FormGroup>
-                                                    </FormGroup>
-                                                </FormGroup>
-                                                <hr />
-                                                <legend>Edit Secondary Contact</legend>
-                                                <FormGroup>
-                                                    <Label for="editSecondaryContactName">Name</Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="editSecondaryContactName"
-                                                        id="editSecondaryContactName"
-                                                        placeholder="Edit Secondary Contact Name"
-                                                        value={this.state.editSecondaryContactName}
-                                                        onChange={(e) => { this.onValueChange("editSecondaryContactName", e.target.value) }}
-                                                    />
-                                                    <Label for="editSecondaryContactEmail">Email</Label>
-                                                    <Input
-                                                        type="text"
-                                                        name="editSecondaryContactEmail"
-                                                        id="editSecondaryContactEmail"
-                                                        placeholder="Edit Secondary Contact Email"
-                                                        value={this.state.editSecondaryContactEmail}
-                                                        onChange={(e) => { this.onValueChange("editSecondaryContactEmail", e.target.value) }}
-                                                    />
-                                                    <Label for="editSecondaryContactPhone">Phone</Label>
-                                                    <Input
-                                                        type="number"
-                                                        name="editSecondaryContactPhone"
-                                                        id="editSecondaryContactPhone"
-                                                        placeholder="Edit Secondary Contact Phone"
-                                                        value={this.state.editSecondaryContactPhone}
-                                                        onChange={(e) => { this.onValueChange("editSecondaryContactPhone", e.target.value) }}
-                                                    />
-                                                    <FormGroup tag="fieldset">
-                                                        <FormGroup check>
-                                                            <Label check>
-                                                                <Input
-                                                                    type="radio"
-                                                                    name="editSecondaryAccess"
-                                                                    value="editSecondaryStore"
-                                                                    checked={this.state.editSecondaryAccess == "editSecondaryStore"}
-                                                                    onChange={(e) => { this.onValueChange("editSecondaryAccess", e.target.value) }}
-                                                                />{' '}
-                                                                Store Access
-                                                            </Label>
-                                                        </FormGroup>
-                                                        <FormGroup check>
-                                                            <Label check>
-                                                                <Input
-                                                                    type="radio"
-                                                                    name="editSecondaryAccess"
-                                                                    value="editSecondaryGroup"
-                                                                    checked={this.state.editSecondaryAccess == "editSecondaryGroup"}
-                                                                    onChange={(e) => { this.onValueChange("editSecondaryAccess", e.target.value) }}
-                                                                />{' '}
-                                                                Group Access
-                                                            </Label>
-                                                        </FormGroup>
-                                                    </FormGroup>
-                                                </FormGroup>
-                                                <hr />
                                                 <legend>Edit Text List</legend>
                                                 <FormGroup>
                                                     {
@@ -887,6 +645,44 @@ class DealershipManagement extends React.Component {
                                                         type="number"
                                                     />
                                                 </FormGroup>
+                                                <hr />
+                                                <legend>EditData Mining Number</legend>
+                                                <FormGroup>
+                                                    <Input
+                                                        value={this.state.editDataMining}
+                                                        onChange={(e) => { this.onValueChange("editDataMining", e.target.value) }}
+                                                        type="number"
+                                                    />
+                                                </FormGroup>
+                                                <hr />
+                                                <legend>Edit Sales Number</legend>
+                                                <FormGroup>
+                                                    <Input
+                                                        value={this.state.editSales}
+                                                        onChange={(e) => { this.onValueChange("editSales", e.target.value) }}
+                                                        type="number"
+                                                    />
+
+                                                </FormGroup>
+                                                <hr />
+                                                <hr />
+                                                <legend>Edit Dealership is Active</legend>
+                                                <FormGroup tag="fieldset">
+                                                    <FormGroup check>
+                                                        <Label check>
+                                                            <Input type="radio" name="editIsActive" value="active" checked={this.state.editIsActive === "active"} onChange={(e)=>{this.onValueChange("editIsActive",e.target.value)}} />
+                                                            {' Yes'}
+                                                        </Label>
+                                                    </FormGroup>
+                                                    <FormGroup check>
+                                                        <Label check>
+                                                            <Input type="radio" name="editIsActive" value="inactive" checked={this.state.editIsActive === "inactive"} onChange={(e)=>{this.onValueChange("editIsActive",e.target.value)}}/>
+                                                            {' No'}
+                                                        </Label>
+                                                    </FormGroup>
+                                                </FormGroup>
+
+
                                                 <Button color="warning" onClick={() => {
                                                     this.toggle("editDealerModal")
                                                     this.setState({ editDealership: { label: "", value: "" } })
@@ -897,18 +693,10 @@ class DealershipManagement extends React.Component {
                                                     this.state.editDealershipName.length === 0 ||
                                                     this.state.editDealershipGroup2.label == undefined ||
                                                     this.state.editTextList.length === 0 ||
-                                                    this.state.editDealershipPhone.length != 10 ||
-                                                    this.state.editAvgMonthlyLeadCount.length === 0 ||
+                                                    // this.state.editDealershipPhone.length != 10 ||
+                                                    // this.state.editAvgMonthlyLeadCount.length === 0 ||
                                                     this.state.editDealershipAddress.length === 0 ||
-                                                    this.state.editAvgMonthlyRO.length === 0 ||
-                                                    this.state.editPrimaryContactName.length === 0 ||
-                                                    this.state.editPrimaryContactEmail.length === 0 ||
-                                                    this.state.editPrimaryContactPhone.length !== 10 ||
-                                                    this.state.editPrimaryAccess.length === 0 ||
-                                                    this.state.editSecondaryContactName.length === 0 ||
-                                                    this.state.editSecondaryContactEmail.length === 0 ||
-                                                    this.state.editSecondaryContactPhone.length !== 10 ||
-                                                    this.state.editSecondaryAccess.length === 0 ||
+                                                    // this.state.editAvgMonthlyRO.length === 0 ||
                                                     this.state.editRingCentral.length != 10
                                                     // access validation?
                                                 }>Update</Button>

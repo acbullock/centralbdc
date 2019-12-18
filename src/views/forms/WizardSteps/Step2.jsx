@@ -64,6 +64,9 @@ class CreateAppointment extends React.Component {
     })
     // dealerships = await dealerships.find({}).toArray()
     let dealerships = await mongo.find("dealerships")
+    dealerships = dealerships.filter((d)=>{
+      return d.isActive == true
+    })
     dealerships.sort((a,b)=>{
       if(a.label < b.label){
         return -1
