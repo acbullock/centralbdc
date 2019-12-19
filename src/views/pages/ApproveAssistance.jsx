@@ -44,7 +44,8 @@ class ApproveAssistance extends React.Component {
             loading: true,
             rejected_reason: "",
             twil: {},
-            feedback: "Loading.."
+            feedback: "Loading..",
+            texts: []
         };
 
     }
@@ -53,7 +54,7 @@ class ApproveAssistance extends React.Component {
         let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         // let agent = await this.props.mongo.getCollection("agents")
         // agent = await agent.findOne({ userId: currUser.userId })
-        let agent = await this.props.mongo.findOne("agents", {userId: currUser.userId})
+        let agent = await this.props.mongo.findOne("agents", { userId: currUser.userId })
         this.setState({ isApprover: agent.isApprover })
         if (agent.isApprover === true) {
 
@@ -85,7 +86,6 @@ class ApproveAssistance extends React.Component {
         let assistance = []
         //loop thru agents
         for (let agent in agents) {
-            
             let agent_name = agents[agent].name
             let agent_email = agents[agent].email
             let agent_team = agents[agent].team.label
@@ -105,85 +105,94 @@ class ApproveAssistance extends React.Component {
                 return -1;
             return 0;
         })
-        this.setState({ pendingAssistance: assistance, loading: false })
-    }
-    async acceptAssistance(assistance) {
-        this.setState({loading: true})
-       //find user that has that assistance record
-       //update that record to be isRejected = false, isPending=false
-       let newAssistance = assistance
-       newAssistance.isPending = false
-       newAssistance.isRejected = false
-    //    let agents = await this.props.mongo.getCollection("agents")
-    //    let owner = await agents.findOne({userId: newAssistance.userId})
-        let owner = await this.props.mongo.findOne("agents", {userId: newAssistance.userId})
-       console.log(owner)
-       let ownerAssistance = await owner.assistance.filter((a)=>{
-           return a.text == assistance.text
-       })
-       console.log(assistance.text)
-       let index = owner.assistance.indexOf(ownerAssistance[0])
-       if (index !== -1) {
-           owner.assistance[index] = newAssistance
+        let texts = []
+        for (let a in assistance) {
+            texts.push(assistance[a].text)
         }
-    //    await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
-        await this.props.mongo.findOneAndUpdate("agents", {userId: newAssistance.userId}, {
+        this.setState({ pendingAssistance: assistance, loading: false, texts })
+    }
+    async acceptAssistance(assistance, i) {
+        this.setState({ loading: true })
+        //find user that has that assistance record
+        //update that record to be isRejected = false, isPending=false
+        let newAssistance = {}
+        for (let a in assistance) {
+            newAssistance[a] = assistance[a]
+        }
+        // let newAssistance = assistance
+        newAssistance.isPending = false
+        newAssistance.isRejected = false
+        newAssistance.text = this.state.texts[i]
+        //    let agents = await this.props.mongo.getCollection("agents")
+        //    let owner = await agents.findOne({userId: newAssistance.userId})
+        let owner = await this.props.mongo.findOne("agents", { userId: newAssistance.userId })
+        let ownerAssistance = await owner.assistance.filter((a) => {
+            return a.text == assistance.text
+        })
+        console.log(assistance.isPending)
+        console.log(newAssistance.text)
+        let index = owner.assistance.indexOf(ownerAssistance[0])
+        if (index !== -1) {
+            owner.assistance[index] = newAssistance
+        }
+        //    await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
+        await this.props.mongo.findOneAndUpdate("agents", { userId: newAssistance.userId }, {
             assistance: owner.assistance,
             isPending: false,
             isRejected: false
         })
-       await this.setState({feedback: "Sending texts to dealers"})
-       await this.sendText(newAssistance)
+        await this.setState({ feedback: "Sending texts to dealers" })
+        await this.sendText(newAssistance)
 
-       await this.getPendingAssistance()
-       this.setState({loading: false, feedback: "Loading.."})
+        await this.getPendingAssistance()
+        this.setState({ loading: false, feedback: "Loading.." })
     }
     async rejectAssistance(assistance) {
 
-        this.setState({loading: true})
-       //find user that has that assistance record
-       //update that record to be isRejected = true, isPending=false
-       let newAssistance = assistance
-       newAssistance.isPending = false
-       newAssistance.isRejected = true
-       newAssistance.rejectedReason = this.state.rejected_reason
-    //    let agents = await this.props.mongo.getCollection("agents")
-    //    let owner = await agents.findOne({userId: newAssistance.userId})
-    let owner = await this.props.mongo.findOne("agents", {userId: newAssistance.userId})
-       let ownerAssistance = await owner.assistance.filter((a)=>{
-           return a.text == assistance.text
-       })
-       let index = owner.assistance.indexOf(ownerAssistance[0])
-       if (index !== -1) {
-           owner.assistance[index] = newAssistance
+        this.setState({ loading: true })
+        //find user that has that assistance record
+        //update that record to be isRejected = true, isPending=false
+        let newAssistance = assistance
+        newAssistance.isPending = false
+        newAssistance.isRejected = true
+        newAssistance.rejectedReason = this.state.rejected_reason
+        //    let agents = await this.props.mongo.getCollection("agents")
+        //    let owner = await agents.findOne({userId: newAssistance.userId})
+        let owner = await this.props.mongo.findOne("agents", { userId: newAssistance.userId })
+        let ownerAssistance = await owner.assistance.filter((a) => {
+            return a.text == assistance.text
+        })
+        let index = owner.assistance.indexOf(ownerAssistance[0])
+        if (index !== -1) {
+            owner.assistance[index] = newAssistance
         }
-    //    await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
-    await this.props.mongo.findOneAndUpdate("agents", {userId: newAssistance.userId},{
-        assistance: owner.assistance, 
-        isPending: false, 
-        isRejected: true, 
-        rejectedReason: this.state.rejected_reason
-    })
-       await this.getPendingAssistance()
-       this.setState({loading: false})
+        //    await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
+        await this.props.mongo.findOneAndUpdate("agents", { userId: newAssistance.userId }, {
+            assistance: owner.assistance,
+            isPending: false,
+            isRejected: true,
+            rejectedReason: this.state.rejected_reason
+        })
+        await this.getPendingAssistance()
+        this.setState({ loading: false })
     }
     async sendText(assistance) {
-        this.setState({loading: true})
+        this.setState({ loading: true })
         // await this.setState({loading: true})
         let contacts = assistance.dealership.contacts
         let token = await this.props.mongo.getToken()
         let arr = []
-        for(let c in contacts){
+        for (let c in contacts) {
             contacts[c] = "1" + contacts[c]
             arr = []
             arr.push(contacts[c])
-            
-            this.props.mongo.sendGroupText("1"+assistance.dealership.textFrom, assistance.text, arr, token)
+
+            this.props.mongo.sendGroupText("1" + assistance.dealership.textFrom, assistance.text, arr, token)
         }
-        
-        
-        this.setState({loading: false})
-        
+
+
+        this.setState({ loading: false })
+
     }
     render() {
         if (this.state.loading) {
@@ -192,9 +201,7 @@ class ApproveAssistance extends React.Component {
                     <div className="content">
                         <Container>
                             <Col className="ml-auto mr-auto text-center" md="6">
-                                <Card color="transparent">
-                                    <CardImg top width="100%" src={this.props.utils.loading} />
-                                </Card>
+                                <CardImg top width="100%" src={this.props.utils.loading} />
                             </Col>
                         </Container>
                     </div>
@@ -211,7 +218,6 @@ class ApproveAssistance extends React.Component {
                             id="accordion"
                             role="tablist"
                         >
-
                             <h1>Approve/Reject Pending Assistance Requests</h1>
                             {
                                 this.state.pendingAssistance.map((app, index) => {
@@ -235,7 +241,7 @@ class ApproveAssistance extends React.Component {
                                                         <p>
                                                             Team Name: <strong>{app.agent_team}</strong>
                                                         </p>
-                                                        <p>Dealer Name: <strong>{app.dealership? app.dealership.label:"" }</strong></p>
+                                                        <p>Dealer Name: <strong>{app.dealership ? app.dealership.label : ""}</strong></p>
                                                         <p>Created: <strong>{new Date(app.created).toLocaleDateString() + " " + new Date(app.created).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong></p>
                                                         <p>
                                                             Customer Name: {app.customer_firstname + " " + app.customer_lastname}
@@ -247,26 +253,30 @@ class ApproveAssistance extends React.Component {
                                                 <Collapse
                                                     role="tabpanel"
                                                     isOpen={this.state.openedCollapses.includes(app.agent_name + "_" + index)}
-
                                                 >
                                                     <CardBody>
                                                         <Row>
-
                                                             <Col sm="12">
                                                                 <h3>Assistance Message</h3>
                                                                 <blockquote className="blockquote" style={{ whiteSpace: "pre-wrap" }}>
-                                                                    <p >{app.text}</p></blockquote>
+                                                                    <p >{app.text}</p>
+                                                                </blockquote>
+                                                                <h3>Edit: </h3>
+                                                                <textarea id="edit" value={this.state.texts[index]} onChange={(e) => {
+                                                                    let t = this.state.texts
+                                                                    t[index] = e.target.value;
+                                                                    this.setState({ texts: t })
+                                                                }} rows={16} cols={48}></textarea>
                                                             </Col>
-                                                            
                                                             <Col sm="6">
                                                                 <br />
-
                                                             </Col>
                                                         </Row>
                                                         <Row>
                                                             <Col sm="12">
-                                                                <Button color="success" className="float-righ" disabled={this.state.loading} onClick={() => {
-                                                                    this.acceptAssistance(app)
+                                                                <p style={{ "color": "red" }} hidden={this.state.texts[index].length <= 1000}>Message too long.</p>
+                                                                <Button color="success" className="float-righ" disabled={this.state.texts[index].length > 1000 || this.state.loading} onClick={() => {
+                                                                    this.acceptAssistance(app, index)
                                                                 }}>Accept</Button>
                                                                 <Button color="danger" className="float-right" disabled={this.state.loading} onClick={() => {
                                                                     this.rejectAssistance(app)
@@ -274,11 +284,6 @@ class ApproveAssistance extends React.Component {
                                                                 <Input placeholder="Rejected Reason" value={this.state.rejected_reason} onChange={(e) => this.setState({ rejected_reason: e.target.value })}></Input>
                                                             </Col>
                                                         </Row>
-                                                        {/* <p>Internal Message</p>
-                                                        <p style={{whiteSpace: "pre-wrap"}}>{app.internal_msg}</p>
-                                                        <p>Customer Message</p>
-                                                        <p style={{whiteSpace: "pre-wrap"}}>{app.customer_msg}</p> */}
-
                                                     </CardBody>
                                                 </Collapse>
 
