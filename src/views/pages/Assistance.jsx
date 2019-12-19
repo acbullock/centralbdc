@@ -24,7 +24,6 @@ import {
     // Collapse,
     Form,
     // FormGroup,
-    // CardText,
     Button,
     Input,
     Label,
@@ -53,50 +52,51 @@ class Assistance extends React.Component {
             dealerships: [],
             sources: [],
             text: "",
-            loading: false
+            loading: false,
+            error: ""
         };
         this.makeAssistanceMessage = this.makeAssistanceMessage.bind(this)
         this.addToPending = this.addToPending.bind(this)
     }
-    async componentWillMount(){
+    async componentWillMount() {
         // let d = await this.props.mongo.getCollection("dealerships")
         // let s = await this.props.mongo.getCollection("sources")
         // d = await d.find({}).toArray()
         // s = await  s.find({}).toArray()
         let d = await this.props.mongo.find("dealerships")
         let s = await this.props.mongo.find("sources")
-        d.sort((a,b)=>{
-            if(a.label < b.label) return -1;
-            if(a.label > b.label) return 1;
+        d.sort((a, b) => {
+            if (a.label < b.label) return -1;
+            if (a.label > b.label) return 1;
             return 0
         })
-        s.sort((a,b)=>{
-            if(a.label < b.label) return -1;
-            if(a.label > b.label) return 1;
+        s.sort((a, b) => {
+            if (a.label < b.label) return -1;
+            if (a.label > b.label) return 1;
             return 0
         })
-        this.setState({dealerships: d, sources: s})
+        this.setState({ dealerships: d, sources: s })
     }
-    makeTitleCase(name){
+    makeTitleCase(name) {
         let title = name
         title = title.toLowerCase().split(' ')
-        for(let i = 0; i < title.length; i++){
-            if(title[i].length < 1) continue;
+        for (let i = 0; i < title.length; i++) {
+            if (title[i].length < 1) continue;
             title[i] = title[i][0].toUpperCase() + title[i].slice(1);
-         }
-         title  = title.join(" ")
-         return title
+        }
+        title = title.join(" ")
+        return title
     }
-    async addToPending(e){
+    async addToPending(e) {
         e.preventDefault();
-        this.setState({loading: true})
+        this.setState({ loading: true })
         //get active user..
         let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         // let agents = await this.props.mongo.getCollection("agents");
         // let activeAgent = await agents.findOne({userId: user.userId})
-        let activeAgent = await this.props.mongo.findOne("agents", {userId: user.userId})
+        let activeAgent = await this.props.mongo.findOne("agents", { userId: user.userId })
         let newAssistanceArray = activeAgent.assistance
-        
+
         let newAssistanceObject = {
             isPending: true,
             isRejected: false,
@@ -113,29 +113,37 @@ class Assistance extends React.Component {
         newAssistanceArray.push(newAssistanceObject)
         activeAgent.assistance = newAssistanceArray
         // await agents.findOneAndUpdate({userId: user.userId}, activeAgent)
-        await this.props.mongo.findOneAndUpdate("agents", {userId: user.userId}, {assistance: newAssistanceArray})
+        await this.props.mongo.findOneAndUpdate("agents", { userId: user.userId }, { assistance: newAssistanceArray })
         await this.setState({
             loading: false,
             firstName: "",
             lastName: "",
             phone: "",
-            dealership: {label:"", value:""},
-            source: {label:"", value:""},
+            dealership: { label: "", value: "" },
+            source: { label: "", value: "" },
             message: "",
-            text: ""})
+            text: "",
+            error: ""
+
+        })
 
         //get their assistance array..
         //build new assistance object
         //add it to their assistance array
         //inset updated record to db 
     }
-    async makeAssistanceMessage(){
+    async makeAssistanceMessage() {
         let message = "CUSTOMER NEEDS ASSISTANCE\n"
         message += `${this.state.dealership.label}\n${this.makeTitleCase(this.state.firstName)} ${this.makeTitleCase(this.state.lastName)}\n`
         message += `${this.state.phone}\n${this.state.message}\n`
         message += `Source: ${this.state.source.label}`
-        
-        this.setState({text: message})
+        if (message.length > 1000) {
+            this.setState({ error: "Message too long." })
+        }
+        else {
+            this.setState({ error: "" })
+        }
+        this.setState({ text: message })
     }
     async sendText(appointment) {
         this.setState({ loading: true })
@@ -169,40 +177,40 @@ class Assistance extends React.Component {
                             <CardBody>
 
                                 <Form>
-                                <Label>
+                                    <Label>
                                         Dealership
                                     </Label>
                                     <Select
                                         placeholder="Dealership"
                                         value={this.state.dealership}
                                         options={this.state.dealerships}
-                                        onChange={async (e)=>{ await this.setState({dealership: e}); this.makeAssistanceMessage()}}
-                                    /><br/>
+                                        onChange={async (e) => { await this.setState({ dealership: e }); this.makeAssistanceMessage() }}
+                                    /><br />
                                     <Label>
                                         Customer First Name
                                     </Label>
                                     <Input
                                         placeholder="Customer First Name"
-                                        value = {this.state.firstName}
-                                        onChange={async (e)=>{await this.setState({firstName: e.target.value}); this.makeAssistanceMessage()}}
+                                        value={this.state.firstName}
+                                        onChange={async (e) => { await this.setState({ firstName: e.target.value }); this.makeAssistanceMessage() }}
                                     />
                                     <Label>
                                         Customer Last Name
                                     </Label>
                                     <Input
                                         placeholder="Customer Last Name"
-                                        value = {this.state.lastName}
-                                        onChange={async (e)=>{await this.setState({lastName: e.target.value}); this.makeAssistanceMessage()}}
+                                        value={this.state.lastName}
+                                        onChange={async (e) => { await this.setState({ lastName: e.target.value }); this.makeAssistanceMessage() }}
                                     />
                                     <Label>
                                         Customer Phone Number
                                     </Label>
                                     <Input
                                         placeholder="Customer Phone Number"
-                                        value = {this.state.phone}
-                                        onChange={async (e)=>{await this.setState({phone: e.target.value}); this.makeAssistanceMessage()}}
+                                        value={this.state.phone}
+                                        onChange={async (e) => { await this.setState({ phone: e.target.value }); this.makeAssistanceMessage() }}
                                     />
-                                     
+
                                     <Label>
                                         Source
                                     </Label>
@@ -210,28 +218,30 @@ class Assistance extends React.Component {
                                         placeholder="Source"
                                         options={this.state.sources}
                                         value={this.state.source}
-                                        onChange={async (e)=>{ await this.setState({source: e}); this.makeAssistanceMessage()}}
-                                    /><br/>
+                                        onChange={async (e) => { await this.setState({ source: e }); this.makeAssistanceMessage() }}
+                                    /><br />
                                     <Label for="message">Follow-up Reason</Label>
-                                    <Input 
+                                    <Input
                                         placeholder="Message/notes"
                                         type="textarea"
                                         name="text"
                                         id="message"
-                                        style={{height: "500px", whiteSpace: "pre-wrap"}}
+                                        style={{ height: "500px", whiteSpace: "pre-wrap" }}
                                         value={this.state.message}
-                                        onChange={async (e)=> {await this.setState({message: e.target.value}); this.makeAssistanceMessage()}}
+                                        onChange={async (e) => { await this.setState({ message: e.target.value }); this.makeAssistanceMessage() }}
                                     />
-                                    <hr/>
+                                    <hr />
                                     <Card lg="6">
                                         <CardHeader>Review Message:</CardHeader>
-                                        <CardBody style={{whiteSpace: "pre-wrap"}}>
-                                            
+                                        <CardBody style={{ whiteSpace: "pre-wrap" }}>
+
                                             {this.state.text}
                                         </CardBody>
                                     </Card>
+                                    <h3 style={{ color: "red" }}>{this.state.error}</h3>
                                     <Button
                                         disabled={
+                                            this.state.error.length > 0 ||
                                             this.state.loading ||
                                             this.state.firstName.length == 0 ||
                                             this.state.lastName.length == 0 ||
