@@ -60,6 +60,7 @@ import UserManagement from "./views/pages/UserManagement.jsx"
 import DealershipLogin from "./views/pages/DealershipLogin.jsx"
 import DealershipDashboard from "./views/DealershipDashboard.jsx"
 import DealershipUsers from "./views/pages/DealershipUsers.jsx"
+import AdminDashboard from "./views/AdminDashboard.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
@@ -81,6 +82,14 @@ const routes = [
     icon: "tim-icons icon-chart-pie-36",
     component: DealershipDashboard,
     layout: "/dealership"
+  },
+  {
+    path: "/admin_dashboard",
+    name: "Admin Dashboard",
+    icon: "tim-icons icon-chart-pie-36",
+    component: AdminDashboard,
+    adminOnly: true,
+    layout: "/admin"
   },
   // {
   //   path: "/recordings",
