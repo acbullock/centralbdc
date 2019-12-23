@@ -51,7 +51,11 @@ class AdminDashboard extends React.Component {
                 label: "",
                 value: ""
             },
-            agent_top_5: []
+            agent_top_5: [],
+            total: [],
+            top10Loading: false,
+            lastAppsLoading: false,
+            agent5Loading: false
         };
         this.sortLastAppts = this.sortLastAppts.bind(this);
         this.getTodayAppts = this.getTodayAppts.bind(this);
@@ -62,17 +66,9 @@ class AdminDashboard extends React.Component {
     async componentDidMount() {
         this._isMounted = true;
         this._isMounted && this.setState({ loading: true });
-        let all_appointments = await this.props.mongo.find("appointments");
-        let agents = this._isMounted && await this.props.mongo.find("agents")
-        this._isMounted && this.setState({ loading: false });
-        //sort every dealer's appointments array by date..
-        for (let a in all_appointments) {
-            all_appointments[a].appointments = all_appointments[a].appointments.sort((a, b) => {
-                if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1;
-                if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return -1;
-                return 0;
-            });
-        }
+        this._isMounted && this.getTodayAppts();
+        let dealerships = await this.props.mongo.find("dealerships", { isActive: true });
+        let agents = await this.props.mongo.find("agents_no_appts")
         for (let a in agents) {
             agents[a].label = agents[a].name;
             agents[a].value = agents[a]._id
@@ -82,76 +78,67 @@ class AdminDashboard extends React.Component {
             if (a.name < b.name) return -1;
             return 0;
         })
-        this._isMounted && this.setState({ all_appointments, agents });
-        this._isMounted && this.sortLastAppts()
-        this._isMounted && this.getTodayAppts();
+        this.setState({ dealerships, agents });
+        this._isMounted && this.sortLastAppts();
         this._isMounted && this.getTop10();
+        this._isMounted && this.setState({ loading: false });
     }
     componentWillUnmount() {
         this._isMounted = false
     }
     async sortLastAppts() {
+        this.setState({ lastAppsLoading: true })
         let last_appts = [];
-        let dealerships = await this.props.mongo.find("dealerships");
-        this.setState({ dealerships })
-        Outerloop:
-        for (let a in this.state.all_appointments) {
-            if (this.state.all_appointments[a].appointments.length > 0) {
-                for (let d in dealerships) {
-                    if (dealerships[d].value === this.state.all_appointments[a].dealership) {
-                        if (!dealerships[d].isActive) {
-                            continue Outerloop;
-                        }
-                    }
+        let appointments = await this.props.mongo.find("appointments")
+        for (let a in appointments) {
+            let found = false;
+            for (let d in this.state.dealerships) {
+                if (appointments[a].dealership === this.state.dealerships[d].value && appointments[a].appointments.length > 0) {
+                    found = true;
+                    break;
                 }
+            }
+            if (found) {
                 last_appts.push({
-                    dealership: this.state.all_appointments[a].dealership,
-                    time_elapsed_hrs: Math.round(new Date(new Date().getTime() - new Date(this.state.all_appointments[a].appointments[0].verified).getTime()).getTime() / 3600000 * 10) / 10
+                    dealership: appointments[a].dealership,
+                    time_elapsed_hrs: Math.round(new Date(new Date().getTime() - new Date(appointments[a].appointments[0].verified).getTime()).getTime() / 3600000 * 10) / 10
                 });
             }
+            else {
+                if (found) {
+                    last_appts.push({
+                        dealership: appointments[a].dealership.label,
+                        time_elapsed_hrs: 1000
+                    });
+                }
+
+            }
         }
-        last_appts.sort((a, b) => {
+        await last_appts.sort((a, b) => {
             if (a.time_elapsed_hrs < b.time_elapsed_hrs) return 1;
             if (a.time_elapsed_hrs > b.time_elapsed_hrs) return -1;
             return 0;
         })
         this._isMounted && await this.setState({ last_appts })
+        this.setState({ lastAppsLoading: false })
     }
-    getTodayAppts() {
-        let total = [];
-        let thisMonth = new Date()
-        thisMonth.setDate(1)
-        thisMonth.setHours(0, 0, 0, 0);
-        let today = new Date();
-        today.setHours(0, 0, 0, 0);
-        for (let a in this.state.all_appointments) {
-            for (let b in this.state.all_appointments[a].appointments) {
-                total.push(this.state.all_appointments[a].appointments[b])
+    async getTodayAppts() {
+        let metrics = await this.props.mongo.findOne("admin_dashboard", { label: "centralbdc_metrics" })
+        let lifetime_appts = metrics.total_lifetime;
+        let month_appts = metrics.total_mtd;
+        let today_appts = metrics.total_today;
+        this.setState({ lifetime_appts, month_appts, today_appts: today_appts })
+    }
+    async getTop10() {
+        this.setState({ top10Loading: true })
+        let agents = await this.props.mongo.find("agents");
+        let today_appts = [];
+        for (let a in agents) {
+            for (let b in agents[a].appointments) {
+                today_appts.push(agents[a].appointments[b])
             }
         }
 
-        //get this month appts
-        let month_appts = total.filter((a) => {
-            return new Date(a.verified).getTime() > thisMonth.getTime();
-        })
-        let today_appts = total.filter((a) => {
-            return new Date(a.verified).getTime() > today.getTime();
-        })
-        let lifetime_appts = 397740 + total.length;
-        this.setState({ lifetime_appts, month_appts: month_appts.length, today_appts: today_appts.length })
-    }
-    async getTop10() {
-        let total = [];
-        for (let a in this.state.all_appointments) {
-            for (let b in this.state.all_appointments[a].appointments) {
-                total.push(this.state.all_appointments[a].appointments[b])
-            }
-        }
-        let today = new Date();
-        today.setHours(0, 0, 0, 0);
-        let today_appts = total.filter((a) => {
-            return new Date(a.verified).getTime() > today.getTime();
-        })
         let agent_counts = {}
         for (let a in today_appts) {
             if (agent_counts[today_appts[a].agent_id] != undefined) {
@@ -168,15 +155,23 @@ class AdminDashboard extends React.Component {
         sortable.sort((a, b) => {
             return b[1] - a[1]
         })
-        this.setState({ top10: sortable })
-
+        this.setState({ top10: sortable, top10Loading: false })
     }
-    getAgentTop5(agent) {
+    async getAgentTop5(agent) {
         //get appointments for selected agent..
-        let agent_appts = agent.appointments
+        this.setState({ agent5Loading: true })
+        let agent_appts = await this.props.mongo.find("all_appointments", { agent_id: agent._id })
         let dealer_counts = {}
+        let active;
         for (let a in agent_appts) {
-            if (dealer_counts[agent_appts[a].dealership.label] !== undefined) {
+            active = false;
+            for (let d in this.state.dealerships) {
+                if (this.state.dealerships[d].value === agent_appts[a].dealership.value) {
+                    active = this.state.dealerships[d].isActive;
+                    break;
+                }
+            }
+            if (dealer_counts[agent_appts[a].dealership.label] !== undefined && active) {
                 dealer_counts[agent_appts[a].dealership.label]++;
             }
             else {
@@ -190,7 +185,7 @@ class AdminDashboard extends React.Component {
         sortable.sort((a, b) => {
             return b[1] - a[1];
         })
-        this.setState({ agent_top_5: sortable })
+        this.setState({ agent_top_5: sortable, agent5Loading: false })
 
     }
     render() {
@@ -213,8 +208,8 @@ class AdminDashboard extends React.Component {
                 <div className="content">
 
                     <Row style={{ justifyContent: "center" }} className="text-center">
-                        <Col lg="4">
-                            <Card className="card-raised card-white">
+                        <Col lg="6">
+                            <Card className="card-raised card-white blur">
                                 <CardHeader>
                                     <CardTitle >
                                         <h3><strong>Top 10 Stale Dealerships</strong></h3>
@@ -222,7 +217,9 @@ class AdminDashboard extends React.Component {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardBody>
-                                    <Table>
+                                    <CardImg hidden={!this.state.lastAppsLoading} top width="100%" src={this.props.utils.loading} />
+
+                                    <Table hidden={this.state.lastAppsLoading}>
                                         <thead>
                                             <tr>
                                                 <th>Dealership Name</th>
@@ -245,14 +242,13 @@ class AdminDashboard extends React.Component {
                                                     // let dealership_name = await this.props.mongo.findOne("dealerships", { value: a.dealership })
                                                     return (
                                                         <tr key={a.dealership}>
-                                                            {/* <td>{dealership_name.label}</td> */}
                                                             <td>
-                                                                <p style={{ color: "red" }} hidden={a.time_elapsed_hrs < 0.8}>{dealership_name}</p>
-                                                                <p hidden={a.time_elapsed_hrs >= 0.8}>{dealership_name}</p>
+                                                                <p style={{ color: "red" }} hidden={a.time_elapsed_hrs < 1}>{dealership_name}</p>
+                                                                <p hidden={a.time_elapsed_hrs >= 1}>{dealership_name}</p>
                                                             </td>
                                                             <td >
-                                                                <p style={{ color: "red" }} hidden={a.time_elapsed_hrs < 0.8}><strong>{a.time_elapsed_hrs + " hours"}</strong></p>
-                                                                <p hidden={a.time_elapsed_hrs >= 0.8}><strong>{a.time_elapsed_hrs + " hours"}</strong></p>
+                                                                <p style={{ color: "red" }} hidden={a.time_elapsed_hrs < 1}>{a.time_elapsed_hrs + " hours"}</p>
+                                                                <p hidden={a.time_elapsed_hrs >= 1}>{a.time_elapsed_hrs + " hours"}</p>
                                                             </td>
                                                         </tr>
                                                     )
@@ -263,7 +259,7 @@ class AdminDashboard extends React.Component {
                                 </CardBody>
                             </Card>
                         </Col>
-                        <Col lg="4">
+                        <Col lg="6">
                             <Card className="card-raised card-white">
                                 <CardHeader>
                                     <CardTitle>
@@ -272,7 +268,9 @@ class AdminDashboard extends React.Component {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardBody>
-                                    <Table>
+                                    <CardImg hidden={!this.state.top10Loading} top width="100%" src={this.props.utils.loading} />
+
+                                    <Table hidden={this.state.top10Loading}>
                                         <thead>
                                             <tr>
                                                 <th>#</th>
@@ -291,8 +289,8 @@ class AdminDashboard extends React.Component {
                                                 }
                                                 return (
                                                     <tr key={a[0]}>
-                                                        <td>{i + 1}</td>
-                                                        <td>{name}</td>
+                                                        <td><p>{i + 1}</p></td>
+                                                        <td><p hidden></p><p>{name}</p></td>
                                                         <td>{a[1]}</td>
                                                     </tr>
                                                 )
@@ -302,7 +300,72 @@ class AdminDashboard extends React.Component {
                                 </CardBody>
                             </Card>
                         </Col>
-                        <Col lg="4">
+                    </Row>
+                    <Row style={{ justifyContent: "center" }} className="text-center">
+                        <Col lg="6" style={{ justifyContent: "center" }} className="text-center">
+                            <Card className="card-raised card-white">
+                                <CardHeader>
+                                    <CardTitle>
+                                        <h3><strong>Agent's Top 5 Dealerships</strong></h3>
+                                        <hr />
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardBody>
+                                    <Label>Agent</Label>
+                                    <Select
+                                        options={this.state.agents}
+                                        value={this.state.selected_agent}
+                                        onChange={(e) => {
+                                            this.setState({ selected_agent: e })
+                                            this.getAgentTop5(e)
+                                        }}
+                                    />
+                                    <CardImg hidden={!this.state.agent5Loading} top width="100%" src={this.props.utils.loading} />
+
+                                    <hr hidden={this.state.selected_agent.label.length < 1} />
+                                    <Table hidden={this.state.selected_agent.label.length < 1 || this.state.agent5Loading}>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Dealership Name</th>
+                                                <th>Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this.state.agent_top_5.map((d, i) => {
+
+                                                if (i > 4) return null;
+                                                let stale = false
+                                                let stales = []
+                                                for (let l in this.state.last_appts) {
+                                                    if (l > 9) break;
+                                                    let dealer = {};
+                                                    for (let dealership in this.state.dealerships) {
+                                                        if (this.state.dealerships[dealership].value === this.state.last_appts[l].dealership) {
+                                                            stales.push(this.state.dealerships[dealership].label)
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (stales.indexOf(d[0]) !== -1) {
+                                                    stale = true;
+                                                }
+                                                return (
+                                                    <tr key={i}>
+                                                        <td>{i + 1}</td>
+                                                        <td hidden={!stale}><p style={{ color: "red" }}>{d[0]}</p></td>
+                                                        <td hidden={stale}><p>{d[0]}</p></td>
+                                                        <td>{d[1]}</td>
+                                                    </tr>
+
+                                                )
+                                            })}
+                                        </tbody>
+                                    </Table>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                        <Col lg="6">
                             <Card className="card-raised card-white">
                                 <CardHeader>
                                     <CardTitle>
@@ -324,53 +387,8 @@ class AdminDashboard extends React.Component {
 
                             </Card>
                         </Col>
-                    </Row>
-                    <Row style={{ justifyContent: "center" }} className="text-center">
-                        <Col lg="6">
-                            <Card className="card-raised card-white">
-                                <CardHeader>
-                                    <CardTitle>
-                                        <h3><strong>Agent's Top 5 Dealerships</strong></h3>
-                                        <hr />
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardBody>
-                                    <Label>Agent</Label>
-                                    <Select
-                                        options={this.state.agents}
-                                        value={this.state.selected_agent}
-                                        onChange={(e) => {
-                                            this.setState({ selected_agent: e })
-                                            this.getAgentTop5(e)
-                                        }}
-                                    />
-                                    <hr hidden={this.state.selected_agent.label.length < 1} />
-                                    <Table hidden={this.state.selected_agent.label.length < 1}>
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Dealership Name</th>
-                                                <th>Count</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {this.state.agent_top_5.map((d, i) => {
 
-                                                if (i > 9) return null;
-                                                return (
-                                                    <tr key={i}>
-                                                        <td>{i + 1}</td>
-                                                        <td>{d[0]}</td>
-                                                        <td>{d[1]}</td>
-                                                    </tr>
 
-                                                )
-                                            })}
-                                        </tbody>
-                                    </Table>
-                                </CardBody>
-                            </Card>
-                        </Col>
                     </Row>
                 </div>
             </>

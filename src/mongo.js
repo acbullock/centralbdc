@@ -76,8 +76,9 @@ async function handleLogout(client) {
     return auth;
 }
 
-async function find(collection) {
-    let arr = await axios.post(`${SERVER_URL}/find`, { "collection": collection })
+async function find(collection, query) {
+    let req_query = query || {}
+    let arr = await axios.post(`${SERVER_URL}/find`, { "collection": collection, "query": req_query })
     return arr.data
 }
 
