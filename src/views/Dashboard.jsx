@@ -597,14 +597,14 @@ class Dashboard extends React.Component {
         <div className="content">
 
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="12" hidden={this.state.agent.account_type !== "admin"}>
+            <Col lg="12">
               <Card className="card-raised card-lightgrey">
                 <CardHeader>
                   <CardTitle tag="h3">Agent Hourly Breakdown</CardTitle>
                 </CardHeader>
                 <CardBody>
                   <Select
-                    options={this.state.agents}
+                    options={this.state.agent.account_type == "admin"? this.state.agents: this.state.agents.filter((a)=>{return a.label === this.state.agent.name})}
                     value={this.state.selected_agent}
                     onChange={(e) => {
                       this.setState({ selected_agent: e })
