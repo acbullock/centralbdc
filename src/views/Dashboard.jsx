@@ -31,7 +31,7 @@ import {
   Row,
   Col,
 } from "reactstrap";
-
+import Select from "react-select"
 class Dashboard extends React.Component {
 
   constructor(props) {
@@ -50,7 +50,7 @@ class Dashboard extends React.Component {
       isAdmin: false,
       appointments: [],
       loading: false,
-      agents: {},
+      agents: [],
       dealerships: [],
       data: {},
       options: {},
@@ -62,9 +62,12 @@ class Dashboard extends React.Component {
       isOld: true,
       todays_appts: [],
       todays_dealer_counts: [],
-      elements: []
+      elements: [],
+      selected_agent: { label: "", value: "" },
+      counts: {},
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
+    this.getBreakDown = this.getBreakDown.bind(this)
 
   }
   _isMounted = false;
@@ -78,6 +81,14 @@ class Dashboard extends React.Component {
     this._isMounted && this.setState({ user })
     let agent = this._isMounted && await this.props.mongo.findOne("agents", { "userId": user.userId })
     let agents = this._isMounted && await this.props.mongo.find("agents")
+    agents = agents.map((a, i) => {
+      return Object.assign(a, { label: a.name, value: i })
+    })
+    agents.sort((a, b) => {
+      if (a.label > b.label) return 1;
+      if (a.label < b.label) return -1;
+      return 0;
+    })
     this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
     this._isMounted && await this.getAppointmentData()
     this._isMounted && await this.getChartData()
@@ -531,7 +542,39 @@ class Dashboard extends React.Component {
 
     return ret;
   }
+  getBreakDown(agent) {
+    let appointments = agent.appointments
+    let start = new Date()
+    let end = new Date();
+    let now = new Date();
+    let counts = {
 
+    }
+    start.setHours(7, 0, 0, 0)
+    end.setHours(8, 0, 0, 0)
+
+    for (let i = 0; i < 15; i++) {
+      
+      if(now.getTime() < start.getTime()){
+        counts[i+7] = {count: "", color: "red"}
+        continue;
+      }
+      let color = "red";
+      let count = appointments.filter((a) => {
+        return new Date(a.verified).getTime() >= start.getTime() && new Date(a.verified).getTime() < end.getTime()
+      })
+      if(count.length == 2){
+        color = "yellow"
+      }
+      if(count.length > 2){
+        color = "green"
+      }
+      counts[i + 7] = {count: count.length, color}
+      start = new Date(end);
+      end.setHours(end.getHours() + 1, 0, 0, 0)
+    }
+    this.setState({ counts })
+  }
   render() {
     if (this.state.loading) {
       return (
@@ -554,6 +597,63 @@ class Dashboard extends React.Component {
         <div className="content">
 
           <Row style={{ justifyContent: "center" }}>
+            <Col lg="12" hidden={this.state.agent.account_type !== "admin"}>
+              <Card className="card-raised card-lightgrey">
+                <CardHeader>
+                  <CardTitle tag="h3">Agent Hourly Breakdown</CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <Select
+                    options={this.state.agents}
+                    value={this.state.selected_agent}
+                    onChange={(e) => {
+                      this.setState({ selected_agent: e })
+                      this.getBreakDown(e)
+                    }}
+                  />
+                  <Table responsive hidden={this.state.selected_agent.label.length < 1} className="text-center">
+                    <thead className="text-primary">
+                      <tr>
+                        <th>7 - 8</th>
+                        <th>8 - 9</th>
+                        <th>9 - 10</th>
+                        <th>10 - 11</th>
+                        <th>11 - 12</th>
+                        <th>12 - 1</th>
+                        <th>1 - 2</th>
+                        <th>2 - 3</th>
+                        <th>3 - 4</th>
+                        <th>4 - 5</th>
+                        <th>5 - 6</th>
+                        <th>6 - 7</th>
+                        <th>7 - 8</th>
+                        <th>8 - 9</th>
+                        <th>9 - 10</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><p style={this.state.counts[7] == undefined? {}: {color: this.state.counts[7].color}}><strong>{this.state.counts[7] == undefined ? 0 : this.state.counts[7].count}</strong></p></td>
+                        <td><p style={this.state.counts[8] == undefined? {}: {color: this.state.counts[8].color}}><strong>{this.state.counts[8] == undefined ? 0 : this.state.counts[8].count}</strong></p></td>
+                        <td><p style={this.state.counts[9] == undefined? {}: {color: this.state.counts[9].color}}><strong>{this.state.counts[9] == undefined ? 0 : this.state.counts[9].count}</strong></p></td>
+                        <td><p style={this.state.counts[10] == undefined? {}: {color: this.state.counts[10].color}}><strong>{this.state.counts[10] == undefined ? 0 : this.state.counts[10].count}</strong></p></td>
+                        <td><p style={this.state.counts[11] == undefined? {}: {color: this.state.counts[11].color}}><strong>{this.state.counts[11] == undefined ? 0 : this.state.counts[11].count}</strong></p></td>
+                        <td><p style={this.state.counts[12] == undefined? {}: {color: this.state.counts[12].color}}><strong>{this.state.counts[12] == undefined ? 0 : this.state.counts[12].count}</strong></p></td>
+                        <td><p style={this.state.counts[13] == undefined? {}: {color: this.state.counts[13].color}}><strong>{this.state.counts[13] == undefined ? 0 : this.state.counts[13].count}</strong></p></td>
+                        <td><p style={this.state.counts[14] == undefined? {}: {color: this.state.counts[14].color}}><strong>{this.state.counts[14] == undefined ? 0 : this.state.counts[14].count}</strong></p></td>
+                        <td><p style={this.state.counts[15] == undefined? {}: {color: this.state.counts[15].color}}><strong>{this.state.counts[15] == undefined ? 0 : this.state.counts[15].count}</strong></p></td>
+                        <td><p style={this.state.counts[16] == undefined? {}: {color: this.state.counts[16].color}}><strong>{this.state.counts[16] == undefined ? 0 : this.state.counts[16].count}</strong></p></td>
+                        <td><p style={this.state.counts[17] == undefined? {}: {color: this.state.counts[17].color}}><strong>{this.state.counts[17] == undefined ? 0 : this.state.counts[17].count}</strong></p></td>
+                        <td><p style={this.state.counts[18] == undefined? {}: {color: this.state.counts[18].color}}><strong>{this.state.counts[18] == undefined ? 0 : this.state.counts[18].count}</strong></p></td>
+                        <td><p style={this.state.counts[19] == undefined? {}: {color: this.state.counts[19].color}}><strong>{this.state.counts[19] == undefined ? 0 : this.state.counts[19].count}</strong></p></td>
+                        <td><p style={this.state.counts[20] == undefined? {}: {color: this.state.counts[20].color}}><strong>{this.state.counts[20] == undefined ? 0 : this.state.counts[20].count}</strong></p></td>
+                        <td><p style={this.state.counts[21] == undefined? {}: {color: this.state.counts[21].color}}><strong>{this.state.counts[21] == undefined ? 0 : this.state.counts[21].count}</strong></p></td>
+                      </tr>
+                    </tbody>
+                  </Table>
+                </CardBody>
+              </Card>
+            </Col>
             <Col lg="8">
               <Card className="text-center card-raised card-white">
                 <CardHeader>

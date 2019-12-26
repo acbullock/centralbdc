@@ -39,6 +39,7 @@ class DealershipManagement extends React.Component {
             dealershipGroups: [],
             avgMonthlyLeadCount: "",
             avgMonthlyRO: "",
+            avgMonthlyPhoneUps: "",
             dealershipAddress: "",
             newDealershipGroup: "",
             editDealershipGroup: { label: "", value: "" },
@@ -53,6 +54,7 @@ class DealershipManagement extends React.Component {
             editDealershipGroup2: { label: "", value: "" },
             editAvgMonthlyLeadCount: "",
             editAvgMonthlyRO: "",
+            editAvgMonthlyPhoneUps: "",
             editTextList: [],
             newEditTextContact: "",
             editRingCentral: "",
@@ -144,6 +146,7 @@ class DealershipManagement extends React.Component {
             avgMonthlyLeadCount: "",
             dealershipAddress: "",
             avgMonthlyRO: "",
+            avgMonthlyPhoneUps: "",
             addRingCentral: "",
             newDealershipGroup: "",
 
@@ -205,6 +208,7 @@ class DealershipManagement extends React.Component {
             address: this.state.dealershipAddress,
             average_monthly_lead_count: this.state.avgMonthlyLeadCount,
             average_montly_ro_count: this.state.avgMonthlyRO,
+            average_monthly_phone_ups: this.state.avgMonthlyPhoneUps,
             textFrom: this.state.addRingCentral,
             contacts: this.state.addTextList,
             dataMining: "+1" + this.state.addDataMining,
@@ -240,6 +244,7 @@ class DealershipManagement extends React.Component {
             address: this.state.editDealershipAddress,
             average_monthly_lead_count: this.state.editAvgMonthlyLeadCount,
             average_montly_ro_count: this.state.editAvgMonthlyRO,
+            average_monthly_phone_ups: this.state.editAvgMonthlyPhoneUps,
             textFrom: this.state.editRingCentral,
             contacts: this.state.editTextList,
             dataMining: "+1" + this.state.editDataMining,
@@ -371,6 +376,17 @@ class DealershipManagement extends React.Component {
                                                         onChange={(e) => { this.onValueChange("avgMonthlyRO", e.target.value) }}
                                                     />
                                                 </FormGroup>
+                                                <FormGroup>
+                                                    <Label for="avgMonthlyPhoneUps">Average Monthly Phone-Ups</Label>
+                                                    <Input
+                                                        type="number"
+                                                        name="avgMonthlyPhoneUps"
+                                                        id="avgMonthlyPhoneUps"
+                                                        placeholder="Average Monthly Phone-Ups"
+                                                        value={this.state.avgMonthlyPhoneUps}
+                                                        onChange={(e) => { this.onValueChange("avgMonthlyPhoneUps", e.target.value) }}
+                                                    />
+                                                </FormGroup>
                                                 <hr />
                                                 <legend>Text List</legend>
                                                 <FormGroup>
@@ -444,6 +460,7 @@ class DealershipManagement extends React.Component {
                                                     // this.state.avgMonthlyLeadCount.length === 0 ||
                                                     this.state.dealershipAddress.length === 0 ||
                                                     // this.state.avgMonthlyRO.length === 0 ||
+                                                    // this.state.avgMonthlyPhoneUps.length === 0 ||
                                                     this.state.addRingCentral.length != 10 ||
                                                     this.state.addDataMining.length != 10 ||
                                                     this.state.addSales.length != 10 ||
@@ -536,6 +553,7 @@ class DealershipManagement extends React.Component {
                                             editDealershipGroup2: group || { label: "", value: "" },
                                             editAvgMonthlyLeadCount: this.state.editDealership.average_monthly_lead_count || "",
                                             editAvgMonthlyRO: this.state.editDealership.average_montly_ro_count || "",
+                                            editAvgMonthlyPhoneUps: this.state.editDealership.average_monthly_phone_ups || "",
                                             editTextList: this.state.editDealership.contacts || [],
                                             editRingCentral: this.state.editDealership.textFrom || "",
                                             editDataMining: this.state.editDealership.dataMining.substring(2, 12) || "",
@@ -620,6 +638,17 @@ class DealershipManagement extends React.Component {
                                                         onChange={(e) => { this.onValueChange("editAvgMonthlyRO", e.target.value) }}
                                                     />
                                                 </FormGroup>
+                                                <FormGroup>
+                                                    <Label for="editAvgMonthlyPhoneUps">Average Monthly Phone-Ups</Label>
+                                                    <Input
+                                                        type="number"
+                                                        name="editAvgMonthlyPhoneUps"
+                                                        id="editAvgMonthlyPhoneUps"
+                                                        placeholder="Edit Average Monthly Phone-Ups"
+                                                        value={this.state.editAvgMonthlyPhoneUps}
+                                                        onChange={(e) => { this.onValueChange("editAvgMonthlyPhoneUps", e.target.value) }}
+                                                    />
+                                                </FormGroup>
                                                 <hr />
                                                 <legend>Edit Text List</legend>
                                                 <FormGroup>
@@ -697,6 +726,7 @@ class DealershipManagement extends React.Component {
                                                     // this.state.editAvgMonthlyLeadCount.length === 0 ||
                                                     this.state.editDealershipAddress.length === 0 ||
                                                     // this.state.editAvgMonthlyRO.length === 0 ||
+                                                    // this.state.editAvgMonthlyPhoneUps.length === 0 ||
                                                     this.state.editRingCentral.length != 10
                                                     // access validation?
                                                 }>Update</Button>

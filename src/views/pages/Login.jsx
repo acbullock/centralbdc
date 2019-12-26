@@ -85,9 +85,9 @@ class Login extends React.Component {
           <div className="content">
             <Container>
               <Col className="ml-auto mr-auto text-center" md="6">
-                <Card color="transparent" >
+                {/* <Card color="transparent" > */}
                   <CardImg top width="100%" src={this.props.utils.loading} />
-                </Card>
+                {/* </Card> */}
               </Col>
             </Container>
           </div>
