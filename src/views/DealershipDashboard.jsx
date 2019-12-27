@@ -346,6 +346,7 @@ class DealershipDashboard extends React.Component {
               </Col>
             </Row>
             <hr />
+            <hr />
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Month-to-Date</legend>
 
@@ -380,6 +381,7 @@ class DealershipDashboard extends React.Component {
 
               </Col>
             </Row>
+            <hr />
             <hr />
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Last Month</legend>
