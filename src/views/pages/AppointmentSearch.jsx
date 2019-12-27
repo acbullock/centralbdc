@@ -45,13 +45,15 @@ class AppointmnetSearch extends React.Component {
             searchLast: "",
             searchPhone: "",
             results: [],
-            loading: false
+            loading: false,
+            all_apps: []
         };
 
     }
     _isMounted = false
     async componentDidMount() {
         this._isMounted = true
+        this.setState({ loading: true })
         let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agent = await this.props.mongo.findOne("agents", { userId: user.userId })
         if (agent.account_type !== "admin") {
@@ -59,8 +61,8 @@ class AppointmnetSearch extends React.Component {
             this.props.history.push("/admin/dashboard")
         }
 
-
-        this._isMounted && this.setState({ loading: false })
+        let all_apps = this._isMounted && await this.props.mongo.find("all_appointments")
+        this._isMounted && this.setState({ loading: false, all_apps: all_apps })
 
     }
     onInputChange(key, value) {
@@ -69,13 +71,15 @@ class AppointmnetSearch extends React.Component {
     async searchAppt(e) {
         e.preventDefault()
         this.setState({ loading: true, results: [] })
-        let agents = await this.props.mongo.find("agents")
+        let agents = this._isMounted && await this.props.mongo.find("agents")
+
         let appts = []
         for (let a in agents) {
             for (let b in agents[a].appointments) {
                 appts.push(agents[a].appointments[b])
             }
         }
+        appts = appts.concat(this.state.all_apps)
         appts = appts.filter((a) => {
             return (this.state.searchFirst.length > 0 && a.customer_firstname.toLowerCase().indexOf(this.state.searchFirst.toLowerCase()) != -1) ||
                 (this.state.searchLast.length > 0 && a.customer_lastname.toLowerCase().indexOf(this.state.searchLast.toLowerCase()) != -1) ||
@@ -104,7 +108,7 @@ class AppointmnetSearch extends React.Component {
                         <Container>
                             <Col className="ml-auto mr-auto text-center" md="6" >
                                 {/* <Card color="transparent"> */}
-                                    <CardImg top width="100%" src={this.props.utils.loading}/>
+                                <CardImg top width="100%" src={this.props.utils.loading} />
                                 {/* </Card> */}
                             </Col>
                         </Container>

@@ -44,7 +44,7 @@ class DealershipHistory extends React.Component {
             dealershps: [],
             assistance: [],
             loading: true,
-            currDealer: {},
+            currDealer: {label: "", value: ""},
             dealerAppts: [],
             dealerFollow: [],
             numDays: 0
@@ -65,6 +65,7 @@ class DealershipHistory extends React.Component {
         this._isMounted = true
         let agents = this._isMounted && await this.props.mongo.find("agents")
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
+        let all_apps = this._isMounted && await this.props.mongo.find("all_appointments")
         this._isMounted && dealerships.sort((a, b) => {
             if (a.label > b.label) return 1
             if (a.label < b.label) return -1
@@ -80,6 +81,8 @@ class DealershipHistory extends React.Component {
                 assistance.push(agents[a].assistance[c])
             }
         }
+        appts = appts.concat(all_apps)
+
         this._isMounted && appts.sort((a, b) => {
             if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return -1
             if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1
@@ -145,6 +148,7 @@ class DealershipHistory extends React.Component {
         this._isMounted && this.setState({loading:true})
         let agents = this._isMounted && await this.props.mongo.find("agents")
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
+        let all_apps = this._isMounted && await this.props.mongo.find("all_appointments")
         this._isMounted && dealerships.sort((a, b) => {
             if (a.label > b.label) return 1
             if (a.label < b.label) return -1
@@ -160,6 +164,7 @@ class DealershipHistory extends React.Component {
                 assistance.push(agents[a].assistance[c])
             }
         }
+        appts = appts.concat(all_apps)
         this._isMounted && appts.sort((a, b) => {
             if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return -1
             if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1
@@ -187,9 +192,9 @@ class DealershipHistory extends React.Component {
                 <div className="content">
                   <Container>
                     <Col className="ml-auto mr-auto text-center"md="6">
-                      <Card  color="transparent" >
+                      {/* <Card  color="transparent" > */}
                         <CardImg top width="100%" src={this.props.utils.loading} />
-                      </Card>
+                      {/* </Card> */}
                     </Col>
                   </Container>
                 </div>
@@ -208,6 +213,7 @@ class DealershipHistory extends React.Component {
                                 <Select
                                     isDisabled={this.state.loading}
                                     options={this.state.dealerships}
+                                    value={this.state.currDealer}
                                     onChange={async (e) => { this._isMounted && await this.setState({ currDealer: e }); this.refreshList() }}
                                 />
                                 <br />
@@ -216,6 +222,7 @@ class DealershipHistory extends React.Component {
                 </Label>
                                 <Input
                                     type="number"
+                                    value={this.state.numDays}
                                     disabled={this.state.loading}
                                     onChange={(e) => { this._isMounted && this.setState({ numDays: e.target.value }); this.refreshList() }}
                                 /><br/>
