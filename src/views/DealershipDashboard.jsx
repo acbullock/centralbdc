@@ -39,10 +39,13 @@ class DealershipDashboard extends React.Component {
     this.state = {
       loading: false,
       thisMonth: "",
+      todayCount: "",
       lastMonthCount: "",
       thisMonthCount: "",
       dealership: {},
       appointments: [],
+      todayApps: [],
+      tomorrowApps: [],
       thisMonthApps: [],
       lastMonthApps: [],
       dealerships: [],
@@ -155,7 +158,7 @@ class DealershipDashboard extends React.Component {
     }
     else if (this.state.agent.access === "admin") {
       let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
-      dealerships = dealerships.filter((d)=>{
+      dealerships = dealerships.filter((d) => {
         return d.isActive === true
       })
       dealerships.sort((a, b) => {
@@ -202,12 +205,42 @@ class DealershipDashboard extends React.Component {
     })
   }
   async getStatsForDealer(value) {
-    this._isMounted && this.setState({ loading: true, thisMonthApps: "Loading..", lastMonthApps: "Loading..", thisMonthCount: "Loading..", lastMonthCount: "Loading.." })
+    this._isMounted && this.setState({ loading: true, thisMonthApps: "Loading..", lastMonthApps: "Loading..", thisMonthCount: "Loading..", lastMonthCount: "Loading..", tomorrowApps: "Loading..", todayApps: "Loading.." })
 
     let dealership = this._isMounted && await this.props.mongo.findOne("dealerships", { value })
     this._isMounted && this.setState({ dealership })
-    let appointments = this._isMounted && await this.props.mongo.findOne("appointments", { dealership: dealership.value })
+    let appointments = this._isMounted && await this.props.mongo.findOne("appointments", { dealership: dealership.value });
+    let agents = this._isMounted && await this.props.mongo.find("agents");
+    let agent_apps = [];
+    for (let a in agents) {
+      agent_apps = agent_apps.concat(agents[a].appointments)
+    }
+    agent_apps = agent_apps.filter((a) => {
+      return a.dealership.value === dealership.value
+    })
+
     appointments = appointments.appointments;
+    console.log(appointments.length)
+    appointments = appointments.concat(agent_apps);
+    console.log(appointments.length)
+    let todayApps = appointments.filter((a) => {
+      let x = new Date();
+      x.setHours(0, 0, 0, 0)
+
+      let tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(0, 0, 0, 0)
+      return new Date(a.appointment_date).getTime() >= x.getTime() && new Date(a.appointment_date).getTime() < tomorrow.getTime()
+    })
+    let tomorrowApps = appointments.filter((a) => {
+      let x = new Date();
+      x.setDate(x.getDate() + 1);
+      x.setHours(0, 0, 0, 0)
+      let next = new Date();
+      next.setDate(next.getDate() + 2);
+      next.setHours(0, 0, 0, 0)
+      return new Date(a.appointment_date).getTime() >= x.getTime() && new Date(a.appointment_date).getTime() < next.getTime()
+    })
     let thisMonthApps = appointments.filter((a) => {
       let x = new Date()
       x.setDate(1)
@@ -229,6 +262,8 @@ class DealershipDashboard extends React.Component {
     })
 
     this._isMounted && this.setState({
+      todayApps: todayApps.length,
+      tomorrowApps: tomorrowApps.length,
       thisMonthApps: thisMonthApps.length,
       lastMonthApps: lastMonthApps.length
     });
@@ -261,21 +296,6 @@ class DealershipDashboard extends React.Component {
 
 
   render() {
-    // if (this.state.loading) {
-    //   return (
-    //     <>
-    //       <div className="content">
-    //         <Container>
-    //           <Col className="ml-auto mr-auto text-center" md="6">
-    //             {/* <Card color="transparent" > */}
-    //             <CardImg top width="100%" src={this.props.utils.loading} />
-    //             {/* </Card> */}
-    //           </Col>
-    //         </Container>
-    //       </div>
-    //     </>
-    //   );
-    // }
     return (
 
       <>
@@ -292,6 +312,40 @@ class DealershipDashboard extends React.Component {
                 <legend><h1 color="primary">{this.state.dealership.label}</h1></legend>
               </CardTitle>
             </CardHeader>
+            <hr />
+            <Row style={{ justifyContent: "center" }}>
+              <legend className="text-center">Upcoming Appointments</legend>
+              <Col sm="4">
+                <Card className="card-raised card-white" color="success">
+                  <CardHeader>
+                    <CardTitle tag="h3" >
+                      <p>Today's Appointments</p>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardBody className="text-center">
+                    <h1><strong>{this.state.todayApps}</strong></h1>
+
+                  </CardBody>
+                </Card>
+              </Col>
+              <Col sm="4">
+                <Card className="card-raised card-white" color="success">
+                  <CardHeader>
+                    <div className="tools float-right">
+                    </div>
+                    <CardTitle tag="h3" >
+                      <p>Tomorrow's Appointments</p>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardBody className="text-center">
+                    <h1><strong>{this.state.tomorrowApps}</strong></h1>
+
+                  </CardBody>
+                </Card>
+
+              </Col>
+            </Row>
+            <hr />
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Month-to-Date</legend>
 
@@ -303,7 +357,7 @@ class DealershipDashboard extends React.Component {
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{isNaN(this.state.thisMonthCount)? "Loading.." :2 * this.state.thisMonthCount}</strong></h1>
+                    <h1><strong>{isNaN(this.state.thisMonthCount) ? "Loading.." : 2 * this.state.thisMonthCount}</strong></h1>
 
                   </CardBody>
                 </Card>
@@ -326,6 +380,7 @@ class DealershipDashboard extends React.Component {
 
               </Col>
             </Row>
+            <hr />
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Last Month</legend>
               <Col sm="4">
@@ -336,7 +391,7 @@ class DealershipDashboard extends React.Component {
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{isNaN(this.state.lastMonthCount) ? "Loading..":2 * this.state.lastMonthCount}</strong></h1>
+                    <h1><strong>{isNaN(this.state.lastMonthCount) ? "Loading.." : 2 * this.state.lastMonthCount}</strong></h1>
 
                   </CardBody>
                 </Card>

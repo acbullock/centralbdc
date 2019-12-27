@@ -573,6 +573,7 @@ class Dashboard extends React.Component {
       start = new Date(end);
       end.setHours(end.getHours() + 1, 0, 0, 0)
     }
+    counts["total"] = {count: appointments.length, color: "black"}
     this.setState({ counts })
   }
   render() {
@@ -611,7 +612,7 @@ class Dashboard extends React.Component {
                       this.getBreakDown(e)
                     }}
                   />
-                  <Table responsive hidden={this.state.selected_agent.label.length < 1} className="text-center">
+                  <Table bordered striped responsive hidden={this.state.selected_agent.label.length < 1} className="text-center">
                     <thead className="text-primary">
                       <tr>
                         <th>7 - 8</th>
@@ -629,6 +630,7 @@ class Dashboard extends React.Component {
                         <th>7 - 8</th>
                         <th>8 - 9</th>
                         <th>9 - 10</th>
+                        <th>Total</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -648,6 +650,7 @@ class Dashboard extends React.Component {
                         <td><p style={this.state.counts[19] == undefined? {}: {color: this.state.counts[19].color}}><strong>{this.state.counts[19] == undefined ? 0 : this.state.counts[19].count}</strong></p></td>
                         <td><p style={this.state.counts[20] == undefined? {}: {color: this.state.counts[20].color}}><strong>{this.state.counts[20] == undefined ? 0 : this.state.counts[20].count}</strong></p></td>
                         <td><p style={this.state.counts[21] == undefined? {}: {color: this.state.counts[21].color}}><strong>{this.state.counts[21] == undefined ? 0 : this.state.counts[21].count}</strong></p></td>
+                        <td><p style={this.state.counts["total"] == undefined? {}: {color: this.state.counts["total"].color}}><strong>{this.state.counts["total"] == undefined ? 0 : this.state.counts["total"].count}</strong></p></td>
                       </tr>
                     </tbody>
                   </Table>
