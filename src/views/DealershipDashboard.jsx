@@ -313,7 +313,7 @@ class DealershipDashboard extends React.Component {
               </CardTitle>
             </CardHeader>
             <hr />
-            <Row style={{ justifyContent: "center" }} hidden={true}>
+            <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Upcoming Appointments</legend>
               <Col sm="4">
                 <Card className="card-raised card-white" color="success">
@@ -345,8 +345,8 @@ class DealershipDashboard extends React.Component {
 
               </Col>
             </Row>
-            {/* <hr /> */}
-            {/* <hr /> */}
+            <hr />
+            <hr />
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Month-to-Date</legend>
 

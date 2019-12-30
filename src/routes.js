@@ -101,13 +101,13 @@ const routes = [
     adminOnly: true,
     icon: "tim-icons icon-notes"
   },
-  {
-    path: "/reports",
-    name: "Reports",
-    icon: "tim-icons tim-icons icon-notes",
-    component: Reports,
-    layout: "/dealership"
-  },
+  // {
+  //   path: "/reports",
+  //   name: "Reports",
+  //   icon: "tim-icons tim-icons icon-notes",
+  //   component: Reports,
+  //   layout: "/dealership"
+  // },
   {
     path: "/customer_search",
     name: "Customer Search",
