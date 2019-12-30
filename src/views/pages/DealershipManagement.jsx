@@ -40,6 +40,7 @@ class DealershipManagement extends React.Component {
             avgMonthlyLeadCount: "",
             avgMonthlyRO: "",
             avgMonthlyPhoneUps: "",
+            dailyApptGoal: "",
             dealershipAddress: "",
             newDealershipGroup: "",
             editDealershipGroup: { label: "", value: "" },
@@ -55,6 +56,7 @@ class DealershipManagement extends React.Component {
             editAvgMonthlyLeadCount: "",
             editAvgMonthlyRO: "",
             editAvgMonthlyPhoneUps: "",
+            editDailyApptGoal: "",
             editTextList: [],
             newEditTextContact: "",
             editRingCentral: "",
@@ -147,6 +149,7 @@ class DealershipManagement extends React.Component {
             dealershipAddress: "",
             avgMonthlyRO: "",
             avgMonthlyPhoneUps: "",
+            dailyApptGoal: "",
             addRingCentral: "",
             newDealershipGroup: "",
 
@@ -209,6 +212,7 @@ class DealershipManagement extends React.Component {
             average_monthly_lead_count: this.state.avgMonthlyLeadCount,
             average_montly_ro_count: this.state.avgMonthlyRO,
             average_monthly_phone_ups: this.state.avgMonthlyPhoneUps,
+            goal: this.state.dailyApptGoal,
             textFrom: this.state.addRingCentral,
             contacts: this.state.addTextList,
             dataMining: "+1" + this.state.addDataMining,
@@ -245,6 +249,7 @@ class DealershipManagement extends React.Component {
             average_monthly_lead_count: this.state.editAvgMonthlyLeadCount,
             average_montly_ro_count: this.state.editAvgMonthlyRO,
             average_monthly_phone_ups: this.state.editAvgMonthlyPhoneUps,
+            goal: this.state.editDailyApptGoal,
             textFrom: this.state.editRingCentral,
             contacts: this.state.editTextList,
             dataMining: "+1" + this.state.editDataMining,
@@ -385,6 +390,17 @@ class DealershipManagement extends React.Component {
                                                         placeholder="Average Monthly Phone-Ups"
                                                         value={this.state.avgMonthlyPhoneUps}
                                                         onChange={(e) => { this.onValueChange("avgMonthlyPhoneUps", e.target.value) }}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label for="dailyApptGoal">Daily Appointment Goal</Label>
+                                                    <Input
+                                                        type="number"
+                                                        name="dailyApptGoal"
+                                                        id="dailyApptGoal"
+                                                        placeholder="Daily Appointment Goal"
+                                                        value={this.state.dailyApptGoal}
+                                                        onChange={(e) => { this.onValueChange("dailyApptGoal", e.target.value) }}
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -554,6 +570,7 @@ class DealershipManagement extends React.Component {
                                             editAvgMonthlyLeadCount: this.state.editDealership.average_monthly_lead_count || "",
                                             editAvgMonthlyRO: this.state.editDealership.average_montly_ro_count || "",
                                             editAvgMonthlyPhoneUps: this.state.editDealership.average_monthly_phone_ups || "",
+                                            editDailyApptGoal: this.state.editDealership.goal || "",
                                             editTextList: this.state.editDealership.contacts || [],
                                             editRingCentral: this.state.editDealership.textFrom || "",
                                             editDataMining: this.state.editDealership.dataMining.substring(2, 12) || "",
@@ -647,6 +664,17 @@ class DealershipManagement extends React.Component {
                                                         placeholder="Edit Average Monthly Phone-Ups"
                                                         value={this.state.editAvgMonthlyPhoneUps}
                                                         onChange={(e) => { this.onValueChange("editAvgMonthlyPhoneUps", e.target.value) }}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label for="editDailyApptGoal">Daily Appointment Goal</Label>
+                                                    <Input
+                                                        type="number"
+                                                        name="editDailyApptGoal"
+                                                        id="editDailyApptGoal"
+                                                        placeholder="Edit Average Monthly Phone-Ups"
+                                                        value={this.state.editDailyApptGoal}
+                                                        onChange={(e) => { this.onValueChange("editDailyApptGoal", e.target.value) }}
                                                     />
                                                 </FormGroup>
                                                 <hr />

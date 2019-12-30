@@ -61,6 +61,7 @@ import DealershipLogin from "./views/pages/DealershipLogin.jsx"
 import DealershipDashboard from "./views/DealershipDashboard.jsx"
 import DealershipUsers from "./views/pages/DealershipUsers.jsx"
 import AdminDashboard from "./views/AdminDashboard.jsx"
+import DealershipPerformance from "./views/pages/DealershipPerformance.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
@@ -222,6 +223,14 @@ const routes = [
         path: "/dealership_history",
         name: "Dealership History",
         component: DealershipHistory,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-notes"
+      },
+      {
+        path: "/daily_dealership_performance",
+        name: "Dealership Performance",
+        component: DealershipPerformance,
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-notes"
