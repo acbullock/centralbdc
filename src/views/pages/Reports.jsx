@@ -149,7 +149,7 @@ class Reports extends React.Component {
                                                 timeFormat={false}
                                                 inputProps={{
                                                     className: "form-control",
-                                                    placeholder: "From date/time",
+                                                    placeholder: "From Date",
                                                     name: "date",
                                                 }}
                                                 value={this.state.fromDate}
@@ -166,7 +166,7 @@ class Reports extends React.Component {
                                                 timeFormat={false}
                                                 inputProps={{
                                                     className: "form-control",
-                                                    placeholder: "To date/time",
+                                                    placeholder: "To Date",
                                                     name: "date"
                                                 }}
                                                 value={this.state.toDate}
