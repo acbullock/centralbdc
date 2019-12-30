@@ -351,14 +351,14 @@ class DealershipDashboard extends React.Component {
               <legend className="text-center">Month-to-Date</legend>
 
               <Col sm="4">
-                <Card className="card-raised card-white">
+                <Card className="card-raised card-white" style={{backgroundColor: "#3469a6"}}>
                   <CardHeader>
                     <CardTitle tag="h3" >
-                      <p>Total Calls: <strong>{this.state.thisMonth}</strong></p>
+                      <p style={{color: "white"}}><strong>Total Calls: {this.state.thisMonth}</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{isNaN(this.state.thisMonthCount) ? "Loading.." : 2 * this.state.thisMonthCount}</strong></h1>
+                    <h1 style={{color: "white"}}><strong>{isNaN(this.state.thisMonthCount) ? "Loading.." : 2 * this.state.thisMonthCount}</strong></h1>
 
                   </CardBody>
                 </Card>
@@ -370,11 +370,11 @@ class DealershipDashboard extends React.Component {
                     <div className="tools float-right">
                     </div>
                     <CardTitle tag="h3" >
-                      <p>Total Appts: <strong>{this.state.thisMonth}</strong></p>
+                      <p style={{color: "#3469a6"}}><strong>Total Appts: {this.state.thisMonth}</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{this.state.thisMonthApps}</strong></h1>
+                    <h1 style={{color: "#3469a6"}}><strong>{this.state.thisMonthApps}</strong></h1>
 
                   </CardBody>
                 </Card>
@@ -385,14 +385,14 @@ class DealershipDashboard extends React.Component {
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Last Month</legend>
               <Col sm="4">
-                <Card className="card-raised card-white">
+                <Card className="card-raised card-white" style={{backgroundColor: "#3469a6"}}>
                   <CardHeader>
                     <CardTitle tag="h3" >
-                      <p>Total Calls: <strong>{this.state.lastMonth}</strong></p>
+                      <p style={{color: "white"}}><strong>Total Calls: {this.state.lastMonth}</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{isNaN(this.state.lastMonthCount) ? "Loading.." : 2 * this.state.lastMonthCount}</strong></h1>
+                    <h1 style={{color: "white"}}><strong>{isNaN(this.state.lastMonthCount) ? "Loading.." : 2 * this.state.lastMonthCount}</strong></h1>
 
                   </CardBody>
                 </Card>
@@ -401,10 +401,10 @@ class DealershipDashboard extends React.Component {
               <Col sm="4">
                 <Card className="card-raised card-white">
                   <CardHeader>
-                    <CardTitle tag="h3" >Total Appts: <strong>{this.state.lastMonth}</strong></CardTitle>
+                    <CardTitle tag="h3" ><p style={{color: "#3469a6"}}><strong>Total Appts: {this.state.lastMonth}</strong></p></CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{this.state.lastMonthApps}</strong></h1>
+                    <h1 style={{color: "#3469a6"}}><strong>{this.state.lastMonthApps}</strong></h1>
 
                   </CardBody>
                 </Card>

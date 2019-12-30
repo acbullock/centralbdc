@@ -80,7 +80,7 @@ class Dealership extends React.Component {
       this.props.history.push("/authentication/login")
       return;
     }
-    
+
     let dealer = await this.props.mongo.findOne("dealerships", { _id: this.state.agent.dealership })
     let group = await this.props.mongo.findOne("dealership_groups", { _id: dealer.group })
     group = group.label;
@@ -90,7 +90,7 @@ class Dealership extends React.Component {
   componentWillUnmount() {
     this._isMounted = false;
     if (navigator.platform.indexOf("Win") > -1) {
-      if(ps !== undefined)
+      if (ps !== undefined)
         ps.destroy();
       document.documentElement.className += " perfect-scrollbar-off";
       document.documentElement.classList.remove("perfect-scrollbar-on");
@@ -263,11 +263,10 @@ class Dealership extends React.Component {
             sidebarOpened={this.state.sidebarOpened}
             toggleSidebar={this.toggleSidebar}
           />
+          {/* <br />
           <br />
           <br />
-          <br />
-          <h2 className="text-center"><strong>{this.state.dealership_group}</strong></h2>
-
+          <h2 className="text-center"><strong>{this.state.dealership_group}</strong></h2> */}
           <Switch>{this.getRoutes(routes)}</Switch>
           {// we don't want the Footer to be rendered on full screen maps page
             this.props.location.pathname.indexOf("full-screen-map") !==
