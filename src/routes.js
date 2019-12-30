@@ -93,7 +93,7 @@ const routes = [
     layout: "/admin"
   },
   {
-    path: "/daily_dealership_performance",
+    path: "/daily_dealership_goals",
     name: "Daily Dealer Goals",
     component: DealershipPerformance,
     layout: "/admin",

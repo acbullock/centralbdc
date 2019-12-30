@@ -101,7 +101,7 @@ class DealershipPerformance extends React.Component {
                 <Container>
                     <Row>
                         <Col className="ml-auto mr-auto text-center" md="8">
-                            <legend>Daily Dealership Performance</legend>
+                            <legend>Daily Dealership Goals</legend>
                             <Card className="card-raised card-white">
                                 <Table>
                                     <thead>
