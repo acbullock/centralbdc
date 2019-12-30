@@ -201,7 +201,7 @@ class DealershipUsers extends React.Component {
                                                         type="text"
                                                         name="userName"
                                                         id="userName"
-                                                        placeholder="Name of Agent"
+                                                        placeholder="Name of User"
                                                         value={this.state.addUserName}
                                                         onChange={(e) => { this.onValueChange("addUserName", e.target.value) }}
                                                     />
@@ -212,7 +212,7 @@ class DealershipUsers extends React.Component {
                                                         type="email"
                                                         name="userEmail"
                                                         id="userEmail"
-                                                        placeholder="Agent Email Address"
+                                                        placeholder="User Email Address"
                                                         value={this.state.addUserEmail}
                                                         onChange={(e) => this.onValueChange("addUserEmail", e.target.value)}
                                                     />

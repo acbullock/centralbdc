@@ -43,8 +43,8 @@ class DealershipPerformance extends React.Component {
         this.setState({agents})
         dealerships = dealerships.filter((d)=>{return d.isActive === true})
         dealerships.sort((a, b) => {
-            if (a.goal > b.goal) return -1;
-            if (a.goal < b.goal) return 1;
+            if (parseInt(a.goal) > parseInt(b.goal)) return -1;
+            if (parseInt(a.goal) < parseInt(b.goal)) return 1;
             return 0;
         })
         this.setState({dealerships})
