@@ -92,6 +92,14 @@ const routes = [
     adminOnly: true,
     layout: "/admin"
   },
+  {
+    path: "/daily_dealership_performance",
+    name: "Daily Dealer Goals",
+    component: DealershipPerformance,
+    layout: "/admin",
+    adminOnly: true,
+    icon: "tim-icons icon-notes"
+  },
   // {
   //   path: "/recordings",
   //   name: "Recordings",
@@ -223,14 +231,6 @@ const routes = [
         path: "/dealership_history",
         name: "Dealership History",
         component: DealershipHistory,
-        layout: "/admin",
-        adminOnly: true,
-        icon: "tim-icons icon-notes"
-      },
-      {
-        path: "/daily_dealership_performance",
-        name: "Dealership Performance",
-        component: DealershipPerformance,
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-notes"
