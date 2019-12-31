@@ -193,7 +193,7 @@ class AdminReports extends React.Component {
                         <Col className="ml-auto mr-auto" md="12" hidden={this.state.reportDone === false}>
                             <Card className="card-raised text-center card-white">
                                 <CardBody>
-                                    <Table bordered>
+                                    <Table bordered responsive>
                                         <thead style={{ backgroundColor: "#3469a6" }}>
                                             <tr>
                                                 <th><p style={{ color: "white" }}>Progress</p></th>
