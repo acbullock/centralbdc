@@ -36,10 +36,12 @@ class AdminReports extends React.Component {
             appCount: 0,
             goal: 0,
             progressColor: "",
-            progressValue: ""
+            progressValue: "",
+            full_results: []
         }
         this._isMounted = false;
         this.getGoalForRange = this.getGoalForRange.bind(this)
+        this.getGoalForRangeFull = this.getGoalForRangeFull.bind(this)
     }
     async componentWillMount() {
         this._isMounted = true
@@ -47,7 +49,7 @@ class AdminReports extends React.Component {
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId });
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
-        dealerships.filter((a) => {
+        dealerships = dealerships.filter((a) => {
             return a.isActive === true
         })
         dealerships.sort((a, b) => {
@@ -56,7 +58,7 @@ class AdminReports extends React.Component {
             return 0;
         })
 
-        let reports = ["Dealership Goals"];
+        let reports = ["Dealership Goals", "Dealership Goals Full"];
         reports.sort((a, b) => {
             if (a > b) return 1;
             if (a < b) return -1;
@@ -100,6 +102,53 @@ class AdminReports extends React.Component {
 
 
         this.setState({ loading: false, goal, reportDone: true, appCount: apps.length, progressValue, progressColor })
+    }
+    async getGoalForRangeFull() {
+        this.setState({ loading: true })
+        let apps = await this.props.mongo.find("appointments")
+        let full_results = []
+        for (let a in apps) {
+            let curr_apps = apps[a].appointments;
+            let currDealer = {}
+            for(let d in this.state.dealerships){
+                if(this.state.dealerships[d].value === apps[a].dealership){
+                    currDealer = this.state.dealerships[d];
+                    break;
+                }
+            }
+            if(!currDealer.isActive){
+                continue;
+            }
+            curr_apps = curr_apps.filter((a) => {
+                return new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() && new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
+            });
+            let range = new Date(this.state.toDate).getTime() - new Date(this.state.fromDate).getTime()
+            range = range / (1000 * 60 * 60 * 24);
+            range = Math.round(range);
+            let goal = (currDealer.goal) * range;
+            let progressValue = curr_apps.length / goal * 100;
+            let progressColor = "red";
+            if (progressValue > 33) {
+                progressColor = "yellow";
+            }
+            if (progressValue >= 100) {
+                progressColor = "green";
+            }
+            full_results.push({
+                dealership: currDealer,
+                goal,
+                appCount: curr_apps.length,
+                progressValue,
+                progressColor
+            })
+        }
+        full_results.sort((a,b)=>{
+            if(parseInt(a.goal) > parseInt(b.goal)) return -1;
+            if(parseInt(a.goal) < parseInt(b.goal)) return 1;
+            return 0;
+
+        })
+        this.setState({ loading: false, full_results, reportDone: true });
     }
 
     render() {
@@ -190,7 +239,7 @@ class AdminReports extends React.Component {
                             </Card>
 
                         </Col>
-                        <Col className="ml-auto mr-auto" md="12" hidden={this.state.reportDone === false}>
+                        <Col className="ml-auto mr-auto" md="12" hidden={this.state.reportDone === false || this.state.selected_report.label !== "Dealership Goals"}>
                             <Card className="card-raised text-center card-white">
                                 <CardBody>
                                     <Table bordered responsive>
@@ -213,6 +262,91 @@ class AdminReports extends React.Component {
                                                 <td>{this.state.appCount}</td>
                                                 <td>{this.state.goal}</td>
                                             </tr>
+                                        </tbody>
+                                    </Table>
+                                </CardBody>
+                            </Card>
+
+                        </Col>
+                    </Row>
+                    <Row hidden={this.state.selected_report.label !== "Dealership Goals Full"}>
+                        <Col className="ml-auto mr-auto" md="8">
+                            <Card className="card-raised card-white">
+                                <CardBody>
+                                    <legend>{this.state.selected_report.label}</legend>
+                                    <Form >
+                                        <FormGroup>
+                                            <Label>From: </Label>
+                                            <ReactDateTime
+                                                timeFormat={false}
+                                                inputProps={{
+                                                    className: "form-control",
+                                                    placeholder: "From Date",
+                                                    name: "date",
+                                                }}
+                                                value={this.state.fromDate}
+                                                onChange={(value) => {
+                                                    this.setState({ reportDone: false, fromDate: new Date(value) })
+                                                }
+                                                }
+                                                className="primary"
+                                            />
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <Label>To: </Label>
+                                            <ReactDateTime
+                                                timeFormat={false}
+                                                inputProps={{
+                                                    className: "form-control",
+                                                    placeholder: "To Date",
+                                                    name: "date"
+                                                }}
+                                                value={this.state.toDate}
+                                                onChange={(value) => {
+                                                    this.setState({ reportDone: false, toDate: new Date(new Date(value).setHours(23, 59, 59, 999)) })
+                                                }
+                                                }
+                                                className="primary"
+                                            />
+                                        </FormGroup>
+                                        <Button color="primary" disabled={
+                                            this.state.fromDate.length < 1 ||
+                                            this.state.toDate.length < 1 ||
+                                            new Date(this.state.fromDate).getTime() > new Date(this.state.toDate).getTime()
+                                        } onClick={() => { this.getGoalForRangeFull() }}>Generate Report</Button>
+                                    </Form>
+                                </CardBody>
+                            </Card>
+
+                        </Col>
+                        <Col className="ml-auto mr-auto" md="12" hidden={this.state.reportDone === false || this.state.selected_report.label !== "Dealership Goals Full"}>
+                            <Card className="card-raised text-center card-white">
+                                <CardBody>
+                                    <Table bordered responsive>
+                                        <thead style={{ backgroundColor: "#3469a6" }}>
+                                            <tr>
+                                                <th><p style={{ color: "white" }}>Progress</p></th>
+                                                <th><p style={{ color: "white" }}>Dealership</p></th>
+                                                <th><p style={{ color: "white" }}>From</p></th>
+                                                <th><p style={{ color: "white" }}>To</p></th>
+                                                <th><p style={{ color: "white" }}>Appointment Count</p></th>
+                                                <th><p style={{ color: "white" }}>Goal</p></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this.state.full_results.map((r, i) => {
+
+                                                return (
+                                                    <tr key={i}>
+                                                        <td><Progress value={r.progressValue} color={r.progressColor} /></td>
+                                                        <td>{r.dealership.label}</td>
+                                                        <td>{new Date(this.state.fromDate).toLocaleDateString()}</td>
+                                                        <td>{new Date(this.state.toDate).toLocaleDateString()}</td>
+                                                        <td>{r.appCount}</td>
+                                                        <td>{r.goal}</td>
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </Table>
                                 </CardBody>
