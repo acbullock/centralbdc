@@ -214,7 +214,7 @@ class DealershipUsers extends React.Component {
                                                         id="userEmail"
                                                         placeholder="User Email Address"
                                                         value={this.state.addUserEmail}
-                                                        onChange={(e) => this.onValueChange("addUserEmail", e.target.value)}
+                                                        onChange={(e) => this.onValueChange("addUserEmail", e.target.value.toLowerCase())}
                                                     />
                                                 </FormGroup>
                                                 <FormGroup>
@@ -364,7 +364,7 @@ class DealershipUsers extends React.Component {
                                                         id="editUserEmail"
                                                         placeholder="Edit Email"
                                                         value={this.state.editUserEmail}
-                                                        onChange={(e) => { this.onValueChange("editUserEmail", e.target.value) }}
+                                                        onChange={(e) => { this.onValueChange("editUserEmail", e.target.value.toLowerCase()) }}
                                                     />
                                                 </FormGroup>
                                                 <FormGroup>
