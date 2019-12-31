@@ -132,7 +132,7 @@ class DealershipPerformance extends React.Component {
                         <Col className="ml-auto mr-auto text-center" md="12">
                             <legend>Daily Dealership Goals</legend>
                             <Card className="card-raised card-white">
-                                <Table bordered responsive striped>
+                                <Table bordered striped>
                                     <thead style={{ backgroundColor: "#3469a6"}}>
                                         <tr>
                                             <th><p style={{ color: "white" }}>Progress</p></th>
