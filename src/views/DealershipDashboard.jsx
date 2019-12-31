@@ -250,8 +250,8 @@ class DealershipDashboard extends React.Component {
     })
     let lastMonthApps = appointments.filter((a) => {
       let x = new Date()
-      x.setMonth(x.getMonth() - 1)
       x.setDate(1)
+      x.setMonth(x.getMonth() - 1)
       x.setHours(0, 0, 0, 0)
 
       let y = new Date()
@@ -273,7 +273,8 @@ class DealershipDashboard extends React.Component {
 
     let thisMonth = new Date().toLocaleString("default", { month: "long" })
     let lastMonth = new Date()
-    lastMonth.setMonth(new Date().getMonth() - 1);
+    lastMonth = new Date(lastMonth.setDate(1))
+    lastMonth = new Date(lastMonth.setMonth(new Date().getMonth() - 1));
     lastMonth = lastMonth.toLocaleString("default", { month: "long" })
     this._isMounted && await this.setState({
       loading: false,
