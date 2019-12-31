@@ -49,17 +49,18 @@ class Admin extends React.Component {
     // console.log(props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo)
   }
   async componentWillMount() {
-    
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    if(user.userId == undefined){
+    let agent = await this.props.mongo.findOne("agents", { "userId": user.userId })
+    if (user.userId == undefined || agent._id == undefined) {
       this.props.history.push("/auth/login")
       return;
     }
     // let agents = await this.props.mongo.getCollection("agents")
     // let agent = await agents.findOne({userId: user.userId})
-    let agent =await this.props.mongo.findOne("agents", {"userId": user.userId})
-    this.setState({agent: agent, isAdmin: agent.account_type === "admin"})
     
+    
+    this.setState({ agent: agent, isAdmin: agent.account_type === "admin" })
+
     if (navigator.platform.indexOf("Win") > -1) {
       document.documentElement.className += " perfect-scrollbar-on";
       document.documentElement.classList.remove("perfect-scrollbar-off");
@@ -70,7 +71,7 @@ class Admin extends React.Component {
       }
     }
     window.addEventListener("scroll", this.showNavbarButton);
-    if(agent.isActive === false){
+    if (agent.isActive === false) {
       this.props.history.push("/auth/login")
       return;
     }
@@ -84,7 +85,7 @@ class Admin extends React.Component {
     }
     window.removeEventListener("scroll", this.showNavbarButton);
   }
-  componentDidMount(){
+  componentDidMount() {
     this._isMounted = true;
   }
   componentDidUpdate(e) {
@@ -116,7 +117,7 @@ class Admin extends React.Component {
     }
   };
   getRoutes = routes => {
-    
+
     return routes.map((prop, key) => {
       if (prop.collapse) {
         return this.getRoutes(prop.views);
@@ -128,7 +129,7 @@ class Admin extends React.Component {
             path={prop.layout + prop.path}
             // component={prop.component}
             render={(props) => <C {...props}
-            mongo={this.state.mongo} utils={this.state.utils }/>}
+              mongo={this.state.mongo} utils={this.state.utils} />}
             key={key}
           />
         );
@@ -236,10 +237,10 @@ class Admin extends React.Component {
           />
           <Switch>{this.getRoutes(routes)}</Switch>
           {// we don't want the Footer to be rendered on full screen maps page
-          this.props.location.pathname.indexOf("full-screen-map") !==
-          -1 ? null : (
-            <Footer fluid />
-          )}
+            this.props.location.pathname.indexOf("full-screen-map") !==
+              -1 ? null : (
+                <Footer fluid />
+              )}
         </div>
         {/* <FixedPlugin
           activeColor={this.state.activeColor}
