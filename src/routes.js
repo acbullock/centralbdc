@@ -63,6 +63,7 @@ import DealershipUsers from "./views/pages/DealershipUsers.jsx"
 import AdminDashboard from "./views/AdminDashboard.jsx"
 import DealershipPerformance from "./views/pages/DealershipPerformance.jsx"
 import Reports from "./views/pages/Reports.jsx"
+import AdminReports from "./views/pages/AdminReports.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
@@ -102,6 +103,13 @@ const routes = [
     icon: "tim-icons icon-notes"
   },
   {
+    path: "/reports",
+    name: "Reports",
+    icon: "tim-icons icon-bullet-list-67",
+    component: AdminReports,
+    layout: "/admin"
+  },
+  {
     path: "/customer_search",
     name: "Customer Search",
     icon: "tim-icons icon-light-3",
@@ -111,7 +119,7 @@ const routes = [
   {
     path: "/reports",
     name: "Reports",
-    icon: "tim-icons tim-icons icon-notes",
+    icon: "tim-icons icon-bullet-list-67",
     component: Reports,
     layout: "/dealership"
   },
