@@ -93,8 +93,7 @@ class DealershipPerformance extends React.Component {
                 let hourlyRate = elapsed / (1000 * 60 * 60)
                 hourlyRate = apps.length / hourlyRate
                 let totalHrs = now.getDay() === 0 ? 8 : 12;
-                let projection = Math.round(10* hourlyRate * totalHrs)/10
-
+                let projection = Math.round(10 * hourlyRate * totalHrs) / 10
 
 
                 return Object.assign(d, { totalCount: apps.length, progressValue, progressColor, projection: projection })
@@ -104,8 +103,8 @@ class DealershipPerformance extends React.Component {
             }
         })
         dlr.sort((a, b) => {
-            if (a.progressValue > b.progressValue) return 1;
-            if (a.progressValue < b.progressValue) return -1;
+            if ((a.goal - a.projection) > (b.goal - b.projection)) return -1;
+            if ((a.goal - a.projection) < (b.goal - b.projection)) return 1;
             return 0;
         })
         this.setState({ dealerships: dlr });
@@ -130,28 +129,28 @@ class DealershipPerformance extends React.Component {
             <div className="content">
                 <Container>
                     <Row>
-                        <Col className="ml-auto mr-auto text-center" md="8">
+                        <Col className="ml-auto mr-auto text-center" md="12">
                             <legend>Daily Dealership Goals</legend>
                             <Card className="card-raised card-white">
-                                <Table>
-                                    <thead>
+                                <Table bordered responsive striped>
+                                    <thead style={{ backgroundColor: "#3469a6"}}>
                                         <tr>
-                                            <th>Progress</th>
-                                            <th>Dealership Name</th>
-                                            <th>Today's Appointment Count</th>
-                                            <th>Dealership Goal</th>
-                                            <th>On Track</th>
+                                            <th><p style={{ color: "white" }}>Progress</p></th>
+                                            <th><p style={{ color: "white" }}>Dealership Name</p></th>
+                                            <th><p style={{ color: "white" }}>Today's Appointment Count</p></th>
+                                            <th><p style={{ color: "white" }}>Dealership Goal</p></th>
+                                            <th><p style={{ color: "white" }}>On Track</p></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {this.state.dealerships.map((d, i) => {
                                             return (
                                                 <tr key={i}>
-                                                    <td><Progress value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td>
-                                                    <td>{d.label}</td>
-                                                    <td>{d.totalCount}</td>
-                                                    <td>{d.goal}</td>
-                                            <td><i style={{color:d.projection >= d.goal ? "green": "red"}} className={d.projection >= d.goal ? "tim-icons icon-check-2": "tim-icons icon-simple-remove"}/></td>
+                                                    <td ><Progress style={{height: "25px", width: "150px", fontSize: "18px"}} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td>
+                                                    <td><p style={{fontSize: "18px"}}>{d.label}</p></td>
+                                                    <td><p style={{fontSize: "18px"}}>{d.totalCount}</p></td>
+                                                    <td><p style={{fontSize: "18px"}}>{d.goal}</p></td>
+                                                    <td><i solid style={{ fontSize: "24pt", fontWeight: "bolder", color: d.projection / d.goal >= .9 ? "green" : "red" }} className={d.projection / d.goal >= .9 ? "tim-icons icon-check-2" : "tim-icons icon-simple-remove"} /></td>
                                                 </tr>
                                             );
 
