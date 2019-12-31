@@ -117,10 +117,11 @@ class CustomerSearch extends React.Component {
         lastMonth = new Date(lastMonth.setDate(lastMonth.getDate() - 10))
         
         let nextMonth = new Date()
+        nextMonth = new Date(nextMonth.setDate(nextMonth.getDate() +1))
         // console.log(lastMonth, nextMonth)
         // nextMonth = new Date(nextMonth.setMonth(nextMonth.getMonth() + 1))
 
-        let results = this._isMounted && await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/call-log?access_token=${token}&phoneNumber=${this.state.searchPhone}&withRecording=true&view=Detailed&dateFrom=${lastMonth.getFullYear()}-${lastMonth.getMonth() + 1}-${lastMonth.getDate()}&dateTo=${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}-${nextMonth.getDate()+1}&perPage=1000&page=1`)
+        let results = this._isMounted && await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/call-log?access_token=${token}&phoneNumber=${this.state.searchPhone}&withRecording=true&view=Detailed&dateFrom=${lastMonth.getFullYear()}-${lastMonth.getMonth() + 1}-${lastMonth.getDate()}&dateTo=${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}-${nextMonth.getDate()}&perPage=1000&page=1`)
 
 
 
