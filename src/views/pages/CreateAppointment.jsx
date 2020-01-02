@@ -158,7 +158,7 @@ class CreateAppointment extends React.Component {
         else {
             let message = `Hi ${this.makeTitleCase(data.customer.firstname)}, `
             if (data.appointment.department.label === "Service") {
-                message += `I scheduled your Service appointment for ${data.appointment.scenario.label} at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address}. `
+                message += `I scheduled your Service appointment at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address}. `
             }
             else {
                 message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address} for `
