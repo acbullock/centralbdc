@@ -28,14 +28,19 @@ class DealershipManagement extends React.Component {
             editGroupModal: false,
             editDealerModal: false,
             addTextList: [],
+            addServiceTextList: [],
             addDealershipName: "",
             addDealershipGroup: {},
             addDealershipPhone: "",
             addRingCentral: "",
+            addRingCentralService: "",
             addDataMining: "",
             addSales: "",
             addIsActive: "",
+            addIsSales: false,
+            addIsService: false,
             newTextContact: "",
+            newServiceContact: "",
             dealershipGroups: [],
             avgMonthlyLeadCount: "",
             avgMonthlyRO: "",
@@ -58,14 +63,20 @@ class DealershipManagement extends React.Component {
             editAvgMonthlyPhoneUps: "",
             editDailyApptGoal: "",
             editTextList: [],
+            editServiceTextList: [],
             newEditTextContact: "",
+            newEditServiceContact: "",
             editRingCentral: "",
+            editRingCentralService: "",
             editDataMining: "",
             editSales: "",
-            editIsActive: ""
+            editIsActive: "",
+            editIsService: false,
+            editIsSales: false
         }
         this.toggle = this.toggle.bind(this)
         this.addToTextList = this.addToTextList.bind(this)
+        this.addToServiceList = this.addToServiceList.bind(this)
         this.onValueChange = this.onValueChange.bind(this)
         this.deleteGroup = this.deleteGroup.bind(this)
         this.updateGroupName = this.updateGroupName.bind(this)
@@ -74,6 +85,7 @@ class DealershipManagement extends React.Component {
         this.addToEditTextList = this.addToEditTextList.bind(this)
         this.removeFromEditTextList = this.removeFromEditTextList.bind(this)
         this.removeFromTextList = this.removeFromTextList.bind(this)
+        this.removeFromServiceList = this.removeFromServiceList.bind(this)
         this.getGroup = this.getGroup.bind(this)
         this._isMounted = false
     }
@@ -117,11 +129,23 @@ class DealershipManagement extends React.Component {
             arr.push(phoneNumber)
         this.setState({ addTextList: arr, newTextContact: "" })
     }
+    addToServiceList(phoneNumber) {
+        let arr = this.state.addServiceTextList
+        if (arr.indexOf(phoneNumber) == -1)
+            arr.push(phoneNumber)
+        this.setState({ addServiceTextList: arr, newServiceContact: "" })
+    }
     removeFromTextList(phoneNumber) {
         let arr = this.state.addTextList
         if (arr.indexOf(phoneNumber) != -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
         this.setState({ addTextList: arr, newTextContact: "" })
+    }
+    removeFromServiceList(phoneNumber) {
+        let arr = this.state.addServiceTextList
+        if (arr.indexOf(phoneNumber) != -1)
+            arr.splice(arr.indexOf(phoneNumber), 1);
+        this.setState({ addServiceTextList: arr, newServiceContact: "" })
     }
     async addToEditTextList(phoneNumber) {
         let arr = this.state.editTextList
@@ -129,11 +153,23 @@ class DealershipManagement extends React.Component {
             arr.push(phoneNumber)
         this.setState({ editTextList: arr, newEditTextContact: "" })
     }
+    async addToEditServiceList(phoneNumber) {
+        let arr = this.state.editServiceTextList
+        if (arr.indexOf(phoneNumber) == -1)
+            arr.push(phoneNumber)
+        this.setState({ editServiceTextList: arr, newEditServiceContact: "" })
+    }
     removeFromEditTextList(phoneNumber) {
         let arr = this.state.editTextList
         if (arr.indexOf(phoneNumber) != -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
         this.setState({ editTextList: arr, newEditTextContact: "" })
+    }
+    removeFromEditServiceList(phoneNumber) {
+        let arr = this.state.editServiceTextList
+        if (arr.indexOf(phoneNumber) != -1)
+            arr.splice(arr.indexOf(phoneNumber), 1);
+        this.setState({ editServiceTextList: arr, newEditServiceContact: "" })
     }
     onValueChange(key, value) {
         this.setState({ [key]: value })
@@ -142,8 +178,10 @@ class DealershipManagement extends React.Component {
         this.setState({
             addDealershipName: "",
             newTextContact: "",
+            newServiceContact: "",
             addDealershipGroup: {},
             addTextList: [],
+            addServiceTextList: [],
             addDealershipPhone: "",
             avgMonthlyLeadCount: "",
             dealershipAddress: "",
@@ -151,7 +189,13 @@ class DealershipManagement extends React.Component {
             avgMonthlyPhoneUps: "",
             dailyApptGoal: "",
             addRingCentral: "",
+            addRingCentralService: "",
             newDealershipGroup: "",
+            addDataMining: "",
+            addSales: "",
+            addIsSales: false,
+            addIsService: false,
+            addIsActive: ""
 
         })
     }
@@ -214,9 +258,13 @@ class DealershipManagement extends React.Component {
             average_monthly_phone_ups: this.state.avgMonthlyPhoneUps,
             goal: this.state.dailyApptGoal,
             textFrom: this.state.addRingCentral,
+            serviceTextFrom: this.state.addRingCentralService,
             contacts: this.state.addTextList,
+            serviceContacts: this.state.addServiceTextList,
             dataMining: "+1" + this.state.addDataMining,
             sales: "+1" + this.state.addSales,
+            isSales: this.state.addIsSales,
+            isService: this.state.addIsService,
             isActive: this.state.addIsActive === "active"
         }
         //insert dealer
@@ -251,10 +299,14 @@ class DealershipManagement extends React.Component {
             average_monthly_phone_ups: this.state.editAvgMonthlyPhoneUps,
             goal: this.state.editDailyApptGoal,
             textFrom: this.state.editRingCentral,
+            serviceTextFrom: this.state.editRingCentralService,
             contacts: this.state.editTextList,
+            serviceContacts: this.state.editServiceTextList,
             dataMining: "+1" + this.state.editDataMining,
             sales: "+1" + this.state.editSales,
-            isActive: this.state.editIsActive === "active"
+            isActive: this.state.editIsActive === "active",
+            isSales: this.state.editIsSales,
+            isService: this.state.editIsService
         }
         //update dealer
         this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: update_value }, update)
@@ -404,7 +456,7 @@ class DealershipManagement extends React.Component {
                                                     />
                                                 </FormGroup>
                                                 <hr />
-                                                <legend>Text List</legend>
+                                                <legend>Sales Contact List</legend>
                                                 <FormGroup>
                                                     {
                                                         this.state.addTextList.map((phoneNumber, i) => {
@@ -418,14 +470,38 @@ class DealershipManagement extends React.Component {
                                                     <Button disabled={this.state.newTextContact.length != 10} color="primary" onClick={(e) => { this.addToTextList(this.state.newTextContact) }}>
                                                         <i className="tim-icons icon-simple-add" />
                                                     </Button>
-
                                                 </FormGroup>
                                                 <hr />
-                                                <legend>Ring Central Number</legend>
+                                                <legend>Service Contact List</legend>
+                                                <FormGroup>
+                                                    {
+                                                        this.state.addServiceTextList.map((phoneNumber, i) => {
+                                                            return <p key={i}>{phoneNumber}</p>
+                                                        })
+                                                    }
+                                                    <Input value={this.state.newServiceContact} onChange={(e) => { this.onValueChange("newServiceContact", e.target.value) }} type="tel" />
+                                                    <Button disabled={this.state.newServiceContact.length != 10} color="danger" onClick={(e) => { this.removeFromServiceList(this.state.newServiceContact) }}>
+                                                        <i className="tim-icons icon-simple-remove" />
+                                                    </Button>
+                                                    <Button disabled={this.state.newServiceContact.length != 10} color="primary" onClick={(e) => { this.addToServiceList(this.state.newServiceContact) }}>
+                                                        <i className="tim-icons icon-simple-add" />
+                                                    </Button>
+                                                </FormGroup>
+                                                <hr />
+                                                <legend>Ring Central Number (Sales)</legend>
                                                 <FormGroup>
                                                     <Input
                                                         value={this.state.addRingCentral}
                                                         onChange={(e) => { this.onValueChange("addRingCentral", e.target.value) }}
+                                                        type="number"
+                                                    />
+                                                </FormGroup>
+                                                <hr />
+                                                <legend>Ring Central Number (Service)</legend>
+                                                <FormGroup>
+                                                    <Input
+                                                        value={this.state.addRingCentralService}
+                                                        onChange={(e) => { this.onValueChange("addRingCentralService", e.target.value) }}
                                                         type="number"
                                                     />
                                                 </FormGroup>
@@ -449,6 +525,18 @@ class DealershipManagement extends React.Component {
 
                                                 </FormGroup>
                                                 <hr />
+                                                <legend>Departments</legend>
+                                                <FormGroup tag="fieldset">
+                                                    <Label check>
+                                                        <Input type="checkbox" checked={this.state.addIsSales} onClick={(e) => { this.setState({ addIsSales: !this.state.addIsSales }) }} />{' '}
+                                                        Sales
+                                                    </Label>
+                                                    <br />
+                                                    <Label check>
+                                                        <Input type="checkbox" checked={this.state.addIsService} onClick={(e) => { this.setState({ addIsService: !this.state.addIsService }) }} />{' '}
+                                                        Service
+                                                    </Label>
+                                                </FormGroup>
                                                 <hr />
                                                 <legend>Dealership is Active</legend>
                                                 <FormGroup tag="fieldset">
@@ -471,16 +559,19 @@ class DealershipManagement extends React.Component {
                                                 }} color="success" disabled={
                                                     this.state.addDealershipName.length === 0 ||
                                                     this.state.addDealershipGroup.label == undefined ||
-                                                    this.state.addTextList.length === 0 ||
+                                                    // this.state.addTextList.length === 0 ||
+                                                    // this.state.addServiceTextList.length === 0 ||
                                                     // this.state.addDealershipPhone.length != 10 ||
                                                     // this.state.avgMonthlyLeadCount.length === 0 ||
                                                     this.state.dealershipAddress.length === 0 ||
                                                     // this.state.avgMonthlyRO.length === 0 ||
                                                     // this.state.avgMonthlyPhoneUps.length === 0 ||
-                                                    this.state.addRingCentral.length != 10 ||
-                                                    this.state.addDataMining.length != 10 ||
-                                                    this.state.addSales.length != 10 ||
-                                                    this.state.addIsActive.length === 0
+                                                    // this.state.addRingCentral.length != 10 ||
+                                                    // this.state.addRingCentralService.length != 10 ||
+                                                    // this.state.addDataMining.length != 10 ||
+                                                    // this.state.addSales.length != 10 ||
+                                                    this.state.addIsActive.length === 0 ||
+                                                    (this.state.addIsSales === false && this.state.addIsService === false)
                                                     // access validation?
                                                 }>Submit</Button>
                                             </Form>
@@ -488,6 +579,10 @@ class DealershipManagement extends React.Component {
                                     </Modal>
                                 </CardBody>
                             </Card>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col className="ml-auto mr-auto text-center" md="8">
                             <Card>
                                 <CardBody>
                                     <h2>Add Dealership Group</h2>
@@ -516,8 +611,10 @@ class DealershipManagement extends React.Component {
                                     </Modal>
                                 </CardBody>
                             </Card>
-
-                            <hr />
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col className="ml-auto mr-auto text-center" md="8">
                             <Card>
                                 <CardBody>
                                     <h2>Edit/Delete Dealership Group</h2>
@@ -545,6 +642,11 @@ class DealershipManagement extends React.Component {
                                     </Modal>
                                 </CardBody>
                             </Card>
+
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col className="ml-auto mr-auto text-center" md="8">
                             <Card>
                                 <CardBody>
                                     <h2>Edit/Delete Dealership</h2>
@@ -572,10 +674,14 @@ class DealershipManagement extends React.Component {
                                             editAvgMonthlyPhoneUps: this.state.editDealership.average_monthly_phone_ups || "",
                                             editDailyApptGoal: this.state.editDealership.goal || "",
                                             editTextList: this.state.editDealership.contacts || [],
+                                            editServiceTextList: this.state.editDealership.serviceContacts || [],
                                             editRingCentral: this.state.editDealership.textFrom || "",
+                                            editRingCentralService: this.state.editDealership.serviceTextFrom || "",
                                             editDataMining: this.state.editDealership.dataMining.substring(2, 12) || "",
                                             editSales: this.state.editDealership.sales.substring(2, 12) || "",
-                                            editIsActive: this.state.editDealership.isActive == true ? "active" : "inactive"
+                                            editIsActive: this.state.editDealership.isActive == true ? "active" : "inactive",
+                                            editIsSales: this.state.editDealership.isSales,
+                                            editIsService: this.state.editDealership.isService
                                         })
                                         this.setState({ loading: false })
                                         this.toggle("editDealerModal");
@@ -678,7 +784,7 @@ class DealershipManagement extends React.Component {
                                                     />
                                                 </FormGroup>
                                                 <hr />
-                                                <legend>Edit Text List</legend>
+                                                <legend>Edit Sales Contact List</legend>
                                                 <FormGroup>
                                                     {
                                                         this.state.editTextList.map((phoneNumber, i) => {
@@ -694,11 +800,36 @@ class DealershipManagement extends React.Component {
                                                     </Button>
                                                 </FormGroup>
                                                 <hr />
-                                                <legend>Edit Ring Central Number</legend>
+                                                <legend>Edit Service Contact List</legend>
+                                                <FormGroup>
+                                                    {
+                                                        this.state.editServiceTextList.map((phoneNumber, i) => {
+                                                            return <p key={i}>{phoneNumber}</p>
+                                                        })
+                                                    }
+                                                    <Input value={this.state.newEditServiceContact} onChange={(e) => { this.onValueChange("newEditServiceContact", e.target.value) }} type="tel" />
+                                                    <Button disabled={this.state.newEditServiceContact.length != 10} color="danger" onClick={(e) => { this.removeFromEditServiceList(this.state.newEditServiceContact) }}>
+                                                        <i className="tim-icons icon-simple-remove" />
+                                                    </Button>
+                                                    <Button disabled={this.state.newEditServiceContact.length != 10} color="primary" onClick={(e) => { this.addToEditServiceList(this.state.newEditServiceContact) }}>
+                                                        <i className="tim-icons icon-simple-add" />
+                                                    </Button>
+                                                </FormGroup>
+                                                <hr />
+                                                <legend>Edit Ring Central Number (Sales)</legend>
                                                 <FormGroup>
                                                     <Input
                                                         value={this.state.editRingCentral}
                                                         onChange={(e) => { this.onValueChange("editRingCentral", e.target.value) }}
+                                                        type="number"
+                                                    />
+                                                </FormGroup>
+                                                <hr />
+                                                <legend>Edit Ring Central Number (Service)</legend>
+                                                <FormGroup>
+                                                    <Input
+                                                        value={this.state.editRingCentralService}
+                                                        onChange={(e) => { this.onValueChange("editRingCentralService", e.target.value) }}
                                                         type="number"
                                                     />
                                                 </FormGroup>
@@ -720,6 +851,19 @@ class DealershipManagement extends React.Component {
                                                         type="number"
                                                     />
 
+                                                </FormGroup>
+                                                <hr />
+                                                <legend>Edit Departments</legend>
+                                                <FormGroup tag="fieldset">
+                                                    <Label check>
+                                                        <Input type="checkbox" checked={this.state.editIsSales} onClick={(e) => { this.setState({ editIsSales: !this.state.editIsSales }) }} />{' '}
+                                                        Sales
+                                                    </Label>
+                                                    <br />
+                                                    <Label check>
+                                                        <Input type="checkbox" checked={this.state.editIsService} onClick={(e) => { this.setState({ editIsService: !this.state.editIsService }) }} />{' '}
+                                                        Service
+                                                    </Label>
                                                 </FormGroup>
                                                 <hr />
                                                 <hr />
@@ -749,13 +893,15 @@ class DealershipManagement extends React.Component {
                                                 }} color="success" disabled={
                                                     this.state.editDealershipName.length === 0 ||
                                                     this.state.editDealershipGroup2.label == undefined ||
-                                                    this.state.editTextList.length === 0 ||
+                                                    // this.state.editTextList.length === 0 ||
+                                                    // this.state.editServiceTextList.length === 0 ||
                                                     // this.state.editDealershipPhone.length != 10 ||
                                                     // this.state.editAvgMonthlyLeadCount.length === 0 ||
-                                                    this.state.editDealershipAddress.length === 0 ||
+                                                    this.state.editDealershipAddress.length === 0
                                                     // this.state.editAvgMonthlyRO.length === 0 ||
                                                     // this.state.editAvgMonthlyPhoneUps.length === 0 ||
-                                                    this.state.editRingCentral.length != 10
+                                                    // this.state.editRingCentral.length != 10 ||
+                                                    // this.state.editRingCentralService.length != 10 ||
                                                     // access validation?
                                                 }>Update</Button>
                                             </Form>
@@ -763,6 +909,7 @@ class DealershipManagement extends React.Component {
                                     </Modal>
                                 </CardBody>
                             </Card>
+
                         </Col>
                     </Row>
                 </Container>
