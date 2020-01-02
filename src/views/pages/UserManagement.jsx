@@ -34,11 +34,13 @@ class UserManagement extends React.Component {
             addUserPhone: "",
             addUserTeam: { label: "", value: "" },
             addType: "",
+            addDepartment: "",
             addActive: "",
             editUserName: "",
             editUserPhone: "",
             editUserEmail: "",
             editType: "",
+            editDepartment: "",
             editActive: ""
         }
         this.toggle = this.toggle.bind(this)
@@ -49,7 +51,6 @@ class UserManagement extends React.Component {
     }
     async componentWillMount() {
         this._isMounted = true
-
         this.setState({ loading: true })
         let users = this._isMounted && await this.props.mongo.find("agents")
         users.sort((a, b) => {
@@ -94,8 +95,8 @@ class UserManagement extends React.Component {
             addUserPhone: "",
             addUserTeam: { label: "", value: "" },
             addType: "",
-            addActive: ""
-
+            addActive: "",
+            addDepartment: ""
         })
     }
     async addNewGroup() {
@@ -154,6 +155,7 @@ class UserManagement extends React.Component {
             email: this.state.addUserEmail,
             team: this.state.addUserTeam,
             account_type: this.state.addType,
+            department: this.state.addDepartment,
             isActive: this.state.addActive === "active",
             isApprover: this.state.addType === "admin",
             appointments: [],
@@ -188,7 +190,8 @@ class UserManagement extends React.Component {
             phone: this.state.editUserPhone,
             account_type: this.state.editType,
             isActive: this.state.editActive === "active" ? true : false,
-            team: this.state.editUserTeam
+            team: this.state.editUserTeam,
+            department: this.state.editDepartment,
         }
         //update user
         this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { email: this.state.editUserEmail }, update)
@@ -285,6 +288,24 @@ class UserManagement extends React.Component {
                                                     />
                                                 </FormGroup>
                                                 <hr />
+                                                <legend>Department</legend>
+                                                <FormGroup>
+                                                    <FormGroup tag="fieldset">
+                                                        <FormGroup check>
+                                                            <Label check>
+                                                                <Input type="radio" name="addDepartment" value="sales" checked={this.state.addDepartment === "sales"} onChange={(e) => { this.onValueChange("addDepartment", e.target.value) }} />
+                                                                {' Sales'}
+                                                            </Label>
+                                                        </FormGroup>
+                                                        <FormGroup check>
+                                                            <Label check>
+                                                                <Input type="radio" name="addDepartment" value="service" checked={this.state.addDepartment === "service"} onChange={(e) => { this.onValueChange("addDepartment", e.target.value) }} />
+                                                                {' Service'}
+                                                            </Label>
+                                                        </FormGroup>
+                                                    </FormGroup>
+
+                                                </FormGroup>
                                                 <hr />
                                                 <legend>Account Type</legend>
                                                 <FormGroup tag="fieldset">
@@ -330,7 +351,8 @@ class UserManagement extends React.Component {
                                                         this.state.addUserPhone.length !== 10 ||
                                                         this.state.addUserTeam.label == undefined ||
                                                         this.state.addActive.length === 0 ||
-                                                        this.state.addType.length === 0
+                                                        this.state.addType.length === 0 ||
+                                                        this.state.addDepartment.length === 0
                                                     }
                                                 >Submit</Button>
                                             </Form>
@@ -338,6 +360,11 @@ class UserManagement extends React.Component {
                                     </Modal>
                                 </CardBody>
                             </Card>
+
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col className="ml-auto mr-auto text-center" md="8">
                             <Card>
                                 <CardBody>
                                     <h2>Edit User</h2>
@@ -359,6 +386,7 @@ class UserManagement extends React.Component {
                                             editUserEmail: u.email || "",
                                             editUserTeam: u.team,
                                             editType: u.account_type,
+                                            editDepartment: u.department,
                                             editActive: u.isActive == true ? "active" : "inactive"
                                         })
                                         this.setState({ loading: false })
@@ -418,6 +446,21 @@ class UserManagement extends React.Component {
                                                     />
                                                 </FormGroup>
                                                 <hr />
+                                                <legend>Edit Department</legend>
+                                                <FormGroup tag="fieldset">
+                                                    <FormGroup check>
+                                                        <Label check>
+                                                            <Input type="radio" name="editDepartment" value="sales" checked={this.state.editDepartment === "sales"} onChange={(e) => { this.onValueChange("editDepartment", e.target.value) }} />
+                                                            {' Sales'}
+                                                        </Label>
+                                                    </FormGroup>
+                                                    <FormGroup check>
+                                                        <Label check>
+                                                            <Input type="radio" name="editDepartment" value="service" checked={this.state.editDepartment === "service"} onChange={(e) => { this.onValueChange("editDepartment", e.target.value) }} />
+                                                            {' Service'}
+                                                        </Label>
+                                                    </FormGroup>
+                                                </FormGroup>
                                                 <hr />
                                                 <legend>Edit Account Type</legend>
                                                 <FormGroup tag="fieldset">
@@ -464,6 +507,7 @@ class UserManagement extends React.Component {
                                                         this.state.editUserName.length === 0 ||
                                                         this.state.editUserPhone.length !== 10 ||
                                                         this.state.editType.length === 0 ||
+                                                        this.state.editDepartment.length === 0 ||
                                                         this.state.editUserTeam.label.length === 0 ||
                                                         this.state.editActive.length === 0
                                                     }>Update</Button>
