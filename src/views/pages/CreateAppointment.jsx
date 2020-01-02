@@ -19,7 +19,7 @@ import React from "react";
 import ReactWizard from "react-bootstrap-wizard";
 
 // reactstrap components
-import { Col} from "reactstrap";
+import { Col } from "reactstrap";
 
 // wizard steps
 import Step1 from "../forms/WizardSteps/Step1.jsx";
@@ -54,15 +54,15 @@ class CreateAppointment extends React.Component {
         };
 
     }
-    async componentWillMount(){
+    async componentWillMount() {
         // let dealerships = await this.props.mongo.getCollection("dealerships")
         // let dealers = await dealerships.find({}).toArray().catch((err)=>console.log(err))
         let dealers = await this.props.mongo.find("dealerships")
-        await this.setState({dealerships: dealers})
+        await this.setState({ dealerships: dealers })
     }
     finished = async (data) => {
         this.setState({ loading: true })
-        
+
 
         let internal_message = this.generateInternalMessage(data)
         let customer_message = this.generateCustomerMessage(data)
@@ -94,7 +94,7 @@ class CreateAppointment extends React.Component {
         let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         // let agents = await this.props.mongo.getCollection("agents")
         // let agent = await agents.findOne({ userId: user.userId })
-        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
+        let agent = await this.props.mongo.findOne("agents", { userId: user.userId })
 
         let agentAppts = [];
         agent.appointments != undefined ? agentAppts = agent.appointments : agentAppts = []
@@ -117,8 +117,8 @@ class CreateAppointment extends React.Component {
         agentAppts.push(new_app)
         agent.appointments = agentAppts
         // await agents.findOneAndUpdate({ userId: user.userId }, agent)
-        await this.props.mongo.findOneAndUpdate("agents", {userId: user.userId}, {appointments: agent.appointments})
-        
+        await this.props.mongo.findOneAndUpdate("agents", { userId: user.userId }, { appointments: agent.appointments })
+
         //hotfix!!
         await this.acceptAppointment(new_app)
 
@@ -129,15 +129,15 @@ class CreateAppointment extends React.Component {
 
 
     }
-    makeTitleCase(name){
+    makeTitleCase(name) {
         let title = name
         title = title.toLowerCase().split(' ')
-        for(var i = 0; i< title.length; i++){
-            if(title[i].length < 1) continue;
+        for (var i = 0; i < title.length; i++) {
+            if (title[i].length < 1) continue;
             title[i] = title[i][0].toUpperCase() + title[i].slice(1);
-         }
-         title  = title.join(" ")
-         return title
+        }
+        title = title.join(" ")
+        return title
     }
     generateInternalMessage(data) {
         if (data.customer == undefined || data.appointment == undefined) return
@@ -149,7 +149,7 @@ class CreateAppointment extends React.Component {
             message += tempDate.toLocaleDateString() + " " + tempDate.toLocaleString([], { hour: '2-digit', minute: '2-digit' }) + "\n"
             message += data.appointment.scenario.label + "\n"
             message += data.appointment.source != null && data.appointment.source.label.length > 0 && data.appointment.source.label !== "None" ? `Source: ${data.appointment.source.label}\n` : ""
-            message += `${data.appointment.department.label}`
+            message += data.appointment.department.label !== "Service" ? `${data.appointment.department.label}` : "Service"
             return message
         }
     }
@@ -157,10 +157,15 @@ class CreateAppointment extends React.Component {
         if (data.customer === undefined || data.appointment === undefined) return
         else {
             let message = `Hi ${this.makeTitleCase(data.customer.firstname)}, `
-            message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address} for `
+            if (data.appointment.department.label === "Service") {
+                message += `I scheduled your Service appointment for ${data.appointment.scenario.label} at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address}. `
+            }
+            else {
+                message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address} for `
+            }
             let tempDate = new Date(data.appointment.date)
             message += tempDate.toLocaleDateString() + " @ " + tempDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ". "
-            message += "We are excited to assist you! Please ask for the VIP manager at the receptionist desk."
+            message += data.appointment.department.label !== "Service" ? "We are excited to assist you! Please ask for the VIP manager at the receptionist desk." : "We are excited to assist you!"
             return message
         }
     }
@@ -174,7 +179,7 @@ class CreateAppointment extends React.Component {
         new_app.verified = new Date()
         // let agents = await this.props.mongo.getCollection("agents")
         // let agent = await agents.findOne({ _id: appointment.agent_id })
-        let agent = await this.props.mongo.findOne("agents", {_id: appointment.agent_id})
+        let agent = await this.props.mongo.findOne("agents", { _id: appointment.agent_id })
 
         let apps = await agent.appointments.filter((a) => {
             return new Date(a.created).getTime() !== new Date(appointment.created).getTime();
@@ -185,16 +190,17 @@ class CreateAppointment extends React.Component {
         // agent.appointments = x
         agent.appointments.push(new_app)
         // await agents.findOneAndReplace({ _id: appointment.agent_id }, agent)
-        await this.props.mongo.findOneAndUpdate("agents", {_id: appointment.agent_id}, {appointments: agent.appointments})
+        await this.props.mongo.findOneAndUpdate("agents", { _id: appointment.agent_id }, { appointments: agent.appointments })
         // await this.getPendingAppointments()
         await this.sendText(appointment)
-        if(appointment.dealership.label !== "West Palm Beach Nissan")
+        if (appointment.dealership.label !== "West Palm Beach Nissan")
             await this.sendCustText(appointment)
         this.setState({ loading: false })
     }
     async sendText(appointment) {
-        this.setState({loading: true})
+        this.setState({ loading: true })
         let contacts = appointment.dealership.contacts
+        let textFrom = appointment.dealership_department === "Service" ? appointment.dealership.serviceTextFrom : appointment.dealership.textFrom
         let arr = []
         let used_arr = []
         let token = await this.props.mongo.getToken()
@@ -217,44 +223,45 @@ class CreateAppointment extends React.Component {
             "3472656027",
             "9548646379"
         ]
-        await this.setState({token: token})
-        for(let c in contacts){
+        await this.setState({ token: token })
+        for (let c in contacts) {
             contacts[c] = "1" + contacts[c]
             arr = []
             arr.push(contacts[c])
-            this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, arr, token)
+            this.props.mongo.sendGroupText("1" + textFrom, appointment.internal_msg, arr, token)
         }
         //generate new token?
-        if(USED_DEALERS.indexOf(appointment.dealership.label) != -1){
-            if(appointment.dealership_scenario.toLowerCase().indexOf("used") != -1){
-                for(let u in USED_CONTACTS){
+        if (USED_DEALERS.indexOf(appointment.dealership.label) != -1) {
+            if (appointment.dealership_scenario.toLowerCase().indexOf("used") != -1) {
+                for (let u in USED_CONTACTS) {
                     used_arr = []
                     used_arr.push(USED_CONTACTS[u])
-                    this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, used_arr, token)
+                    this.props.mongo.sendGroupText("1" + textFrom, appointment.internal_msg, used_arr, token)
                 }
             }
-            if(appointment.dealership_department == "Service to Sales"){
-                for(let u in SERVICE_TO_SALES_CONTACTS){
+            if (appointment.dealership_department == "Service to Sales") {
+                for (let u in SERVICE_TO_SALES_CONTACTS) {
                     used_arr = []
                     used_arr.push(SERVICE_TO_SALES_CONTACTS[u])
-                    this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.internal_msg, used_arr, token)
+                    this.props.mongo.sendGroupText("1" + textFrom, appointment.internal_msg, used_arr, token)
                 }
             }
-            else{
+            else {
                 console.log("appointment.dealership_department")
             }
         }
-        
-        this.setState({loading: false})
-        
+
+        this.setState({ loading: false })
+
     }
     async sendCustText(appointment) {
-        this.setState({loading: true})
+        this.setState({ loading: true })
+        let textFrom = appointment.dealership_department === "Service" ? appointment.dealership.serviceTextFrom : appointment.dealership.textFrom
         let to = []
-        to.push("1"+appointment.customer_phone)
+        to.push("1" + appointment.customer_phone)
         // let token = await this.props.mongo.getToken()
-        this.props.mongo.sendGroupText("1"+appointment.dealership.textFrom, appointment.customer_msg, to, this.state.token)
-        this.setState({loading:false})
+        this.props.mongo.sendGroupText("1" + textFrom, appointment.customer_msg, to, this.state.token)
+        this.setState({ loading: false })
     }
     //HOT FIX
 
@@ -266,7 +273,7 @@ class CreateAppointment extends React.Component {
                 <div className="content">
                     <Col className="mr-auto ml-auto" md="10">
                         <ReactWizard
-                            
+
                             steps={steps}
                             navSteps
                             validate
@@ -279,7 +286,7 @@ class CreateAppointment extends React.Component {
                             progressbar
                             color="primary"
                             finishButtonClick={(e) => this.finished(e)}
-                            wizardData={{mongo: this.props.mongo}}
+                            wizardData={{ mongo: this.props.mongo }}
 
                         />
                     </Col>

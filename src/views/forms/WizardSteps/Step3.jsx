@@ -19,7 +19,7 @@ import React from "react";
 
 
 // reactstrap components
-import {  Row, Col } from "reactstrap";
+import { Row, Col } from "reactstrap";
 
 class CreateAppointment extends React.Component {
   constructor(props) {
@@ -31,54 +31,60 @@ class CreateAppointment extends React.Component {
     };
     // this.generateInternalMessage = this.generateInternalMessage.bind(this)
   }
-  componentDidMount(){
+  componentDidMount() {
     this.generateInternalMessage()
   }
-  componentWillReceiveProps(){
+  componentWillReceiveProps() {
     this.generateInternalMessage()
   }
-  makeTitleCase(name){
+  makeTitleCase(name) {
     let title = name
     title = title.toLowerCase().split(' ')
-    for(var i = 0; i< title.length; i++){
-        if(title[i].length < 1) continue;
-        title[i] = title[i][0].toUpperCase() + title[i].slice(1);
-     }
-     title  = title.join(" ")
-     return title
-}
-  generateInternalMessage(){
+    for (var i = 0; i < title.length; i++) {
+      if (title[i].length < 1) continue;
+      title[i] = title[i][0].toUpperCase() + title[i].slice(1);
+    }
+    title = title.join(" ")
+    return title
+  }
+  generateInternalMessage() {
     let data = this.props.wizardData
-    if(data.customer == undefined || data.appointment == undefined ||
+    if (data.customer == undefined || data.appointment == undefined ||
       data.appointment.dealership == undefined ||
       data.appointment.department == undefined ||
-      data.appointment.scenario == undefined ) return
-    else{
+      data.appointment.scenario == undefined) return
+    else {
       let message = `${data.appointment.dealership.label}\n`
       message += `${this.makeTitleCase(data.customer.firstname)} ${this.makeTitleCase(data.customer.lastname)}\n`
-      message += `(${data.customer.phone.substring(0, 3)}) ${data.customer.phone.substring(3,6)} - ${data.customer.phone.substring(6,10)}\n`
+      message += `(${data.customer.phone.substring(0, 3)}) ${data.customer.phone.substring(3, 6)} - ${data.customer.phone.substring(6, 10)}\n`
       let tempDate = new Date(data.appointment.date)
-      message += tempDate.toLocaleDateString() + " " + tempDate.toLocaleString([],{hour: '2-digit', minute:'2-digit'}) + "\n"
+      message += tempDate.toLocaleDateString() + " " + tempDate.toLocaleString([], { hour: '2-digit', minute: '2-digit' }) + "\n"
       message += data.appointment.scenario.label + "\n"
-      message += data.appointment.source != null && data.appointment.source.label.length > 0 && data.appointment.source.label !== "None"? `Source: ${data.appointment.source.label}\n`: ""
-      message += `${data.appointment.department.label}`
+      message += data.appointment.source != null && data.appointment.source.label.length > 0 && data.appointment.source.label !== "None" ? `Source: ${data.appointment.source.label}\n` : ""
+      message += data.appointment.department.label !== "Service" ? `${data.appointment.department.label}` : "Service"
       return message
     }
   }
-  
-  generateCustomerMessage(){
+
+  generateCustomerMessage() {
     let data = this.props.wizardData
-    if(data.customer == undefined || data.appointment == undefined ||
+    if (data.customer == undefined || data.appointment == undefined ||
       data.appointment.dealership == undefined ||
       data.appointment.department == undefined ||
-      data.appointment.scenario == undefined ) return
-    else{
+      data.appointment.scenario == undefined) return
+    else {
       let message = `Hi ${this.makeTitleCase(data.customer.firstname)}, `
-      message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address} for `
+      if (data.appointment.department.label === "Service") {
+        message += `I scheduled your Service appointment for ${data.appointment.scenario.label} at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address}. `
+      }
+      else {
+        message += `I scheduled your VIP appointment at ${data.appointment.dealership.label} located at ${data.appointment.dealership.address} for `
+      }
       let tempDate = new Date(data.appointment.date)
-      message += tempDate.toLocaleDateString()+ " @ " + tempDate.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) + ". "
-      message += "We are excited to assist you! Please ask for the VIP manager at the receptionist desk."
+      message += tempDate.toLocaleDateString() + " @ " + tempDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ". "
+      message += data.appointment.department.label !== "Service" ? "We are excited to assist you! Please ask for the VIP manager at the receptionist desk." : "We are excited to assist you!"
       return message
+      
     }
   }
   render() {
@@ -91,12 +97,12 @@ class CreateAppointment extends React.Component {
             </Col>
             <Col sm="6">
               <h5 className="justify-content-center">Internal Text</h5>
-              <blockquote className="blockquote" style={{whiteSpace: "pre-wrap"}}>
+              <blockquote className="blockquote" style={{ whiteSpace: "pre-wrap" }}>
                 {this.generateInternalMessage()}</blockquote>
             </Col>
             <Col sm="6">
               <h5 className="justify-content-center">Customer Text</h5>
-              <blockquote className="blockquote" style={{whiteSpace: "pre-wrap"}}>
+              <blockquote className="blockquote" style={{ whiteSpace: "pre-wrap" }}>
                 {this.generateCustomerMessage()}</blockquote>
             </Col>
           </Row>

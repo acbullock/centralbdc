@@ -84,6 +84,9 @@ class Dashboard extends React.Component {
     agents = agents.map((a, i) => {
       return Object.assign(a, { label: a.name, value: i })
     })
+    agents = agents.filter((a) => {
+      return a.department === "sales"
+    })
     agents.sort((a, b) => {
       if (a.label > b.label) return 1;
       if (a.label < b.label) return -1;
@@ -554,29 +557,30 @@ class Dashboard extends React.Component {
     end.setHours(8, 0, 0, 0)
 
     for (let i = 0; i < 15; i++) {
-      
-      if(now.getTime() < start.getTime()){
-        counts[i+7] = {count: "", color: "red"}
+
+      if (now.getTime() < start.getTime()) {
+        counts[i + 7] = { count: "", color: "red" }
         continue;
       }
       let color = "red";
       let count = appointments.filter((a) => {
         return new Date(a.verified).getTime() >= start.getTime() && new Date(a.verified).getTime() < end.getTime()
       })
-      if(count.length == 2){
+      if (count.length == 2) {
         color = "yellow"
       }
-      if(count.length > 2){
+      if (count.length > 2) {
         color = "green"
       }
-      counts[i + 7] = {count: count.length, color}
+      counts[i + 7] = { count: count.length, color }
       start = new Date(end);
       end.setHours(end.getHours() + 1, 0, 0, 0)
     }
-    counts["total"] = {count: appointments.length, color: "black"}
+    counts["total"] = { count: appointments.length, color: "black" }
     this.setState({ counts })
   }
   render() {
+
     if (this.state.loading) {
       return (
         <>
@@ -592,6 +596,19 @@ class Dashboard extends React.Component {
         </>
       );
     }
+    if (this.state.agent.department !== "sales" && this.state.agent.account_type !== "admin") {
+      return (
+        <div className="content">
+          <Container>
+            <Row>
+              <Col lg="8">
+                <h1>Service Dashboard Coming Soon..</h1>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      );
+    }
     return (
 
       <>
@@ -605,7 +622,7 @@ class Dashboard extends React.Component {
                 </CardHeader>
                 <CardBody>
                   <Select
-                    options={this.state.agent.account_type == "admin"? this.state.agents: this.state.agents.filter((a)=>{return a.label === this.state.agent.name})}
+                    options={this.state.agent.account_type == "admin" ? this.state.agents : this.state.agents.filter((a) => { return a.label === this.state.agent.name })}
                     value={this.state.selected_agent}
                     onChange={(e) => {
                       this.setState({ selected_agent: e })
@@ -635,22 +652,22 @@ class Dashboard extends React.Component {
                     </thead>
                     <tbody>
                       <tr>
-                        <td><p style={this.state.counts[7] == undefined? {}: {color: this.state.counts[7].color}}><strong>{this.state.counts[7] == undefined ? 0 : this.state.counts[7].count}</strong></p></td>
-                        <td><p style={this.state.counts[8] == undefined? {}: {color: this.state.counts[8].color}}><strong>{this.state.counts[8] == undefined ? 0 : this.state.counts[8].count}</strong></p></td>
-                        <td><p style={this.state.counts[9] == undefined? {}: {color: this.state.counts[9].color}}><strong>{this.state.counts[9] == undefined ? 0 : this.state.counts[9].count}</strong></p></td>
-                        <td><p style={this.state.counts[10] == undefined? {}: {color: this.state.counts[10].color}}><strong>{this.state.counts[10] == undefined ? 0 : this.state.counts[10].count}</strong></p></td>
-                        <td><p style={this.state.counts[11] == undefined? {}: {color: this.state.counts[11].color}}><strong>{this.state.counts[11] == undefined ? 0 : this.state.counts[11].count}</strong></p></td>
-                        <td><p style={this.state.counts[12] == undefined? {}: {color: this.state.counts[12].color}}><strong>{this.state.counts[12] == undefined ? 0 : this.state.counts[12].count}</strong></p></td>
-                        <td><p style={this.state.counts[13] == undefined? {}: {color: this.state.counts[13].color}}><strong>{this.state.counts[13] == undefined ? 0 : this.state.counts[13].count}</strong></p></td>
-                        <td><p style={this.state.counts[14] == undefined? {}: {color: this.state.counts[14].color}}><strong>{this.state.counts[14] == undefined ? 0 : this.state.counts[14].count}</strong></p></td>
-                        <td><p style={this.state.counts[15] == undefined? {}: {color: this.state.counts[15].color}}><strong>{this.state.counts[15] == undefined ? 0 : this.state.counts[15].count}</strong></p></td>
-                        <td><p style={this.state.counts[16] == undefined? {}: {color: this.state.counts[16].color}}><strong>{this.state.counts[16] == undefined ? 0 : this.state.counts[16].count}</strong></p></td>
-                        <td><p style={this.state.counts[17] == undefined? {}: {color: this.state.counts[17].color}}><strong>{this.state.counts[17] == undefined ? 0 : this.state.counts[17].count}</strong></p></td>
-                        <td><p style={this.state.counts[18] == undefined? {}: {color: this.state.counts[18].color}}><strong>{this.state.counts[18] == undefined ? 0 : this.state.counts[18].count}</strong></p></td>
-                        <td><p style={this.state.counts[19] == undefined? {}: {color: this.state.counts[19].color}}><strong>{this.state.counts[19] == undefined ? 0 : this.state.counts[19].count}</strong></p></td>
-                        <td><p style={this.state.counts[20] == undefined? {}: {color: this.state.counts[20].color}}><strong>{this.state.counts[20] == undefined ? 0 : this.state.counts[20].count}</strong></p></td>
-                        <td><p style={this.state.counts[21] == undefined? {}: {color: this.state.counts[21].color}}><strong>{this.state.counts[21] == undefined ? 0 : this.state.counts[21].count}</strong></p></td>
-                        <td><p style={this.state.counts["total"] == undefined? {}: {color: this.state.counts["total"].color}}><strong>{this.state.counts["total"] == undefined ? 0 : this.state.counts["total"].count}</strong></p></td>
+                        <td><p style={this.state.counts[7] == undefined ? {} : { color: this.state.counts[7].color }}><strong>{this.state.counts[7] == undefined ? 0 : this.state.counts[7].count}</strong></p></td>
+                        <td><p style={this.state.counts[8] == undefined ? {} : { color: this.state.counts[8].color }}><strong>{this.state.counts[8] == undefined ? 0 : this.state.counts[8].count}</strong></p></td>
+                        <td><p style={this.state.counts[9] == undefined ? {} : { color: this.state.counts[9].color }}><strong>{this.state.counts[9] == undefined ? 0 : this.state.counts[9].count}</strong></p></td>
+                        <td><p style={this.state.counts[10] == undefined ? {} : { color: this.state.counts[10].color }}><strong>{this.state.counts[10] == undefined ? 0 : this.state.counts[10].count}</strong></p></td>
+                        <td><p style={this.state.counts[11] == undefined ? {} : { color: this.state.counts[11].color }}><strong>{this.state.counts[11] == undefined ? 0 : this.state.counts[11].count}</strong></p></td>
+                        <td><p style={this.state.counts[12] == undefined ? {} : { color: this.state.counts[12].color }}><strong>{this.state.counts[12] == undefined ? 0 : this.state.counts[12].count}</strong></p></td>
+                        <td><p style={this.state.counts[13] == undefined ? {} : { color: this.state.counts[13].color }}><strong>{this.state.counts[13] == undefined ? 0 : this.state.counts[13].count}</strong></p></td>
+                        <td><p style={this.state.counts[14] == undefined ? {} : { color: this.state.counts[14].color }}><strong>{this.state.counts[14] == undefined ? 0 : this.state.counts[14].count}</strong></p></td>
+                        <td><p style={this.state.counts[15] == undefined ? {} : { color: this.state.counts[15].color }}><strong>{this.state.counts[15] == undefined ? 0 : this.state.counts[15].count}</strong></p></td>
+                        <td><p style={this.state.counts[16] == undefined ? {} : { color: this.state.counts[16].color }}><strong>{this.state.counts[16] == undefined ? 0 : this.state.counts[16].count}</strong></p></td>
+                        <td><p style={this.state.counts[17] == undefined ? {} : { color: this.state.counts[17].color }}><strong>{this.state.counts[17] == undefined ? 0 : this.state.counts[17].count}</strong></p></td>
+                        <td><p style={this.state.counts[18] == undefined ? {} : { color: this.state.counts[18].color }}><strong>{this.state.counts[18] == undefined ? 0 : this.state.counts[18].count}</strong></p></td>
+                        <td><p style={this.state.counts[19] == undefined ? {} : { color: this.state.counts[19].color }}><strong>{this.state.counts[19] == undefined ? 0 : this.state.counts[19].count}</strong></p></td>
+                        <td><p style={this.state.counts[20] == undefined ? {} : { color: this.state.counts[20].color }}><strong>{this.state.counts[20] == undefined ? 0 : this.state.counts[20].count}</strong></p></td>
+                        <td><p style={this.state.counts[21] == undefined ? {} : { color: this.state.counts[21].color }}><strong>{this.state.counts[21] == undefined ? 0 : this.state.counts[21].count}</strong></p></td>
+                        <td><p style={this.state.counts["total"] == undefined ? {} : { color: this.state.counts["total"].color }}><strong>{this.state.counts["total"] == undefined ? 0 : this.state.counts["total"].count}</strong></p></td>
                       </tr>
                     </tbody>
                   </Table>

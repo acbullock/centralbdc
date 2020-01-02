@@ -65,6 +65,12 @@ class Assistance extends React.Component {
         // s = await  s.find({}).toArray()
         let d = await this.props.mongo.find("dealerships")
         let s = await this.props.mongo.find("sources")
+        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
+
+        if(agent.department !== "sales"){
+            this.props.history.push("/admin/dashboard")
+        }
         d.sort((a, b) => {
             if (a.label < b.label) return -1;
             if (a.label > b.label) return 1;
