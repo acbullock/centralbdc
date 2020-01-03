@@ -216,7 +216,7 @@ class AdminDashboard extends React.Component {
                             <Card className="card-raised card-white blur">
                                 <CardHeader>
                                     <CardTitle >
-                                        <h3><strong>Top 10 Stale Dealerships</strong></h3>
+                                        <h3><strong>Longest Time Since Last Appointment</strong></h3>
                                         <hr />
                                     </CardTitle>
                                 </CardHeader>

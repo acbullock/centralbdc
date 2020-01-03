@@ -71,13 +71,47 @@ import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 
 const routes = [
   {
-    path: "/dashboard",
-    name: "Dashboard",
-    rtlName: "لوحة القيادة",
-    icon: "tim-icons icon-chart-pie-36",
-    component: Dashboard,
-    layout: "/admin"
+    collapse: true,
+    name: "Dashboards",
+    // rtlName: "صفحات",
+    icon: "tim-icons icon-badge",
+    state: "dashboardCollapse",
+    views: [
+      {
+        path: "/dashboard",
+        name: "Dashboard",
+        rtlName: "لوحة القيادة",
+        icon: "tim-icons icon-chart-pie-36",
+        component: Dashboard,
+        layout: "/admin"
+      },
+      {
+        path: "/admin_dashboard",
+        name: "Admin Dashboard",
+        icon: "tim-icons icon-chart-pie-36",
+        component: AdminDashboard,
+        adminOnly: true,
+        layout: "/admin"
+      },
+      {
+        path: "/daily_dealership_goals",
+        name: "Daily Dealer Goals",
+        component: DealershipPerformance,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-notes"
+      },
+      {
+        path: "/reports",
+        name: "Reports",
+        icon: "tim-icons icon-bullet-list-67",
+        component: AdminReports,
+        layout: "/admin"
+      },
+
+    ]
   },
+
   {
     path: "/dashboard",
     name: "Dealership Dashboard",
@@ -85,29 +119,6 @@ const routes = [
     icon: "tim-icons icon-chart-pie-36",
     component: DealershipDashboard,
     layout: "/dealership"
-  },
-  {
-    path: "/admin_dashboard",
-    name: "Admin Dashboard",
-    icon: "tim-icons icon-chart-pie-36",
-    component: AdminDashboard,
-    adminOnly: true,
-    layout: "/admin"
-  },
-  {
-    path: "/daily_dealership_goals",
-    name: "Daily Dealer Goals",
-    component: DealershipPerformance,
-    layout: "/admin",
-    adminOnly: true,
-    icon: "tim-icons icon-notes"
-  },
-  {
-    path: "/reports",
-    name: "Reports",
-    icon: "tim-icons icon-bullet-list-67",
-    component: AdminReports,
-    layout: "/admin"
   },
   {
     path: "/customer_search",

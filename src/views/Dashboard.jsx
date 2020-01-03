@@ -55,6 +55,7 @@ class Dashboard extends React.Component {
       data: {},
       options: {},
       top5: [],
+      mtdTop5: [],
       mostRecent: {
         name: "no one",
         time: new Date(0), dealership: ""
@@ -65,10 +66,11 @@ class Dashboard extends React.Component {
       elements: [],
       selected_agent: { label: "", value: "" },
       counts: {},
+      mtdtop5loading: false
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
     this.getBreakDown = this.getBreakDown.bind(this)
-
+    this.getMtdTop5 = this.getMtdTop5.bind(this)
   }
   _isMounted = false;
   async componentDidMount() {
@@ -98,7 +100,8 @@ class Dashboard extends React.Component {
     // this._isMounted && await this.getBarChartData()
     this._isMounted && await this.getCountData()
     this._isMounted && await this.renderCount()
-    this._isMounted && await this.getTop5()
+    this._isMounted && this.getTop5()
+    this._isMounted && this.getMtdTop5()
     this._isMounted && await this.isOld()
     this._isMounted && this.setState({ loading: false })
   }
@@ -431,10 +434,6 @@ class Dashboard extends React.Component {
             new Date(allAgents[a].appointments[b].verified).getTime() < (curr.getTime() + (24 * 3600 * 1000))) {
             user.count++;
           }
-
-
-
-
         }
       }
       nums.push(user)
@@ -450,6 +449,47 @@ class Dashboard extends React.Component {
     })
     this._isMounted && this.setState({ top5: nums, loading: false })
 
+  }
+  async getMtdTop5() {
+    this._isMounted && this.setState({ loading: true, mtdtop5loading: true })
+    let allAgents = this.state.agents;
+    let appointments = await this.props.mongo.find("appointments");
+    let allApps = [];
+    for (let a in appointments) {
+      allApps = allApps.concat(appointments[a].appointments)
+    }
+    let first = new Date();
+    first.setDate(1);
+    first = new Date(first.setHours(0, 0, 0, 0))
+    allApps = allApps.filter((a) => {
+      return new Date(a.verified).getTime() >= first.getTime()
+    })
+    let nums = [];
+    for (let a in allAgents) {
+      let currApps = allApps.filter((app) => { return app.agent_id === allAgents[a]._id })
+      let user = {
+        name: allAgents[a].name,
+        count: currApps.length
+      }
+      // for (let b in currApps) {
+      //   if (currApps[b].verified != undefined) {
+      //     if (new Date(currApps[b].verified).getTime() >= first.getTime()) {
+      //       user.count++;
+      //     }
+      //   }
+      // }
+      nums.push(user)
+    }
+    this._isMounted && await nums.sort((a, b) => {
+      if (a.count > b.count) {
+        return -1;
+      }
+      if (a.count < b.count) {
+        return 1
+      }
+      return 0;
+    })
+    this._isMounted && this.setState({ loading: false, mtdtop5loading: false, mtdTop5: nums })
   }
   async getAppointmentData() {
     this._isMounted && this.setState({ loading: true })
@@ -615,7 +655,7 @@ class Dashboard extends React.Component {
         <div className="content">
 
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="12">
+            <Col lg="8">
               <Card className="card-raised card-lightgrey">
                 <CardHeader>
                   <CardTitle tag="h3">Agent Hourly Breakdown</CardTitle>
@@ -674,10 +714,12 @@ class Dashboard extends React.Component {
                 </CardBody>
               </Card>
             </Col>
-            <Col lg="8">
+          </Row>
+          <Row style={{ justifyContent: "center" }}>
+            <Col lg="4">
               <Card className="text-center card-raised card-white">
                 <CardHeader>
-                  <CardTitle tag="h3">Daily Performance Report for {this.state.agent.name}</CardTitle>
+                  <CardTitle tag="h3">Daily Performance Report for <p>{this.state.agent.name}</p></CardTitle>
                 </CardHeader>
                 <CardBody>
                   {
@@ -708,6 +750,44 @@ class Dashboard extends React.Component {
                 </CardBody>
               </Card>
             </Col>
+            <Col lg="4">
+              <Card className="text-center card-raised card-white">
+                <CardHeader>
+                  <CardTitle tag="h3">Month-to-Date Performance Report for <p>{this.state.agent.name}</p></CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <CardImg top width="100%" hidden={!this.state.mtdtop5loading} src={this.props.utils.loading} />
+
+                  {
+
+                    this.state.mtdTop5.map((a, i) => {
+                      let thisAgent = this.state.mtdTop5.filter((a) => {
+                        return a.name === this.state.agent.name
+                      })
+                      thisAgent = thisAgent[0]
+                      if (i > 0) return null;
+                      let rank = 1
+                      for (let agent in this.state.mtdTop5) {
+                        if (this.state.mtdTop5[agent].count > thisAgent.count) {
+                          rank++;
+                        }
+                        else {
+                          break;
+                        }
+                      }
+                      return (
+                        <div key={i}>
+                          <h4 >Appointment Count: <strong>{thisAgent.count}</strong></h4>
+                          <h4>Call Center Rank: <strong>#{rank}</strong></h4>
+                        </div>
+                      );
+                    })
+                  }
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+          <Row style={{ justifyContent: "center" }}>
             <Col lg="8">
               <Card className="card-raised card-white">
                 <CardHeader>
@@ -749,6 +829,8 @@ class Dashboard extends React.Component {
                 </CardBody>
               </Card>
             </Col>
+          </Row>
+          <Row style={{ justifyContent: "center" }}>
             <Col lg="8">
 
               {/* <Card hidden={!this.state.isAdmin}>
@@ -908,6 +990,8 @@ class Dashboard extends React.Component {
                 </CardBody>
               </Card> */}
             </Col>
+          </Row>
+          <Row style={{ justifyContent: "center" }}>
             <Col lg="8">
               <Card className="card-raised card-white" hidden={!this.state.isAdmin || !["lexliveslife@gmail.com", "marc@centralbdc.com"].includes(this.state.agent.email)}>
                 <CardHeader>

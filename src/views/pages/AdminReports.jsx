@@ -28,20 +28,28 @@ class AdminReports extends React.Component {
             agent: {},
             reports: [],
             dealerships: [],
+            agents: [],
             selected_report: {},
             fromDate: "",
             toDate: "",
             selected_dealership: { label: "", value: "" },
+            selected_agent: { label: "", value: "" },
             reportDone: false,
             appCount: 0,
             goal: 0,
             progressColor: "",
             progressValue: "",
-            full_results: []
+            full_results: [],
+            allDealers: false,
+            allAgents: false,
+            agentCount: 0
         }
         this._isMounted = false;
         this.getGoalForRange = this.getGoalForRange.bind(this)
         this.getGoalForRangeFull = this.getGoalForRangeFull.bind(this)
+        this.getAppCountFull = this.getAppCountFull.bind(this)
+        this.getAppCount = this.getAppCount.bind(this)
+        this.clearForm = this.clearForm.bind(this)
     }
     async componentWillMount() {
         this._isMounted = true
@@ -49,16 +57,27 @@ class AdminReports extends React.Component {
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId });
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
+        let agents = this._isMounted && await this.props.mongo.find("agents");
         dealerships = dealerships.filter((a) => {
             return a.isActive === true
+        })
+        agents = agents.filter((a) => {
+            return a.isActive === true
+        })
+        agents = agents.map((a) => {
+            return Object.assign(a, { label: a.name, value: a._id })
         })
         dealerships.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
             return 0;
         })
-
-        let reports = ["Dealership Goals", "Dealership Goals Full"];
+        agents.sort((a, b) => {
+            if (a.label > b.label) return 1;
+            if (a.label < b.label) return -1;
+            return 0;
+        })
+        let reports = ["Dealership Goals", "Appointment Count"];
         reports.sort((a, b) => {
             if (a > b) return 1;
             if (a < b) return -1;
@@ -68,7 +87,7 @@ class AdminReports extends React.Component {
         for (let r in reports) {
             report_options.push({ label: reports[r], value: r })
         }
-        this._isMounted && this.setState({ agent, reports: report_options, dealerships })
+        this._isMounted && this.setState({ agent, reports: report_options, dealerships, agents })
 
 
         this.setState({ loading: false })
@@ -103,6 +122,16 @@ class AdminReports extends React.Component {
 
         this.setState({ loading: false, goal, reportDone: true, appCount: apps.length, progressValue, progressColor })
     }
+    clearForm() {
+        this.setState({
+            toDate: "",
+            fromDate: "",
+            selected_agent: { label: "", value: "" },
+            selected_dealership: { label: "", value: "" },
+            allAgents: false,
+            allDealers: false
+        })
+    }
     async getGoalForRangeFull() {
         this.setState({ loading: true })
         let apps = await this.props.mongo.find("appointments")
@@ -110,13 +139,13 @@ class AdminReports extends React.Component {
         for (let a in apps) {
             let curr_apps = apps[a].appointments;
             let currDealer = {}
-            for(let d in this.state.dealerships){
-                if(this.state.dealerships[d].value === apps[a].dealership){
+            for (let d in this.state.dealerships) {
+                if (this.state.dealerships[d].value === apps[a].dealership) {
                     currDealer = this.state.dealerships[d];
                     break;
                 }
             }
-            if(!currDealer.isActive){
+            if (!currDealer.isActive) {
                 continue;
             }
             curr_apps = curr_apps.filter((a) => {
@@ -142,15 +171,56 @@ class AdminReports extends React.Component {
                 progressColor
             })
         }
-        full_results.sort((a,b)=>{
-            if(parseInt(a.goal) > parseInt(b.goal)) return -1;
-            if(parseInt(a.goal) < parseInt(b.goal)) return 1;
+        full_results.sort((a, b) => {
+            if (parseInt(a.goal) > parseInt(b.goal)) return -1;
+            if (parseInt(a.goal) < parseInt(b.goal)) return 1;
             return 0;
 
         })
         this.setState({ loading: false, full_results, reportDone: true });
     }
+    async getAppCount() {
+        this.setState({ loading: true });
+        let appointments = await this.props.mongo.find("appointments");
+        let allApps = [];
+        for (let a in appointments) {
+            allApps = allApps.concat(appointments[a].appointments)
+        }
+        allApps = allApps.filter((a) => {
+            return a.agent_id === this.state.selected_agent._id
+        })
+        allApps = allApps.filter((a) => {
+            return new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() &&
+                new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
+        })
 
+        this.setState({ loading: false, agentCount: allApps.length, reportDone: true });
+    }
+    async getAppCountFull() {
+        this.setState({ loading: true });
+        let full_results = []
+        let appointments = await this.props.mongo.find("appointments");
+        let agents = await this.props.mongo.find("agents", { isActive: true })
+        let allApps = [];
+        for (let a in appointments) {
+            allApps = allApps.concat(appointments[a].appointments);
+        }
+        for (let a in agents) {
+            let currApps = allApps.filter((app) => {
+                return (app.agent_id === agents[a]._id &&
+                    new Date(app.verified) >= new Date(this.state.fromDate) &&
+                    new Date(app.verified) <= new Date(this.state.toDate))
+            });
+            full_results.push({
+                name: agents[a].name,
+                appCount: currApps.length
+            })
+        }
+        full_results.sort((a, b) => {
+            return b.appCount - a.appCount
+        })
+        this.setState({ loading: false, full_results, reportDone: true });
+    }
     render() {
         if (this.state.loading) {
             return (
@@ -172,9 +242,10 @@ class AdminReports extends React.Component {
                         <Col className="ml-auto mr-auto text-center" md="8">
                             <legend>Select Report:</legend>
                             <Select
+                                isDisabled={this.state.loading}
                                 options={this.state.reports}
                                 value={this.state.selected_report}
-                                onChange={(e) => { this.setState({ selected_report: e }) }}
+                                onChange={(e) => { this.clearForm(); this.setState({ selected_report: e, reportDone: false }) }}
                             />
                         </Col>
                     </Row>
@@ -188,7 +259,9 @@ class AdminReports extends React.Component {
                                     <Form >
                                         <FormGroup>
                                             <Label>Dealership:</Label>
-                                            <Select style={{ width: "50%" }}
+                                            <Select
+                                                isDisabled={this.state.allDealers === true}
+                                                style={{ width: "50%" }}
                                                 options={this.state.dealerships}
                                                 value={this.state.selected_dealership}
                                                 onChange={(e) => { this.setState({ reportDone: false, selected_dealership: e }) }}
@@ -228,12 +301,23 @@ class AdminReports extends React.Component {
                                                 className="primary"
                                             />
                                         </FormGroup>
+                                        <Col>
+                                            <FormGroup tag="fieldset">
+                                                <Label check>
+
+                                                    <Input type="checkbox" checked={this.state.allDealers} onChange={(e) => { this.setState({ reportDone: false, allDealers: !this.state.allDealers }) }} />
+                                                    All Dealerships
+                                            </Label>
+                                            </FormGroup>
+                                        </Col>
+
                                         <Button color="primary" disabled={
-                                            this.state.selected_dealership.label.length < 1 ||
+
+                                            (this.state.allDealers === false && this.state.selected_dealership.label.length < 1) ||
                                             this.state.fromDate.length < 1 ||
                                             this.state.toDate.length < 1 ||
                                             new Date(this.state.fromDate).getTime() > new Date(this.state.toDate).getTime()
-                                        } onClick={() => { this.getGoalForRange() }}>Generate Report</Button>
+                                        } onClick={() => { this.state.allDealers === true ? this.getGoalForRangeFull() : this.getGoalForRange() }}>Generate Report</Button>
                                     </Form>
                                 </CardBody>
                             </Card>
@@ -254,7 +338,7 @@ class AdminReports extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
+                                            <tr hidden={this.state.allDealers === true}>
                                                 <td><Progress value={this.state.progressValue} color={this.state.progressColor} /></td>
                                                 <td>{this.state.selected_dealership.label}</td>
                                                 <td>{new Date(this.state.fromDate).toLocaleDateString()}</td>
@@ -262,6 +346,21 @@ class AdminReports extends React.Component {
                                                 <td>{this.state.appCount}</td>
                                                 <td>{this.state.goal}</td>
                                             </tr>
+                                            {this.state.full_results.map((r, i) => {
+                                                if (this.state.allDealers === false) {
+                                                    return null;
+                                                }
+                                                return (
+                                                    <tr key={i}>
+                                                        <td><Progress value={r.progressValue} color={r.progressColor} /></td>
+                                                        <td>{r.dealership.label}</td>
+                                                        <td>{new Date(this.state.fromDate).toLocaleDateString()}</td>
+                                                        <td>{new Date(this.state.toDate).toLocaleDateString()}</td>
+                                                        <td>{r.appCount}</td>
+                                                        <td>{r.goal}</td>
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </Table>
                                 </CardBody>
@@ -269,12 +368,22 @@ class AdminReports extends React.Component {
 
                         </Col>
                     </Row>
-                    <Row hidden={this.state.selected_report.label !== "Dealership Goals Full"}>
+                    <Row hidden={this.state.selected_report.label !== "Appointment Count"}>
                         <Col className="ml-auto mr-auto" md="8">
                             <Card className="card-raised card-white">
                                 <CardBody>
                                     <legend>{this.state.selected_report.label}</legend>
-                                    <Form >
+                                    <Form>
+                                        <FormGroup>
+                                            <Label>Agent:</Label>
+                                            <Select
+                                                isDisabled={this.state.allAgents === true}
+                                                style={{ width: "50%" }}
+                                                options={this.state.agents}
+                                                value={this.state.selected_agent}
+                                                onChange={(e) => { this.setState({ reportDone: false, selected_agent: e }) }}
+                                            />
+                                        </FormGroup>
                                         <FormGroup>
                                             <Label>From: </Label>
                                             <ReactDateTime
@@ -309,41 +418,55 @@ class AdminReports extends React.Component {
                                                 className="primary"
                                             />
                                         </FormGroup>
+                                        <Col>
+                                            <FormGroup tag="fieldset">
+                                                <Label check>
+
+                                                    <Input type="checkbox" checked={this.state.allAgents} onChange={(e) => { console.log(this.state.allAgents); this.setState({ reportDone: false, allAgents: !this.state.allAgents }) }} />
+                                                    All Agents
+                                            </Label>
+                                            </FormGroup>
+                                        </Col>
                                         <Button color="primary" disabled={
+
+                                            (this.state.allAgents === false && this.state.selected_agent.label.length < 1) ||
                                             this.state.fromDate.length < 1 ||
                                             this.state.toDate.length < 1 ||
                                             new Date(this.state.fromDate).getTime() > new Date(this.state.toDate).getTime()
-                                        } onClick={() => { this.getGoalForRangeFull() }}>Generate Report</Button>
+                                        } onClick={() => { this.state.allAgents === true ? this.getAppCountFull() : this.getAppCount() }}>Generate Report</Button>
                                     </Form>
                                 </CardBody>
                             </Card>
-
                         </Col>
-                        <Col className="ml-auto mr-auto" md="12" hidden={this.state.reportDone === false || this.state.selected_report.label !== "Dealership Goals Full"}>
+                        <Col className="ml-auto mr-auto" md="12" hidden={this.state.reportDone === false || this.state.selected_report.label !== "Appointment Count"}>
                             <Card className="card-raised text-center card-white">
                                 <CardBody>
                                     <Table bordered responsive>
                                         <thead style={{ backgroundColor: "#3469a6" }}>
                                             <tr>
-                                                <th><p style={{ color: "white" }}>Progress</p></th>
-                                                <th><p style={{ color: "white" }}>Dealership</p></th>
+                                                <th><p style={{ color: "white" }}>Agent Name</p></th>
                                                 <th><p style={{ color: "white" }}>From</p></th>
                                                 <th><p style={{ color: "white" }}>To</p></th>
                                                 <th><p style={{ color: "white" }}>Appointment Count</p></th>
-                                                <th><p style={{ color: "white" }}>Goal</p></th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <tr hidden={this.state.allAgents === true} >
+                                                <td>{this.state.selected_agent.name}</td>
+                                                <td>{new Date(this.state.fromDate).toLocaleDateString()}</td>
+                                                <td>{new Date(this.state.toDate).toLocaleDateString()}</td>
+                                                <td>{this.state.agentCount}</td>
+                                            </tr>
                                             {this.state.full_results.map((r, i) => {
-
+                                                if (this.state.allAgents === false) {
+                                                    return null;
+                                                }
                                                 return (
                                                     <tr key={i}>
-                                                        <td><Progress value={r.progressValue} color={r.progressColor} /></td>
-                                                        <td>{r.dealership.label}</td>
+                                                        <td>{r.name}</td>
                                                         <td>{new Date(this.state.fromDate).toLocaleDateString()}</td>
                                                         <td>{new Date(this.state.toDate).toLocaleDateString()}</td>
                                                         <td>{r.appCount}</td>
-                                                        <td>{r.goal}</td>
                                                     </tr>
                                                 );
                                             })}
