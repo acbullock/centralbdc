@@ -94,6 +94,14 @@ class Dashboard extends React.Component {
       if (a.label < b.label) return -1;
       return 0;
     })
+    if(agent.account_type !== "admin"){
+      let selected = agents.filter((a)=>{
+        return a._id == agent._id
+      })
+      selected = selected[0]
+      this.getBreakDown(agent)
+      this.setState({selected_agent: selected})
+    }
     this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
     this._isMounted && await this.getAppointmentData()
     this._isMounted && await this.getChartData()
@@ -641,7 +649,7 @@ class Dashboard extends React.Component {
         <div className="content">
           <Container>
             <Row>
-              <Col lg="8">
+              <Col lg="10">
                 <h1>Service Dashboard Coming Soon..</h1>
               </Col>
             </Row>
@@ -655,21 +663,21 @@ class Dashboard extends React.Component {
         <div className="content">
 
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="8">
-              <Card className="card-raised card-lightgrey">
+            <Col lg="10">
+              <Card className="card-raised card-white" color="primary">
                 <CardHeader>
-                  <CardTitle tag="h3">Agent Hourly Breakdown</CardTitle>
+                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Agent Hourly Breakdown</strong></p></CardTitle>
                 </CardHeader>
                 <CardBody>
                   <Select
                     options={this.state.agent.account_type == "admin" ? this.state.agents : this.state.agents.filter((a) => { return a.label === this.state.agent.name })}
-                    value={this.state.selected_agent}
+                    value={this.state.agent.account_type == "admin" ? this.state.selected_agent: this.state.agents.filter((a) => { return a.label === this.state.agent.name })[0]}
                     onChange={(e) => {
                       this.setState({ selected_agent: e })
                       this.getBreakDown(e)
                     }}
                   />
-                  <Table bordered striped responsive hidden={this.state.selected_agent.label.length < 1} className="text-center">
+                  <Table style={{ backgroundColor: "white" }} bordered striped responsive hidden={this.state.selected_agent.label.length < 1} className="text-center">
                     <thead className="text-primary">
                       <tr>
                         <th>7 - 8</th>
@@ -716,10 +724,10 @@ class Dashboard extends React.Component {
             </Col>
           </Row>
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="4">
+            <Col lg="5">
               <Card className="text-center card-raised card-white">
                 <CardHeader>
-                  <CardTitle tag="h3">Daily Performance Report for <p>{this.state.agent.name}</p></CardTitle>
+                  <CardTitle tag="h3"><p style={{ color: "#3469a6" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "#3469a6" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
                 </CardHeader>
                 <CardBody>
                   {
@@ -741,8 +749,8 @@ class Dashboard extends React.Component {
                       }
                       return (
                         <div key={i}>
-                          <h4 >Appointment Count: <strong>{this.state.agent.appointments.length}</strong></h4>
-                          <h4>Call Center Rank: <strong>#{rank}</strong></h4>
+                          <h4 style={{ color: "#3469a6" }}>Appointment Count: <strong>{this.state.agent.appointments.length}</strong></h4>
+                          <h4 style={{ color: "#3469a6" }}>Call Center Rank: <strong>#{rank}</strong></h4>
                         </div>
                       );
                     })
@@ -750,13 +758,13 @@ class Dashboard extends React.Component {
                 </CardBody>
               </Card>
             </Col>
-            <Col lg="4">
-              <Card className="text-center card-raised card-white">
+            <Col lg="5">
+              <Card className="text-center card-raised card-white" color="primary">
                 <CardHeader>
-                  <CardTitle tag="h3">Month-to-Date Performance Report for <p>{this.state.agent.name}</p></CardTitle>
+                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <CardImg top width="100%" hidden={!this.state.mtdtop5loading} src={this.props.utils.loading} />
+                  <CardImg top width="100%" hidden={!this.state.mtdtop5loading} src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
 
                   {
 
@@ -777,8 +785,8 @@ class Dashboard extends React.Component {
                       }
                       return (
                         <div key={i}>
-                          <h4 >Appointment Count: <strong>{thisAgent.count}</strong></h4>
-                          <h4>Call Center Rank: <strong>#{rank}</strong></h4>
+                          <h4 style={{ color: "white" }}>Appointment Count: <strong>{thisAgent.count}</strong></h4>
+                          <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{rank}</strong></h4>
                         </div>
                       );
                     })
@@ -788,7 +796,7 @@ class Dashboard extends React.Component {
             </Col>
           </Row>
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="8">
+            <Col lg="5">
               <Card className="card-raised card-white">
                 <CardHeader>
                   <div className="tools float-right">
@@ -800,15 +808,15 @@ class Dashboard extends React.Component {
                       
                     </Button> */}
                   </div>
-                  <CardTitle tag="h3">Top 10 Agents Today</CardTitle>
+                  <CardTitle tag="h3"><p style={{ color: "#3469a6" }}><strong>Top 10 Agents Today</strong></p></CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <Table responsive>
-                    <thead className="text-primary">
+                  <Table responsive >
+                    <thead className="text-primary" >
                       <tr>
-                        <th className="text-center">Rank</th>
-                        <th className="text-center">Agent Name</th>
-                        <th className="text-center"># Approved Appointments</th>
+                        <th style={{ borderBottom: "1px solid #3469a6" }} className="text-center"><p style={{ color: "#3469a6" }}>Rank</p></th>
+                        <th style={{ borderBottom: "1px solid #3469a6" }} className="text-center"><p style={{ color: "#3469a6" }}>Agent Name</p></th>
+                        <th style={{ borderBottom: "1px solid #3469a6" }} className="text-center"><p style={{ color: "#3469a6" }}># Approved Appointments</p></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -816,10 +824,44 @@ class Dashboard extends React.Component {
                         this.state.top5.map((agent, index) => {
                           if (index > 9) return null;
                           return (
-                            <tr key={index} className="text-center">
-                              <td >{index + 1}</td>
-                              <td >{agent.name}</td>
-                              <td >{agent.count}</td>
+                            <tr key={index} className="text-center" style={{ borderTop: "1px solid #3469a6" }}>
+                              <td style={{ borderBottom: "1px solid #3469a6" }}><p style={{ color: "#3469a6" }}>{index + 1}</p></td>
+                              <td style={{ borderBottom: "1px solid #3469a6" }}><p style={{ color: "#3469a6" }}>{agent.name}</p></td>
+                              <td style={{ borderBottom: "1px solid #3469a6" }}><p style={{ color: "#3469a6" }}>{agent.count}</p></td>
+                            </tr>
+                          )
+                        })
+                      }
+                    </tbody>
+                  </Table>
+                </CardBody>
+              </Card>
+            </Col>
+            <Col lg="5">
+              <Card className="card-raised card-white" color="primary">
+                <CardHeader>
+                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Top 10 Agents MTD</strong></p></CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.mtdtop5loading} style={{ backgroundColor: "white" }} />
+                  <Table responsive style={this.state.mtdtop5loading ? { display: "none" } : {}}>
+                    <thead className="text-primary" >
+                      <tr >
+                        <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Rank</p></th>
+                        <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Agent Name</p></th>
+                        <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}># Approved Appointments</p></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+
+                      {
+                        this.state.mtdTop5.map((agent, index) => {
+                          if (index > 9) return null;
+                          return (
+                            <tr key={index} className="text-center" >
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{index + 1}</p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{agent.name}</p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{agent.count}</p></td>
                             </tr>
                           )
                         })
@@ -831,7 +873,7 @@ class Dashboard extends React.Component {
             </Col>
           </Row>
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="8">
+            <Col lg="10">
 
               {/* <Card hidden={!this.state.isAdmin}>
                 <CardHeader>
@@ -992,7 +1034,7 @@ class Dashboard extends React.Component {
             </Col>
           </Row>
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="8">
+            <Col lg="10">
               <Card className="card-raised card-white" hidden={!this.state.isAdmin || !["lexliveslife@gmail.com", "marc@centralbdc.com"].includes(this.state.agent.email)}>
                 <CardHeader>
                   <CardTitle tag="h3">Today's Appointments <strong>total: {this.state.todays_appts.length}</strong></CardTitle>
