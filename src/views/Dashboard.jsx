@@ -87,7 +87,7 @@ class Dashboard extends React.Component {
       return Object.assign(a, { label: a.name, value: i })
     })
     agents = agents.filter((a) => {
-      return a.department === "sales"
+      return a.department === "sales" && a.isActive === true
     })
     agents.sort((a, b) => {
       if (a.label > b.label) return 1;
