@@ -144,7 +144,8 @@ class DealershipDashboard extends React.Component {
       let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
 
       dealerships = dealerships.filter((d) => {
-        return d.isActive === true && d.group == this.state.dealership.group
+        // return d.isActive === true && d.group == this.state.dealership.group
+        return d.group == this.state.dealership.group
       })
       dealerships.sort((a, b) => {
         if (a.label > b.label) return 1;
@@ -158,9 +159,9 @@ class DealershipDashboard extends React.Component {
     }
     else if (this.state.agent.access === "admin") {
       let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
-      dealerships = dealerships.filter((d) => {
-        return d.isActive === true
-      })
+      // dealerships = dealerships.filter((d) => {
+      //   return d.isActive === true
+      // })
       dealerships.sort((a, b) => {
         if (a.label > b.label) return 1;
         if (a.label < b.label) return -1;
