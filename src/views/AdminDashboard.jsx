@@ -46,6 +46,8 @@ class AdminDashboard extends React.Component {
             lifetime_appts: 0,
             month_appts: 0,
             today_appts: 0,
+            projected_today: 0,
+            projected_month: 0,
             top10: [],
             selected_agent: {
                 label: "",
@@ -91,7 +93,7 @@ class AdminDashboard extends React.Component {
         this.setState({ lastAppsLoading: true })
         let last_appts = [];
         let appointments = this._isMounted && await this.props.mongo.find("appointments")
-        let dealervals = this._isMounted && await this.state.dealerships.map((d)=>{
+        let dealervals = this._isMounted && await this.state.dealerships.map((d) => {
             return d.value
         })
         for (let a in appointments) {
@@ -127,11 +129,30 @@ class AdminDashboard extends React.Component {
         console.log(new Date())
     }
     async getTodayAppts() {
+        let today = new Date();
+        today = new Date(today.setHours(8, 0, 0, 0))
+        let first = new Date()
+        first = new Date(first.setDate(1))
+        first = new Date(first.setHours(0,0,0,0))
+        let now = new Date();
+        let elapsed = now.getTime() - today.getTime();
+        elapsed /= (1000 * 60 * 60)
+
+        let hrs = now.getDay() === 0 ? 8 : 12
+        let days = now.getDate()
         let metrics = this._isMounted && await this.props.mongo.findOne("admin_dashboard", { label: "centralbdc_metrics" })
         let lifetime_appts = metrics.total_lifetime;
         let month_appts = metrics.total_mtd;
         let today_appts = metrics.total_today;
-        this._isMounted && this.setState({ lifetime_appts, month_appts, today_appts: today_appts })
+        let projected_today = Math.round(today_appts / elapsed * hrs)
+        let projected_month = Math.round(month_appts/ days * 26)
+        if (elapsed >= hrs) {
+            projected_today = today_appts
+        }
+        if(projected_month <  month_appts){
+            projected_month = month_appts
+        }
+        this._isMounted && this.setState({ lifetime_appts, month_appts, today_appts: today_appts, projected_today, projected_month })
     }
     async getTop10() {
         this.setState({ top10Loading: true })
@@ -380,9 +401,13 @@ class AdminDashboard extends React.Component {
                                 <CardBody>
                                     <h2>Total Appts Today</h2>
                                     <h3><strong>{this.state.today_appts}</strong></h3>
+                                    <h2>Projected Appts Today</h2>
+                                    <h3><strong>{this.state.projected_today}</strong></h3>
                                     <hr />
                                     <h2>Total Appts This Month</h2>
                                     <h3><strong>{this.state.month_appts}</strong></h3>
+                                    <h2>Projected Appts This Month</h2>
+                                    <h3><strong>{this.state.projected_month}</strong></h3>
                                     <hr />
                                     <h2>Total Appts Lifetime</h2>
                                     <h3><strong>{this.state.lifetime_appts}</strong></h3>
