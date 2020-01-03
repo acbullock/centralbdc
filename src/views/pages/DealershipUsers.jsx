@@ -41,7 +41,9 @@ class DealershipUsers extends React.Component {
             editUserTitle: "",
             editAccess: "",
             editActive: "",
-            editUserDealership: { label: "", value: "" }
+            editUserDealership: { label: "", value: "" },
+            editGroup: {label: "", value: ""},
+            dealership_groups: []
         }
         this.toggle = this.toggle.bind(this)
         this.onValueChange = this.onValueChange.bind(this)
@@ -55,23 +57,36 @@ class DealershipUsers extends React.Component {
         this.setState({ loading: true })
         let users = this._isMounted && await this.props.mongo.find("dealership_users")
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
+        let dealership_groups = this._isMounted && await this.props.mongo.find("dealership_groups")
         users.sort((a, b) => {
             if (a.name < b.name) return -1
             if (b.name < a.name) return 1
             return 0
         })
+        users = users.map((u)=>{
+            let group = "";
+            for(let d in dealerships){
+                if(dealerships[d].value === u.dealership){
+                    group = dealerships[d].group;
+                    break;
+                }
+            }
+            return Object.assign(u, {group: group})
+        });
         dealerships.sort((a, b) => {
             if (a.label < b.label) return -1
             if (b.label < a.label) return 1
             return 0
         })
-        let userOptions = []
-        for (let u in users) {
-            userOptions[u] = {}
-            userOptions[u].label = users[u].email
-            userOptions[u].value = users[u]._id
-        }
-        this.setState({ loading: false, users: userOptions, dealerships })
+        dealership_groups.sort((a, b) => {
+            if (a.label < b.label) return -1
+            if (b.label < a.label) return 1
+            return 0
+        })
+        let userOptions = users.map((u)=>{
+            return Object.assign(u, {label: u.name, value: u._id})
+        })
+        this.setState({ loading: false, users: userOptions, dealerships, dealership_groups })
         // this.setState({dealershipGroups: groups})
     }
     componentDidMount() {
@@ -183,7 +198,7 @@ class DealershipUsers extends React.Component {
             <div className="content">
                 <Container>
                     <Row>
-                        <Col className="ml-auto mr-auto text-center" md="8">
+                        <Col className="ml-auto mr-auto" md="8">
                             <Card>
                                 <CardBody>
                                     <h2>Add User</h2>
@@ -312,14 +327,31 @@ class DealershipUsers extends React.Component {
                             </Card>
                             <Card>
                                 <CardBody>
-                                    <h2>Edit User</h2>
-                                    <Select
-                                        name="editUser"
-                                        id="editUser"
-                                        options={this.state.users}
-                                        value={this.state.editUser}
-                                        onChange={(e) => { this.onValueChange("editUser", e); }}
-                                    />
+                                    <Form>
+                                        <h2>Edit User</h2>
+                                        <FormGroup>
+                                            <Label>Dealership Group</Label>
+                                            <Select
+                                                name="editGroup"
+                                                id="editGroup"
+                                                options={this.state.dealership_groups}
+                                                value={this.state.editGroup}
+                                                onChange={(e) => { this.onValueChange("editGroup", e); }}
+                                            />
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <Label>User</Label>
+                                            <Select
+                                                isDisabled={this.state.editGroup.label.length < 1}
+                                                name="editUser"
+                                                id="editUser"
+                                                options={this.state.users.filter((u)=>{return u.group === this.state.editGroup.value})}
+                                                value={this.state.editUser}
+                                                onChange={(e) => { this.onValueChange("editUser", e); }}
+                                            />
+                                        </FormGroup>
+
+                                    </Form>
                                     <br />
                                     <Button color="primary" disabled={this.state.editUser.label.length == 0} onClick={async () => {
                                         this.setState({ loading: true })
