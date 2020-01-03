@@ -89,7 +89,6 @@ class AdminDashboard extends React.Component {
         this._isMounted = false
     }
     async sortLastAppts() {
-        console.log(new Date())
         this.setState({ lastAppsLoading: true })
         let last_appts = [];
         let appointments = this._isMounted && await this.props.mongo.find("appointments")
@@ -126,14 +125,13 @@ class AdminDashboard extends React.Component {
             return 0;
         })
         this._isMounted && await this.setState({ last_appts, lastAppsLoading: false })
-        console.log(new Date())
     }
     async getTodayAppts() {
         let today = new Date();
         today = new Date(today.setHours(8, 0, 0, 0))
         let first = new Date()
         first = new Date(first.setDate(1))
-        first = new Date(first.setHours(0,0,0,0))
+        first = new Date(first.setHours(0, 0, 0, 0))
         let now = new Date();
         let elapsed = now.getTime() - today.getTime();
         elapsed /= (1000 * 60 * 60)
@@ -145,11 +143,11 @@ class AdminDashboard extends React.Component {
         let month_appts = metrics.total_mtd;
         let today_appts = metrics.total_today;
         let projected_today = Math.round(today_appts / elapsed * hrs)
-        let projected_month = Math.round(month_appts/ days * 26)
+        let projected_month = Math.round(month_appts / days * 26)
         if (elapsed >= hrs) {
             projected_today = today_appts
         }
-        if(projected_month <  month_appts){
+        if (projected_month < month_appts) {
             projected_month = month_appts
         }
         this._isMounted && this.setState({ lifetime_appts, month_appts, today_appts: today_appts, projected_today, projected_month })
@@ -234,17 +232,17 @@ class AdminDashboard extends React.Component {
 
                     <Row style={{ justifyContent: "center" }} className="text-center">
                         <Col lg="6">
-                            <Card className="card-raised card-white blur">
+                            <Card className="card-raised card-white blur" color="primary">
                                 <CardHeader>
                                     <CardTitle >
-                                        <h3><strong>Longest Time Since Last Appointment</strong></h3>
-                                        <hr />
+                                        <h3 style={{ color: "white" }}><strong>Longest Time Since Last Appointment</strong></h3>
+                                        <hr style={{ backgroundColor: "white" }} />
                                     </CardTitle>
                                 </CardHeader>
                                 <CardBody>
-                                    <CardImg hidden={!this.state.lastAppsLoading} top width="100%" src={this.props.utils.loading} />
+                                    <CardImg hidden={!this.state.lastAppsLoading} top width="100%" src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
 
-                                    <Table hidden={this.state.lastAppsLoading}>
+                                    <Table hidden={this.state.lastAppsLoading} style={{ backgroundColor: "white" }}>
                                         <thead>
                                             <tr>
                                                 <th>Dealership Name</th>
@@ -285,17 +283,17 @@ class AdminDashboard extends React.Component {
                             </Card>
                         </Col>
                         <Col lg="6">
-                            <Card className="card-raised card-white">
+                            <Card className="card-raised card-white" color="primary">
                                 <CardHeader>
                                     <CardTitle>
-                                        <h3><strong>Top 10 Agents Today</strong></h3>
-                                        <hr />
+                                        <h3 style={{ color: "white" }}><strong>Top 10 Agents Today</strong></h3>
+                                        <hr style={{ backgroundColor: "white" }} />
                                     </CardTitle>
                                 </CardHeader>
                                 <CardBody>
-                                    <CardImg hidden={!this.state.top10Loading} top width="100%" src={this.props.utils.loading} />
+                                    <CardImg hidden={!this.state.top10Loading} top width="100%" src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
 
-                                    <Table hidden={this.state.top10Loading}>
+                                    <Table hidden={this.state.top10Loading} style={{ backgroundColor: "white" }}>
                                         <thead>
                                             <tr>
                                                 <th>#</th>
@@ -328,15 +326,15 @@ class AdminDashboard extends React.Component {
                     </Row>
                     <Row style={{ justifyContent: "center" }} className="text-center">
                         <Col lg="6" style={{ justifyContent: "center" }} className="text-center">
-                            <Card className="card-raised card-white">
+                            <Card className="card-raised card-white" color="primary">
                                 <CardHeader>
                                     <CardTitle>
-                                        <h3><strong>Agent's Top 5 Dealerships</strong></h3>
-                                        <hr />
+                                        <h3 style={{ color: "white" }}><strong>Agent's Top 5 Dealerships</strong></h3>
+                                        <hr style={{ backgroundColor: "white" }} />
                                     </CardTitle>
                                 </CardHeader>
                                 <CardBody>
-                                    <Label>Agent</Label>
+                                    <Label style={{ color: "white" }}>Agent</Label>
                                     <Select
                                         options={this.state.agents}
                                         value={this.state.selected_agent}
@@ -345,10 +343,10 @@ class AdminDashboard extends React.Component {
                                             this.getAgentTop5(e)
                                         }}
                                     />
-                                    <CardImg hidden={!this.state.agent5Loading} top width="100%" src={this.props.utils.loading} />
+                                    <CardImg hidden={!this.state.agent5Loading} top width="100%" src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
 
                                     <hr hidden={this.state.selected_agent.label.length < 1} />
-                                    <Table hidden={this.state.selected_agent.label.length < 1 || this.state.agent5Loading}>
+                                    <Table hidden={this.state.selected_agent.label.length < 1 || this.state.agent5Loading} style={{ backgroundColor: "white" }}>
                                         <thead>
                                             <tr>
                                                 <th>#</th>
@@ -391,27 +389,41 @@ class AdminDashboard extends React.Component {
                             </Card>
                         </Col>
                         <Col lg="6">
-                            <Card className="card-raised card-white">
+                            <Card className="card-raised card-white" color="primary">
                                 <CardHeader>
                                     <CardTitle>
-                                        <h3><strong>CentralBDC Metrics</strong></h3>
-                                        <hr />
+                                        <h3 style={{ color: "white" }}><strong>CentralBDC Metrics</strong></h3>
+                                        <hr style={{ backgroundColor: "white" }} />
                                     </CardTitle>
                                 </CardHeader>
                                 <CardBody>
-                                    <h2>Total Appts Today</h2>
-                                    <h3><strong>{this.state.today_appts}</strong></h3>
-                                    <h2>Projected Appts Today</h2>
-                                    <h3><strong>{this.state.projected_today}</strong></h3>
-                                    <hr />
-                                    <h2>Total Appts This Month</h2>
-                                    <h3><strong>{this.state.month_appts}</strong></h3>
-                                    <h2>Projected Appts This Month</h2>
-                                    <h3><strong>{this.state.projected_month}</strong></h3>
-                                    <hr />
-                                    <h2>Total Appts Lifetime</h2>
-                                    <h3><strong>{this.state.lifetime_appts}</strong></h3>
-                                    <hr />
+                                    <Card className="card-raised card-white">
+                                        <CardBody>
+                                            <h2 style={{ color: "#3469a6" }}>Total Appts Today</h2>
+                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.today_appts}</strong></h3>
+                                            <hr style={{ backgroundColor: "#3469a6" }} />
+                                            <h2 style={{ color: "#3469a6" }}>Projected Appts Today</h2>
+                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.projected_today}</strong></h3>
+
+                                        </CardBody>
+                                    </Card>
+                                    <hr style={{ backgroundColor: "white" }} />
+                                    <Card className="card-raised card-white">
+                                        <CardBody>
+                                            <h2 style={{ color: "#3469a6" }}>Total Appts This Month</h2>
+                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.month_appts}</strong></h3>
+                                            <hr style={{ backgroundColor: "#3469a6" }} />
+                                            <h2 style={{ color: "#3469a6" }}>Projected Appts This Month</h2>
+                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.projected_month}</strong></h3>
+                                        </CardBody>
+                                    </Card>
+                                    <hr style={{ backgroundColor: "white" }} />
+                                    <Card className="card-raised card-white">
+                                        <CardBody>
+                                            <h2 style={{ color: "#3469a6" }}>Total Appts Lifetime</h2>
+                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.lifetime_appts}</strong></h3>
+                                        </CardBody>
+                                    </Card>
                                 </CardBody>
 
                             </Card>
