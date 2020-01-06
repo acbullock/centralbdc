@@ -152,14 +152,17 @@ class UserManagement extends React.Component {
         let newUser = {
             name: this.props.utils.toTitleCase(this.state.addUserName),
             phone: this.state.addUserPhone,
-            email: this.state.addUserEmail,
+            email: this.state.addUserEmail.toLowerCase(),
             team: this.state.addUserTeam,
             account_type: this.state.addType,
             department: this.state.addDepartment,
             isActive: this.state.addActive === "active",
             isApprover: this.state.addType === "admin",
             appointments: [],
-            assistance: []
+            assistance: [],
+            extension: "",
+            inboundToday: 0,
+            outboundToday: 0
         }
         console.log(newUser)
         //register user with "password" as password.. they can always reset password on login page..

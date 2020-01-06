@@ -71,6 +71,7 @@ class Dashboard extends React.Component {
     this.getAppointmentData = this.getAppointmentData.bind(this)
     this.getBreakDown = this.getBreakDown.bind(this)
     this.getMtdTop5 = this.getMtdTop5.bind(this)
+    this.getProjection = this.getProjection.bind(this)
   }
   _isMounted = false;
   async componentDidMount() {
@@ -94,13 +95,13 @@ class Dashboard extends React.Component {
       if (a.label < b.label) return -1;
       return 0;
     })
-    if(agent.account_type !== "admin"){
-      let selected = agents.filter((a)=>{
+    if (agent.account_type !== "admin") {
+      let selected = agents.filter((a) => {
         return a._id == agent._id
       })
       selected = selected[0]
       this.getBreakDown(agent)
-      this.setState({selected_agent: selected})
+      this.setState({ selected_agent: selected })
     }
     this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
     this._isMounted && await this.getAppointmentData()
@@ -627,6 +628,25 @@ class Dashboard extends React.Component {
     counts["total"] = { count: appointments.length, color: "black" }
     this.setState({ counts })
   }
+  getProjection(curr) {
+    let now = new Date();
+    let isSunday = now.getDay() === 0;
+    let hrs = isSunday === true ? 8 : 12
+    let start = isSunday === true ? new Date(new Date().setHours(10, 0, 0, 0)) : new Date(new Date().setHours(8, 0, 0, 0));
+    if (isSunday === true) {
+      if (now.getHours() > 18) {
+        return curr
+      }
+    }
+    else {
+      if (now.getHours() > 20) {
+        return curr
+      }
+    }
+    let elapsed = (now.getTime() - start.getTime()) / (1000 * 60 * 60)
+    return Math.round(10 * curr / elapsed * hrs) / 10
+
+  }
   render() {
 
     if (this.state.loading) {
@@ -663,7 +683,7 @@ class Dashboard extends React.Component {
         <div className="content">
 
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="10">
+            <Col lg="12">
               <Card className="card-raised card-white" color="primary">
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Agent Hourly Breakdown</strong></p></CardTitle>
@@ -671,15 +691,17 @@ class Dashboard extends React.Component {
                 <CardBody>
                   <Select
                     options={this.state.agent.account_type == "admin" ? this.state.agents : this.state.agents.filter((a) => { return a.label === this.state.agent.name })}
-                    value={this.state.agent.account_type == "admin" ? this.state.selected_agent: this.state.agents.filter((a) => { return a.label === this.state.agent.name })[0]}
+                    value={this.state.agent.account_type == "admin" ? this.state.selected_agent : this.state.agents.filter((a) => { return a.label === this.state.agent.name })[0]}
                     onChange={(e) => {
                       this.setState({ selected_agent: e })
                       this.getBreakDown(e)
                     }}
                   />
-                  <Table style={{ backgroundColor: "white" }} bordered striped responsive hidden={this.state.selected_agent.label.length < 1} className="text-center">
+                  <br />
+                  <Table style={{ backgroundColor: "lightgrey" }} bordered striped hidden={this.state.selected_agent.label.length < 1} className="text-center">
                     <thead className="text-primary">
                       <tr>
+                        <th></th>
                         <th>7 - 8</th>
                         <th>8 - 9</th>
                         <th>9 - 10</th>
@@ -696,10 +718,12 @@ class Dashboard extends React.Component {
                         <th>8 - 9</th>
                         <th>9 - 10</th>
                         <th>Total</th>
+                        <th>Projection</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
+                        <td>Appointments</td>
                         <td><p style={this.state.counts[7] == undefined ? {} : { color: this.state.counts[7].color }}><strong>{this.state.counts[7] == undefined ? 0 : this.state.counts[7].count}</strong></p></td>
                         <td><p style={this.state.counts[8] == undefined ? {} : { color: this.state.counts[8].color }}><strong>{this.state.counts[8] == undefined ? 0 : this.state.counts[8].count}</strong></p></td>
                         <td><p style={this.state.counts[9] == undefined ? {} : { color: this.state.counts[9].color }}><strong>{this.state.counts[9] == undefined ? 0 : this.state.counts[9].count}</strong></p></td>
@@ -716,7 +740,29 @@ class Dashboard extends React.Component {
                         <td><p style={this.state.counts[20] == undefined ? {} : { color: this.state.counts[20].color }}><strong>{this.state.counts[20] == undefined ? 0 : this.state.counts[20].count}</strong></p></td>
                         <td><p style={this.state.counts[21] == undefined ? {} : { color: this.state.counts[21].color }}><strong>{this.state.counts[21] == undefined ? 0 : this.state.counts[21].count}</strong></p></td>
                         <td><p style={this.state.counts["total"] == undefined ? {} : { color: this.state.counts["total"].color }}><strong>{this.state.counts["total"] == undefined ? 0 : this.state.counts["total"].count}</strong></p></td>
+                        <td><strong>{this.state.counts["total"] === undefined ? 0 : this.getProjection(this.state.counts["total"].count)}</strong></td>
                       </tr>
+                      <tr>
+                        <td>Calls</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td><strong>{this.state.selected_agent.outboundToday == undefined || this.state.selected_agent.inboundToday == undefined ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday}</strong></td>
+                        <td><strong>{this.getProjection(this.state.selected_agent.outboundToday == undefined || this.state.selected_agent.inboundToday == undefined ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday)}</strong></td>
+                      </tr>
+
                     </tbody>
                   </Table>
                 </CardBody>
@@ -724,7 +770,7 @@ class Dashboard extends React.Component {
             </Col>
           </Row>
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="5">
+            <Col lg="6">
               <Card className="text-center card-raised card-white">
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "#3469a6" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "#3469a6" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
@@ -758,7 +804,7 @@ class Dashboard extends React.Component {
                 </CardBody>
               </Card>
             </Col>
-            <Col lg="5">
+            <Col lg="6">
               <Card className="text-center card-raised card-white" color="primary">
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
@@ -796,7 +842,7 @@ class Dashboard extends React.Component {
             </Col>
           </Row>
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="5">
+            <Col lg="6">
               <Card className="card-raised card-white">
                 <CardHeader>
                   <div className="tools float-right">
@@ -837,7 +883,7 @@ class Dashboard extends React.Component {
                 </CardBody>
               </Card>
             </Col>
-            <Col lg="5">
+            <Col lg="6">
               <Card className="card-raised card-white" color="primary">
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Top 10 Agents MTD</strong></p></CardTitle>
@@ -873,7 +919,7 @@ class Dashboard extends React.Component {
             </Col>
           </Row>
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="10">
+            <Col lg="12">
 
               {/* <Card hidden={!this.state.isAdmin}>
                 <CardHeader>
@@ -1034,7 +1080,7 @@ class Dashboard extends React.Component {
             </Col>
           </Row>
           <Row style={{ justifyContent: "center" }}>
-            <Col lg="10">
+            <Col lg="12">
               <Card className="card-raised card-white" hidden={!this.state.isAdmin || !["lexliveslife@gmail.com", "marc@centralbdc.com"].includes(this.state.agent.email)}>
                 <CardHeader>
                   <CardTitle tag="h3">Today's Appointments <strong>total: {this.state.todays_appts.length}</strong></CardTitle>

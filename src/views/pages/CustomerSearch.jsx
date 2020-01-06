@@ -219,7 +219,8 @@ class CustomerSearch extends React.Component {
                                                     <p><strong>Agent: </strong>{this.state.results[i].from.name || "Not available.."}</p>
                                                     <p><strong>Direction: </strong>{this.state.results[i].direction || "Not available.."}</p>
                                                     <br/>
-                                                    <audio controls src={u} hidden={u.length < 1}/>
+                                                    <audio controls src={u} hidden={u.length < 1 || this.state.agent.access !== "admin"}/>
+                                                    <audio controls src={u} hidden={u.length < 1 || this.state.agent.access === "admin"} controlsList="nodownload"/>
                                                     <br />
                                                     <Button onClick={() => this.loadAudio(i)}>Load Audio</Button>
                                                     <hr />
