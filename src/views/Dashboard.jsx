@@ -765,6 +765,7 @@ class Dashboard extends React.Component {
 
                     </tbody>
                   </Table>
+                  <p style={{ color: "white" }} hidden={this.state.selected_agent.label.length < 1}>Call Count Last Updated: <strong>{new Date(this.state.selected_agent.callCountLastUpdated).toLocaleTimeString()}</strong></p>
                 </CardBody>
               </Card>
             </Col>
