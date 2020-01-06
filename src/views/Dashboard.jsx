@@ -83,36 +83,41 @@ class Dashboard extends React.Component {
     }
     this._isMounted && this.setState({ user })
     let agent = this._isMounted && await this.props.mongo.findOne("agents", { "userId": user.userId })
-    let agents = this._isMounted && await this.props.mongo.find("agents")
-    agents = agents.map((a, i) => {
-      return Object.assign(a, { label: a.name, value: i })
-    })
-    agents = agents.filter((a) => {
-      return a.department === "sales" && a.isActive === true
-    })
-    agents.sort((a, b) => {
-      if (a.label > b.label) return 1;
-      if (a.label < b.label) return -1;
-      return 0;
-    })
-    if (agent.account_type !== "admin") {
-      let selected = agents.filter((a) => {
-        return a._id == agent._id
-      })
-      selected = selected[0]
-      this.getBreakDown(agent)
-      this.setState({ selected_agent: selected })
+    if (agent.department === "service" && agent.account_type !== "admin") {
+      this.props.history.push("/admin/service_dashboard")
     }
-    this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
-    this._isMounted && await this.getAppointmentData()
-    this._isMounted && await this.getChartData()
-    // this._isMounted && await this.getBarChartData()
-    this._isMounted && await this.getCountData()
-    this._isMounted && await this.renderCount()
-    this._isMounted && this.getTop5()
-    this._isMounted && this.getMtdTop5()
-    this._isMounted && await this.isOld()
-    this._isMounted && this.setState({ loading: false })
+    else {
+      let agents = this._isMounted && await this.props.mongo.find("agents")
+      agents = agents.map((a, i) => {
+        return Object.assign(a, { label: a.name, value: i })
+      })
+      agents = agents.filter((a) => {
+        return a.department === "sales" && a.isActive === true
+      })
+      agents.sort((a, b) => {
+        if (a.label > b.label) return 1;
+        if (a.label < b.label) return -1;
+        return 0;
+      })
+      if (agent.account_type !== "admin") {
+        let selected = agents.filter((a) => {
+          return a._id == agent._id
+        })
+        selected = selected[0]
+        this.getBreakDown(agent)
+        this.setState({ selected_agent: selected })
+      }
+      this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
+      this._isMounted && await this.getAppointmentData()
+      this._isMounted && await this.getChartData()
+      // this._isMounted && await this.getBarChartData()
+      this._isMounted && await this.getCountData()
+      this._isMounted && await this.renderCount()
+      this._isMounted && this.getTop5()
+      this._isMounted && this.getMtdTop5()
+      this._isMounted && await this.isOld()
+      this._isMounted && this.setState({ loading: false })
+    }
   }
   componentWillUnmount() {
     this._isMounted = false

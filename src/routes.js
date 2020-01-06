@@ -64,6 +64,7 @@ import AdminDashboard from "./views/AdminDashboard.jsx"
 import DealershipPerformance from "./views/pages/DealershipPerformance.jsx"
 import Reports from "./views/pages/Reports.jsx"
 import AdminReports from "./views/pages/AdminReports.jsx"
+import ServiceDashboard from "./views/ServiceDashboard.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
@@ -79,10 +80,18 @@ const routes = [
     views: [
       {
         path: "/dashboard",
-        name: "Dashboard",
+        name: "Sales Dashboard",
         rtlName: "لوحة القيادة",
         icon: "tim-icons icon-chart-pie-36",
         component: Dashboard,
+        layout: "/admin"
+      },
+      {
+        path: "/service_dashboard",
+        name: "Service Dashboard",
+        rtlName: "لوحة القيادة",
+        icon: "tim-icons icon-chart-pie-36",
+        component: ServiceDashboard,
         layout: "/admin"
       },
       {
