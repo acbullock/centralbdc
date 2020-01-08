@@ -74,10 +74,10 @@ import DealershipProfile from "./views/pages/DealershipProfile.jsx"
 const routes = [
   {
     collapse: true,
-    name: "Dashboards",
+    name: "Sales Dashboards",
     // rtlName: "صفحات",
     icon: "tim-icons icon-badge",
-    state: "dashboardCollapse",
+    state: "salesDashboardCollapse",
     views: [
       {
         path: "/dashboard",
@@ -85,14 +85,6 @@ const routes = [
         rtlName: "لوحة القيادة",
         icon: "tim-icons icon-chart-pie-36",
         component: Dashboard,
-        layout: "/admin"
-      },
-      {
-        path: "/service_dashboard",
-        name: "Service Dashboard",
-        rtlName: "لوحة القيادة",
-        icon: "tim-icons icon-chart-pie-36",
-        component: ServiceDashboard,
         layout: "/admin"
       },
       {
@@ -121,7 +113,23 @@ const routes = [
 
     ]
   },
-
+  {
+    collapse: true,
+    name: "Service Dashboards",
+    // rtlName: "صفحات",
+    icon: "tim-icons icon-badge",
+    state: "serviceDashboardCollapse",
+    views: [
+      {
+        path: "/service_dashboard",
+        name: "Service Dashboard",
+        rtlName: "لوحة القيادة",
+        icon: "tim-icons icon-chart-pie-36",
+        component: ServiceDashboard,
+        layout: "/admin"
+      },
+    ]
+  },
   {
     path: "/dashboard",
     name: "Dealership Dashboard",
