@@ -707,7 +707,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="editDealershipPhone">Dealership Main Phone Number</Label>
                                                     <Input
-                                                        type="text"
+                                                        type="number"
                                                         name="editDealershipPhone"
                                                         id="editDealershipPhone"
                                                         placeholder="Edit Dealership Main Phone #"
@@ -834,7 +834,7 @@ class DealershipManagement extends React.Component {
                                                     />
                                                 </FormGroup>
                                                 <hr />
-                                                <legend>EditData Mining Number</legend>
+                                                <legend>Edit Data Mining Number</legend>
                                                 <FormGroup>
                                                     <Input
                                                         value={this.state.editDataMining}

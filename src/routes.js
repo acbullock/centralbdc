@@ -67,6 +67,7 @@ import AdminReports from "./views/pages/AdminReports.jsx"
 import ServiceDashboard from "./views/ServiceDashboard.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
+import DealershipProfile from "./views/pages/DealershipProfile.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -141,6 +142,13 @@ const routes = [
     name: "Reports",
     icon: "tim-icons icon-bullet-list-67",
     component: Reports,
+    layout: "/dealership"
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    icon: "tim-icons icon-badge",
+    component: DealershipProfile,
     layout: "/dealership"
   },
   {
