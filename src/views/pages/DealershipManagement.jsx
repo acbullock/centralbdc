@@ -265,7 +265,95 @@ class DealershipManagement extends React.Component {
             sales: "+1" + this.state.addSales,
             isSales: this.state.addIsSales,
             isService: this.state.addIsService,
-            isActive: this.state.addIsActive === "active"
+            isActive: this.state.addIsActive === "active",
+            salesHours: [
+                {
+                    day: "Monday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Tuesday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Wednesday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Thursday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Friday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Saturday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Sunday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+            ],
+            serviceHours: [
+                {
+                    day: "Monday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Tuesday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Wednesday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Thursday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Friday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Saturday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+                {
+                    day: "Sunday",
+                    open: new Date(new Date().setHours(8, 0, 0, 0)),
+                    close: new Date(new Date().setHours(21, 0, 0, 0)),
+                    isClosed: false
+                },
+            ],
         }
         //insert dealer
         let inserted = this._isMounted && await this.props.mongo.insertOne("dealerships", newDealership)
