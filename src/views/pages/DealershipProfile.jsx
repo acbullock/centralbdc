@@ -646,7 +646,7 @@ class DealershipProfile extends React.Component {
                                     <h3 for="leads" style={{ color: "#3469a6" }}>Average Monthly Leads:</h3>
                                     <h3 id="leads" style={{ color: "#3469a6" }}><strong>{this.state.selected_dealership.average_monthly_lead_count == "" ? 0 : this.state.selected_dealership.average_monthly_lead_count}</strong></h3>
 
-                                    <h3 for="phoneups" style={{ color: "#3469a6" }}>Average Phone-Ups:</h3>
+                                    <h3 for="phoneups" style={{ color: "#3469a6" }}>Average Monthly Phone-Ups:</h3>
                                     <h3 id="phoneups" style={{ color: "#3469a6" }}><strong>{this.state.selected_dealership.average_monthly_phone_ups == "" ? 0 : this.state.selected_dealership.average_monthly_phone_ups}</strong></h3>
 
                                     <h3 for="ro" style={{ color: "#3469a6" }}>Average Monthly Repair Orders:</h3>
