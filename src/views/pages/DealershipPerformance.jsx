@@ -65,7 +65,7 @@ class DealershipPerformance extends React.Component {
         let apps = [];
         for (let a in this.state.agents) {
             for (let b in this.state.agents[a].appointments) {
-                if (this.state.agents[a].appointments[b].dealership.value === dealership.value) {
+                if (this.state.agents[a].appointments[b].dealership.value === dealership.value && this.state.agents[a].appointments[b].dealership_department!== "Service") {
                     apps.push(this.state.agents[a].appointments[b])
                 }
             }

@@ -221,7 +221,7 @@ class CreateAppointment extends React.Component {
         ]
         let SERVICE_TO_SALES_CONTACTS = [
             "3472656027",
-            "9548646379"
+            // "9548646379"
         ]
         await this.setState({ token: token })
         for (let c in contacts) {
