@@ -100,11 +100,13 @@ class AdminReports extends React.Component {
     }
     async getGoalForRange() {
         this.setState({ loading: true })
+
         let apps = await this.props.mongo.findOne("appointments", { dealership: this.state.selected_dealership.value })
         apps = apps.appointments;
+
         //find all apps in given range..
         apps = apps.filter((a) => {
-            return new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() && new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
+            return a.dealership_department !== "Service" && new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() && new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
         })
         let range = new Date(this.state.toDate).getTime() - new Date(this.state.fromDate).getTime()
         range = range / (1000 * 60 * 60 * 24);
@@ -149,7 +151,7 @@ class AdminReports extends React.Component {
                 continue;
             }
             curr_apps = curr_apps.filter((a) => {
-                return new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() && new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
+                return a.dealership_department !== "Service" && new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() && new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
             });
             let range = new Date(this.state.toDate).getTime() - new Date(this.state.fromDate).getTime()
             range = range / (1000 * 60 * 60 * 24);
@@ -191,7 +193,7 @@ class AdminReports extends React.Component {
         })
         allApps = allApps.filter((a) => {
             return new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() &&
-                new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
+                new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime() && a.dealership_department !== "Service"
         })
 
         this.setState({ loading: false, agentCount: allApps.length, reportDone: true });
@@ -209,7 +211,7 @@ class AdminReports extends React.Component {
             let currApps = allApps.filter((app) => {
                 return (app.agent_id === agents[a]._id &&
                     new Date(app.verified) >= new Date(this.state.fromDate) &&
-                    new Date(app.verified) <= new Date(this.state.toDate))
+                    new Date(app.verified) <= new Date(this.state.toDate)) && app.dealership_department !== "Service"
             });
             full_results.push({
                 name: agents[a].name,

@@ -383,7 +383,7 @@ class Dashboard extends React.Component {
     today.setHours(0, 0, 0, 0)
     for (let a in agents) {
       for (let b in agents[a].appointments) {
-        if (new Date(agents[a].appointments[b].verified).getTime() > today.getTime()) {
+        if (new Date(agents[a].appointments[b].verified).getTime() > today.getTime() && agents[a].appointments[b].dealership_department !== "Service") {
           todays_appts.push(agents[a].appointments[b])
         }
       }
@@ -476,7 +476,7 @@ class Dashboard extends React.Component {
     first.setDate(1);
     first = new Date(first.setHours(0, 0, 0, 0))
     allApps = allApps.filter((a) => {
-      return new Date(a.verified).getTime() >= first.getTime()
+      return new Date(a.verified).getTime() >= first.getTime() && a.dealership_department !== "Service"
     })
     let nums = [];
     for (let a in allAgents) {
@@ -667,19 +667,6 @@ class Dashboard extends React.Component {
             </Container>
           </div>
         </>
-      );
-    }
-    if (this.state.agent.department !== "sales" && this.state.agent.account_type !== "admin") {
-      return (
-        <div className="content">
-          <Container>
-            <Row>
-              <Col lg="10">
-                <h1>Service Dashboard Coming Soon..</h1>
-              </Col>
-            </Row>
-          </Container>
-        </div>
       );
     }
     return (
