@@ -199,7 +199,7 @@ class CreateAppointment extends React.Component {
     }
     async sendText(appointment) {
         this.setState({ loading: true })
-        let contacts = appointment.dealership.contacts
+        let contacts = appointment.dealership_department === "Service" ? appointment.dealership.serviceContacts : appointment.dealership.contacts
         let textFrom = appointment.dealership_department === "Service" ? appointment.dealership.serviceTextFrom : appointment.dealership.textFrom
         let arr = []
         let used_arr = []
@@ -255,7 +255,7 @@ class CreateAppointment extends React.Component {
 
     }
     async sendCustText(appointment) {
-        if(appointment.dealership.value === "5deaa83728eac700174a760a" && appointment.dealership_department === "Service to Sales") return;
+        if (appointment.dealership.value === "5deaa83728eac700174a760a" && appointment.dealership_department === "Service to Sales") return;
         this.setState({ loading: true })
         let textFrom = appointment.dealership_department === "Service" ? appointment.dealership.serviceTextFrom : appointment.dealership.textFrom
         let to = []
