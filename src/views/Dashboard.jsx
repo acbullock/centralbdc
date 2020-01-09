@@ -87,12 +87,12 @@ class Dashboard extends React.Component {
       this.props.history.push("/admin/service_dashboard")
     }
     else {
-      let agents = this._isMounted && await this.props.mongo.find("agents")
+      let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true })
       agents = agents.map((a, i) => {
         return Object.assign(a, { label: a.name, value: i })
       })
       agents = agents.filter((a) => {
-        return a.department === "sales" && a.isActive === true
+        return a.department === "sales" || a.account_type === "admin"
       })
       agents.sort((a, b) => {
         if (a.label > b.label) return 1;
@@ -824,7 +824,8 @@ class Dashboard extends React.Component {
                       let thisAgent = this.state.mtdTop5.filter((a) => {
                         return a.name === this.state.agent.name
                       })
-                      thisAgent = thisAgent[0]
+                      thisAgent = thisAgent[0];
+
                       if (i > 0) return null;
                       let rank = 1
                       for (let agent in this.state.mtdTop5) {

@@ -87,15 +87,12 @@ class ServiceDashboard extends React.Component {
             this.props.history.push("/admin/dashboard")
         }
         else {
-            let agents = this._isMounted && await this.props.mongo.find("agents")
+            let agents = this._isMounted && await this.props.mongo.find("agents", {isActive: true})
             agents = agents.map((a, i) => {
                 return Object.assign(a, { label: a.name, value: i })
             })
             agents = agents.filter((a) => {
                 return a.department === "service" || a.account_type === "admin"
-            })
-            agents = agents.filter((a) => {
-                return a.isActive === true
             })
             agents.sort((a, b) => {
                 if (a.label > b.label) return 1;
