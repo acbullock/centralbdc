@@ -351,6 +351,7 @@ class DealershipProfile extends React.Component {
                                                                             inputProps={{ disabled: h.isClosed }}
                                                                             value={new Date(h.open).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                                                                             dateFormat={false}
+                                                                            timeConstraints={{minutes:{step: 15}}}
                                                                             onChange={(e) => {
 
                                                                                 let newOpen = new Date(e)
@@ -381,6 +382,7 @@ class DealershipProfile extends React.Component {
                                                                             inputProps={{ disabled: h.isClosed }}
                                                                             value={new Date(h.close).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                                                                             dateFormat={false}
+                                                                            timeConstraints={{minutes:{step: 15}}}
                                                                             onChange={(e) => {
                                                                                 let newClose = new Date(e)
                                                                                 let newArray = this.state.editSalesHours
