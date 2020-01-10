@@ -65,6 +65,7 @@ import DealershipPerformance from "./views/pages/DealershipPerformance.jsx"
 import Reports from "./views/pages/Reports.jsx"
 import AdminReports from "./views/pages/AdminReports.jsx"
 import ServiceDashboard from "./views/ServiceDashboard.jsx"
+import ServiceTVDashboard from "./views/pages/ServicceTVDashboard.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 import DealershipProfile from "./views/pages/DealershipProfile.jsx"
@@ -126,6 +127,14 @@ const routes = [
         rtlName: "لوحة القيادة",
         icon: "tim-icons icon-chart-pie-36",
         component: ServiceDashboard,
+        layout: "/admin"
+      },
+      {
+        path: "/service_tv_dashboard",
+        name: "Service TV Dashboard",
+        rtlName: "لوحة القيادة",
+        icon: "tim-icons icon-tv-2",
+        component: ServiceTVDashboard,
         layout: "/admin"
       },
     ]
