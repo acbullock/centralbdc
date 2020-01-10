@@ -202,7 +202,7 @@ class AdminReports extends React.Component {
         this.setState({ loading: true });
         let full_results = []
         let appointments = await this.props.mongo.find("appointments");
-        let agents = await this.props.mongo.find("agents", { isActive: true })
+        let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" })
         let allApps = [];
         for (let a in appointments) {
             allApps = allApps.concat(appointments[a].appointments);

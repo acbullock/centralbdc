@@ -87,7 +87,7 @@ class ServiceDashboard extends React.Component {
             this.props.history.push("/admin/dashboard")
         }
         else {
-            let agents = this._isMounted && await this.props.mongo.find("agents", {isActive: true})
+            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true })
             agents = agents.map((a, i) => {
                 return Object.assign(a, { label: a.name, value: i })
             })
