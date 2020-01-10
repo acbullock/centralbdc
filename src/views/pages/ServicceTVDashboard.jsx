@@ -105,7 +105,6 @@ class ServiceTVDashboard extends React.Component {
         for (let a in agents) {
             if (agents[a].inboundMTD == undefined || agents[a].outboundMTD == undefined) { continue }
             totalCallCountMTD += agents[a].inboundMTD + agents[a].outboundMTD
-            console.log(agents[a].inboundMTD, agents[a].outboundMTD)
         }
         this._isMounted && await this.setState({ totalCallCountMTD })
     }
@@ -130,7 +129,6 @@ class ServiceTVDashboard extends React.Component {
             agent_apps = agent_apps.filter((a) => {
                 return new Date(a.verified).getTime() >= thisMonth.getTime()
             })
-            // console.log(agents[a].name, "mtd", agent_apps.length)
             apptMtdTotal += agent_apps.length
         }
         this._isMounted && this.setState({ apptMtdLoading: false, apptMtdTotal })
@@ -242,11 +240,9 @@ class ServiceTVDashboard extends React.Component {
                     <Row style={{ justifyContent: "center", textAlign: "center" }}>
                         <Col md="5">
                             <Card className="card-raised card-white text-center">
-                                <Card>
-                                    <CardTitle>
-                                        <h3 style={{ color: "#1d67a8" }}><strong>Call Counts Today</strong></h3>
-                                    </CardTitle>
-                                </Card>
+                                <CardTitle>
+                                    <h3 style={{ color: "#1d67a8" }}><strong>Calls Today</strong></h3>
+                                </CardTitle>
                                 <CardBody>
                                     <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.callsMtdLoading} />
                                     <Table style={{ backgroundColor: "white" }} hidden={this.state.callsMtdLoading}>
@@ -274,12 +270,10 @@ class ServiceTVDashboard extends React.Component {
                         <Col md="5">
                             <Card className="card-raised card-white text-center" style={{ backgroundColor: "#1d67a8" }}>
                                 <CardTitle>
-                                    <h3 style={{ color: "white" }}><strong>Appointment Counts Today</strong></h3>
+                                    <h3 style={{ color: "white" }}><strong>Appointments Today</strong></h3>
                                 </CardTitle>
                                 <CardBody>
-                                    <Card>
-                                        <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.apptMtdLoading} />
-                                    </Card>
+                                    <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.apptMtdLoading} />
                                     <Table style={{ backgroundColor: "#1d67a8" }} hidden={this.state.apptMtdLoading}>
                                         <thead>
                                             <tr>
