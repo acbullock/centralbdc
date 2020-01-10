@@ -45,13 +45,13 @@ class CreateAppointment extends React.Component {
       scenarios: [],
       departments: [],
       agent: {},
-      timeConstraints: {},
+      timeConstraints: { minutes: { step: 15 } },
       curDate: null
     };
 
   }
   async componentWillMount() {
-    this.setState({ date: new Date().setHours(0, 0, 0, 0) })
+    this.setState({ date: new Date().setHours(new Date().getHours() + 1, 0, 0, 0) })
     let { mongo } = this.props.wizardData
     let user = await mongo.getActiveUser(mongo.mongodb);
 
@@ -117,6 +117,7 @@ class CreateAppointment extends React.Component {
   }
 
   isValidated() {
+    if (new Date().getTime() > new Date(this.state.date).getTime()) return false;
     let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     let curDay = days[new Date(this.state.date).getDay()]
     if (this.state.agent.department === "sales") {
@@ -296,7 +297,6 @@ class CreateAppointment extends React.Component {
                       let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
                       let x = new Date(value)
                       let dayX = days[x.getDay()]
-                      console.log(dayX)
                       if (this.state.dealership) {
                         if (this.state.agent.department == "sales") {
                           dayX = this.state.dealership.salesHours.filter((d) => { return d.day === dayX })
@@ -304,7 +304,6 @@ class CreateAppointment extends React.Component {
                           this.setState({
                             timeConstraints: { hours: { min: new Date(dayX.open).getHours(), max: new Date(dayX.close).getHours(), step: 1 }, minutes: { step: 15 } }
                           })
-
                         }
                         else if (this.state.agent.department == "service") {
                           dayX = this.state.dealership.serviceHours.filter((d) => { return d.day === dayX })
