@@ -59,7 +59,7 @@ class ServiceTVDashboard extends React.Component {
         this._isMounted = true
         setInterval(() => {
             this.refreshPage()
-        }, 30000);
+        }, 300000);
         this._isMounted && this.setState({ loading: true })
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         if (user.userId == undefined) {
