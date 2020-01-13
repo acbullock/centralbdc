@@ -48,7 +48,7 @@ class DealershipSidebar extends React.Component {
     });
     return initialState;
   };
-  VALID_LINKS = ["Dealership Dashboard", "Reports", "Customer Search"]
+  VALID_LINKS = ["Dealership Dashboard", "Reports", "Customer Search", "Profile"]
   async getCurrentUser(){
     // console.log("why")
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb);

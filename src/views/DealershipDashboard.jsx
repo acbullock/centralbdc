@@ -30,6 +30,9 @@ import {
   Table,
   Row,
   Col,
+  FormGroup,
+  Input,
+  Label
 } from "reactstrap";
 import Select from 'react-select'
 class DealershipDashboard extends React.Component {
@@ -53,7 +56,8 @@ class DealershipDashboard extends React.Component {
       selected: {
         label: "",
         value: ""
-      }
+      },
+      showType: "sales"
     };
 
     this.getCallCountForMonth = this.getCallCountForMonth.bind(this)
@@ -227,12 +231,19 @@ class DealershipDashboard extends React.Component {
     let todayApps = appointments.filter((a) => {
       let x = new Date();
       x.setHours(0, 0, 0, 0)
-
       let tomorrow = new Date()
       tomorrow.setDate(tomorrow.getDate() + 1)
       tomorrow.setHours(0, 0, 0, 0)
       return new Date(a.appointment_date).getTime() >= x.getTime() && new Date(a.appointment_date).getTime() < tomorrow.getTime()
     })
+    let svcApps = todayApps.filter((a) => {
+      return a.dealership_department === "Service"
+    })
+    let salesApps = todayApps.filter((a) => {
+      return a.dealership_department !== "Service"
+    })
+    console.log("svc", svcApps.length)
+    console.log("sales", salesApps.length)
     let tomorrowApps = appointments.filter((a) => {
       let x = new Date();
       x.setDate(x.getDate() + 1);
@@ -242,12 +253,24 @@ class DealershipDashboard extends React.Component {
       next.setHours(0, 0, 0, 0)
       return new Date(a.appointment_date).getTime() >= x.getTime() && new Date(a.appointment_date).getTime() < next.getTime()
     })
+    let svcApps2m = tomorrowApps.filter((a) => {
+      return a.dealership_department === "Service"
+    })
+    let salesApps2m = tomorrowApps.filter((a) => {
+      return a.dealership_department !== "Service"
+    })
     let thisMonthApps = appointments.filter((a) => {
       let x = new Date()
       x.setDate(1)
       x.setHours(0, 0, 0, 0)
       return new Date(a.verified).getTime() >= x.getTime()
 
+    })
+    let thisMonthService = thisMonthApps.filter((a) => {
+      return a.dealership_department === "Service"
+    })
+    let thisMonthSales = thisMonthApps.filter((a) => {
+      return a.dealership_department !== "Service"
     })
     let lastMonthApps = appointments.filter((a) => {
       let x = new Date()
@@ -261,12 +284,25 @@ class DealershipDashboard extends React.Component {
 
       return new Date(a.verified).getTime() >= x.getTime() && new Date(a.verified).getTime() <= y.getTime()
     })
-
+    let lastMonthService = lastMonthApps.filter((a) => {
+      return a.dealership_department === "Service"
+    })
+    let lastMonthSales = lastMonthApps.filter((a) => {
+      return a.dealership_department !== "Service"
+    })
     this._isMounted && this.setState({
       todayApps: todayApps.length,
       tomorrowApps: tomorrowApps.length,
       thisMonthApps: thisMonthApps.length,
-      lastMonthApps: lastMonthApps.length
+      lastMonthApps: lastMonthApps.length,
+      todayServiceApps: svcApps.length,
+      todaySalesApps: salesApps.length,
+      tomorrowServiceApps: svcApps2m.length,
+      tomorrowSalesApps: salesApps2m.length,
+      thisMonthServiceApps: thisMonthService.length,
+      thisMonthSalesApps: thisMonthSales.length,
+      lastMonthServiceApps: lastMonthService.length,
+      lastMonthSalesApps: lastMonthSales.length
     });
     let recordings = this._isMounted && await this.props.mongo.findOne("recordings", { dealership: dealership.value })
     let lastMonthRecordings = recordings.lastMonthCount
@@ -309,9 +345,15 @@ class DealershipDashboard extends React.Component {
           />
           <br />
           <Card className="card-raised card-white">
-            <CardHeader color="primary">
+            <CardHeader color="#1d67a8">
               <CardTitle className="text-center">
-                <legend><h1 color="primary">{this.state.dealership.label}</h1></legend>
+                <legend><h1 style={{ color: "#1d67a8" }}>{this.state.dealership.label}</h1></legend>
+                <FormGroup>
+                  <Label md="3">
+                    <Input name="showTypeSales" type="radio" value="sales" checked={this.state.showType === "sales"} onChange={(e) => { this.setState({ showType: e.target.value }) }} />{' '} <h3 style={{ marginLeft: "75px", color: "#1d67a8" }}><strong>Sales</strong></h3> </Label>
+                  <Label md="3">
+                    <Input name="showTypeService" type="radio" value="service" checked={this.state.showType === "service"} onChange={(e) => { this.setState({ showType: e.target.value }) }} />{' '} <h3 style={{ marginLeft: "100px", color: "#1d67a8" }}><strong>Service</strong></h3> </Label>
+                </FormGroup >
               </CardTitle>
             </CardHeader>
             <hr />
@@ -325,8 +367,14 @@ class DealershipDashboard extends React.Component {
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{this.state.todayApps}</strong></h1>
-
+                    <h1>{(() => {
+                      if (this.state.todayApps === "Loading..") {
+                        return <strong>Loading..</strong>
+                      }
+                      else {
+                        return <strong>{this.state.showType == "sales" ? this.state.todaySalesApps : this.state.todayServiceApps}</strong>;
+                      }
+                    })()}</h1>
                   </CardBody>
                 </Card>
               </Col>
@@ -340,8 +388,14 @@ class DealershipDashboard extends React.Component {
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1><strong>{this.state.tomorrowApps}</strong></h1>
-
+                    <h1>{(() => {
+                      if (this.state.tomorrowApps === "Loading..") {
+                        return <strong>Loading..</strong>
+                      }
+                      else {
+                        return <strong>{this.state.showType == "sales" ? this.state.tomorrowSalesApps : this.state.tomorrowServiceApps}</strong>;
+                      }
+                    })()}</h1>
                   </CardBody>
                 </Card>
 
@@ -353,14 +407,14 @@ class DealershipDashboard extends React.Component {
               <legend className="text-center">Month-to-Date</legend>
 
               <Col sm="4">
-                <Card className="card-raised card-white" style={{backgroundColor: "#3469a6"}}>
+                <Card className="card-raised card-white" style={{ backgroundColor: "#1d67a8" }}>
                   <CardHeader>
                     <CardTitle tag="h3" >
-                      <p style={{color: "white"}}><strong>Total Calls: {this.state.thisMonth}</strong></p>
+                      <p style={{ color: "white" }}><strong>Total Calls: {this.state.thisMonth}</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{color: "white"}}><strong>{isNaN(this.state.thisMonthCount) ? "Loading.." : 2 * this.state.thisMonthCount}</strong></h1>
+                    <h1 style={{ color: "white" }}><strong>{isNaN(this.state.thisMonthCount) ? "Loading.." : 2 * this.state.thisMonthCount}</strong></h1>
 
                   </CardBody>
                 </Card>
@@ -372,12 +426,18 @@ class DealershipDashboard extends React.Component {
                     <div className="tools float-right">
                     </div>
                     <CardTitle tag="h3" >
-                      <p style={{color: "#3469a6"}}><strong>Total Appts: {this.state.thisMonth}</strong></p>
+                      <p style={{ color: "#1d67a8" }}><strong>Total Appts: {this.state.thisMonth}</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{color: "#3469a6"}}><strong>{this.state.thisMonthApps}</strong></h1>
-
+                    <h1 style={{ color: "#1d67a8" }}>{(() => {
+                      if (this.state.thisMonthApps === "Loading..") {
+                        return <strong>Loading..</strong>
+                      }
+                      else {
+                        return <strong>{this.state.showType == "sales" ? this.state.thisMonthSalesApps : this.state.thisMonthServiceApps}</strong>;
+                      }
+                    })()}</h1>
                   </CardBody>
                 </Card>
 
@@ -387,14 +447,14 @@ class DealershipDashboard extends React.Component {
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Last Month</legend>
               <Col sm="4">
-                <Card className="card-raised card-white" style={{backgroundColor: "#3469a6"}}>
+                <Card className="card-raised card-white" style={{ backgroundColor: "#1d67a8" }}>
                   <CardHeader>
                     <CardTitle tag="h3" >
-                      <p style={{color: "white"}}><strong>Total Calls: {this.state.lastMonth}</strong></p>
+                      <p style={{ color: "white" }}><strong>Total Calls: {this.state.lastMonth}</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{color: "white"}}><strong>{isNaN(this.state.lastMonthCount) ? "Loading.." : 2 * this.state.lastMonthCount}</strong></h1>
+                    <h1 style={{ color: "white" }}><strong>{isNaN(this.state.lastMonthCount) ? "Loading.." : 2 * this.state.lastMonthCount}</strong></h1>
 
                   </CardBody>
                 </Card>
@@ -403,11 +463,17 @@ class DealershipDashboard extends React.Component {
               <Col sm="4">
                 <Card className="card-raised card-white">
                   <CardHeader>
-                    <CardTitle tag="h3" ><p style={{color: "#3469a6"}}><strong>Total Appts: {this.state.lastMonth}</strong></p></CardTitle>
+                    <CardTitle tag="h3" ><p style={{ color: "#1d67a8" }}><strong>Total Appts: {this.state.lastMonth}</strong></p></CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{color: "#3469a6"}}><strong>{this.state.lastMonthApps}</strong></h1>
-
+                    <h1 style={{ color: "#1d67a8" }}>{(() => {
+                      if (this.state.lastMonthApps === "Loading..") {
+                        return <strong>Loading..</strong>
+                      }
+                      else {
+                        return <strong>{this.state.showType == "sales" ? this.state.lastMonthSalesApps : this.state.lastMonthServiceApps}</strong>;
+                      }
+                    })()}</h1>
                   </CardBody>
                 </Card>
 
