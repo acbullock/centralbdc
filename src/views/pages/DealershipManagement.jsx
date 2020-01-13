@@ -714,7 +714,7 @@ class DealershipManagement extends React.Component {
                                         onChange={(e) => { this.onValueChange("editDealershipGroup", e); this.setState({ editGroupValue: e.value }) }}
                                     />
                                     <br />
-                                    <Button color="warning" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.deleteGroup() }}>Delete Group Name</Button>
+                                    {/* <Button color="warning" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.deleteGroup() }}>Delete Group Name</Button> */}
                                     <Button color="primary" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.toggle("editGroupModal"); this.setState({ editGroupName: this.state.editDealershipGroup.label }) }}>Edit Group Name</Button>
                                     <Modal isOpen={this.state.editGroupModal} toggle={() => { this.toggle("editGroupModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("editGroupModal") }}>Edit Group</ModalHeader>
