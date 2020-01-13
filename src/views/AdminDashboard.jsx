@@ -31,6 +31,7 @@ import {
     Table,
     Row,
     Col,
+    Form
 } from "reactstrap";
 import Select from "react-select"
 class AdminDashboard extends React.Component {
@@ -441,45 +442,46 @@ class AdminDashboard extends React.Component {
 
 
                     </Row>
-                    <Row style={{ justifyContent: "center" }} className="text-center" hidden={this.state.agent==undefined?true:(this.state.agent.name !== "Admin User" && this.state.agent.name !== "Marc Vertus")}>
+                    <Row style={{ justifyContent: "center" }} className="text-center" hidden={this.state.agent == undefined ? true : (this.state.agent.name !== "Admin User" && this.state.agent.name !== "Marc Vertus")}>
                         <Col lg="6" style={{ justifyContent: "center" }} className="text-center">
                             <Card className="card-raised card-white shadow" color="primary" style={{ background: "linear-gradient(45deg, #1d67a8 0%, #ffffff 100%)" }}>
                                 <CardHeader>
-                                    Agent's Most Recent Call
+                                    <p>Agent's Most Recent Call</p>
                                 </CardHeader>
                                 <CardBody>
-                                    <Select
-                                        options={this.state.agents}
-                                        value={this.state.agent_recent_call}
-                                        onChange={async (e) => {
-                                            let token = this._isMounted && await this.props.mongo.findOne("utils", { _id: "5df2b825f195a16a1dbd4bf5" })
-                                            token = token.voice_token;
-                                            this.setState({ agent_recent_call: e, token })
-                                        }}
-                                    />
-                                    {(() => {
-
-                                        if (this.state.agent_recent_call.label.length > 0) {
-                                            if (this.state.agent_recent_call.lastCall !== undefined && this.state.agent_recent_call.lastCall !== null) {
-                                                return (
-                                                    <div >
-                                                        <br />
-
-                                                        <h2 style={{ opacity: "75%" }}>Most Recent Call for {this.state.agent_recent_call.name}</h2>
-                                                        <p>Start Time: <strong>{new Date(this.state.agent_recent_call.lastCall.startTime).toLocaleString()}</strong></p>
-                                                        <p>Duration <strong>{Math.round(10 * this.state.agent_recent_call.lastCall.duration / 60) / 10} minutes</strong></p>
-                                                        <p >Direction: <strong>{this.state.agent_recent_call.lastCall.direction}</strong></p>
-                                                        <p>Result: <strong>{this.state.agent_recent_call.lastCall.result}</strong></p><br />
-                                                        <p style={{ opacity: "75%" }}>Last Updated: <strong>{new Date(this.state.agent_recent_call.callCountLastUpdated).toLocaleString()}</strong></p>
-                                                        <audio controls src={this.state.agent_recent_call.lastCall.recording == undefined ? "" : this.state.agent_recent_call.lastCall.recording.contentUri + "?access_token=" + this.state.token} hidden={this.state.agent_recent_call.lastCall.recording == undefined} />
-
-                                                    </div>
-                                                );
-                                            }
-                                        }
-
-                                    })()}
-
+                                    <Table>
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Time Elapsed</th>
+                                                <th>Last Updated</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {(() => {
+                                                let agents = this.state.agents.filter((a) => { return a.lastCall !== null && !isNaN(new Date(a.lastCall).getTime()) })
+                                                for (let a in agents) {
+                                                    agents[a].elapsed = Math.round(10 * ((new Date().getTime() - new Date(agents[a].lastCall).getTime()) / (60000))) / 10
+                                                    console.log(Math.round(10 * (new Date().getTime() - new Date(agents[a].lastCall).getTime()) / (1000 * 60)) / 10)
+                                                }
+                                                agents = agents.sort((a, b) => {
+                                                    if (a.elapsed > b.elapsed) return -1;
+                                                    if (a.elapsed < b.elapsed) return 1;
+                                                    return 0;
+                                                })
+                                                return agents.map((a, i) => {
+                                                    if (a.lastCall === null) return null
+                                                    return (
+                                                        <tr key={i}>
+                                                            <td><p><strong>{a.name}</strong></p></td>
+                                                            <td><p><strong>{a.lastCall === null ? "No Calls Today" : Math.round(10 * (new Date().getTime() - new Date(a.lastCall).getTime()) / (1000 * 60)) / 10 + " min"}</strong></p></td>
+                                                            <td><p><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
+                                                        </tr>
+                                                    );
+                                                })
+                                            })()}
+                                        </tbody>
+                                    </Table>
                                 </CardBody>
                             </Card>
                         </Col>
