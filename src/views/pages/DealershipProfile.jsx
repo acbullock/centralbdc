@@ -452,6 +452,44 @@ class DealershipProfile extends React.Component {
                                                                                 this.setState({ editSalesHours: newArray })
                                                                             }} />{' '}
                                                                             <strong>Closed</strong></Label>
+                                                                            <Label check style={{ padding: "20px" }}>
+
+                                                                            <Input type="checkbox" value={new Date(h.open).getHours() === 0 &&
+                                                                                new Date(h.open).getMinutes() === 0 &&
+                                                                                new Date(h.close).getHours() === 23 &&
+                                                                                new Date(h.close).getMinutes() === 59} checked={
+                                                                                    new Date(h.open).getHours() === 0 &&
+                                                                                    new Date(h.open).getMinutes() === 0 &&
+                                                                                    new Date(h.close).getHours() === 23 &&
+                                                                                    new Date(h.close).getMinutes() === 59
+                                                                                } onChange={(e) => {
+                                                                                    if (new Date(h.open).getMinutes() === 0 &&
+                                                                                        new Date(h.close).getHours() === 23 &&
+                                                                                        new Date(h.close).getMinutes() === 59) {
+                                                                                        let newArray = this.state.editSalesHours
+                                                                                        newArray[i] = {
+                                                                                            day: h.day,
+                                                                                            open: new Date(new Date().setHours(8, 0, 0, 0)),
+                                                                                            close: new Date(new Date().setHours(21, 0, 0, 0)),
+                                                                                            isClosed: h.isClosed
+                                                                                        }
+
+                                                                                        this.setState({ editSalesHours: newArray })
+                                                                                    }
+                                                                                    else {
+                                                                                        let newArray = this.state.editSalesHours
+                                                                                        newArray[i] = {
+                                                                                            day: h.day,
+                                                                                            open: new Date(new Date().setHours(0, 0, 0, 0)),
+                                                                                            close: new Date(new Date().setHours(23, 59, 59, 999)),
+                                                                                            isClosed: h.isClosed
+                                                                                        }
+
+                                                                                        this.setState({ editSalesHours: newArray })
+                                                                                    }
+
+                                                                                }} />{' '}
+                                                                            <strong>24 Hrs</strong></Label>
                                                                     </FormGroup>
                                                                     <p style={{ color: "red" }} hidden={this.state.salesValid[i]} className="text-center"><strong>Error: Hours for {h.day} are invalid.</strong></p>
                                                                     <hr />
@@ -608,6 +646,45 @@ class DealershipProfile extends React.Component {
                                                                                 this.setState({ editServiceHours: newArray })
                                                                             }} />{' '}
                                                                             <strong>Closed</strong></Label>
+                                                                        <Label check style={{ padding: "20px" }}>
+
+                                                                            <Input type="checkbox" value={new Date(h.open).getHours() === 0 &&
+                                                                                new Date(h.open).getMinutes() === 0 &&
+                                                                                new Date(h.close).getHours() === 23 &&
+                                                                                new Date(h.close).getMinutes() === 59} checked={
+                                                                                    new Date(h.open).getHours() === 0 &&
+                                                                                    new Date(h.open).getMinutes() === 0 &&
+                                                                                    new Date(h.close).getHours() === 23 &&
+                                                                                    new Date(h.close).getMinutes() === 59
+                                                                                } onChange={(e) => {
+                                                                                    if (new Date(h.open).getMinutes() === 0 &&
+                                                                                        new Date(h.close).getHours() === 23 &&
+                                                                                        new Date(h.close).getMinutes() === 59) {
+                                                                                        let newArray = this.state.editServiceHours
+                                                                                        newArray[i] = {
+                                                                                            day: h.day,
+                                                                                            open: new Date(new Date().setHours(8, 0, 0, 0)),
+                                                                                            close: new Date(new Date().setHours(21, 0, 0, 0)),
+                                                                                            isClosed: h.isClosed
+                                                                                        }
+
+                                                                                        this.setState({ editServiceHours: newArray })
+                                                                                    }
+                                                                                    else {
+                                                                                        let newArray = this.state.editServiceHours
+                                                                                        newArray[i] = {
+                                                                                            day: h.day,
+                                                                                            open: new Date(new Date().setHours(0, 0, 0, 0)),
+                                                                                            close: new Date(new Date().setHours(23, 59, 59, 999)),
+                                                                                            isClosed: h.isClosed
+                                                                                        }
+
+                                                                                        this.setState({ editServiceHours: newArray })
+                                                                                    }
+
+                                                                                }} />{' '}
+                                                                            <strong>24 Hrs</strong></Label>
+
                                                                     </FormGroup>
                                                                     <p style={{ color: "red" }} hidden={this.state.serviceValid[i]} className="text-center"><strong>Error: Hours for {h.day} are invalid.</strong></p>
                                                                     <hr />
