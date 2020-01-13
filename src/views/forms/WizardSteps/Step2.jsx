@@ -294,6 +294,9 @@ class CreateAppointment extends React.Component {
                     }}
                     value={this.state.date}
                     onChange={(value) => {
+                      if(new Date(value).getTime() !== new Date(value).getTime()){
+                        value = new Date(new Date().setHours(new Date().getHours() +1, 0,0,0))
+                      }
                       let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
                       let x = new Date(value)
                       let dayX = days[x.getDay()]

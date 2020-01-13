@@ -80,7 +80,7 @@ class AdminDashboard extends React.Component {
         else {
             this._isMounted && this.getTodayAppts();
             let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true });
-            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true })
+            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" })
             for (let a in agents) {
                 agents[a].label = agents[a].name;
                 agents[a].value = agents[a]._id
@@ -165,7 +165,7 @@ class AdminDashboard extends React.Component {
     }
     async getTop10() {
         this.setState({ top10Loading: true })
-        let agents = this._isMounted && await this.props.mongo.find("agents");
+        let agents = this.state.agents
         let today_appts = [];
         for (let a in agents) {
             for (let b in agents[a].appointments) {
