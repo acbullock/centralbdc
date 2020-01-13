@@ -737,7 +737,7 @@ class DealershipManagement extends React.Component {
                         <Col className="ml-auto mr-auto text-center" md="8">
                             <Card>
                                 <CardBody>
-                                    <h2>Edit/Delete Dealership</h2>
+                                    <h2>Edit Dealership</h2>
                                     <Select
                                         name="editDealership"
                                         id="editDealership"
@@ -746,7 +746,7 @@ class DealershipManagement extends React.Component {
                                         onChange={(e) => { this.onValueChange("editDealership", e); this.setState({ editDealershipValue: e.value }) }}
                                     />
                                     <br />
-                                    <Button color="danger" disabled={this.state.editDealership.label.length == 0} onClick={() => { this.deleteDealership() }}>Delete Dealership</Button>
+                                    {/* <Button color="danger" disabled={this.state.editDealership.label.length == 0} onClick={() => { this.deleteDealership() }}>Delete Dealership</Button> */}
                                     <Button color="primary" disabled={this.state.editDealership.label.length == 0} onClick={async () => {
                                         this.setState({ loading: true })
                                         let d = await this.props.mongo.findOne("dealerships", { value: this.state.editDealership.value })
