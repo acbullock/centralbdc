@@ -57,7 +57,9 @@ class AdminDashboard extends React.Component {
             total: [],
             top10Loading: false,
             lastAppsLoading: false,
-            agent5Loading: false
+            agent5Loading: false,
+            agent_recent_call: { label: "", value: "" },
+            token: ""
         };
         this.sortLastAppts = this.sortLastAppts.bind(this);
         this.getTodayAppts = this.getTodayAppts.bind(this);
@@ -68,21 +70,29 @@ class AdminDashboard extends React.Component {
     async componentDidMount() {
         this._isMounted = true;
         this._isMounted && this.setState({ loading: true });
-        this._isMounted && this.getTodayAppts();
-        let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true });
-        let agents = this._isMounted && await this.props.mongo.find("agents_no_appts")
-        for (let a in agents) {
-            agents[a].label = agents[a].name;
-            agents[a].value = agents[a]._id
+        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
+        this.setState({ agent });
+        if (user.userId == undefined || agent.account_type !== "admin") {
+            this._isMounted && this.props.history.push("/auth/login")
         }
-        agents.sort((a, b) => {
-            if (a.name > b.name) return 1;
-            if (a.name < b.name) return -1;
-            return 0;
-        })
-        this._isMounted && this.setState({ dealerships, agents });
-        this._isMounted && this.sortLastAppts();
-        this._isMounted && this.getTop10();
+        else {
+            this._isMounted && this.getTodayAppts();
+            let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true });
+            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true })
+            for (let a in agents) {
+                agents[a].label = agents[a].name;
+                agents[a].value = agents[a]._id
+            }
+            agents.sort((a, b) => {
+                if (a.name > b.name) return 1;
+                if (a.name < b.name) return -1;
+                return 0;
+            })
+            this._isMounted && this.setState({ dealerships, agents });
+            this._isMounted && this.sortLastAppts();
+            this._isMounted && this.getTop10();
+        }
         this._isMounted && this.setState({ loading: false });
     }
     componentWillUnmount() {
@@ -430,6 +440,49 @@ class AdminDashboard extends React.Component {
                         </Col>
 
 
+                    </Row>
+                    <Row style={{ justifyContent: "center" }} className="text-center" hidden={this.state.agent==undefined?true:(this.state.agent.name !== "Admin User" && this.state.agent.name !== "Marc Vertus")}>
+                        <Col lg="6" style={{ justifyContent: "center" }} className="text-center">
+                            <Card className="card-raised card-white shadow" color="primary" style={{ background: "linear-gradient(45deg, #1d67a8 0%, #ffffff 100%)" }}>
+                                <CardHeader>
+                                    Agent's Most Recent Call
+                                </CardHeader>
+                                <CardBody>
+                                    <Select
+                                        options={this.state.agents}
+                                        value={this.state.agent_recent_call}
+                                        onChange={async (e) => {
+                                            let token = this._isMounted && await this.props.mongo.findOne("utils", { _id: "5df2b825f195a16a1dbd4bf5" })
+                                            token = token.voice_token;
+                                            this.setState({ agent_recent_call: e, token })
+                                        }}
+                                    />
+                                    {(() => {
+
+                                        if (this.state.agent_recent_call.label.length > 0) {
+                                            if (this.state.agent_recent_call.lastCall !== undefined && this.state.agent_recent_call.lastCall !== null) {
+                                                return (
+                                                    <div >
+                                                        <br />
+
+                                                        <h2 style={{ opacity: "75%" }}>Most Recent Call for {this.state.agent_recent_call.name}</h2>
+                                                        <p>Start Time: <strong>{new Date(this.state.agent_recent_call.lastCall.startTime).toLocaleString()}</strong></p>
+                                                        <p>Duration <strong>{Math.round(10 * this.state.agent_recent_call.lastCall.duration / 60) / 10} minutes</strong></p>
+                                                        <p >Direction: <strong>{this.state.agent_recent_call.lastCall.direction}</strong></p>
+                                                        <p>Result: <strong>{this.state.agent_recent_call.lastCall.result}</strong></p><br />
+                                                        <p style={{ opacity: "75%" }}>Last Updated: <strong>{new Date(this.state.agent_recent_call.callCountLastUpdated).toLocaleString()}</strong></p>
+                                                        <audio controls src={this.state.agent_recent_call.lastCall.recording == undefined ? "" : this.state.agent_recent_call.lastCall.recording.contentUri + "?access_token=" + this.state.token} hidden={this.state.agent_recent_call.lastCall.recording == undefined} />
+
+                                                    </div>
+                                                );
+                                            }
+                                        }
+
+                                    })()}
+
+                                </CardBody>
+                            </Card>
+                        </Col>
                     </Row>
                 </div>
             </>

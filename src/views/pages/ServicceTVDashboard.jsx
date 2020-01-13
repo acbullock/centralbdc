@@ -245,7 +245,7 @@ class ServiceTVDashboard extends React.Component {
                                 </CardTitle>
                                 <CardBody>
                                     <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.callsMtdLoading} />
-                                    <Table style={{ backgroundColor: "white" }} hidden={this.state.callsMtdLoading}>
+                                    <Table style={{ backgroundColor: "white" }} striped hidden={this.state.callsMtdLoading}>
                                         <thead>
                                             <tr>
                                                 <th style={{ color: "#1d67a8", borderBottom: "#1d67a8 1px solid" }}>#</th>
@@ -274,7 +274,7 @@ class ServiceTVDashboard extends React.Component {
                                 </CardTitle>
                                 <CardBody>
                                     <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.apptMtdLoading} />
-                                    <Table style={{ backgroundColor: "#1d67a8" }} hidden={this.state.apptMtdLoading}>
+                                    <Table style={{ backgroundColor: "#1d67a8" }} striped hidden={this.state.apptMtdLoading}>
                                         <thead>
                                             <tr>
                                                 <th style={{ color: "white", borderBottom: "1px solid white" }}>#</th>

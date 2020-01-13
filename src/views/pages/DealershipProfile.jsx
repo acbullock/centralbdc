@@ -33,6 +33,7 @@ class DealershipProfile extends React.Component {
             selected_dealership: { label: "", value: "" },
             salesHoursModal: false,
             serviceHoursModal: false,
+            addContactModal: false,
             editSalesHours: [
                 {
                     day: "Monday",
@@ -141,6 +142,12 @@ class DealershipProfile extends React.Component {
             ],
             salesModalError: false,
             serviceModalError: false,
+            newContact: {
+                name: null,
+                title: null,
+                phone: null,
+                email: null
+            }
         }
         this._isMounted = false;
         this.toggle = this.toggle.bind(this)
@@ -235,7 +242,8 @@ class DealershipProfile extends React.Component {
             editSalesHours: dlr.salesHours || defaultHrs,
             editServiceHours: dlr.serviceHours || defaultHrs,
             salesValid: [true, true, true, true, true, true, true],
-            serviceValid: [true, true, true, true, true, true, true]
+            serviceValid: [true, true, true, true, true, true, true],
+            newContact: { name: null, title: null, phone: null, email: null }
         })
         this.setState({ [modal_name]: !this.state[modal_name] })
     }
@@ -302,15 +310,15 @@ class DealershipProfile extends React.Component {
                                         <Col lg="4">
 
 
-                                            <h3 for="name" style={{ color: "white" }}>Name:</h3>
+                                            <Label for="name" style={{ color: "white" }}>Name:</Label>
                                             <h3 id="name" style={{ color: "white" }}><strong>{this.state.selected_dealership.label}</strong></h3>
 
 
 
-                                            <h3 for="address" style={{ color: "white" }}>Address:</h3>
+                                            <Label for="address" style={{ color: "white" }}>Address:</Label>
                                             <h3 id="address" style={{ color: "white" }}><strong>{this.state.selected_dealership.address}</strong></h3>
 
-                                            <h3 for="phone" style={{ color: "white" }}>Phone:</h3>
+                                            <Label for="phone" style={{ color: "white" }}>Phone:</Label>
                                             <h3 id="phone" style={{ color: "white" }}><strong>{this.state.selected_dealership.phone == undefined ? "" : `(${this.state.selected_dealership.phone.substring(0, 3)}) ${this.state.selected_dealership.phone.substring(3, 6)}-${this.state.selected_dealership.phone.substring(6, 10)}`}</strong></h3>
 
                                         </Col>
@@ -343,15 +351,15 @@ class DealershipProfile extends React.Component {
                                                     <Form>
                                                         {this.state.editSalesHours.map((h, i) => {
                                                             return (
-                                                                <>
-                                                                    <FormGroup key={i}>
+                                                                <div key={i}>
+                                                                    <FormGroup >
                                                                         <Label><strong>{h.day}</strong></Label>
                                                                         <p>Open</p>
                                                                         <ReactDateTime
                                                                             inputProps={{ disabled: h.isClosed }}
                                                                             value={new Date(h.open).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                                                                             dateFormat={false}
-                                                                            timeConstraints={{minutes:{step: 15}}}
+                                                                            timeConstraints={{ minutes: { step: 15 } }}
                                                                             onChange={(e) => {
 
                                                                                 let newOpen = new Date(e)
@@ -382,7 +390,7 @@ class DealershipProfile extends React.Component {
                                                                             inputProps={{ disabled: h.isClosed }}
                                                                             value={new Date(h.close).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                                                                             dateFormat={false}
-                                                                            timeConstraints={{minutes:{step: 15}}}
+                                                                            timeConstraints={{ minutes: { step: 15 } }}
                                                                             onChange={(e) => {
                                                                                 let newClose = new Date(e)
                                                                                 let newArray = this.state.editSalesHours
@@ -434,7 +442,7 @@ class DealershipProfile extends React.Component {
                                                                     </FormGroup>
                                                                     <p style={{ color: "red" }} hidden={this.state.salesValid[i]} className="text-center"><strong>Error: Hours for {h.day} are invalid.</strong></p>
                                                                     <hr />
-                                                                </>
+                                                                </div>
                                                             );
 
                                                         })}
@@ -487,9 +495,9 @@ class DealershipProfile extends React.Component {
                                                     </tr>
                                                 </thead>
                                                 <tbody className="text-center">
-                                                    {this.state.selected_dealership.serviceHours !== undefined ? this.state.selected_dealership.serviceHours.map((h) => {
+                                                    {this.state.selected_dealership.serviceHours !== undefined ? this.state.selected_dealership.serviceHours.map((h, i) => {
                                                         return (
-                                                            <tr>
+                                                            <tr key={i}>
                                                                 <td style={{ borderBottom: "solid 0.5px white" }}><p style={{ color: "white" }}>{h.day}</p></td>
                                                                 <td style={{ borderBottom: "solid 0.5px white" }}><p style={{ color: "white" }}>{h.isClosed === true ? "Closed" : `${new Date(h.open).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} - ${new Date(h.close).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}</p></td>
                                                             </tr>
@@ -504,7 +512,7 @@ class DealershipProfile extends React.Component {
                                                     <Form>
                                                         {this.state.editServiceHours.map((h, i) => {
                                                             return (
-                                                                <>
+                                                                <div key={i}>
                                                                     <FormGroup key={i}>
                                                                         <Label><strong>{h.day}</strong></Label>
                                                                         <p>Open</p>
@@ -512,7 +520,7 @@ class DealershipProfile extends React.Component {
                                                                             inputProps={{ disabled: h.isClosed }}
                                                                             value={new Date(h.open).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                                                                             dateFormat={false}
-                                                                            timeConstraints={{minutes:{step: 15}}}
+                                                                            timeConstraints={{ minutes: { step: 15 } }}
                                                                             onChange={(e) => {
                                                                                 let newOpen = new Date(e)
                                                                                 let newArray = this.state.editServiceHours
@@ -540,7 +548,7 @@ class DealershipProfile extends React.Component {
                                                                             inputProps={{ disabled: h.isClosed }}
                                                                             value={new Date(h.close).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                                                                             dateFormat={false}
-                                                                            timeConstraints={{minutes:{step: 15}}}
+                                                                            timeConstraints={{ minutes: { step: 15 } }}
                                                                             onChange={(e) => {
                                                                                 let newClose = new Date(e)
                                                                                 let newArray = this.state.editServiceHours
@@ -590,7 +598,7 @@ class DealershipProfile extends React.Component {
                                                                     </FormGroup>
                                                                     <p style={{ color: "red" }} hidden={this.state.serviceValid[i]} className="text-center"><strong>Error: Hours for {h.day} are invalid.</strong></p>
                                                                     <hr />
-                                                                </>
+                                                                </div>
                                                             );
 
                                                         })}
@@ -641,20 +649,20 @@ class DealershipProfile extends React.Component {
                             <Card className="card-raised card-white text-center">
                                 <CardHeader>
                                     <CardTitle>
-                                        <h2 style={{ color: "#3469a6" }}>Average Monthly Opportunities</h2>
-                                        <hr style={{ border: "solid 1px #3469a6" }} />
+                                        <h2 style={{ color: "#1d67a8" }}>Average Monthly Opportunities</h2>
+                                        <hr style={{ border: "solid 1px #1d67a8" }} />
                                     </CardTitle>
                                 </CardHeader>
                                 <CardBody>
 
-                                    <h3 for="leads" style={{ color: "#3469a6" }}>Average Monthly Leads:</h3>
-                                    <h3 id="leads" style={{ color: "#3469a6" }}><strong>{this.state.selected_dealership.average_monthly_lead_count == "" ? 0 : this.state.selected_dealership.average_monthly_lead_count}</strong></h3>
+                                    <Label for="leads"><h3 style={{ color: "#1d67a8" }}>Average Monthly Leads:</h3></Label>
+                                    <h3 id="leads" style={{ color: "#1d67a8" }}><strong>{this.state.selected_dealership.average_monthly_lead_count == "" ? 0 : this.state.selected_dealership.average_monthly_lead_count}</strong></h3>
 
-                                    <h3 for="phoneups" style={{ color: "#3469a6" }}>Average Monthly Phone-Ups:</h3>
-                                    <h3 id="phoneups" style={{ color: "#3469a6" }}><strong>{this.state.selected_dealership.average_monthly_phone_ups == "" ? 0 : this.state.selected_dealership.average_monthly_phone_ups}</strong></h3>
+                                    <Label for="phoneups"><h3 style={{ color: "#1d67a8" }}>Average Monthly Phone-Ups:</h3></Label>
+                                    <h3 id="phoneups" style={{ color: "#1d67a8" }}><strong>{this.state.selected_dealership.average_monthly_phone_ups == "" ? 0 : this.state.selected_dealership.average_monthly_phone_ups}</strong></h3>
 
-                                    <h3 for="ro" style={{ color: "#3469a6" }}>Average Monthly Repair Orders:</h3>
-                                    <h3 id="ro" style={{ color: "#3469a6" }}><strong>{this.state.selected_dealership.average_montly_ro_count == "" ? 0 : this.state.selected_dealership.average_montly_ro_count}</strong></h3>
+                                    <Label for="ro"><h3 style={{ color: "#1d67a8" }}>Average Monthly Repair Orders:</h3></Label>
+                                    <h3 id="ro" style={{ color: "#1d67a8" }}><strong>{this.state.selected_dealership.average_montly_ro_count == "" ? 0 : this.state.selected_dealership.average_montly_ro_count}</strong></h3>
 
                                 </CardBody>
                             </Card>
@@ -670,7 +678,154 @@ class DealershipProfile extends React.Component {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardBody>
+                                    <Table responsive striped>
+                                        <thead>
+                                            <tr>
+                                                <th style={{ color: "white" }}>Name</th>
+                                                <th style={{ color: "white" }}>Title</th>
+                                                <th style={{ color: "white" }}>Email</th>
+                                                <th style={{ color: "white" }}>Phone</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this.state.selected_dealership.profileContacts == undefined ? null : this.state.selected_dealership.profileContacts.map((c, i) => {
+                                                return (
+                                                    <tr key={i}>
+                                                        <td><p style={{ color: "white" }}>{c.name}</p></td>
+                                                        <td><p style={{ color: "white" }}>{c.title}</p></td>
+                                                        <td><p style={{ color: "white" }}>{c.email}</p></td>
+                                                        <td><p style={{ color: "white" }}>({c.phone.substring(0, 3)}) {c.phone.substring(3, 6)} - {c.phone.substring(6, 10)}</p></td>
+                                                        <td><i style={{ color: "#fd5d93", fontWeight: "solid", fontSize: "24pt", cursor: "pointer" }} className="tim-icons icon-trash-simple" onClick={async () => {
+                                                            let arr = this.state.selected_dealership.profileContacts
+                                                            arr = arr.filter((a) => {
+                                                                return a.name != c.name && c.title != a.title && a.email != c.email
+                                                            })
+                                                            let dlr = this.state.selected_dealership;
+                                                            dlr.profileContacts = arr;
+                                                            await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, dlr)
+                                                            let updated = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value })
+                                                            this.setState({ selected_dealership: updated })
+                                                        }} /></td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </Table>
+                                    <Button color="success" onClick={() => { this.toggle("addContactModal") }}><i className="tim-icons icon-simple-add" style={{ color: "white" }} /></Button>
+                                    <Modal isOpen={this.state.addContactModal} toggle={() => this.toggle("addContactModal")}>
+                                        <ModalHeader toggle={() => this.toggle("addContactModal")}>
+                                            <p>Add Contact</p>
+                                        </ModalHeader>
+                                        <ModalBody>
+                                            <Form>
+                                                <FormGroup>
+                                                    <Label>Name:</Label>
+                                                    <Input
+                                                        value={this.state.newContact.name}
+                                                        onChange={(e) => {
+                                                            let newCon = this.state.newContact
+                                                            newCon.name = this.props.utils.toTitleCase(e.target.value);
+                                                            this.setState({ newContact: newCon})
+                                                        }}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label>Title:</Label>
+                                                    <Input
+                                                        value={this.state.newContact.title}
+                                                        onChange={(e) => {
+                                                            let newCon = this.state.newContact
+                                                            newCon.title = this.props.utils.toTitleCase(e.target.value);
+                                                            this.setState({ newContact: newCon })
+                                                        }} />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label>Email:</Label>
+                                                    <Input
+                                                        type="email"
+                                                        value={this.state.newContact.email !== null ? this.state.newContact.email.toLowerCase() : null}
+                                                        onChange={(e) => {
+                                                            let newCon = this.state.newContact
+                                                            newCon.email = e.target.value;
+                                                            this.setState({ newContact: newCon })
+                                                        }}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label>Phone:</Label>
+                                                    <Input
+                                                        type="number"
+                                                        value={this.state.newContact.phone}
+                                                        onChange={(e) => {
+                                                            let newCon = this.state.newContact
+                                                            newCon.phone = e.target.value;
+                                                            this.setState({ newContact: newCon })
+                                                        }}
+                                                    />
+                                                </FormGroup>
+                                                <Button
+                                                    disabled={
+                                                        (() => {
+                                                            let ret = false;
+                                                            if (this.state.newContact.name === null) {
+                                                                return true;
+                                                            }
+                                                            else {
+                                                                if (this.state.newContact.name.length < 1) {
+                                                                    ret = true
+                                                                }
+                                                            }
+                                                            if (this.state.newContact.email === null) {
+                                                                return true;
+                                                            }
+                                                            else {
+                                                                if (this.state.newContact.email.length < 1) {
+                                                                    ret = true
+                                                                }
+                                                            }
+                                                            if (this.state.newContact.title === null) {
+                                                                return true;
+                                                            }
+                                                            else {
+                                                                if (this.state.newContact.title.length < 1) {
+                                                                    ret = true
+                                                                }
+                                                            }
+                                                            if (this.state.newContact.phone === null) {
+                                                                return true;
+                                                            }
+                                                            else {
+                                                                if (this.state.newContact.phone.length !== 10) {
+                                                                    ret = true
+                                                                }
+                                                            }
+                                                            return ret;
+                                                        })()
 
+                                                    } color="success" onClick={async (e) => {
+                                                        e.preventDefault();
+                                                        let contacts = this.state.selected_dealership.profileContacts || [];
+                                                        contacts.push(this.state.newContact)
+                                                        let dlr = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                        dlr.profileContacts = contacts
+                                                        await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, dlr)
+
+                                                        let updated = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                        this.setState({
+                                                            selected_dealership: updated,
+                                                            newContact: {
+                                                                name: null,
+                                                                email: null,
+                                                                title: null,
+                                                                phone: null
+                                                            }
+                                                        })
+                                                        this.toggle("addContactModal")
+                                                    }}>Add Contact</Button>
+                                            </Form>
+                                        </ModalBody>
+                                    </Modal>
                                 </CardBody>
                             </Card>
                         </Col>
