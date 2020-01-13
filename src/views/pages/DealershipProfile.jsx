@@ -34,6 +34,7 @@ class DealershipProfile extends React.Component {
             salesHoursModal: false,
             serviceHoursModal: false,
             addContactModal: false,
+            editContactModal: false,
             editSalesHours: [
                 {
                     day: "Monday",
@@ -143,10 +144,22 @@ class DealershipProfile extends React.Component {
             salesModalError: false,
             serviceModalError: false,
             newContact: {
-                name: null,
-                title: null,
-                phone: null,
-                email: null
+                name: "",
+                title: "",
+                phone: "",
+                email: ""
+            },
+            editContact: {
+                name: "",
+                title: "",
+                phone: "",
+                email: ""
+            },
+            editContact2: {
+                name: "",
+                title: "",
+                phone: "",
+                email: ""
             }
         }
         this._isMounted = false;
@@ -243,7 +256,7 @@ class DealershipProfile extends React.Component {
             editServiceHours: dlr.serviceHours || defaultHrs,
             salesValid: [true, true, true, true, true, true, true],
             serviceValid: [true, true, true, true, true, true, true],
-            newContact: { name: null, title: null, phone: null, email: null }
+            newContact: { name: "", title: "", phone: "", email: "" }
         })
         this.setState({ [modal_name]: !this.state[modal_name] })
     }
@@ -686,6 +699,7 @@ class DealershipProfile extends React.Component {
                                                 <th style={{ color: "white" }}>Email</th>
                                                 <th style={{ color: "white" }}>Phone</th>
                                                 <th></th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -696,6 +710,16 @@ class DealershipProfile extends React.Component {
                                                         <td><p style={{ color: "white" }}>{c.title}</p></td>
                                                         <td><p style={{ color: "white" }}>{c.email}</p></td>
                                                         <td><p style={{ color: "white" }}>({c.phone.substring(0, 3)}) {c.phone.substring(3, 6)} - {c.phone.substring(6, 10)}</p></td>
+                                                        <td><i style={{ color: "#f4f5f7", fontWeight: "solid", fontSize: "24pt", cursor: "pointer" }} className="tim-icons icon-pencil" onClick={() => {
+                                                            let editContact = {
+                                                                name: c.name,
+                                                                phone: c.phone,
+                                                                email: c.email,
+                                                                title: c.title
+                                                            }
+                                                            this.setState({ editContact, editContact2: editContact })
+                                                            this.toggle("editContactModal")
+                                                        }} /></td>
                                                         <td><i style={{ color: "#fd5d93", fontWeight: "solid", fontSize: "24pt", cursor: "pointer" }} className="tim-icons icon-trash-simple" onClick={async () => {
                                                             let arr = this.state.selected_dealership.profileContacts
                                                             arr = arr.filter((a) => {
@@ -726,7 +750,7 @@ class DealershipProfile extends React.Component {
                                                         onChange={(e) => {
                                                             let newCon = this.state.newContact
                                                             newCon.name = this.props.utils.toTitleCase(e.target.value);
-                                                            this.setState({ newContact: newCon})
+                                                            this.setState({ newContact: newCon })
                                                         }}
                                                     />
                                                 </FormGroup>
@@ -815,14 +839,139 @@ class DealershipProfile extends React.Component {
                                                         this.setState({
                                                             selected_dealership: updated,
                                                             newContact: {
-                                                                name: null,
-                                                                email: null,
-                                                                title: null,
-                                                                phone: null
+                                                                name: "",
+                                                                email: "",
+                                                                title: "",
+                                                                phone: ""
                                                             }
                                                         })
                                                         this.toggle("addContactModal")
                                                     }}>Add Contact</Button>
+                                            </Form>
+                                        </ModalBody>
+                                    </Modal>
+                                    <Modal isOpen={this.state.editContactModal} toggle={() => this.toggle("editContactModal")}>
+                                        <ModalHeader toggle={() => this.toggle("editContactModal")}>
+                                            <p>Edit Contact</p>
+                                        </ModalHeader>
+                                        <ModalBody>
+                                            <Form>
+                                                <FormGroup>
+                                                    <Label>Name:</Label>
+                                                    <Input
+                                                        value={this.state.editContact.name}
+                                                        onChange={(e) => {
+                                                            let editContact = this.state.editContact
+                                                            editContact.name = this.props.utils.toTitleCase(e.target.value);
+                                                            this.setState({ editContact })
+                                                        }}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label>Title:</Label>
+                                                    <Input
+                                                        value={this.state.editContact.title}
+                                                        onChange={(e) => {
+                                                            let editContact = this.state.editContact
+                                                            editContact.title = this.props.utils.toTitleCase(e.target.value);
+                                                            this.setState({ editContact })
+                                                        }} />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label>Email:</Label>
+                                                    <Input
+                                                        type="email"
+                                                        value={this.state.editContact.email !== null ? this.state.editContact.email.toLowerCase() : null}
+                                                        onChange={(e) => {
+                                                            let editContact = this.state.editContact
+                                                            editContact.email = e.target.value;
+                                                            this.setState({ editContact })
+                                                        }}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label>Phone:</Label>
+                                                    <Input
+                                                        type="number"
+                                                        value={this.state.editContact.phone}
+                                                        onChange={(e) => {
+                                                            let editContact = this.state.editContact
+                                                            editContact.phone = e.target.value;
+                                                            this.setState({ editContact })
+                                                        }}
+                                                    />
+                                                </FormGroup>
+                                                <Button color="warning" onClick={(e) => { e.preventDefault(); this.toggle("editContactModal") }}>Cancel</Button>
+                                                <Button color="primary" disabled={
+                                                    (() => {
+                                                        let ret = false;
+                                                        if (this.state.editContact.name === null) {
+                                                            return true;
+                                                        }
+                                                        else {
+                                                            if (this.state.editContact.name.length < 1) {
+                                                                ret = true
+                                                            }
+                                                        }
+                                                        if (this.state.editContact.email === null) {
+                                                            return true;
+                                                        }
+                                                        else {
+                                                            if (this.state.editContact.email.length < 1) {
+                                                                ret = true
+                                                            }
+                                                        }
+                                                        if (this.state.editContact.title === null) {
+                                                            return true;
+                                                        }
+                                                        else {
+                                                            if (this.state.editContact.title.length < 1) {
+                                                                ret = true
+                                                            }
+                                                        }
+                                                        if (this.state.editContact.phone === null) {
+                                                            return true;
+                                                        }
+                                                        else {
+                                                            if (this.state.editContact.phone.length !== 10) {
+                                                                ret = true
+                                                            }
+                                                        }
+                                                        return ret;
+                                                    })()
+                                                } onClick={async (e) => {
+                                                    e.preventDefault();
+                                                    console.log(this.state.editContact2)
+                                                    let contacts = this.state.selected_dealership.profileContacts || [];
+                                                    let i = 0;
+                                                    for (i in contacts) {
+                                                        if (contacts[i].email === this.state.editContact2.email && contacts[i].phone === this.state.editContact2.phone) {
+                                                            break;
+                                                        }
+                                                    }
+                                                    contacts[i] = this.state.editContact;
+                                                    let dlr = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                    dlr.profileContacts = contacts
+                                                    await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, dlr)
+
+                                                    let updated = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                    this.setState({
+                                                        selected_dealership: updated,
+                                                        editContact: {
+                                                            name: "",
+                                                            email: "",
+                                                            title: "",
+                                                            phone: ""
+                                                        },
+                                                        editContact2: {
+                                                            name: "",
+                                                            email: "",
+                                                            title: "",
+                                                            phone: ""
+                                                        }
+                                                    })
+                                                    this.toggle("editContactModal")
+                                                }}>Update</Button>
                                             </Form>
                                         </ModalBody>
                                     </Modal>
