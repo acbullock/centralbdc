@@ -243,7 +243,7 @@ class AdminDashboard extends React.Component {
 
                     <Row style={{ justifyContent: "center" }} className="text-center">
                         <Col lg="6">
-                            <Card className="card-raised card-white blur" color="primary">
+                            <Card className="card-raised card-white blur" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader>
                                     <CardTitle >
                                         <h3 style={{ color: "white" }}><strong>Longest Time Since Last Appointment</strong></h3>
@@ -294,7 +294,7 @@ class AdminDashboard extends React.Component {
                             </Card>
                         </Col>
                         <Col lg="6">
-                            <Card className="card-raised card-white" color="primary">
+                            <Card className="card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader>
                                     <CardTitle>
                                         <h3 style={{ color: "white" }}><strong>Top 10 Agents Today</strong></h3>
@@ -304,12 +304,12 @@ class AdminDashboard extends React.Component {
                                 <CardBody>
                                     <CardImg hidden={!this.state.top10Loading} top width="100%" src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
 
-                                    <Table hidden={this.state.top10Loading} style={{ backgroundColor: "white" }}>
+                                    <Table hidden={this.state.top10Loading}>
                                         <thead>
                                             <tr>
-                                                <th>#</th>
-                                                <th>Agent Name</th>
-                                                <th>Count</th>
+                                                <th style={{color: "white", borderBottom: "solid 1px white"}}>#</th>
+                                                <th style={{color: "white", borderBottom: "solid 1px white"}}>Agent Name</th>
+                                                <th style={{color: "white", borderBottom: "solid 1px white"}}>Count</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -323,9 +323,9 @@ class AdminDashboard extends React.Component {
                                                 }
                                                 return (
                                                     <tr key={a[0]}>
-                                                        <td><p>{i + 1}</p></td>
-                                                        <td><p hidden></p><p>{name}</p></td>
-                                                        <td>{a[1]}</td>
+                                                        <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{i + 1}</strong></p></td>
+                                                        <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{name}</strong></p></td>
+                                                        <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{a[1]}</strong></p></td>
                                                     </tr>
                                                 )
                                             })}
@@ -337,7 +337,7 @@ class AdminDashboard extends React.Component {
                     </Row>
                     <Row style={{ justifyContent: "center" }} className="text-center">
                         <Col lg="6" style={{ justifyContent: "center" }} className="text-center">
-                            <Card className="card-raised card-white" color="primary">
+                            <Card className="card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader>
                                     <CardTitle>
                                         <h3 style={{ color: "white" }}><strong>Agent's Top 5 Dealerships</strong></h3>
@@ -400,39 +400,39 @@ class AdminDashboard extends React.Component {
                             </Card>
                         </Col>
                         <Col lg="6">
-                            <Card className="card-raised card-white" color="primary">
+                            <Card className="card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader>
                                     <CardTitle>
                                         <h3 style={{ color: "white" }}><strong>CentralBDC Metrics</strong></h3>
-                                        <hr style={{ backgroundColor: "white" }} />
+                                        <hr style={{ backgroundColor: "white", borderBottom: "2px solid white" }} />
                                     </CardTitle>
                                 </CardHeader>
                                 <CardBody>
-                                    <Card className="card-raised card-white">
+                                    <Card className="card-raised card-white" color="transparent">
                                         <CardBody>
-                                            <h2 style={{ color: "#3469a6" }}>Total Appts Today</h2>
-                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.today_appts}</strong></h3>
-                                            <hr style={{ backgroundColor: "#3469a6" }} />
-                                            <h2 style={{ color: "#3469a6" }}>Projected Appts Today</h2>
-                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.projected_today}</strong></h3>
+                                            <h2 style={{ color: "white" }}>Total Appts Today</h2>
+                                            <h3 style={{ color: "white" }}><strong>{this.state.today_appts}</strong></h3>
+                                            <hr style={{ borderBottom: "2px dotted white" }} />
+                                            <h2 style={{ color: "white" }}>Projected Appts Today</h2>
+                                            <h3 style={{ color: "white" }}><strong>{this.state.projected_today}</strong></h3>
 
                                         </CardBody>
                                     </Card>
-                                    <hr style={{ backgroundColor: "white" }} />
-                                    <Card className="card-raised card-white">
+                                    <hr style={{ backgroundColor: "white", borderBottom: "2px solid white" }} />
+                                    <Card className="card-raised card-white" color="transparent">
                                         <CardBody>
-                                            <h2 style={{ color: "#3469a6" }}>Total Appts This Month</h2>
-                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.month_appts}</strong></h3>
-                                            <hr style={{ backgroundColor: "#3469a6" }} />
-                                            <h2 style={{ color: "#3469a6" }}>Projected Appts This Month</h2>
-                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.projected_month}</strong></h3>
+                                            <h2 style={{ color: "white" }}>Total Appts This Month</h2>
+                                            <h3 style={{ color: "white" }}><strong>{this.state.month_appts}</strong></h3>
+                                            <hr style={{ borderBottom: "2px dotted white" }} />
+                                            <h2 style={{ color: "white" }}>Projected Appts This Month</h2>
+                                            <h3 style={{ color: "white" }}><strong>{this.state.projected_month}</strong></h3>
                                         </CardBody>
                                     </Card>
-                                    <hr style={{ backgroundColor: "white" }} />
-                                    <Card className="card-raised card-white">
+                                    <hr style={{ backgroundColor: "white", borderBottom: "2px solid white" }} />
+                                    <Card className="card-raised card-white" color="transparent">
                                         <CardBody>
-                                            <h2 style={{ color: "#3469a6" }}>Total Appts Lifetime</h2>
-                                            <h3 style={{ color: "#3469a6" }}><strong>{this.state.lifetime_appts}</strong></h3>
+                                            <h2 style={{ color: "white" }}>Total Appts Lifetime</h2>
+                                            <h3 style={{ color: "white" }}><strong>{this.state.lifetime_appts}</strong></h3>
                                         </CardBody>
                                     </Card>
                                 </CardBody>
@@ -444,17 +444,17 @@ class AdminDashboard extends React.Component {
                     </Row>
                     <Row style={{ justifyContent: "center" }} className="text-center" hidden={this.state.agent == undefined ? true : (this.state.agent.name !== "Admin User" && this.state.agent.name !== "Marc Vertus")}>
                         <Col lg="6" style={{ justifyContent: "center" }} className="text-center">
-                            <Card className="card-raised card-white shadow" color="primary" style={{ background: "linear-gradient(45deg, #1d67a8 0%, #ffffff 100%)" }}>
+                            <Card className="card-raised card-white shadow" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader>
-                                    <p>Agent's Most Recent Call</p>
+                                    <p style={{color: "white"}}><strong>Agent's Most Recent Call</strong></p>
                                 </CardHeader>
                                 <CardBody>
                                     <Table>
                                         <thead>
                                             <tr>
-                                                <th>Name</th>
-                                                <th>Time Elapsed</th>
-                                                <th>Last Updated</th>
+                                                <th style={{color: "white", borderBottom: "1px solid white"}}>Name</th>
+                                                <th style={{color: "white", borderBottom: "1px solid white"}}>Time Elapsed</th>
+                                                <th style={{color: "white", borderBottom: "1px solid white"}}>Last Updated</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -473,9 +473,9 @@ class AdminDashboard extends React.Component {
                                                     if (a.lastCall === null) return null
                                                     return (
                                                         <tr key={i}>
-                                                            <td><p><strong>{a.name}</strong></p></td>
-                                                            <td><p><strong>{a.lastCall === null ? "No Calls Today" : Math.round(10 * (new Date().getTime() - new Date(a.lastCall).getTime()) / (1000 * 60)) / 10 + " min"}</strong></p></td>
-                                                            <td><p><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
+                                                            <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{a.name}</strong></p></td>
+                                                            <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{a.lastCall === null ? "No Calls Today" : Math.round(10 * (new Date().getTime() - new Date(a.lastCall).getTime()) / (1000 * 60)) / 10 + " min"}</strong></p></td>
+                                                            <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
                                                         </tr>
                                                     );
                                                 })

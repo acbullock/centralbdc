@@ -234,10 +234,10 @@ class UserManagement extends React.Component {
                 <Container>
                     <Row>
                         <Col className="ml-auto mr-auto text-center" md="8">
-                            <Card>
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <h2>Add User</h2>
-                                    <Button color="primary" onClick={() => { this.toggle("addModal") }}>
+                                    <h2 style={{color: "white"}}>Add User</h2>
+                                    <Button color="neutral" onClick={() => { this.toggle("addModal") }}>
                                         <i className="tim-icons icon-simple-add"></i>
                                     </Button>
                                     <Modal isOpen={this.state.addModal} toggle={() => { this.toggle("addModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
@@ -368,9 +368,9 @@ class UserManagement extends React.Component {
                     </Row>
                     <Row>
                         <Col className="ml-auto mr-auto text-center" md="8">
-                            <Card>
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <h2>Edit User</h2>
+                                    <h2 style={{color: "white"}}>Edit User</h2>
                                     <Select
                                         name="editUser"
                                         id="editUser"
@@ -379,7 +379,7 @@ class UserManagement extends React.Component {
                                         onChange={(e) => { this.onValueChange("editUser", e); }}
                                     />
                                     <br />
-                                    <Button color="primary" disabled={this.state.editUser.label.length == 0} onClick={async () => {
+                                    <Button color="neutral" disabled={this.state.editUser.label.length == 0} onClick={async () => {
                                         this.setState({ loading: true })
                                         console.log("!@#", this.state.editUser)
                                         let u = await this.props.mongo.findOne("agents", { _id: this.state.editUser.value })

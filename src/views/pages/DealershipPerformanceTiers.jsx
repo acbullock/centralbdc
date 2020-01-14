@@ -172,7 +172,7 @@ class DealershipPerformanceTiers extends React.Component {
                             <legend>TIER 1</legend>
                             <Card className="card-raised card-white">
                                 <Table bordered striped responsive>
-                                    <thead style={{ backgroundColor: "#1d67a8" }}>
+                                    <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                         <tr>
                                             <th><p style={{ color: "white" }}>Progress</p></th>
                                             <th><p style={{ color: "white" }}>Name</p></th>
@@ -203,7 +203,7 @@ class DealershipPerformanceTiers extends React.Component {
                             <legend>TIER 2</legend>
                             <Card className="card-raised card-white">
                                 <Table bordered striped responsive>
-                                    <thead style={{ backgroundColor: "#1d67a8" }}>
+                                    <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                         <tr>
                                             <th><p style={{ color: "white" }}>Progress</p></th>
                                             <th><p style={{ color: "white" }}>Name</p></th>
@@ -233,7 +233,7 @@ class DealershipPerformanceTiers extends React.Component {
                             <legend>TIER 3</legend>
                             <Card className="card-raised card-white">
                                 <Table bordered striped responsive>
-                                    <thead style={{ backgroundColor: "#1d67a8" }}>
+                                    <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                         <tr>
                                             <th><p style={{ color: "white" }}>Progress</p></th>
                                             <th><p style={{ color: "white" }}>Name</p></th>
@@ -264,9 +264,9 @@ class DealershipPerformanceTiers extends React.Component {
                             <legend>TIER 4</legend>
                             <Card className="card-raised card-white">
                                 <Table bordered striped responsive>
-                                    <thead style={{ backgroundColor: "#1d67a8" }}>
+                                    <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                         <tr>
-                                            {/* <th><p style={{ color: "white" }}>Progress</p></th> */}
+                                            <th><p style={{ color: "white" }}>Progress</p></th>
                                             <th><p style={{ color: "white" }}>Name</p></th>
                                             <th><p style={{ color: "white" }}>Count</p></th>
                                             <th><p style={{ color: "white" }}>Goal</p></th>

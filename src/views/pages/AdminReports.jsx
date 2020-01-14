@@ -329,7 +329,7 @@ class AdminReports extends React.Component {
                             <Card className="card-raised text-center card-white">
                                 <CardBody>
                                     <Table bordered responsive>
-                                        <thead style={{ backgroundColor: "#3469a6" }}>
+                                        <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                             <tr>
                                                 <th><p style={{ color: "white" }}>Progress</p></th>
                                                 <th><p style={{ color: "white" }}>Dealership</p></th>
@@ -444,7 +444,7 @@ class AdminReports extends React.Component {
                             <Card className="card-raised text-center card-white">
                                 <CardBody>
                                     <Table bordered responsive>
-                                        <thead style={{ backgroundColor: "#3469a6" }}>
+                                        <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                             <tr>
                                                 <th><p style={{ color: "white" }}>Agent Name</p></th>
                                                 <th><p style={{ color: "white" }}>From</p></th>

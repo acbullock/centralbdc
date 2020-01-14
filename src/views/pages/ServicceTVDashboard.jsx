@@ -212,98 +212,99 @@ class ServiceTVDashboard extends React.Component {
                     <Row style={{ textAlign: "center" }}>
                         <Col md="12" >
                             <img src={logo} alt="react-logo" height="100" style={{ textAlign: "center", display: "block", margin: "auto" }} />
-                            <h1 style={{ color: "#1d67a8", textAlign: "center" }}><strong>Service Department</strong></h1>
+                            <h1 style={{ background: "-webkit-linear-gradient(#1d67a8, #000000)", "-webkit-background-clip": "text", "-webkit-text-fill-color": "transparent" }}><strong>Service Department</strong></h1>
+                        {/* <h1 style={{ color: "#1d67a8", textAlign: "center" }}><strong>Service Department</strong></h1> */}
                         </Col>
                     </Row>
-                    <br />
-                    <Row style={{ justifyContent: "center" }}>
-                        <Col md="5">
-                            <Card className="card-raised card-white text-center">
-                                <CardBody>
-                                    <h2 style={{ color: "#1d67a8" }}><strong>Total Calls</strong></h2>
-                                    <h3 style={{ color: "#1d67a8" }}>Today: <strong>{this.state.totalCallCountToday}</strong></h3>
-                                    <h3 style={{ color: "#1d67a8" }}>MTD: <strong>{this.state.totalCallCountMTD}</strong></h3>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                        <Col md="5">
-                            {/* style={{ background: "linear-gradient(45deg, #1d67a8 0%, #ffffff 100%)" }} */}
-                            <Card className="card-raised card-white text-center" style={{ background: "#1d67a8" }}>
-                                <CardBody>
-                                    <h3 style={{ color: "white" }}><strong>Total Appointments</strong></h3>
-                                    <h3 style={{ color: "white" }}>Today: <strong>{this.state.totalApptCountToday}</strong></h3>
-                                    <h3 style={{ color: "white" }}>MTD: <strong>{this.state.apptMtdTotal}</strong></h3>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                    </Row>
-                    <Row style={{ justifyContent: "center", textAlign: "center" }}>
-                        <Col md="5">
-                            <Card className="card-raised card-white text-center">
-                                <CardTitle>
-                                    <h3 style={{ color: "#1d67a8" }}><strong>Calls Today</strong></h3>
-                                </CardTitle>
-                                <CardBody>
-                                    <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.callsMtdLoading} />
-                                    <Table style={{ backgroundColor: "white" }} striped hidden={this.state.callsMtdLoading}>
-                                        <thead>
-                                            <tr>
-                                                <th style={{ color: "#1d67a8", borderBottom: "#1d67a8 1px solid" }}>#</th>
-                                                <th style={{ color: "#1d67a8", borderBottom: "#1d67a8 1px solid" }}>Name</th>
-                                                <th style={{ color: "#1d67a8", borderBottom: "#1d67a8 1px solid" }}>Call Count</th>
+                <br />
+                <Row style={{ justifyContent: "center" }}>
+                    <Col md="5">
+                        <Card className="card-raised card-white text-center" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                            <CardBody>
+                                <h2 style={{ color: "white" }}><strong>Total Calls</strong></h2>
+                                <h3 style={{ color: "white" }}>Today: <strong>{this.state.totalCallCountToday}</strong></h3>
+                                <h3 style={{ color: "white" }}>MTD: <strong>{this.state.totalCallCountMTD}</strong></h3>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                    <Col md="5">
+                        {/* style={{ background: "linear-gradient(45deg, #1d67a8 0%, #ffffff 100%)" }} */}
+                        <Card className="card-raised card-white text-center" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                            <CardBody>
+                                <h3 style={{ color: "white" }}><strong>Total Appointments</strong></h3>
+                                <h3 style={{ color: "white" }}>Today: <strong>{this.state.totalApptCountToday}</strong></h3>
+                                <h3 style={{ color: "white" }}>MTD: <strong>{this.state.apptMtdTotal}</strong></h3>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                </Row>
+                <Row style={{ justifyContent: "center", textAlign: "center" }}>
+                    <Col md="5">
+                        <Card className="card-raised card-white text-center" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                            <CardTitle>
+                                <h3 style={{ color: "white" }}><strong>Calls Today</strong></h3>
+                            </CardTitle>
+                            <CardBody>
+                                <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.callsMtdLoading} />
+                                <Table striped hidden={this.state.callsMtdLoading}>
+                                    <thead>
+                                        <tr>
+                                            <th style={{ color: "white", borderBottom: "white 1px solid" }}>#</th>
+                                            <th style={{ color: "white", borderBottom: "white 1px solid" }}>Name</th>
+                                            <th style={{ color: "white", borderBottom: "white 1px solid" }}>Call Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.state.callSortedAgents.map((a, i) => {
+                                            if (i > 9) return null
+                                            return (<tr key={i}>
+                                                <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
+                                                <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
+                                                <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.inboundToday + a.outboundToday}</strong></p></td>
+                                            </tr>)
+                                        })}
+                                    </tbody>
+                                </Table>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                    <Col md="5">
+                        <Card className="card-raised card-white text-center" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                            <CardTitle>
+                                <h3 style={{ color: "white" }}><strong>Appointments Today</strong></h3>
+                            </CardTitle>
+                            <CardBody>
+                                <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.apptMtdLoading} />
+                                <Table striped hidden={this.state.apptMtdLoading}>
+                                    <thead>
+                                        <tr>
+                                            <th style={{ color: "white", borderBottom: "1px solid white" }}>#</th>
+                                            <th style={{ color: "white", borderBottom: "1px solid white" }}>Name</th>
+                                            <th style={{ color: "white", borderBottom: "1px solid white" }}>Appt Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.state.agents.map((a, i) => {
+                                            if (i > 9) return null
+                                            return <tr key={i}>
+                                                <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
+                                                <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
+                                                <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.appointments.length}</strong></p></td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {this.state.callSortedAgents.map((a, i) => {
-                                                if (i > 9) return null
-                                                return (<tr key={i}>
-                                                    <td style={{ borderBottom: "#1d67a8 1px solid" }}><p style={{ color: "#1d67a8" }}>{i + 1}</p></td>
-                                                    <td style={{ borderBottom: "#1d67a8 1px solid" }}><p style={{ color: "#1d67a8" }}>{a.name}</p></td>
-                                                    <td style={{ borderBottom: "#1d67a8 1px solid" }}><p style={{ color: "#1d67a8" }}><strong>{a.inboundToday + a.outboundToday}</strong></p></td>
-                                                </tr>)
-                                            })}
-                                        </tbody>
-                                    </Table>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                        <Col md="5">
-                            <Card className="card-raised card-white text-center" style={{ backgroundColor: "#1d67a8" }}>
-                                <CardTitle>
-                                    <h3 style={{ color: "white" }}><strong>Appointments Today</strong></h3>
-                                </CardTitle>
-                                <CardBody>
-                                    <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.apptMtdLoading} />
-                                    <Table style={{ backgroundColor: "#1d67a8" }} striped hidden={this.state.apptMtdLoading}>
-                                        <thead>
-                                            <tr>
-                                                <th style={{ color: "white", borderBottom: "1px solid white" }}>#</th>
-                                                <th style={{ color: "white", borderBottom: "1px solid white" }}>Name</th>
-                                                <th style={{ color: "white", borderBottom: "1px solid white" }}>Appt Count</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {this.state.agents.map((a, i) => {
-                                                if (i > 9) return null
-                                                return <tr key={i}>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{i + 1}</p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{a.name}</p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.appointments.length}</strong></p></td>
-                                                </tr>
-                                            })}
-                                        </tbody>
-                                    </Table>
-                                </CardBody>
-                            </Card>
+                                        })}
+                                    </tbody>
+                                </Table>
+                            </CardBody>
+                        </Card>
 
-                        </Col>
-                    </Row>
-                    <Row style={{ justifyContent: "center", textAlign: "center" }}>
-                        <Col md="5">
+                    </Col>
+                </Row>
+                <Row style={{ justifyContent: "center", textAlign: "center" }}>
+                    <Col md="5">
 
-                        </Col>
-                    </Row>
-                </div>
+                    </Col>
+                </Row>
+            </div>
             </>
         );
     }

@@ -133,7 +133,7 @@ class DealershipPerformance extends React.Component {
                             <legend>Daily Dealership Goals</legend>
                             <Card className="card-raised card-white">
                                 <Table bordered striped>
-                                    <thead style={{ backgroundColor: "#3469a6"}}>
+                                    <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                         <tr>
                                             <th><p style={{ color: "white" }}>Progress</p></th>
                                             <th><p style={{ color: "white" }}>Dealership Name</p></th>

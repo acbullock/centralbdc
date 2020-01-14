@@ -676,7 +676,7 @@ class Dashboard extends React.Component {
 
           <Row style={{ justifyContent: "center" }}>
             <Col lg="12">
-              <Card className="card-raised card-white" color="primary">
+              <Card className="card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Agent Hourly Breakdown</strong></p></CardTitle>
                 </CardHeader>
@@ -764,9 +764,9 @@ class Dashboard extends React.Component {
           </Row>
           <Row style={{ justifyContent: "center" }}>
             <Col lg="6">
-              <Card className="text-center card-raised card-white">
+              <Card className="text-center card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
-                  <CardTitle tag="h3"><p style={{ color: "#3469a6" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "#3469a6" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
+                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
                 </CardHeader>
                 <CardBody>
                   {
@@ -788,8 +788,8 @@ class Dashboard extends React.Component {
                       }
                       return (
                         <div key={i}>
-                          <h4 style={{ color: "#3469a6" }}>Appointment Count: <strong>{this.state.agent.appointments.length}</strong></h4>
-                          <h4 style={{ color: "#3469a6" }}>Call Center Rank: <strong>#{rank}</strong></h4>
+                          <h4 style={{ color: "white" }}>Appointment Count: <strong>{this.state.agent.appointments.length}</strong></h4>
+                          <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{rank}</strong></h4>
                         </div>
                       );
                     })
@@ -798,7 +798,7 @@ class Dashboard extends React.Component {
               </Card>
             </Col>
             <Col lg="6">
-              <Card className="text-center card-raised card-white" color="primary">
+              <Card className="text-center card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
                 </CardHeader>
@@ -837,7 +837,7 @@ class Dashboard extends React.Component {
           </Row>
           <Row style={{ justifyContent: "center" }}>
             <Col lg="6">
-              <Card className="card-raised card-white">
+              <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <div className="tools float-right">
                     {/* <Button
@@ -848,15 +848,15 @@ class Dashboard extends React.Component {
                       
                     </Button> */}
                   </div>
-                  <CardTitle tag="h3"><p style={{ color: "#3469a6" }}><strong>Top 10 Agents Today</strong></p></CardTitle>
+                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Top 10 Agents Today</strong></p></CardTitle>
                 </CardHeader>
                 <CardBody>
                   <Table responsive >
                     <thead className="text-primary" >
                       <tr>
-                        <th style={{ borderBottom: "1px solid #3469a6" }} className="text-center"><p style={{ color: "#3469a6" }}>Rank</p></th>
-                        <th style={{ borderBottom: "1px solid #3469a6" }} className="text-center"><p style={{ color: "#3469a6" }}>Agent Name</p></th>
-                        <th style={{ borderBottom: "1px solid #3469a6" }} className="text-center"><p style={{ color: "#3469a6" }}># Approved Appointments</p></th>
+                        <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Rank</p></th>
+                        <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Agent Name</p></th>
+                        <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}># Approved Appointments</p></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -864,10 +864,10 @@ class Dashboard extends React.Component {
                         this.state.top5.map((agent, index) => {
                           if (index > 9) return null;
                           return (
-                            <tr key={index} className="text-center" style={{ borderTop: "1px solid #3469a6" }}>
-                              <td style={{ borderBottom: "1px solid #3469a6" }}><p style={{ color: "#3469a6" }}>{index + 1}</p></td>
-                              <td style={{ borderBottom: "1px solid #3469a6" }}><p style={{ color: "#3469a6" }}>{agent.name}</p></td>
-                              <td style={{ borderBottom: "1px solid #3469a6" }}><p style={{ color: "#3469a6" }}>{agent.count}</p></td>
+                            <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
                           )
                         })
@@ -878,7 +878,7 @@ class Dashboard extends React.Component {
               </Card>
             </Col>
             <Col lg="6">
-              <Card className="card-raised card-white" color="primary">
+              <Card className="card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Top 10 Agents MTD</strong></p></CardTitle>
                 </CardHeader>
@@ -899,9 +899,9 @@ class Dashboard extends React.Component {
                           if (index > 9) return null;
                           return (
                             <tr key={index} className="text-center" >
-                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{index + 1}</p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{agent.name}</p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{agent.count}</p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
                           )
                         })

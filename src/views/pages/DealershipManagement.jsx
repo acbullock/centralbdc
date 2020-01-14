@@ -443,10 +443,10 @@ class DealershipManagement extends React.Component {
                 <Container>
                     <Row>
                         <Col className="ml-auto mr-auto text-center" md="8">
-                            <Card>
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <h2>Add Dealership</h2>
-                                    <Button color="primary" onClick={() => { this.toggle("addModal") }}>
+                                    <h2 style={{ color: "white" }}>Add Dealership</h2>
+                                    <Button color="neutral" onClick={() => { this.toggle("addModal") }}>
                                         <i className="tim-icons icon-simple-add"></i>
                                     </Button>
                                     <Modal isOpen={this.state.addModal} toggle={() => { this.toggle("addModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
@@ -671,10 +671,10 @@ class DealershipManagement extends React.Component {
                     </Row>
                     <Row>
                         <Col className="ml-auto mr-auto text-center" md="8">
-                            <Card>
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <h2>Add Dealership Group</h2>
-                                    <Button color="primary" onClick={() => { this.toggle("addDealerModal") }}>
+                                    <h2 style={{ color: "white" }}>Add Dealership Group</h2>
+                                    <Button color="neutral" onClick={() => { this.toggle("addDealerModal") }}>
                                         <i className="tim-icons icon-simple-add"></i>
                                     </Button>
                                     <Modal isOpen={this.state.addDealerModal} toggle={() => { this.toggle("addDealerModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
@@ -703,9 +703,9 @@ class DealershipManagement extends React.Component {
                     </Row>
                     <Row>
                         <Col className="ml-auto mr-auto text-center" md="8">
-                            <Card>
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <h2>Edit/Delete Dealership Group</h2>
+                                    <h2 style={{ color: "white" }}>Edit/Delete Dealership Group</h2>
                                     <Select
                                         name="editDealershipGroup"
                                         id="editDealershipGroup"
@@ -715,7 +715,7 @@ class DealershipManagement extends React.Component {
                                     />
                                     <br />
                                     {/* <Button color="warning" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.deleteGroup() }}>Delete Group Name</Button> */}
-                                    <Button color="primary" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.toggle("editGroupModal"); this.setState({ editGroupName: this.state.editDealershipGroup.label }) }}>Edit Group Name</Button>
+                                    <Button color="neutral" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.toggle("editGroupModal"); this.setState({ editGroupName: this.state.editDealershipGroup.label }) }}>Edit Group Name</Button>
                                     <Modal isOpen={this.state.editGroupModal} toggle={() => { this.toggle("editGroupModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("editGroupModal") }}>Edit Group</ModalHeader>
                                         <ModalBody>
@@ -735,9 +735,9 @@ class DealershipManagement extends React.Component {
                     </Row>
                     <Row>
                         <Col className="ml-auto mr-auto text-center" md="8">
-                            <Card>
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <h2>Edit Dealership</h2>
+                                    <h2 style={{color: "white"}}>Edit Dealership</h2>
                                     <Select
                                         name="editDealership"
                                         id="editDealership"
@@ -747,7 +747,7 @@ class DealershipManagement extends React.Component {
                                     />
                                     <br />
                                     {/* <Button color="danger" disabled={this.state.editDealership.label.length == 0} onClick={() => { this.deleteDealership() }}>Delete Dealership</Button> */}
-                                    <Button color="primary" disabled={this.state.editDealership.label.length == 0} onClick={async () => {
+                                    <Button color="neutral" disabled={this.state.editDealership.label.length == 0} onClick={async () => {
                                         this.setState({ loading: true })
                                         let d = await this.props.mongo.findOne("dealerships", { value: this.state.editDealership.value })
                                         let group = await this.getGroup(this.state.editDealership.group)
