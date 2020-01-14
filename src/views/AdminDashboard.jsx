@@ -61,12 +61,16 @@ class AdminDashboard extends React.Component {
             agent5Loading: false,
             agent_recent_call: { label: "", value: "" },
             token: "",
-            latestLoading: false
+            latestLoading: false,
+            selected_dlr: { label: "", value: "" },
+            dlrtop5loading: false,
+            dlrTop5: []
         };
         this.sortLastAppts = this.sortLastAppts.bind(this);
         this.getTodayAppts = this.getTodayAppts.bind(this);
         this.getTop10 = this.getTop10.bind(this);
         this.getAgentTop5 = this.getAgentTop5.bind(this)
+        this.getDealerTop5 = this.getDealerTop5.bind(this)
     }
     _isMounted = false;
     async componentDidMount() {
@@ -222,6 +226,32 @@ class AdminDashboard extends React.Component {
         })
         this._isMounted && this.setState({ agent_top_5: sortable, agent5Loading: false })
 
+    }
+    async getDealerTop5(dealer) {
+        this.setState({ dlrtop5loading: true })
+        let apps = await this.props.mongo.find("all_appointments")
+        let dlr_apps = apps.filter((a) => {
+            return a.dealership.label === dealer.label
+        })
+        let dict = {};
+        for (let d in dlr_apps) {
+            if (dict[dlr_apps[d].agent_id] == undefined) {
+                dict[dlr_apps[d].agent_id] = 1;
+            }
+            else {
+                dict[dlr_apps[d].agent_id]++;
+            }
+        }
+        let sortable = [];
+        for (let d in dict) {
+            let name = await this.props.mongo.findOne("agents", { _id: d })
+            sortable.push({ name: name.name, count: dict[d] })
+        }
+        sortable.sort((a, b) => {
+            return b.count - a.count
+        })
+        console.log(sortable)
+        this.setState({ dlrtop5loading: false, dlrTop5: sortable })
     }
     render() {
         if (this.state.loading) {
@@ -499,13 +529,13 @@ class AdminDashboard extends React.Component {
                                                                 let outbound = records.filter(r => { return r.direction === "Outbound" })
                                                                 let inbound = records.filter(r => { return r.direction === "Inbound" && r.result === "Accepted" })
                                                                 await this.props.mongo.findOneAndUpdate("agents", { name: a.name }, { inboundToday: inbound.length, outboundToday: outbound.length, callCountLastUpdated: new Date(), lastCall: lastTime })
-                                                                let agents = await this.props.mongo.find("agents", {isActive: true, department: "sales"})
-                                                                this.setState({agents})
+                                                                let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" })
+                                                                this.setState({ agents })
                                                                 //force update
                                                                 setTimeout(() => {
                                                                     this.setState({ latestLoading: false })
                                                                 }, 7000);
-                                                            }}><i className="tim-icons icon-refresh-01"/></Button></td>
+                                                            }}><i className="tim-icons icon-refresh-01" /></Button></td>
                                                         </tr>
                                                     );
                                                 })
@@ -515,6 +545,46 @@ class AdminDashboard extends React.Component {
                                 </CardBody>
                             </Card>
                         </Col>
+                        <Col lg="6" style={{ justifyContent: "center" }} className="text-center">
+                            <Card className="card-raised card-white shadow" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <CardHeader>
+                                    <p style={{ color: "white" }}><strong>Dealership's Top 10 Agents</strong></p>
+                                </CardHeader>
+                                <CardBody>
+
+                                    <Select
+                                        options={this.state.dealerships}
+                                        value={this.state.selected_dlr}
+                                        onChange={(e) => { this.setState({ selected_dlr: e }); this.getDealerTop5(e) }}
+                                        inputProps={{disabled: this.state.dlrtop5loading}}
+                                    />
+                                    <br />
+                                    <CardImg hidden={!this.state.dlrtop5loading} style={{ backgroundColor: "white" }} top width="100%" src={this.props.utils.loading} />
+                                    <Table responsive striped hidden={this.state.dlrtop5loading || this.state.selected_dlr.label.length < 1}>
+                                        <thead>
+                                            <tr>
+                                                <th style={{color: "white"}}>#</th>
+                                                <th style={{color: "white"}}>Name</th>
+                                                <th style={{color: "white"}}>Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this.state.dlrTop5.map((d, i)=>{
+                                                if(i > 9) return null;
+                                                return (<tr key={i}>
+                                                    <td style={{borderBottom: "1px solid white"}}><p style={{color: "white"}}><strong>{i+1}</strong></p></td>
+                                                    <td style={{borderBottom: "1px solid white"}}><p style={{color: "white"}}><strong>{d.name}</strong></p></td>
+                                                    <td style={{borderBottom: "1px solid white"}}><p style={{color: "white"}}><strong>{d.count}</strong></p></td>
+                                                </tr>);
+                                            })}
+                                        </tbody>
+                                    </Table>
+
+                                </CardBody>
+
+                            </Card>
+                        </Col>
+
                     </Row>
                 </div>
             </>
