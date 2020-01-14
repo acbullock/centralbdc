@@ -62,6 +62,7 @@ import DealershipDashboard from "./views/DealershipDashboard.jsx"
 import DealershipUsers from "./views/pages/DealershipUsers.jsx"
 import AdminDashboard from "./views/AdminDashboard.jsx"
 import DealershipPerformance from "./views/pages/DealershipPerformance.jsx"
+import DealershipPerformanceTiers from "./views/pages/DealershipPerformanceTiers.jsx"
 import Reports from "./views/pages/Reports.jsx"
 import AdminReports from "./views/pages/AdminReports.jsx"
 import ServiceDashboard from "./views/ServiceDashboard.jsx"
@@ -100,6 +101,14 @@ const routes = [
         path: "/daily_dealership_goals",
         name: "Daily Dealer Goals",
         component: DealershipPerformance,
+        layout: "/admin",
+        adminOnly: true,
+        icon: "tim-icons icon-notes"
+      },
+      {
+        path: "/goal_tiers",
+        name: "Goal Tiers",
+        component: DealershipPerformanceTiers,
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-notes"
