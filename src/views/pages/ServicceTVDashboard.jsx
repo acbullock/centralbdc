@@ -212,7 +212,7 @@ class ServiceTVDashboard extends React.Component {
                     <Row style={{ textAlign: "center" }}>
                         <Col md="12" >
                             <img src={logo} alt="react-logo" height="100" style={{ textAlign: "center", display: "block", margin: "auto" }} />
-                            <h1 style={{ background: "-webkit-linear-gradient(#1d67a8, #000000)", "-webkit-background-clip": "text", "-webkit-text-fill-color": "transparent" }}><strong>Service Department</strong></h1>
+                            <h1 style={{ background: "-webkit-linear-gradient(#1d67a8, #000000)", "WebkitBackgroundClip": "text", "WebkitTextFillColor": "transparent" }}><strong>Service Department</strong></h1>
                         {/* <h1 style={{ color: "#1d67a8", textAlign: "center" }}><strong>Service Department</strong></h1> */}
                         </Col>
                     </Row>
@@ -251,7 +251,9 @@ class ServiceTVDashboard extends React.Component {
                                         <tr>
                                             <th style={{ color: "white", borderBottom: "white 1px solid" }}>#</th>
                                             <th style={{ color: "white", borderBottom: "white 1px solid" }}>Name</th>
-                                            <th style={{ color: "white", borderBottom: "white 1px solid" }}>Call Count</th>
+                                            <th style={{ color: "white", borderBottom: "white 1px solid" }}>Outbound</th>
+                                            <th style={{ color: "white", borderBottom: "white 1px solid" }}>Inbound</th>
+                                            <th style={{ color: "white", borderBottom: "white 1px solid" }}>Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -260,6 +262,8 @@ class ServiceTVDashboard extends React.Component {
                                             return (<tr key={i}>
                                                 <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
                                                 <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
+                                                <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.outboundToday}</strong></p></td>
+                                                <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.inboundToday}</strong></p></td>
                                                 <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.inboundToday + a.outboundToday}</strong></p></td>
                                             </tr>)
                                         })}
