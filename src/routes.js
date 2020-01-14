@@ -117,6 +117,7 @@ const routes = [
         path: "/reports",
         name: "Reports",
         icon: "tim-icons icon-bullet-list-67",
+        adminOnly: true,
         component: AdminReports,
         layout: "/admin"
       },
