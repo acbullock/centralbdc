@@ -347,7 +347,7 @@ class DealershipDashboard extends React.Component {
           <Card className="card-raised card-white" color="transparent">
             <CardHeader color="#1d67a8">
               <CardTitle className="text-center">
-                <legend><h1 style={{ color: "#1d67a8" }}>{this.state.dealership.label}</h1></legend>
+                <legend><h1 style={{ color: "#1d67a8" }}><strong>{this.state.dealership.label}</strong></h1></legend>
                 <FormGroup>
                   <Label md="3">
                     <Input name="showTypeSales" type="radio" value="sales" checked={this.state.showType === "sales"} onChange={(e) => { this.setState({ showType: e.target.value }) }} />{' '} <h3 style={{ marginLeft: "75px", color: "#1d67a8" }}><strong>Sales</strong></h3> </Label>
@@ -360,10 +360,10 @@ class DealershipDashboard extends React.Component {
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Upcoming Appointments</legend>
               <Col sm="4">
-                <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
+                <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                   <CardHeader>
                     <CardTitle tag="h3" >
-                      <p style={{color: "white"}}>Today's Appointments</p>
+                      <p style={{color: "white"}}><strong>Today's Appointments</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
@@ -379,12 +379,12 @@ class DealershipDashboard extends React.Component {
                 </Card>
               </Col>
               <Col sm="4">
-                <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
+                <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                   <CardHeader>
                     <div className="tools float-right">
                     </div>
                     <CardTitle tag="h3" >
-                      <p style={{color: "white"}}>Tomorrow's Appointments</p>
+                      <p style={{color: "white"}}><strong>Tomorrow's Appointments</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
@@ -407,7 +407,7 @@ class DealershipDashboard extends React.Component {
               <legend className="text-center">Month-to-Date</legend>
 
               <Col sm="4">
-                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
+                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                   <CardHeader>
                     <CardTitle tag="h3" >
                       <p style={{ color: "white" }}><strong>Total Calls: {this.state.thisMonth}</strong></p>
@@ -421,7 +421,7 @@ class DealershipDashboard extends React.Component {
 
               </Col>
               <Col sm="4">
-                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
+                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                   <CardHeader>
                     <div className="tools float-right">
                     </div>
@@ -447,7 +447,7 @@ class DealershipDashboard extends React.Component {
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Last Month</legend>
               <Col sm="4">
-                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
+                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                   <CardHeader>
                     <CardTitle tag="h3" >
                       <p style={{ color: "white" }}><strong>Total Calls: {this.state.lastMonth}</strong></p>
@@ -461,7 +461,7 @@ class DealershipDashboard extends React.Component {
 
               </Col>
               <Col sm="4">
-                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
+                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                   <CardHeader>
                     <CardTitle tag="h3" ><p style={{color: "white"}}><strong>Total Appts: {this.state.lastMonth}</strong></p></CardTitle>
                   </CardHeader>

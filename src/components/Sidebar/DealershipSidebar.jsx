@@ -100,7 +100,7 @@ class DealershipSidebar extends React.Component {
                   <i className={prop.icon} />
                   <p>
                     {rtlActive ? prop.rtlName : prop.name}
-                    <b className="caret" />
+                    <b className="caret"/>
                   </p>
                 </>
               ) : (
@@ -128,7 +128,7 @@ class DealershipSidebar extends React.Component {
             {prop.icon !== undefined ? (
               <>
                 <i className={prop.icon} />
-                <p>{rtlActive ? prop.rtlName : prop.name}</p>
+                <p style={{fontWeight: "bolder  "}}>{rtlActive ? prop.rtlName : prop.name}</p>
               </>
             ) : (
               <>
