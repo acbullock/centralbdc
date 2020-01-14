@@ -97,8 +97,8 @@ class Sidebar extends React.Component {
               {prop.icon !== undefined ? (
                 <>
                   <i className={prop.icon} />
-                  <p>
-                    {rtlActive ? prop.rtlName : prop.name}
+                  <p style={{fontWeight: "bolder"}}><strong>
+                    {rtlActive ? prop.rtlName : prop.name}</strong>
                     <b className="caret" />
                   </p>
                 </>
@@ -126,7 +126,7 @@ class Sidebar extends React.Component {
             {prop.icon !== undefined ? (
               <>
                 <i className={prop.icon} />
-                <p>{rtlActive ? prop.rtlName : prop.name}</p>
+                <p style={{fontWeight: "bolder"}}><strong>{rtlActive ? prop.rtlName : prop.name}</strong></p>
               </>
             ) : (
               <>

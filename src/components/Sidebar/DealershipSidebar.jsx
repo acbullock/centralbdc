@@ -128,7 +128,7 @@ class DealershipSidebar extends React.Component {
             {prop.icon !== undefined ? (
               <>
                 <i className={prop.icon} />
-                <p style={{fontWeight: "bolder  "}}>{rtlActive ? prop.rtlName : prop.name}</p>
+                <p style={{fontWeight: "bolder  "}}><strong>{rtlActive ? prop.rtlName : prop.name}</strong></p>
               </>
             ) : (
               <>
