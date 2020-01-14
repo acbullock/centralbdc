@@ -113,7 +113,7 @@ class DealershipPerformanceTiers extends React.Component {
                 let progressValue = Math.round(apps.length * 10 / d.goal * 100) / 10;
                 let progressColor = "red";
                 if (progressValue > 33) {
-                    progressColor = "yellow"
+                    progressColor = "#CCCC00"
                 }
                 if (progressValue >= 100) {
                     progressColor = "green"
@@ -174,7 +174,7 @@ class DealershipPerformanceTiers extends React.Component {
                                 <Table bordered striped responsive>
                                     <thead style={{ backgroundColor: "#1d67a8" }}>
                                         <tr>
-                                            {/* <th><p style={{ color: "white" }}>Progress</p></th> */}
+                                            <th><p style={{ color: "white" }}>Progress</p></th>
                                             <th><p style={{ color: "white" }}>Name</p></th>
                                             <th><p style={{ color: "white" }}>Count</p></th>
                                             <th><p style={{ color: "white" }}>Goal</p></th>
@@ -186,6 +186,7 @@ class DealershipPerformanceTiers extends React.Component {
                                             return (
                                                 <tr key={i}>
                                                     {/* <td ><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td> */}
+                                                    <td ><p style={{color: d.progressColor}}><strong>{d.progressValue}%</strong></p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.goal}</p></td>
@@ -204,7 +205,7 @@ class DealershipPerformanceTiers extends React.Component {
                                 <Table bordered striped responsive>
                                     <thead style={{ backgroundColor: "#1d67a8" }}>
                                         <tr>
-                                            {/* <th><p style={{ color: "white" }}>Progress</p></th> */}
+                                            <th><p style={{ color: "white" }}>Progress</p></th>
                                             <th><p style={{ color: "white" }}>Name</p></th>
                                             <th><p style={{ color: "white" }}>Count</p></th>
                                             <th><p style={{ color: "white" }}>Goal</p></th>
@@ -215,7 +216,7 @@ class DealershipPerformanceTiers extends React.Component {
                                         {this.state.dealership2.map((d, i) => {
                                             return (
                                                 <tr key={i}>
-                                                    {/* <td ><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td> */}
+                                                    <td ><p style={{color: d.progressColor}}><strong>{d.progressValue}%</strong></p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.goal}</p></td>
@@ -234,7 +235,7 @@ class DealershipPerformanceTiers extends React.Component {
                                 <Table bordered striped responsive>
                                     <thead style={{ backgroundColor: "#1d67a8" }}>
                                         <tr>
-                                            {/* <th><p style={{ color: "white" }}>Progress</p></th> */}
+                                            <th><p style={{ color: "white" }}>Progress</p></th>
                                             <th><p style={{ color: "white" }}>Name</p></th>
                                             <th><p style={{ color: "white" }}>Count</p></th>
                                             <th><p style={{ color: "white" }}>Goal</p></th>
@@ -245,6 +246,7 @@ class DealershipPerformanceTiers extends React.Component {
                                         {this.state.dealership3.map((d, i) => {
                                             return (
                                                 <tr key={i}>
+                                                    <td><p style={{color: d.progressColor}}><strong>{d.progressValue}</strong></p></td>
                                                     {/* <td ><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td> */}
                                                     <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
@@ -275,6 +277,7 @@ class DealershipPerformanceTiers extends React.Component {
                                         {this.state.dealership4.map((d, i) => {
                                             return (
                                                 <tr key={i}>
+                                                    <td><p style={{color: d.progressColor}}><strong>{d.progressValue}%</strong></p></td>
                                                     {/* <td style={{ height: "75px", maxHeight: "75px" }}><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td> */}
                                                     <td ><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td ><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
