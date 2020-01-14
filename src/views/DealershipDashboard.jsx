@@ -344,7 +344,7 @@ class DealershipDashboard extends React.Component {
             onChange={(e) => { this.getStatsForDealer(e.value) }}
           />
           <br />
-          <Card className="card-raised card-white">
+          <Card className="card-raised card-white" color="transparent">
             <CardHeader color="#1d67a8">
               <CardTitle className="text-center">
                 <legend><h1 style={{ color: "#1d67a8" }}>{this.state.dealership.label}</h1></legend>
@@ -360,14 +360,14 @@ class DealershipDashboard extends React.Component {
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Upcoming Appointments</legend>
               <Col sm="4">
-                <Card className="card-raised card-white" color="success">
+                <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
                   <CardHeader>
                     <CardTitle tag="h3" >
-                      <p>Today's Appointments</p>
+                      <p style={{color: "white"}}>Today's Appointments</p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1>{(() => {
+                    <h1 style={{color: "white"}}>{(() => {
                       if (this.state.todayApps === "Loading..") {
                         return <strong>Loading..</strong>
                       }
@@ -379,16 +379,16 @@ class DealershipDashboard extends React.Component {
                 </Card>
               </Col>
               <Col sm="4">
-                <Card className="card-raised card-white" color="success">
+                <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
                   <CardHeader>
                     <div className="tools float-right">
                     </div>
                     <CardTitle tag="h3" >
-                      <p>Tomorrow's Appointments</p>
+                      <p style={{color: "white"}}>Tomorrow's Appointments</p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1>{(() => {
+                    <h1 style={{color: "white"}}>{(() => {
                       if (this.state.tomorrowApps === "Loading..") {
                         return <strong>Loading..</strong>
                       }
@@ -402,12 +402,12 @@ class DealershipDashboard extends React.Component {
               </Col>
             </Row>
             <hr />
-            <hr />
+            {/* <hr /> */}
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Month-to-Date</legend>
 
               <Col sm="4">
-                <Card className="card-raised card-white" style={{ backgroundColor: "#1d67a8" }}>
+                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
                   <CardHeader>
                     <CardTitle tag="h3" >
                       <p style={{ color: "white" }}><strong>Total Calls: {this.state.thisMonth}</strong></p>
@@ -421,16 +421,16 @@ class DealershipDashboard extends React.Component {
 
               </Col>
               <Col sm="4">
-                <Card className="card-raised card-white">
+                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
                   <CardHeader>
                     <div className="tools float-right">
                     </div>
                     <CardTitle tag="h3" >
-                      <p style={{ color: "#1d67a8" }}><strong>Total Appts: {this.state.thisMonth}</strong></p>
+                      <p style={{color: "white"}}><strong>Total Appts: {this.state.thisMonth}</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{ color: "#1d67a8" }}>{(() => {
+                    <h1 style={{color: "white"}}>{(() => {
                       if (this.state.thisMonthApps === "Loading..") {
                         return <strong>Loading..</strong>
                       }
@@ -447,7 +447,7 @@ class DealershipDashboard extends React.Component {
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Last Month</legend>
               <Col sm="4">
-                <Card className="card-raised card-white" style={{ backgroundColor: "#1d67a8" }}>
+                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
                   <CardHeader>
                     <CardTitle tag="h3" >
                       <p style={{ color: "white" }}><strong>Total Calls: {this.state.lastMonth}</strong></p>
@@ -461,12 +461,12 @@ class DealershipDashboard extends React.Component {
 
               </Col>
               <Col sm="4">
-                <Card className="card-raised card-white">
+                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #000000 100%)" }}>
                   <CardHeader>
-                    <CardTitle tag="h3" ><p style={{ color: "#1d67a8" }}><strong>Total Appts: {this.state.lastMonth}</strong></p></CardTitle>
+                    <CardTitle tag="h3" ><p style={{color: "white"}}><strong>Total Appts: {this.state.lastMonth}</strong></p></CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{ color: "#1d67a8" }}>{(() => {
+                    <h1 style={{color:"white"}}>{(() => {
                       if (this.state.lastMonthApps === "Loading..") {
                         return <strong>Loading..</strong>
                       }
