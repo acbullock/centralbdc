@@ -15,7 +15,7 @@
 
 */
 import React from "react";
-
+import axios from "axios"
 // react plugin used to create charts
 import { Line, Bar } from "react-chartjs-2";
 // reactstrap components
@@ -60,7 +60,8 @@ class AdminDashboard extends React.Component {
             lastAppsLoading: false,
             agent5Loading: false,
             agent_recent_call: { label: "", value: "" },
-            token: ""
+            token: "",
+            latestLoading: false
         };
         this.sortLastAppts = this.sortLastAppts.bind(this);
         this.getTodayAppts = this.getTodayAppts.bind(this);
@@ -307,9 +308,9 @@ class AdminDashboard extends React.Component {
                                     <Table hidden={this.state.top10Loading}>
                                         <thead>
                                             <tr>
-                                                <th style={{color: "white", borderBottom: "solid 1px white"}}>#</th>
-                                                <th style={{color: "white", borderBottom: "solid 1px white"}}>Agent Name</th>
-                                                <th style={{color: "white", borderBottom: "solid 1px white"}}>Count</th>
+                                                <th style={{ color: "white", borderBottom: "solid 1px white" }}>#</th>
+                                                <th style={{ color: "white", borderBottom: "solid 1px white" }}>Agent Name</th>
+                                                <th style={{ color: "white", borderBottom: "solid 1px white" }}>Count</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -323,9 +324,9 @@ class AdminDashboard extends React.Component {
                                                 }
                                                 return (
                                                     <tr key={a[0]}>
-                                                        <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{i + 1}</strong></p></td>
-                                                        <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{name}</strong></p></td>
-                                                        <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{a[1]}</strong></p></td>
+                                                        <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
+                                                        <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{name}</strong></p></td>
+                                                        <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a[1]}</strong></p></td>
                                                     </tr>
                                                 )
                                             })}
@@ -446,15 +447,16 @@ class AdminDashboard extends React.Component {
                         <Col lg="6" style={{ justifyContent: "center" }} className="text-center">
                             <Card className="card-raised card-white shadow" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader>
-                                    <p style={{color: "white"}}><strong>Agent's Most Recent Call</strong></p>
+                                    <p style={{ color: "white" }}><strong>Agent's Most Recent Call</strong></p>
                                 </CardHeader>
                                 <CardBody>
                                     <Table>
                                         <thead>
                                             <tr>
-                                                <th style={{color: "white", borderBottom: "1px solid white"}}>Name</th>
-                                                <th style={{color: "white", borderBottom: "1px solid white"}}>Time Elapsed</th>
-                                                <th style={{color: "white", borderBottom: "1px solid white"}}>Last Updated</th>
+                                                <th style={{ color: "white", borderBottom: "1px solid white" }}>Name</th>
+                                                <th style={{ color: "white", borderBottom: "1px solid white" }}>Time Elapsed</th>
+                                                <th style={{ color: "white", borderBottom: "1px solid white" }}>Last Updated</th>
+                                                <th style={{ color: "white", borderBottom: "1px solid white" }}></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -462,7 +464,7 @@ class AdminDashboard extends React.Component {
                                                 let agents = this.state.agents.filter((a) => { return a.lastCall !== null && !isNaN(new Date(a.lastCall).getTime()) })
                                                 for (let a in agents) {
                                                     agents[a].elapsed = Math.round(10 * ((new Date().getTime() - new Date(agents[a].lastCall).getTime()) / (60000))) / 10
-                                                    console.log(Math.round(10 * (new Date().getTime() - new Date(agents[a].lastCall).getTime()) / (1000 * 60)) / 10)
+                                                    // console.log(Math.round(10 * (new Date().getTime() - new Date(agents[a].lastCall).getTime()) / (1000 * 60)) / 10)
                                                 }
                                                 agents = agents.sort((a, b) => {
                                                     if (a.elapsed > b.elapsed) return -1;
@@ -473,9 +475,37 @@ class AdminDashboard extends React.Component {
                                                     if (a.lastCall === null) return null
                                                     return (
                                                         <tr key={i}>
-                                                            <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{a.name}</strong></p></td>
-                                                            <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{a.lastCall === null ? "No Calls Today" : Math.round(10 * (new Date().getTime() - new Date(a.lastCall).getTime()) / (1000 * 60)) / 10 + " min"}</strong></p></td>
-                                                            <td style={{borderBottom: "solid 1px white"}}><p style={{color: "white"}}><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
+                                                            <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
+                                                            <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a.lastCall === null ? "No Calls Today" : Math.round(10 * (new Date().getTime() - new Date(a.lastCall).getTime()) / (1000 * 60)) / 10 + " min"}</strong></p></td>
+                                                            <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
+                                                            <td style={{ borderBottom: "solid 1px white" }}><Button color="neutral" disabled={this.state.latestLoading} onClick={async () => {
+                                                                this.setState({ latestLoading: true })
+                                                                //get voice token
+                                                                let token = await this.props.mongo.findOne("utils", { "_id": "5df2b825f195a16a1dbd4bf5" })
+                                                                token = token.voice_token
+                                                                //get curr users records
+                                                                let currCount = await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/extension/${a.extension}/call-log?dateFrom=${new Date(new Date().setHours(0, 0, 0, 0)).toISOString()}&access_token=${token}&perPage=1000&withRecording=true`).catch()
+                                                                let records = currCount.data.records;
+                                                                let lastTime = null
+                                                                for (let i in records) {
+                                                                    if (records[i].direction === "Inbound" && records[i].result === "Missed") {
+                                                                        continue;
+                                                                    }
+                                                                    else {
+                                                                        lastTime = new Date(new Date(records[i].startTime).getTime() + (records[i].duration * 1000));
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                let outbound = records.filter(r => { return r.direction === "Outbound" })
+                                                                let inbound = records.filter(r => { return r.direction === "Inbound" && r.result === "Accepted" })
+                                                                await this.props.mongo.findOneAndUpdate("agents", { name: a.name }, { inboundToday: inbound.length, outboundToday: outbound.length, callCountLastUpdated: new Date(), lastCall: lastTime })
+                                                                let agents = await this.props.mongo.find("agents", {isActive: true, department: "sales"})
+                                                                this.setState({agents})
+                                                                //force update
+                                                                setTimeout(() => {
+                                                                    this.setState({ latestLoading: false })
+                                                                }, 7000);
+                                                            }}><i className="tim-icons icon-refresh-01"/></Button></td>
                                                         </tr>
                                                     );
                                                 })
