@@ -225,8 +225,15 @@ class DealershipDashboard extends React.Component {
     })
 
     appointments = appointments.appointments;
-    console.log(appointments.length)
-    appointments = appointments.concat(agent_apps);
+    let appt_verifieds = appointments.map(a=>{
+      return a.verified
+    })
+    for(let a in agent_apps){
+      if(appt_verifieds.indexOf(agent_apps[a].verified) === -1){
+        appointments.push(agent_apps[a])
+      }
+    }
+    // appointments = appointments.concat(agent_apps);
     console.log(appointments.length)
     let todayApps = appointments.filter((a) => {
       let x = new Date();
