@@ -117,7 +117,7 @@ class CreateAppointment extends React.Component {
   }
 
   isValidated() {
-    if (new Date().getTime() > new Date(this.state.date).getTime()) return false;
+    if (new Date().getTime() > (new Date(this.state.date).getTime())+(1000*60*60*3)) return false;
     let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     let curDay = days[new Date(this.state.date).getDay()]
     if (this.state.agent.department === "sales") {
