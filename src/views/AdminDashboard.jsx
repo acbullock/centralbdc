@@ -514,7 +514,7 @@ class AdminDashboard extends React.Component {
                                                                 let token = await this.props.mongo.findOne("utils", { "_id": "5df2b825f195a16a1dbd4bf5" })
                                                                 token = token.voice_token
                                                                 //get curr users records
-                                                                let currCount = await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/extension/${a.extension}/call-log?dateFrom=${new Date(new Date().setHours(0, 0, 0, 0)).toISOString()}&access_token=${token}&perPage=1000&withRecording=true`).catch()
+                                                                let currCount = await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/extension/${a.extension}/call-log?dateFrom=${new Date(new Date().setHours(0, 0, 0, 0)).toISOString()}&access_token=${token}&perPage=1000`).catch()
                                                                 let records = currCount.data.records;
                                                                 let lastTime = null
                                                                 for (let i in records) {
