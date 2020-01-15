@@ -57,6 +57,7 @@ class ServiceTVDashboard extends React.Component {
     _isMounted = false;
     async componentDidMount() {
         this._isMounted = true
+        document.body.classList.toggle("sidebar-mini");
         setInterval(() => {
             this.refreshPage()
         }, 300000);
@@ -90,6 +91,7 @@ class ServiceTVDashboard extends React.Component {
     }
     componentWillUnmount() {
         this._isMounted = false
+        document.body.classList.toggle("sidebar-mini");
     }
     async getDepartmentCallCount() {
         let { agents } = this.state;
