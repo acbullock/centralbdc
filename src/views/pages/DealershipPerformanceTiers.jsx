@@ -169,7 +169,6 @@ class DealershipPerformanceTiers extends React.Component {
                 <Container>
                     <Row>
                         <Col className="ml-auto mr-auto text-center" md="6">
-                            <legend>TIER 1</legend>
                             <Card className="card-raised card-white">
                                 <Table bordered striped responsive>
                                     <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
@@ -200,7 +199,6 @@ class DealershipPerformanceTiers extends React.Component {
                             </Card>
                         </Col>
                         <Col className="ml-auto mr-auto text-center" md="6">
-                            <legend>TIER 2</legend>
                             <Card className="card-raised card-white">
                                 <Table bordered striped responsive>
                                     <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
@@ -230,7 +228,6 @@ class DealershipPerformanceTiers extends React.Component {
                             </Card>
                         </Col>
                         <Col className="ml-auto mr-auto text-center" md="6">
-                            <legend>TIER 3</legend>
                             <Card className="card-raised card-white">
                                 <Table bordered striped responsive>
                                     <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
@@ -261,7 +258,6 @@ class DealershipPerformanceTiers extends React.Component {
                             </Card>
                         </Col>
                         <Col className="ml-auto mr-auto text-center" md="6">
-                            <legend>TIER 4</legend>
                             <Card className="card-raised card-white">
                                 <Table bordered striped responsive>
                                     <thead style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
