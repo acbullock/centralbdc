@@ -208,7 +208,7 @@ class Reports extends React.Component {
                         <Col className="ml-auto mr-auto" md="8" hidden={this.state.reportDone === false}>
                             <Card className="card-raised text-center card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <Table >
+                                    <Table responsive>
                                         <thead>
                                             <tr >
                                                 <th style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }} >Dealership</p></th>

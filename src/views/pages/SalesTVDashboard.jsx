@@ -319,8 +319,8 @@ class SalesTVDashboard extends React.Component {
                                     <h3 style={{ color: "white" }}><strong>Total Appointments</strong></h3>
                                     <h3 style={{ color: "white" }}>Today: <strong>{this.state.totalApptCountToday}</strong></h3>
                                     <h3 style={{ color: "white" }}>MTD: <strong>{this.state.apptMtdTotal}</strong></h3>
-                                    <h3 style={{ color: "white" }}>Close Ratio Today: <strong>{Math.round(1000 * this.state.totalApptCountToday / this.state.totalCallCountToday) / 10}%</strong></h3>
-                                    <h3 style={{ color: "white" }}>Close Ratio MTD: <strong>{Math.round(1000 * this.state.apptMtdTotal / this.state.totalCallCountMTD) / 10}%</strong></h3>
+                                    {/* <h3 style={{ color: "white" }}>Close Ratio Today: <strong>{Math.round(1000 * this.state.totalApptCountToday / this.state.totalCallCountToday) / 10}%</strong></h3>
+                                    <h3 style={{ color: "white" }}>Close Ratio MTD: <strong>{Math.round(1000 * this.state.apptMtdTotal / this.state.totalCallCountMTD) / 10}%</strong></h3> */}
                                 </CardBody>
                             </Card>
                         </Col>
