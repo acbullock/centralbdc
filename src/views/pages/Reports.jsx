@@ -85,6 +85,7 @@ class Reports extends React.Component {
         this.setState({ loading: true, clicked: false })
         let appointments = await this.props.mongo.findOne("appointments", { dealership: this.state.selected_dealership.value });
         appointments = appointments.appointments;
+        let verifieds = appointments.map((a)=>{return a.verified})
         let agents = await this.props.mongo.find("agents")
         let agent_apps = [];
         for (let a in agents) {
@@ -93,7 +94,12 @@ class Reports extends React.Component {
         agent_apps = agent_apps.filter((a) => {
             return a.dealership.value === this.state.selected_dealership.value
         })
-        appointments = appointments.concat(agent_apps)
+        for(let a in agent_apps){
+            if(verifieds.indexOf(agent_apps[a].verified) === -1){
+                appointments.push(agent_apps[a])
+            }
+        }
+        // appointments = appointments.concat(agent_apps)
         appointments = appointments.filter((a) => {
             return (new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() &&
                 new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()) && a.dealership_department !== "Service"
