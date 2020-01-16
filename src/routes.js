@@ -68,7 +68,7 @@ import Reports from "./views/pages/Reports.jsx"
 import AdminReports from "./views/pages/AdminReports.jsx"
 import ServiceDashboard from "./views/ServiceDashboard.jsx"
 import ServiceTVDashboard from "./views/pages/ServicceTVDashboard.jsx"
-// import SalesTVDashboard from "./views/pages/SalesTVDashboard.jsx"
+import SalesTVDashboard from "./views/pages/SalesTVDashboard.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 import DealershipProfile from "./views/pages/DealershipProfile.jsx"
@@ -115,13 +115,15 @@ const routes = [
         adminOnly: true,
         icon: "tim-icons icon-notes"
       },
-      // {
-      //   path: "/sales_tv_dashboard",
-      //   name: "Sales TV Dashboard",
-      //   icon: "tim-icons icon-tv-2",
-      //   component: SalesTVDashboard,
-      //   layout: "/admin"
-      // },
+      {
+        path: "/sales_tv_dashboard",
+        name: "Sales TV Dashboard",
+        icon: "tim-icons icon-tv-2",
+        component: SalesTVDashboard,
+        adminOnly: true,
+        //need to remove adminOnly when it's done
+        layout: "/admin"
+      },
       {
         path: "/reports",
         name: "Reports",
