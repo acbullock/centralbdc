@@ -53,6 +53,7 @@ import ApproveAssistance from "./views/pages/ApproveAssistance.jsx"
 import RejectedAssistance from "./views/pages/RejectedAssistance.jsx"
 import AppointmentHistory from "./views/pages/AppointmentHistory.jsx"
 import DealershipHistory from "./views/pages/DealershipHistory.jsx"
+import DealershipHistoryNew from "./views/pages/DealershipHistoryNew.jsx"
 import FailedTexts from "./views/pages/FailedTexts.jsx"
 import AppointmentSearch from "./views/pages/AppointmentSearch.jsx"
 import DealershipManagement from "./views/pages/DealershipManagement.jsx"
@@ -67,6 +68,7 @@ import Reports from "./views/pages/Reports.jsx"
 import AdminReports from "./views/pages/AdminReports.jsx"
 import ServiceDashboard from "./views/ServiceDashboard.jsx"
 import ServiceTVDashboard from "./views/pages/ServicceTVDashboard.jsx"
+// import SalesTVDashboard from "./views/pages/SalesTVDashboard.jsx"
 // import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 import DealershipProfile from "./views/pages/DealershipProfile.jsx"
@@ -113,6 +115,13 @@ const routes = [
         adminOnly: true,
         icon: "tim-icons icon-notes"
       },
+      // {
+      //   path: "/sales_tv_dashboard",
+      //   name: "Sales TV Dashboard",
+      //   icon: "tim-icons icon-tv-2",
+      //   component: SalesTVDashboard,
+      //   layout: "/admin"
+      // },
       {
         path: "/reports",
         name: "Reports",
@@ -294,11 +303,19 @@ const routes = [
       {
         path: "/dealership_history",
         name: "Dealership History",
-        component: DealershipHistory,
+        component: DealershipHistoryNew,
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-notes"
       },
+      // {
+      //   path: "/dealership_history_new",
+      //   name: "Dealership History 2",
+      //   component: DealershipHistoryNew,
+      //   layout: "/admin",
+      //   adminOnly: true,
+      //   icon: "tim-icons icon-notes"
+      // },
       {
         path: "/failed_texts",
         name: "Failed Texts",
