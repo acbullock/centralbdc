@@ -16,7 +16,8 @@ import {
     ModalBody,
     Input,
     FormGroup,
-    Form
+    Form,
+    CardHeader
 } from "reactstrap";
 import Select from 'react-select'
 import ReactDateTime from "react-datetime";
@@ -32,7 +33,9 @@ class Reports extends React.Component {
             toDate: "",
             selected_dealership: { label: "", value: "" },
             reportDone: false,
-            appCount: 0
+            appCount: 0,
+            clicked: false,
+            appointments: []
         }
         this._isMounted = false;
         this.appCountReport = this.appCountReport.bind(this);
@@ -79,7 +82,7 @@ class Reports extends React.Component {
         this._isMounted = false
     }
     async appCountReport() {
-        this.setState({ loading: true })
+        this.setState({ loading: true, clicked: false })
         let appointments = await this.props.mongo.findOne("appointments", { dealership: this.state.selected_dealership.value });
         appointments = appointments.appointments;
         let agents = await this.props.mongo.find("agents")
@@ -93,10 +96,15 @@ class Reports extends React.Component {
         appointments = appointments.concat(agent_apps)
         appointments = appointments.filter((a) => {
             return (new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() &&
-                new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime())
+                new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()) && a.dealership_department !== "Service"
         })
+        appointments.sort((a, b) => {
+            if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return 1;
+            if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return -1;
+            return 0;
 
-        this.setState({ reportDone: true, appCount: appointments.length, loading: false })
+        })
+        this.setState({ reportDone: true, appCount: appointments.length, appointments, loading: false })
     }
 
 
@@ -131,53 +139,56 @@ class Reports extends React.Component {
                     <br />
                     <Row hidden={this.state.selected_report.label !== "Appointment Count"}>
                         <Col className="ml-auto mr-auto" md="8">
-                            <Card className="card-raised card-white">
+                            <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <legend>{this.state.selected_report.label}</legend>
+                                    <legend style={{ color: "white" }}>{this.state.selected_report.label}</legend>
                                     <Form >
                                         <FormGroup>
-                                            <Label>Dealership:</Label>
+                                            <Label style={{ color: "white" }}>Dealership:</Label>
                                             <Select style={{ width: "50%" }}
                                                 options={this.state.dealerships}
                                                 value={this.state.selected_dealership}
-                                                onChange={(e) => { this.setState({ reportDone: false, selected_dealership: e }) }}
+                                                onChange={(e) => { this.setState({ clicked: false, reportDone: false, selected_dealership: e }) }}
                                             />
                                         </FormGroup>
                                         <FormGroup>
-                                            <Label>From: </Label>
-                                            <ReactDateTime
-                                                timeFormat={false}
-                                                inputProps={{
-                                                    className: "form-control",
-                                                    placeholder: "From Date",
-                                                    name: "date",
-                                                }}
-                                                value={this.state.fromDate}
-                                                onChange={(value) => {
-                                                    this.setState({ reportDone: false, fromDate: new Date(value) })
-                                                }
-                                                }
-                                                className="primary"
-                                            />
+                                            <Label style={{ color: "white" }}>From: </Label>
+                                            <Card>
+                                                <ReactDateTime
+                                                    timeFormat={false}
+                                                    inputProps={{
+                                                        className: "form-control",
+                                                        placeholder: "From Date",
+                                                        name: "date",
+                                                    }}
+                                                    value={this.state.fromDate}
+                                                    onChange={(value) => {
+                                                        this.setState({ reportDone: false, fromDate: new Date(value) })
+                                                    }
+                                                    }
+                                                    className="primary"
+                                                />
+                                            </Card>
                                         </FormGroup>
                                         <FormGroup>
-                                            <Label>To: </Label>
-                                            <ReactDateTime
-                                                timeFormat={false}
-                                                inputProps={{
-                                                    className: "form-control",
-                                                    placeholder: "To Date",
-                                                    name: "date"
-                                                }}
-                                                value={this.state.toDate}
-                                                onChange={(value) => {
-                                                    this.setState({ reportDone: false, toDate: new Date(new Date(value).setHours(23, 59, 59, 999)) })
-                                                }
-                                                }
-                                                className="primary"
-                                            />
+                                            <Label style={{ color: "white" }}>To: </Label>
+                                            <Card >
+                                                <ReactDateTime
+                                                    timeFormat={false}
+                                                    inputProps={{
+                                                        className: "form-control",
+                                                        placeholder: "To Date",
+                                                        name: "date"
+                                                    }}
+                                                    value={this.state.toDate}
+                                                    onChange={(value) => {
+                                                        this.setState({ reportDone: false, toDate: new Date(new Date(value).setHours(23, 59, 59, 999)) })
+                                                    }
+                                                    }
+                                                    className="primary"
+                                                /></Card>
                                         </FormGroup>
-                                        <Button color="primary" disabled={
+                                        <Button color="neutral" disabled={
                                             this.state.selected_dealership.label.length < 1 ||
                                             this.state.fromDate.length < 1 ||
                                             this.state.toDate.length < 1 ||
@@ -188,27 +199,49 @@ class Reports extends React.Component {
                             </Card>
 
                         </Col>
-                        <Col className="ml-auto mr-auto" md="12" hidden={this.state.reportDone === false}>
-                            <Card className="card-raised text-center card-white">
+                        <Col className="ml-auto mr-auto" md="8" hidden={this.state.reportDone === false}>
+                            <Card className="card-raised text-center card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <Table bordered>
-                                        <thead style={{ backgroundColor: "#3469a6" }}>
-                                            <tr>
-                                                <th><p style={{ color: "white" }}>Dealership</p></th>
-                                                <th><p style={{ color: "white" }}>From</p></th>
-                                                <th><p style={{ color: "white" }}>To</p></th>
-                                                <th><p style={{ color: "white" }}>Appointment Count</p></th>
+                                    <Table >
+                                        <thead>
+                                            <tr >
+                                                <th style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }} >Dealership</p></th>
+                                                <th style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>From</p></th>
+                                                <th style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>To</p></th>
+                                                <th style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>Appointment Count</p></th>
+                                                <th style={{ borderBottom: "1px solid white" }}></th>
+
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td>{this.state.selected_dealership.label}</td>
-                                                <td>{new Date(this.state.fromDate).toLocaleDateString()}</td>
-                                                <td>{new Date(this.state.toDate).toLocaleDateString()}</td>
-                                                <td>{this.state.appCount}</td>
+                                                <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{this.state.selected_dealership.label}</p></td>
+                                                <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{new Date(this.state.fromDate).toLocaleDateString()}</p></td>
+                                                <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{new Date(this.state.toDate).toLocaleDateString()}</p></td>
+                                                <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}> {this.state.appCount}</p></td>
+                                                <td style={{ borderBottom: "1px solid white" }}><p style={{ cursor: "pointer", color: "#ff8d72" }} onClick={() => {
+                                                    this.setState({ clicked: true })
+                                                }}> Show</p></td>
                                             </tr>
                                         </tbody>
                                     </Table>
+                                </CardBody>
+                            </Card>
+                            <Card className="card-raised card-white" hidden={!this.state.clicked} style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <CardHeader><strong>{this.state.appointments.length} Results</strong></CardHeader>
+                                <CardBody>
+                                    {this.state.appointments.map((a, i) => {
+                                        return (
+                                            <Card key={i} color="transparent" className="card-raised card-white">
+
+                                                <CardBody style={{ whiteSpace: "pre-wrap" }}>
+                                                    <p style={{ color: "white" }}><strong>{i + 1}.</strong></p>
+                                                    <p style={{ color: "white" }}><strong>{a.internal_msg}</strong></p>
+                                                    <p style={{ color: "white" }}>Created: <strong>{new Date(a.verified).toLocaleString()}</strong></p>
+                                                </CardBody>
+                                            </Card>
+                                        );
+                                    })}
                                 </CardBody>
                             </Card>
 
