@@ -176,7 +176,7 @@ class DealershipHistoryNew extends React.Component {
                 <div className="content">
                     <Container>
                         <Row style={{ textAlign: "center", justifyContent: "center" }}>
-                            <Col md="10">
+                            <Col md="12">
                                 <Card className="card-raised card-white text-center" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                     <CardHeader>
                                         <CardTitle><h1 style={{ color: "white" }}><strong>Dealership History</strong></h1></CardTitle>
@@ -195,7 +195,7 @@ class DealershipHistoryNew extends React.Component {
                             </Col>
                         </Row>
                         <Row hidden={this.state.historyAssistance.length < 1 && this.state.history.length < 1 && !this.state.historyLoading} style={{ justifyContent: "center" }}>
-                            <Col md="10">
+                            <Col md="12">
                                 <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                     <CardHeader>
                                         <CardTitle><h1 className="text-center" style={{ color: "white" }}>Select Date Range</h1></CardTitle>
@@ -270,7 +270,7 @@ class DealershipHistoryNew extends React.Component {
                         </Row>
 
                         <Row style={{ justifyContent: "center" }} hidden={!this.state.searched}>
-                            <Col md="5">
+                            <Col md="6">
                                 <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)", padding: "20px" }}>
                                     <Card className="card-raised card-white" >
                                         <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.resultsLoading} />
@@ -291,7 +291,7 @@ class DealershipHistoryNew extends React.Component {
 
                                 </Card>
                             </Col>
-                            <Col md="5">
+                            <Col md="6">
                                 <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)", padding: "20px" }}>
                                     <Card className="card-raised card-white" >
                                         <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.resultsAssistanceLoading} />
