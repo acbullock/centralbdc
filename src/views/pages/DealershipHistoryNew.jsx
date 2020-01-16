@@ -101,6 +101,9 @@ class DealershipHistoryNew extends React.Component {
 
         let all_appts = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealer.value })
         appts = appts.concat(all_appts)
+        appts = appts.filter((a)=>{
+            return a.dealership_department !== "Service"
+        })
         this._isMounted && this.setState({ historyLoading: false, history: appts })
 
     }
