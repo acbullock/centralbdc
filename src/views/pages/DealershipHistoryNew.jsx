@@ -53,11 +53,14 @@ class DealershipHistoryNew extends React.Component {
             selected_dealership: { label: "", value: "" },
             historyLoading: false,
             history: [],
+            historyAssistance: [],
             fromDate: new Date(),
             toDate: new Date(),
             results: [],
+            resultsAssistance: [],
             searched: false,
-            resultsLoading: false
+            resultsLoading: false,
+            resultsAssistanceLoading: false
         };
         this.loadHistory = this.loadHistory.bind(this)
         this.getResults = this.getResults.bind(this)
@@ -92,23 +95,27 @@ class DealershipHistoryNew extends React.Component {
         this._isMounted && this.setState({ historyLoading: true })
         let agents = this.state.agents
         let appts = []
+        let assistance = []
         for (let a in agents) {
             appts = appts.concat(agents[a].appointments)
+            assistance = assistance.concat(agents[a].assistance)
         }
         appts = appts.filter((a) => {
             return a.dealership.value === dealer.value
         })
-
+        assistance = assistance.filter((a) => {
+            return a.dealership.value === dealer.value
+        })
         let all_appts = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealer.value })
         appts = appts.concat(all_appts)
-        appts = appts.filter((a)=>{
+        appts = appts.filter((a) => {
             return a.dealership_department !== "Service"
         })
-        this._isMounted && this.setState({ historyLoading: false, history: appts })
+        this._isMounted && this.setState({ historyLoading: false, history: appts, historyAssistance: assistance })
 
     }
     async getResults() {
-        this._isMounted && await this.setState({ searched: true, resultsLoading: true, results: [] })
+        this._isMounted && await this.setState({ searched: true, resultsLoading: true, resultsAssistanceLoading: true, results: [], resultsAssistance: [] })
         let from = new Date(this.state.fromDate).setHours(0, 0, 0, 0)
         let to = new Date(this.state.toDate).setHours(23, 59, 59, 999)
         let results = this.state.history.filter((a) => {
@@ -118,6 +125,16 @@ class DealershipHistoryNew extends React.Component {
         results.sort((a, b) => {
             if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return 1;
             if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return -1;
+            return 0
+        })
+
+        let resultsAssistance = this.state.historyAssistance.filter((a) => {
+            let created = new Date(a.created)
+            return created.getTime() >= new Date(from).getTime() && created.getTime() <= new Date(to).getTime()
+        })
+        resultsAssistance.sort((a, b) => {
+            if (new Date(a.created).getTime() > new Date(b.created).getTime()) return 1;
+            if (new Date(a.created).getTime() < new Date(b.created).getTime()) return -1;
             return 0
         })
         for (let r in results) {
@@ -135,7 +152,7 @@ class DealershipHistoryNew extends React.Component {
                 resolve()
             }, 200);
         })
-        this._isMounted && await this.setState({ results, resultsLoading: false })
+        this._isMounted && await this.setState({ results, resultsLoading: false, resultsAssistanceLoading: false, resultsAssistance })
 
     }
     render() {
@@ -159,7 +176,7 @@ class DealershipHistoryNew extends React.Component {
                 <div className="content">
                     <Container>
                         <Row style={{ textAlign: "center", justifyContent: "center" }}>
-                            <Col md="8">
+                            <Col md="10">
                                 <Card className="card-raised card-white text-center" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                     <CardHeader>
                                         <CardTitle><h1 style={{ color: "white" }}><strong>Dealership History</strong></h1></CardTitle>
@@ -169,7 +186,7 @@ class DealershipHistoryNew extends React.Component {
                                             options={this.state.dealerships}
                                             value={this.state.selected_dealership}
                                             onChange={(e) => {
-                                                this._isMounted && this.setState({ selected_dealership: e, history: [], results: [], searched: false })
+                                                this._isMounted && this.setState({ selected_dealership: e, history: [], historyAssistance: [], results: [], resultsAssistance: [], searched: false })
                                                 this.loadHistory(e)
                                             }}
                                         />
@@ -177,8 +194,8 @@ class DealershipHistoryNew extends React.Component {
                                 </Card>
                             </Col>
                         </Row>
-                        <Row hidden={this.state.history.length < 1 && !this.state.historyLoading} style={{ justifyContent: "center" }}>
-                            <Col md="8">
+                        <Row hidden={this.state.historyAssistance.length < 1 && this.state.history.length < 1 && !this.state.historyLoading} style={{ justifyContent: "center" }}>
+                            <Col md="10">
                                 <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                     <CardHeader>
                                         <CardTitle><h1 className="text-center" style={{ color: "white" }}>Select Date Range</h1></CardTitle>
@@ -237,10 +254,10 @@ class DealershipHistoryNew extends React.Component {
                                                 </FormGroup>
                                                 <FormGroup>
                                                     <Button
-                                                        disabled={new Date(this.state.fromDate).getTime() > new Date(this.state.toDate).getTime() || this.state.resultsLoading}
+                                                        disabled={new Date(this.state.fromDate).getTime() > new Date(this.state.toDate).getTime() || this.state.resultsLoading || this.state.resultsAssistanceLoading}
                                                         color="primary" onClick={(e) => {
                                                             e.preventDefault();
-                                                            this._isMounted && this.setState({ results: [] })
+                                                            this._isMounted && this.setState({ results: [], resultsAssistance: [] })
 
                                                             this.getResults()
                                                         }}>Search</Button>
@@ -253,12 +270,12 @@ class DealershipHistoryNew extends React.Component {
                         </Row>
 
                         <Row style={{ justifyContent: "center" }} hidden={!this.state.searched}>
-                            <Col md="8">
+                            <Col md="5">
                                 <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)", padding: "20px" }}>
                                     <Card className="card-raised card-white" >
                                         <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.resultsLoading} />
                                     </Card>
-                                    <h2 style={{ color: "white" }}>{this.state.results.length} Results</h2>
+                                    <h2 style={{ color: "white" }}>Appointments: {this.state.results.length} Results</h2>
                                     {this.state.results.map((a, i) => {
                                         return (
                                             <Card key={i} color="transparent" className="card-raised card-white shadow">
@@ -266,6 +283,31 @@ class DealershipHistoryNew extends React.Component {
                                                     <p style={{ color: "white" }}><strong>{i + 1}.</strong></p>
                                                     <p style={{ color: "white" }}><strong>{a.internal_msg}</strong></p>
                                                     <p style={{ color: "white" }}>Created: <strong>{new Date(a.verified).toLocaleString()}</strong></p>
+                                                    <p style={{ color: "white" }}>Agent Name: <strong>{a.agent_name}</strong></p>
+                                                </CardBody>
+                                            </Card>);
+                                    })}
+
+
+                                </Card>
+                            </Col>
+                            <Col md="5">
+                                <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)", padding: "20px" }}>
+                                    <Card className="card-raised card-white" >
+                                        <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.resultsAssistanceLoading} />
+                                    </Card>
+                                    <h2 style={{ color: "white" }}>Follow-ups: {this.state.resultsAssistance.length} Results</h2>
+                                    {this.state.resultsAssistance.map((a, i) => {
+                                        return (
+                                            <Card key={i} color="transparent" className="card-raised card-white shadow">
+                                                <CardBody style={{ whiteSpace: "pre-wrap" }}>
+                                                    <p style={{ color: "white" }}><strong>{i + 1}.</strong></p>
+                                                    <p style={{color: "white"}}><strong>{a.dealership.label}</strong></p>
+                                                    <p style={{ color: "white" }}><strong>{a.customer_firstname} {a.customer_lastname}</strong></p>
+                                                    <p style={{ color: "white" }}><strong>({a.customer_phone.substring(0,3)}) {a.customer_phone.substring(3,6)} - {a.customer_phone.substring(6,10)}</strong></p>
+                                                    <p style={{ color: "white" }}><strong>{a.message}</strong></p>
+                                                    <p style={{color: "white"}}>Source: <strong>{a.source.label}</strong></p>
+                                                    <p style={{ color: "white" }}>Created: <strong>{new Date(a.created).toLocaleString()}</strong></p>
                                                     <p style={{ color: "white" }}>Agent Name: <strong>{a.agent_name}</strong></p>
                                                 </CardBody>
                                             </Card>);
