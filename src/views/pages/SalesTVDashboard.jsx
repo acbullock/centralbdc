@@ -64,7 +64,7 @@ class SalesTVDashboard extends React.Component {
         document.body.classList.toggle("sidebar-mini");
         setInterval(() => {
             this.refreshPage()
-        }, 300000);
+        }, 900000);
         this._isMounted && this.setState({ loading: true })
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         if (user.userId == undefined) {
