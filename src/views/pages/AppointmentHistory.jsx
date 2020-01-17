@@ -58,11 +58,11 @@ class AppointmentHistory extends React.Component {
     })
     let today = new Date()
     today.setHours(0, 0, 0, 0)
-    appts = appts.filter((a) => {
+    appts = this._isMounted && appts.filter((a) => {
       return new Date(a.verified).getTime() > today.getTime()
     })
 
-    this.setState({ appointments: appts, loading: false })
+    this._isMounted && this.setState({ appointments: appts, loading: false })
 
   }
   componentWillUnmount() {

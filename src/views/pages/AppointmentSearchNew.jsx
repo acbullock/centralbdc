@@ -152,8 +152,8 @@ class AppointmnetSearchNew extends React.Component {
 
         }
         total_apps.sort((a, b) => {
-            if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return -1;
-            if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1;
+            if (new Date(a.created).getTime() > new Date(b.created).getTime()) return -1;
+            if (new Date(a.created).getTime() < new Date(b.created).getTime()) return 1;
             return 0;
         })
         total_asst.sort((a, b) => {

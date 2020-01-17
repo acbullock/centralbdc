@@ -355,7 +355,7 @@ const routes = [
     views: [
       {
         path: "/new_appointment",
-        name: "Create New Appointmennt",
+        name: "Create New Appointment",
         component: CreateAppointment,
         layout: "/admin",
         adminOnly: false,
