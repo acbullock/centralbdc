@@ -52,10 +52,11 @@ import Assistance from "./views/pages/Assistance.jsx"
 import ApproveAssistance from "./views/pages/ApproveAssistance.jsx"
 import RejectedAssistance from "./views/pages/RejectedAssistance.jsx"
 import AppointmentHistory from "./views/pages/AppointmentHistory.jsx"
-import DealershipHistory from "./views/pages/DealershipHistory.jsx"
+// import DealershipHistory from "./views/pages/DealershipHistory.jsx"
 import DealershipHistoryNew from "./views/pages/DealershipHistoryNew.jsx"
 import FailedTexts from "./views/pages/FailedTexts.jsx"
-import AppointmentSearch from "./views/pages/AppointmentSearch.jsx"
+// import AppointmentSearch from "./views/pages/AppointmentSearch.jsx"
+import AppointmentSearchNew from "./views/pages/AppointmentSearchNew.jsx"
 import DealershipManagement from "./views/pages/DealershipManagement.jsx"
 import UserManagement from "./views/pages/UserManagement.jsx"
 import DealershipLogin from "./views/pages/DealershipLogin.jsx"
@@ -384,10 +385,18 @@ const routes = [
         adminOnly: false,
         icon: "tim-icons icon-single-copy-04"
       },
+      // {
+      //   path: "/appointment_search",
+      //   name: "Appointment Search",
+      //   component: AppointmentSearch,
+      //   layout: "/admin",
+      //   adminOnly: true,
+      //   icon: "tim-icons icon-light-3"
+      // },
       {
         path: "/appointment_search",
         name: "Appointment Search",
-        component: AppointmentSearch,
+        component: AppointmentSearchNew,
         layout: "/admin",
         adminOnly: true,
         icon: "tim-icons icon-light-3"
