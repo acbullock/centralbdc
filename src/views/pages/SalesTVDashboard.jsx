@@ -41,6 +41,7 @@ class SalesTVDashboard extends React.Component {
             user: {},
             agent: {},
             agents: [],
+            dealerships: [],
             totalCallCountToday: 0,
             totalApptCountToday: 0,
             callSortedAgents: [],
@@ -81,10 +82,10 @@ class SalesTVDashboard extends React.Component {
         })
         this._isMounted && this.setState({ agent, user, agents });
         this._isMounted && this.getMTDData();
-        this._isMounted && await this.getDepartmentCallCount()
-        this._isMounted && await this.getDepartmentApptCount()
-        this._isMounted && await this.getApptsMTD()
-        this._isMounted && await this.getDepartmentCallCountMTD()
+        this._isMounted && this.getDepartmentCallCount()
+        this._isMounted && this.getDepartmentApptCount()
+        this._isMounted && this.getApptsMTD()
+        this._isMounted && this.getDepartmentCallCountMTD()
         this._isMounted && await this.setState({ loading: false })
 
     }
@@ -194,18 +195,27 @@ class SalesTVDashboard extends React.Component {
     async getMTDData() {
         this.setState({ mtdDataLoading: true })
         let dealerships = await this.props.mongo.find("dealerships", { isSales: true, isActive: true })
+        this.setState({ dealerships })
         let agents = this.state.agents
-        let appts = []
+        this.setState({ mtdDataLoading: false })
         for (let a in agents) {
-            appts = appts.concat(agents[a].appointments)
+            this.getAgentMTDData(agents[a])
         }
-        let all_appointments = await this.props.mongo.find("all_appointments")
-        appts = appts.concat(all_appointments)
-        console.log("got all apps")
-        appts = appts.filter((a) => {
+    }
+    async getAgentMTDData(agent) {
+        let { agents, dealerships } = this.state
+        let agentIndex = agents.findIndex((a) => {
+            return a.email === agent.email
+        })
+        let apps = agents[agentIndex].appointments;
+        let all_apps = await this.props.mongo.find("all_appointments", { agent_id: agent._id })
+        apps = apps.concat(all_apps)
+        apps = apps.filter((a) => {
             if (a.dealership_department === "Service") return false
+            if (a.dealership == undefined) { console.log(Object.keys(a)) }
             let found = false;
             for (let d in dealerships) {
+
                 if (dealerships[d].value === a.dealership.value) {
                     found = true;
                     break;
@@ -215,23 +225,16 @@ class SalesTVDashboard extends React.Component {
         })
         let first = new Date(new Date().setDate(1))
         first = new Date(first.setHours(0, 0, 0, 0))
-        appts = appts.filter((a) => {
+        apps = apps.filter((a) => {
             return new Date(a.verified).getTime() >= first.getTime()
         })
 
-        this.setState({ mtdApps: appts, mtdDataLoading: false })
-        for (let a in agents) {
-            this.getAgentMTDData(agents[a])
-        }
-    }
-    async getAgentMTDData(agent) {
-        let { agents } = this.state
-        let agent_MTD = this.state.mtdApps.filter((a) => {
+        let agent_MTD = apps.filter((a) => {
             // console.log(a.agent_id, agent._id)
             return a.agent_id == agent._id
         })
         agent.agent_MTD = agent_MTD.length;
-        let first = new Date().setDate(1)
+        first = new Date().setDate(1)
         first = new Date(first).setHours(1, 1, 1, 1)
         let daysElapsed = (new Date().getTime() - new Date(first).getTime()) / (1000 * 3600 * 24)
         agent.agent_MTD_Avg = Math.round(10 * agent.agent_MTD / daysElapsed) / 10;
@@ -248,15 +251,14 @@ class SalesTVDashboard extends React.Component {
         let dayMs = 1000 * 60 * 60 * 24;
         let dict = {};
         let max = 0;
-        for(let a in agent_MTD){
-            
+        for (let a in agent_MTD) {
             let verified = new Date(agent_MTD[a].verified)
             let key = `${verified.getMonth()}_${verified.getDate()}_${verified.getFullYear()}`
-            if(dict[key] === undefined){
+            if (dict[key] === undefined) {
                 dict[key] = 0
             }
             dict[key]++;
-            if(dict[key] > max){
+            if (dict[key] > max) {
                 max = dict[key]
             }
         }
@@ -391,7 +393,8 @@ class SalesTVDashboard extends React.Component {
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.agent_MTD || "Loading.."}</strong></p></td>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.agent_MTD_Avg || "Loading.."}</strong></p></td>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.seven_day_avg || "Loading.."}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.mtdHigh|| "Loading.."}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.mtdHigh || "Loading.."}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.personalRecord || "Loading.."}</strong></p></td>
                                                 </tr>
                                             })}
                                         </tbody>
