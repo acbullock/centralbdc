@@ -117,7 +117,7 @@ class CreateAppointment extends React.Component {
   }
 
   isValidated() {
-    if (new Date().getTime() > (new Date(this.state.date).getTime())+(1000*60*60*3)) return false;
+    if (new Date().getTime() > (new Date(this.state.date).getTime()) + (1000 * 60 * 60 * 3)) return false;
     let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     let curDay = days[new Date(this.state.date).getDay()]
     if (this.state.agent.department === "sales") {
@@ -127,6 +127,9 @@ class CreateAppointment extends React.Component {
       //create a date with today's date but open/close times
       let curOpen = new Date(new Date(this.state.date).setHours(new Date(curHrs.open).getHours(), new Date(curHrs.open).getMinutes(), 0, 0));
       let curClose = new Date(new Date(this.state.date).setHours(new Date(curHrs.close).getHours(), new Date(curHrs.close).getMinutes(), 0, 0))
+
+      //15 min before close..
+      curClose = new Date(curClose.getTime() - (1000 * 60 * 15))
       if (new Date(this.state.date).getTime() < curOpen.getTime() ||
         new Date(this.state.date).getTime() > curClose.getTime()) {
         return false
@@ -294,8 +297,8 @@ class CreateAppointment extends React.Component {
                     }}
                     value={this.state.date}
                     onChange={(value) => {
-                      if(new Date(value).getTime() !== new Date(value).getTime()){
-                        value = new Date(new Date().setHours(new Date().getHours() +1, 0,0,0))
+                      if (new Date(value).getTime() !== new Date(value).getTime()) {
+                        value = new Date(new Date().setHours(new Date().getHours() + 1, 0, 0, 0))
                       }
                       let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
                       let x = new Date(value)

@@ -52,20 +52,58 @@ class Dealership extends React.Component {
     this._isMounted = false
     // console.log(props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo)
   }
+  async getDealershipsInGroup() {
+    if (this.state.agent.access === "group") {
+      let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true, group: this.state.dealership.group })
+
+      dealerships.sort((a, b) => {
+        if (a.label > b.label) return 1;
+        if (a.label < b.label) return -1;
+        return 0;
+      })
+      this._isMounted && this.setState({ dealershipsInGroup: dealerships })
+    }
+    else if (this.state.agent.access === "store") {
+      this._isMounted && this.setState({ dealershipsInGroup: [this.state.dealership] })
+    }
+    else if (this.state.agent.access === "admin") {
+      let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
+      // dealerships = dealerships.filter((d) => {
+      //   return d.isActive === true
+      // })
+      dealerships.sort((a, b) => {
+        if (a.label > b.label) return 1;
+        if (a.label < b.label) return -1;
+        return 0;
+      })
+      this._isMounted && this.setState({ dealershipsInGroup: dealerships })
+    }
+    if (this.state.dealershipsInGroup.length < 1) {
+      this.props.history.push("/authentication/login")
+      return;
+    }
+  }
   async componentWillMount() {
-    this.setState({ loading: true })
-    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+    this._isMounted = true;
+
+    this._isMounted && this.setState({ loading: true })
+    let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
     if (user.userId == undefined) {
+      this._isMounted = false
       this.props.history.push("/authentication/login")
       return;
     }
     let agent = await this.props.mongo.findOne("dealership_users", { "userId": user.userId })
     if (agent == "") {
+      this._isMounted = false
       this.props.history.push("/authentication/login")
       return;
     }
-    this.setState({ agent: agent })
+    this._isMounted && this.setState({ agent: agent })
 
+    let dealership = this._isMounted && await this.props.mongo.findOne("dealerships", { value: agent.dealership })
+    this._isMounted && this.setState({ dealership });
+    this._isMounted && await this.getDealershipsInGroup()
     if (this.refs.mainPanel != undefined && navigator.platform.indexOf("Win") > -1) {
       document.documentElement.className += " perfect-scrollbar-on";
       document.documentElement.classList.remove("perfect-scrollbar-off");
@@ -81,11 +119,11 @@ class Dealership extends React.Component {
       return;
     }
 
-    let dealer = await this.props.mongo.findOne("dealerships", { _id: this.state.agent.dealership })
-    let group = await this.props.mongo.findOne("dealership_groups", { _id: dealer.group })
+    let dealer = this._isMounted && await this.props.mongo.findOne("dealerships", { _id: this.state.agent.dealership })
+    let group = this._isMounted && await this.props.mongo.findOne("dealership_groups", { _id: dealer.group })
     group = group.label;
     dealer = dealer.label
-    this.setState({ dealership_group: group, dealership: dealer, loading: false })
+    this._isMounted && this.setState({ dealership_group: group, dealership: dealer, loading: false })
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -263,7 +301,7 @@ class Dealership extends React.Component {
             sidebarOpened={this.state.sidebarOpened}
             toggleSidebar={this.toggleSidebar}
           />
-           <br />
+          <br />
           {/*<br />
           <br />
           <h2 className="text-center"><strong>{this.state.dealership_group}</strong></h2> */}

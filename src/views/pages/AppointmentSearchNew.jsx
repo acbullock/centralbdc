@@ -58,19 +58,19 @@ class AppointmnetSearchNew extends React.Component {
     _isMounted = false
     async componentDidMount() {
         this._isMounted = true
-        this.setState({ loading: true })
-        let agents = await this.props.mongo.find("agents");
-        agents = agents.map((a) => {
+        this._isMounted && this.setState({ loading: true })
+        let agents = this._isMounted && await this.props.mongo.find("agents");
+        agents = this._isMounted && agents.map((a) => {
             a.label = a.name;
             a.value = a._id;
             return a;
         })
-        agents.sort((a, b) => {
+        this._isMounted && agents.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
             return 0;
         })
-        this.setState({ loading: false, agents })
+        this._isMounted && this.setState({ loading: false, agents })
 
     }
     onInputChange(key, value) {

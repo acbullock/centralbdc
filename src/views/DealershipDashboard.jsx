@@ -145,12 +145,8 @@ class DealershipDashboard extends React.Component {
   }
   async getDealershipsInGroup() {
     if (this.state.agent.access === "group") {
-      let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
+      let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true, group: this.state.dealership.group })
 
-      dealerships = dealerships.filter((d) => {
-        // return d.isActive === true && d.group == this.state.dealership.group
-        return d.group == this.state.dealership.group
-      })
       dealerships.sort((a, b) => {
         if (a.label > b.label) return 1;
         if (a.label < b.label) return -1;
@@ -225,11 +221,11 @@ class DealershipDashboard extends React.Component {
     })
 
     appointments = appointments.appointments;
-    let appt_verifieds = appointments.map(a=>{
+    let appt_verifieds = appointments.map(a => {
       return a.verified
     })
-    for(let a in agent_apps){
-      if(appt_verifieds.indexOf(agent_apps[a].verified) === -1){
+    for (let a in agent_apps) {
+      if (appt_verifieds.indexOf(agent_apps[a].verified) === -1) {
         appointments.push(agent_apps[a])
       }
     }
@@ -370,11 +366,11 @@ class DealershipDashboard extends React.Component {
                 <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                   <CardHeader>
                     <CardTitle tag="h3" >
-                      <p style={{color: "white"}}><strong>Today's Appointments</strong></p>
+                      <p style={{ color: "white" }}><strong>Today's Appointments</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{color: "white"}}>{(() => {
+                    <h1 style={{ color: "white" }}>{(() => {
                       if (this.state.todayApps === "Loading..") {
                         return <strong>Loading..</strong>
                       }
@@ -391,11 +387,11 @@ class DealershipDashboard extends React.Component {
                     <div className="tools float-right">
                     </div>
                     <CardTitle tag="h3" >
-                      <p style={{color: "white"}}><strong>Tomorrow's Appointments</strong></p>
+                      <p style={{ color: "white" }}><strong>Tomorrow's Appointments</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{color: "white"}}>{(() => {
+                    <h1 style={{ color: "white" }}>{(() => {
                       if (this.state.tomorrowApps === "Loading..") {
                         return <strong>Loading..</strong>
                       }
@@ -433,11 +429,11 @@ class DealershipDashboard extends React.Component {
                     <div className="tools float-right">
                     </div>
                     <CardTitle tag="h3" >
-                      <p style={{color: "white"}}><strong>Total Appts: {this.state.thisMonth}</strong></p>
+                      <p style={{ color: "white" }}><strong>Total Appts: {this.state.thisMonth}</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{color: "white"}}>{(() => {
+                    <h1 style={{ color: "white" }}>{(() => {
                       if (this.state.thisMonthApps === "Loading..") {
                         return <strong>Loading..</strong>
                       }
@@ -470,10 +466,10 @@ class DealershipDashboard extends React.Component {
               <Col sm="4">
                 <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                   <CardHeader>
-                    <CardTitle tag="h3" ><p style={{color: "white"}}><strong>Total Appts: {this.state.lastMonth}</strong></p></CardTitle>
+                    <CardTitle tag="h3" ><p style={{ color: "white" }}><strong>Total Appts: {this.state.lastMonth}</strong></p></CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
-                    <h1 style={{color:"white"}}>{(() => {
+                    <h1 style={{ color: "white" }}>{(() => {
                       if (this.state.lastMonthApps === "Loading..") {
                         return <strong>Loading..</strong>
                       }
