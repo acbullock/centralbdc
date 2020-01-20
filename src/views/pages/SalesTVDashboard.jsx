@@ -51,7 +51,8 @@ class SalesTVDashboard extends React.Component {
             apptMtdTotal: 0,
             totalCallCountMTD: 0,
             mtdDataLoading: false,
-            mtdApps: []
+            mtdApps: [],
+            todayAgents:[]
         };
         this.getDepartmentCallCount = this.getDepartmentCallCount.bind(this)
         this.getDepartmentApptCount = this.getDepartmentApptCount.bind(this)
@@ -274,6 +275,12 @@ class SalesTVDashboard extends React.Component {
             return b.agent_MTD - a.agent_MTD
         })
         this.setState({ agents })
+        agents.sort((a, b) => {
+            if(a.appointments.length > b.appointments.length) return -1;
+            if(a.appointments.length < b.appointments.length) return 1;
+            return 0;
+        })
+        this.setState({ todayAgents: agents })
         // console.log(agents)
     }
     render() {
@@ -390,11 +397,11 @@ class SalesTVDashboard extends React.Component {
                                                 return <tr key={i}>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.agent_MTD || "Loading.."}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.agent_MTD_Avg || "Loading.."}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.seven_day_avg || "Loading.."}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.mtdHigh || "Loading.."}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.personalRecord || "Loading.."}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.agent_MTD === undefined ? "Loading.." : a.agent_MTD}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.agent_MTD_Avg === undefined ? "Loading.." : a.agent_MTD_Avg}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.seven_day_avg === undefined ? "Loading.." : a.seven_day_avg}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.mtdHigh === undefined ? "Loading.." : a.mtdHigh}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.personalRecord === undefined ? "Loading.." : a.personalRecord}</strong></p></td>
                                                 </tr>
                                             })}
                                         </tbody>
@@ -455,7 +462,7 @@ class SalesTVDashboard extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.agents.map((a, i) => {
+                                            {this.state.todayAgents.map((a, i) => {
                                                 if (i > 9) return null
                                                 return <tr key={i}>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
