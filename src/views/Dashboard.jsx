@@ -914,6 +914,39 @@ class Dashboard extends React.Component {
           </Row>
           <Row style={{ justifyContent: "center" }}>
             <Col lg="12">
+              <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                <CardHeader>
+                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Record Breakers</strong></p></CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <Table responsive >
+                    <thead className="text-primary" >
+                      <tr>
+                        <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Agent Name</p></th>
+                        <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Appointment Count</p></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {
+                        this.state.agents.map((agent, index) => {
+                          if (agent.appointments.length === 0 || agent.appointments.length < agent.personalRecord || agent.account_type !== "agent") return null;
+                          return (
+                            <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.appointments.length}</strong></p></td>
+                            </tr>
+                          )
+                        })
+                      }
+                    </tbody>
+                  </Table>
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row style={{ justifyContent: "center" }}>
+            <Col lg="12">
 
               {/* <Card hidden={!this.state.isAdmin}>
                 <CardHeader>
