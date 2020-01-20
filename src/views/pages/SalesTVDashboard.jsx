@@ -401,7 +401,7 @@ class SalesTVDashboard extends React.Component {
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.agent_MTD_Avg === undefined ? "Loading.." : a.agent_MTD_Avg}</strong></p></td>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.seven_day_avg === undefined ? "Loading.." : a.seven_day_avg}</strong></p></td>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.mtdHigh === undefined ? "Loading.." : a.mtdHigh}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.personalRecord === undefined ? "Loading.." : a.personalRecord}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: a.appointments.length>=a.personalRecord?"yellow":"white" }}><strong>{a.personalRecord === undefined ? "Loading.." : a.personalRecord}</strong></p></td>
                                                 </tr>
                                             })}
                                         </tbody>
