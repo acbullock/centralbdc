@@ -66,7 +66,8 @@ class Dashboard extends React.Component {
       elements: [],
       selected_agent: { label: "", value: "" },
       counts: {},
-      mtdtop5loading: false
+      mtdtop5loading: false,
+      mtdloadnew: false
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
     this.getBreakDown = this.getBreakDown.bind(this)
@@ -465,7 +466,7 @@ class Dashboard extends React.Component {
 
   }
   async getMtdTop5() {
-    this._isMounted && this.setState({ loading: true })
+    this._isMounted && this.setState({ loading: true, mtdloadnew:true })
     let allAgents = this.state.agents;
     let allApps = []
     let apps = []
@@ -543,7 +544,7 @@ class Dashboard extends React.Component {
     //   return 0;
     // })
     // this._isMounted && this.setState({ loading: false, mtdtop5loading: false, mtdTop5: nums })
-    this._isMounted && this.setState({ loading: false })
+    this._isMounted && this.setState({ loading: false, mtdloadnew: false })
   }
   async getAppointmentData() {
     this._isMounted && this.setState({ loading: true })
@@ -840,7 +841,7 @@ class Dashboard extends React.Component {
             <Col lg="6">
               <Card className="text-center card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
-                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
+                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong>{this.state.mtdloadnew ? " (still loading)" : null}</p></CardTitle>
                 </CardHeader>
                 <CardBody>
                   <CardImg top width="100%" hidden={!this.state.mtdtop5loading} src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
@@ -848,11 +849,13 @@ class Dashboard extends React.Component {
                   {
 
                     this.state.mtdTop5.map((a, i) => {
-                      let thisAgent = this.state.mtdTop5.filter((a) => {
-                        return a.name === this.state.agent.name
+                      let thisAgent = this.state.mtdTop5.filter((ag) => {
+                        return ag.name === this.state.agent.name
                       })
                       thisAgent = thisAgent[0];
-
+                      if (thisAgent === undefined) {
+                        return null;
+                      }
                       if (i > 0) return null;
                       let rank = 1
                       for (let agent in this.state.mtdTop5) {
@@ -920,7 +923,7 @@ class Dashboard extends React.Component {
             <Col lg="6">
               <Card className="card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
-                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Top 10 Agents MTD</strong></p></CardTitle>
+                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Top 10 Agents MTD</strong>{this.state.mtdloadnew ? " (still loading)" : null}</p></CardTitle>
                 </CardHeader>
                 <CardBody>
                   <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.mtdtop5loading} style={{ backgroundColor: "white" }} />
@@ -956,7 +959,7 @@ class Dashboard extends React.Component {
             <Col lg="12">
               <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
-                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Record Breakers</strong></p></CardTitle>
+                  <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Record Breakers </strong><i style={{ color: "yellow" }} className="tim-icons icon-trophy" /></p></CardTitle>
                 </CardHeader>
                 <CardBody>
                   <Table responsive >
