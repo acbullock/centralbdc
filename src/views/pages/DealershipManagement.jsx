@@ -468,7 +468,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="dealershipMainPhone">Dealership Main Phone Number</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="dealershipMainPhone"
                                                         id="dealershipMainPhone"
                                                         placeholder="Dealership Main Phone #"
@@ -502,7 +502,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="avgMonthlyLeadCount">Average Monthly Lead Count</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="avgMonthlyLeadCount"
                                                         id="avgMonthlyLeadCount"
                                                         placeholder="Average Monthly Lead Count"
@@ -513,7 +513,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="avgMonthlyRO">Average Monthly Repair Order Count</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="avgMonthlyRO"
                                                         id="avgMonthlyRO"
                                                         placeholder="Average Monthly RO Count"
@@ -524,7 +524,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="avgMonthlyPhoneUps">Average Monthly Phone-Ups</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="avgMonthlyPhoneUps"
                                                         id="avgMonthlyPhoneUps"
                                                         placeholder="Average Monthly Phone-Ups"
@@ -535,7 +535,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="dailyApptGoal">Daily Appointment Goal</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="dailyApptGoal"
                                                         id="dailyApptGoal"
                                                         placeholder="Daily Appointment Goal"
@@ -581,7 +581,7 @@ class DealershipManagement extends React.Component {
                                                     <Input
                                                         value={this.state.addRingCentral}
                                                         onChange={(e) => { this.onValueChange("addRingCentral", e.target.value) }}
-                                                        type="number"
+                                                        type="text"
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -590,7 +590,7 @@ class DealershipManagement extends React.Component {
                                                     <Input
                                                         value={this.state.addRingCentralService}
                                                         onChange={(e) => { this.onValueChange("addRingCentralService", e.target.value) }}
-                                                        type="number"
+                                                        type="text"
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -599,7 +599,7 @@ class DealershipManagement extends React.Component {
                                                     <Input
                                                         value={this.state.addDataMining}
                                                         onChange={(e) => { this.onValueChange("addDataMining", e.target.value) }}
-                                                        type="number"
+                                                        type="text"
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -608,7 +608,7 @@ class DealershipManagement extends React.Component {
                                                     <Input
                                                         value={this.state.addSales}
                                                         onChange={(e) => { this.onValueChange("addSales", e.target.value) }}
-                                                        type="number"
+                                                        type="text"
                                                     />
 
                                                 </FormGroup>
@@ -616,12 +616,12 @@ class DealershipManagement extends React.Component {
                                                 <legend>Departments</legend>
                                                 <FormGroup tag="fieldset">
                                                     <Label check>
-                                                        <Input type="checkbox" checked={this.state.addIsSales} onClick={(e) => { this.setState({ addIsSales: !this.state.addIsSales }) }} />{' '}
+                                                        <Input type="checkbox" checked={this.state.addIsSales} onChange={(e) => { this.setState({ addIsSales: !this.state.addIsSales }) }} />{' '}
                                                         Sales
                                                     </Label>
                                                     <br />
                                                     <Label check>
-                                                        <Input type="checkbox" checked={this.state.addIsService} onClick={(e) => { this.setState({ addIsService: !this.state.addIsService }) }} />{' '}
+                                                        <Input type="checkbox" checked={this.state.addIsService} onChange={(e) => { this.setState({ addIsService: !this.state.addIsService }) }} />{' '}
                                                         Service
                                                     </Label>
                                                 </FormGroup>
@@ -649,15 +649,24 @@ class DealershipManagement extends React.Component {
                                                     this.state.addDealershipGroup.label == undefined ||
                                                     // this.state.addTextList.length === 0 ||
                                                     // this.state.addServiceTextList.length === 0 ||
-                                                    // this.state.addDealershipPhone.length != 10 ||
-                                                    // this.state.avgMonthlyLeadCount.length === 0 ||
+                                                    this.state.addDealershipPhone.length != 10 ||
+                                                    isNaN(this.state.addDealershipPhone) ||
+                                                    this.state.avgMonthlyLeadCount.length === 0 ||
+                                                    isNaN(this.state.avgMonthlyLeadCount) ||
                                                     this.state.dealershipAddress.length === 0 ||
-                                                    // this.state.avgMonthlyRO.length === 0 ||
-                                                    // this.state.avgMonthlyPhoneUps.length === 0 ||
-                                                    // this.state.addRingCentral.length != 10 ||
-                                                    // this.state.addRingCentralService.length != 10 ||
-                                                    // this.state.addDataMining.length != 10 ||
-                                                    // this.state.addSales.length != 10 ||
+                                                    this.state.avgMonthlyRO.length === 0 ||
+                                                    isNaN(this.state.avgMonthlyRO) ||
+                                                    this.state.avgMonthlyPhoneUps.length === 0 ||
+                                                    isNaN(this.state.avgMonthlyPhoneUps) ||
+                                                    isNaN(this.state.dailyApptGoal) ||
+                                                    this.state.addRingCentral.length != 10 ||
+                                                    isNaN(this.state.addRingCentral) ||
+                                                    this.state.addRingCentralService.length != 10 ||
+                                                    isNaN(this.state.addRingCentralService) ||
+                                                    this.state.addDataMining.length != 10 ||
+                                                    isNaN(this.state.addDataMining) ||
+                                                    this.state.addSales.length != 10 ||
+                                                    isNaN(this.state.addSales) ||
                                                     this.state.addIsActive.length === 0 ||
                                                     (this.state.addIsSales === false && this.state.addIsService === false)
                                                     // access validation?
@@ -737,7 +746,7 @@ class DealershipManagement extends React.Component {
                         <Col className="ml-auto mr-auto text-center" md="8">
                             <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <h2 style={{color: "white"}}>Edit Dealership</h2>
+                                    <h2 style={{ color: "white" }}>Edit Dealership</h2>
                                     <Select
                                         name="editDealership"
                                         id="editDealership"
@@ -795,7 +804,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="editDealershipPhone">Dealership Main Phone Number</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="editDealershipPhone"
                                                         id="editDealershipPhone"
                                                         placeholder="Edit Dealership Main Phone #"
@@ -830,7 +839,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="editAvgMonthlyLeadCount">Average Monthly Lead Count</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="editAvgMonthlyLeadCount"
                                                         id="editAvgMonthlyLeadCount"
                                                         placeholder="Edit Average Monthly Lead Count"
@@ -841,7 +850,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="editAvgMonthlyRO">Average Monthly Repair Order Count</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="editAvgMonthlyRO"
                                                         id="editAvgMonthlyRO"
                                                         placeholder="Edit Average Monthly RO Count"
@@ -852,7 +861,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="editAvgMonthlyPhoneUps">Average Monthly Phone-Ups</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="editAvgMonthlyPhoneUps"
                                                         id="editAvgMonthlyPhoneUps"
                                                         placeholder="Edit Average Monthly Phone-Ups"
@@ -863,7 +872,7 @@ class DealershipManagement extends React.Component {
                                                 <FormGroup>
                                                     <Label for="editDailyApptGoal">Daily Appointment Goal</Label>
                                                     <Input
-                                                        type="number"
+                                                        type="text"
                                                         name="editDailyApptGoal"
                                                         id="editDailyApptGoal"
                                                         placeholder="Edit Average Monthly Phone-Ups"
@@ -909,7 +918,7 @@ class DealershipManagement extends React.Component {
                                                     <Input
                                                         value={this.state.editRingCentral}
                                                         onChange={(e) => { this.onValueChange("editRingCentral", e.target.value) }}
-                                                        type="number"
+                                                        type="text"
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -918,7 +927,7 @@ class DealershipManagement extends React.Component {
                                                     <Input
                                                         value={this.state.editRingCentralService}
                                                         onChange={(e) => { this.onValueChange("editRingCentralService", e.target.value) }}
-                                                        type="number"
+                                                        type="text"
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -927,7 +936,7 @@ class DealershipManagement extends React.Component {
                                                     <Input
                                                         value={this.state.editDataMining}
                                                         onChange={(e) => { this.onValueChange("editDataMining", e.target.value) }}
-                                                        type="number"
+                                                        type="text"
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -936,7 +945,7 @@ class DealershipManagement extends React.Component {
                                                     <Input
                                                         value={this.state.editSales}
                                                         onChange={(e) => { this.onValueChange("editSales", e.target.value) }}
-                                                        type="number"
+                                                        type="text"
                                                     />
 
                                                 </FormGroup>
@@ -944,12 +953,12 @@ class DealershipManagement extends React.Component {
                                                 <legend>Edit Departments</legend>
                                                 <FormGroup tag="fieldset">
                                                     <Label check>
-                                                        <Input type="checkbox" checked={this.state.editIsSales} onClick={(e) => { this.setState({ editIsSales: !this.state.editIsSales }) }} />{' '}
+                                                        <Input type="checkbox" checked={this.state.editIsSales} onChange={(e) => { this.setState({ editIsSales: !this.state.editIsSales }) }} />{' '}
                                                         Sales
                                                     </Label>
                                                     <br />
                                                     <Label check>
-                                                        <Input type="checkbox" checked={this.state.editIsService} onClick={(e) => { this.setState({ editIsService: !this.state.editIsService }) }} />{' '}
+                                                        <Input type="checkbox" checked={this.state.editIsService} onChange={(e) => { this.setState({ editIsService: !this.state.editIsService }) }} />{' '}
                                                         Service
                                                     </Label>
                                                 </FormGroup>
@@ -981,15 +990,26 @@ class DealershipManagement extends React.Component {
                                                 }} color="success" disabled={
                                                     this.state.editDealershipName.length === 0 ||
                                                     this.state.editDealershipGroup2.label == undefined ||
+                                                    isNaN(this.state.editDailyApptGoal) ||
                                                     // this.state.editTextList.length === 0 ||
                                                     // this.state.editServiceTextList.length === 0 ||
-                                                    // this.state.editDealershipPhone.length != 10 ||
-                                                    // this.state.editAvgMonthlyLeadCount.length === 0 ||
-                                                    this.state.editDealershipAddress.length === 0
-                                                    // this.state.editAvgMonthlyRO.length === 0 ||
-                                                    // this.state.editAvgMonthlyPhoneUps.length === 0 ||
-                                                    // this.state.editRingCentral.length != 10 ||
-                                                    // this.state.editRingCentralService.length != 10 ||
+                                                    this.state.editDealershipPhone.length != 10 ||
+                                                    isNaN(this.state.editDealershipPhone) ||
+                                                    this.state.editAvgMonthlyLeadCount.length === 0 ||
+                                                    isNaN(this.state.editAvgMonthlyLeadCount) ||
+                                                    this.state.editDealershipAddress.length === 0 ||
+                                                    this.state.editAvgMonthlyRO.length === 0 ||
+                                                    isNaN(this.state.editAvgMonthlyRO) ||
+                                                    this.state.editAvgMonthlyPhoneUps.length === 0 ||
+                                                    isNaN(this.state.editAvgMonthlyPhoneUps) ||
+                                                    this.state.editRingCentral.length !== 10 ||
+                                                    isNaN(this.state.editRingCentral) ||
+                                                    this.state.editRingCentralService.length !== 10 ||
+                                                    isNaN(this.state.editRingCentralService) ||
+                                                    this.state.editDataMining.length !== 10 ||
+                                                    isNaN(this.state.editDataMining) ||
+                                                    this.state.editSales.length !== 10 ||
+                                                    isNaN(this.state.editSales)
                                                     // access validation?
                                                 }>Update</Button>
                                             </Form>
