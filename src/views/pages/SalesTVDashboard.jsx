@@ -234,16 +234,16 @@ class SalesTVDashboard extends React.Component {
         agent.agent_MTD = agent_MTD.length;
         first = new Date().setDate(1)
         first = new Date(first).setHours(1, 1, 1, 1)
-        let daysElapsed = (new Date().getTime() - new Date(first).getTime()) / (1000 * 3600 * 24)
-        agent.agent_MTD_Avg = Math.round(10 * agent.agent_MTD / daysElapsed) / 10;
+        // let daysElapsed = (new Date().getTime() - new Date(first).getTime()) / (1000 * 3600 * 24)
+        // agent.agent_MTD_Avg = Math.round(10 * agent.agent_MTD / daysElapsed) / 10;
 
-        let sevenDaysAgo = new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0, 0, 0, 0)
-        let sevenElapsed = (new Date().getTime() - new Date(sevenDaysAgo).getTime()) / (1000 * 3600 * 24)
+        // let sevenDaysAgo = new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0, 0, 0, 0)
+        // let sevenElapsed = (new Date().getTime() - new Date(sevenDaysAgo).getTime()) / (1000 * 3600 * 24)
 
-        let sevenDaysTD = agent_MTD.filter((a) => {
-            return new Date(a.verified).getTime() >= new Date(sevenDaysAgo).getTime()
-        })
-        agent.seven_day_avg = Math.round(10 * sevenDaysTD.length / (sevenElapsed)) / 10;
+        // let sevenDaysTD = agent_MTD.filter((a) => {
+        //     return new Date(a.verified).getTime() >= new Date(sevenDaysAgo).getTime()
+        // })
+        // agent.seven_day_avg = Math.round(10 * sevenDaysTD.length / (sevenElapsed)) / 10;
 
         //get mtd high
         let dayMs = 1000 * 60 * 60 * 24;
@@ -260,7 +260,45 @@ class SalesTVDashboard extends React.Component {
                 max = dict[key]
             }
         }
-        // console.log(dict, "max:", max)
+        let total = 0
+        let days = 0;
+        for (let i = 0; i < 7; i++) {
+            let currDay = new Date()
+            currDay = new Date(currDay.setDate(currDay.getDate() - i))
+            let key = `${currDay.getMonth()}_${currDay.getDate()}_${currDay.getFullYear()}`
+            if (dict[key] === undefined || dict[key] === 0) {
+                total += 0;
+            }
+            else {
+                total += dict[key]
+                days++;
+            }
+
+        }
+        agent.seven_day_avg = Math.round(10 * total / days) / 10
+        if(isNaN(agent.seven_day_avg)){
+            agent.seven_day_avg = 0;
+        }
+        // console.log("\n", total, days, agent.name, total / days)
+        days = 0;
+        total = 0;
+        for (let i = 0; i < Object.keys(dict).length; i++) {
+            let currDay = new Date()
+            currDay = new Date(currDay.setDate(currDay.getDate() - i))
+            let key = `${currDay.getMonth()}_${currDay.getDate()}_${currDay.getFullYear()}`
+            if (dict[key] === undefined || dict[key] === 0) {
+                total += 0;
+            }
+            else {
+                total += dict[key]
+                days++;
+            }
+
+        }
+        agent.agent_MTD_Avg = Math.round(10 * total / days) / 10;
+        if(isNaN(agent.agent_MTD_Avg)){
+            agent.agent_MTD_Avg = 0;
+        }
         agent.mtdHigh = max;
         for (let a in agents) {
             if (agents[a].name === agent.name) {
