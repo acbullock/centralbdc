@@ -52,7 +52,7 @@ class SalesTVDashboard extends React.Component {
             totalCallCountMTD: 0,
             mtdDataLoading: false,
             mtdApps: [],
-            todayAgents:[]
+            todayAgents: []
         };
         this.getDepartmentCallCount = this.getDepartmentCallCount.bind(this)
         this.getDepartmentApptCount = this.getDepartmentApptCount.bind(this)
@@ -204,25 +204,22 @@ class SalesTVDashboard extends React.Component {
         }
     }
     async getAgentMTDData(agent) {
-        let { agents, dealerships } = this.state
+        let agents = this.state.agents
         let agentIndex = agents.findIndex((a) => {
             return a.email === agent.email
         })
-        let apps = agents[agentIndex].appointments;
+        let apps = agents[agentIndex].appointments.slice();
         let all_apps = await this.props.mongo.find("all_appointments", { agent_id: agent._id })
-        apps = apps.concat(all_apps)
+        for (let a in all_apps) {
+            if (apps.findIndex((appoint => {
+                return new Date(appoint.verified).getTime() === new Date(all_apps[a].verified).getTime()
+            })) === -1) {
+                apps.push(all_apps[a])
+            }
+        }
         apps = apps.filter((a) => {
             if (a.dealership_department === "Service") return false
-            if (a.dealership == undefined) { console.log(Object.keys(a)) }
-            let found = false;
-            for (let d in dealerships) {
-
-                if (dealerships[d].value === a.dealership.value) {
-                    found = true;
-                    break;
-                }
-            }
-            return found;
+            return true
         })
         let first = new Date(new Date().setDate(1))
         first = new Date(first.setHours(0, 0, 0, 0))
@@ -246,7 +243,7 @@ class SalesTVDashboard extends React.Component {
         let sevenDaysTD = agent_MTD.filter((a) => {
             return new Date(a.verified).getTime() >= new Date(sevenDaysAgo).getTime()
         })
-        agent.seven_day_avg = Math.round(10 * sevenDaysTD.length / sevenElapsed) / 10;
+        agent.seven_day_avg = Math.round(10 * sevenDaysTD.length / (sevenElapsed)) / 10;
 
         //get mtd high
         let dayMs = 1000 * 60 * 60 * 24;
@@ -275,12 +272,12 @@ class SalesTVDashboard extends React.Component {
             return b.agent_MTD - a.agent_MTD
         })
         this.setState({ agents })
-        agents.sort((a, b) => {
-            if(a.appointments.length > b.appointments.length) return -1;
-            if(a.appointments.length < b.appointments.length) return 1;
+        let todayAge = agents.slice().sort((a, b) => {
+            if (a.appointments.length > b.appointments.length) return -1;
+            if (a.appointments.length < b.appointments.length) return 1;
             return 0;
         })
-        this.setState({ todayAgents: agents })
+        this.setState({ todayAgents: todayAge })
         // console.log(agents)
     }
     render() {
@@ -393,15 +390,16 @@ class SalesTVDashboard extends React.Component {
                                         </thead>
                                         <tbody>
                                             {this.state.agents.map((a, i) => {
+                                                // console.log(a.appointments.length, a.personalRecord, a.name)
                                                 // if (i > 0) return null
                                                 return <tr key={i}>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.agent_MTD === undefined ? "Loading.." : a.agent_MTD}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.agent_MTD_Avg === undefined ? "Loading.." : a.agent_MTD_Avg}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.seven_day_avg === undefined ? "Loading.." : a.seven_day_avg}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.mtdHigh === undefined ? "Loading.." : a.mtdHigh}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: a.appointments.length>=a.personalRecord?"yellow":"white" }}><strong>{a.personalRecord === undefined ? "Loading.." : a.personalRecord}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: a.appointments.length >= a.personalRecord ? "yellow" : "white" }}><strong>{i + 1}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: a.appointments.length >= a.personalRecord ? "yellow" : "white" }}><strong>{a.name}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: a.appointments.length >= a.personalRecord ? "yellow" : "white" }}><strong>{a.agent_MTD === undefined ? "Loading.." : a.agent_MTD}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: a.appointments.length >= a.personalRecord ? "yellow" : "white" }}><strong>{a.agent_MTD_Avg === undefined ? "Loading.." : a.agent_MTD_Avg}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: a.appointments.length >= a.personalRecord ? "yellow" : "white" }}><strong>{a.seven_day_avg === undefined ? "Loading.." : a.seven_day_avg}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: a.appointments.length >= a.personalRecord ? "yellow" : "white" }}><strong>{a.mtdHigh === undefined ? "Loading.." : a.mtdHigh}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: a.appointments.length >= a.personalRecord ? "yellow" : "white" }}><strong>{a.personalRecord === undefined ? "Loading.." : a.personalRecord}</strong></p></td>
                                                 </tr>
                                             })}
                                         </tbody>
