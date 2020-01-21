@@ -85,28 +85,29 @@ class Dashboard extends React.Component {
     this._isMounted && this.setState({ user })
     let agent = this._isMounted && await this.props.mongo.findOne("agents", { "userId": user.userId })
     if (agent.department === "service" && agent.account_type !== "admin") {
+      this._isMounted = false;
       this.props.history.push("/admin/service_dashboard")
     }
     else {
       let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true })
-      agents = agents.map((a, i) => {
+      agents = this._isMounted && agents.map((a, i) => {
         return Object.assign(a, { label: a.name, value: i })
       })
-      agents = agents.filter((a) => {
+      agents = this._isMounted && agents.filter((a) => {
         return a.department === "sales" || a.account_type === "admin"
       })
-      agents.sort((a, b) => {
+      this._isMounted && agents.sort((a, b) => {
         if (a.label > b.label) return 1;
         if (a.label < b.label) return -1;
         return 0;
       })
       if (agent.account_type !== "admin") {
-        let selected = agents.filter((a) => {
+        let selected = this._isMounted && agents.filter((a) => {
           return a._id == agent._id
         })
         selected = selected[0]
-        this.getBreakDown(agent)
-        this.setState({ selected_agent: selected })
+        this._isMounted && this.getBreakDown(agent)
+        this._isMounted && this.setState({ selected_agent: selected })
       }
       this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
       this._isMounted && await this.getAppointmentData()
