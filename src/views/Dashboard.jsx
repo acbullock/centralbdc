@@ -506,7 +506,7 @@ class Dashboard extends React.Component {
         }
         return 0;
       })
-      this.setState({ mtdTop5: nums })
+      this._isMounted && this.setState({ mtdTop5: nums })
     }
     // let appointments = await this.props.mongo.find("appointments");
     // let allApps = [];

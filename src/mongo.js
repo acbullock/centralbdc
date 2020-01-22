@@ -100,9 +100,8 @@ async function findOneAndDelete(collection, query) {
     return res.data
 }
 function sendGroupText(fromNumber, text, toNumber, token) {
-    return axios.post(`${SERVER_URL}/sendGroupText?fromNumber=${fromNumber}&token=${token}`, {
-        text,
-        toNumber
+    return axios.post(`${SERVER_URL}/sendGroupText?toNumber=${toNumber}&fromNumber=${fromNumber}&token=${token}`, {
+        text
     })
 }
 async function getToken() {
