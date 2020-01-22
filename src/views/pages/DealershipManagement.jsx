@@ -659,10 +659,10 @@ class DealershipManagement extends React.Component {
                                                     this.state.avgMonthlyPhoneUps.length === 0 ||
                                                     isNaN(this.state.avgMonthlyPhoneUps) ||
                                                     isNaN(this.state.dailyApptGoal) ||
-                                                    this.state.addRingCentral.length != 10 ||
-                                                    isNaN(this.state.addRingCentral) ||
-                                                    this.state.addRingCentralService.length != 10 ||
-                                                    isNaN(this.state.addRingCentralService) ||
+                                                    // this.state.addRingCentral.length != 10 ||
+                                                    // isNaN(this.state.addRingCentral) ||
+                                                    // this.state.addRingCentralService.length != 10 ||
+                                                    // isNaN(this.state.addRingCentralService) ||
                                                     this.state.addDataMining.length != 10 ||
                                                     isNaN(this.state.addDataMining) ||
                                                     this.state.addSales.length != 10 ||

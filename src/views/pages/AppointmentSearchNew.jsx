@@ -293,7 +293,7 @@ class AppointmnetSearchNew extends React.Component {
                                                         <p style={{ color: "white" }}>Message: <strong>{a.message}</strong></p>
                                                         <p style={{ color: "white" }}>Customer Phone: <strong>{a.customer_phone}</strong></p>
                                                         <p style={{ color: "white" }}>Created: <strong>{new Date(a.created).toLocaleString()}</strong></p>
-                                                        <p style={{ color: "white" }}>Agent: <strong>{this.state.agents[this.state.agents.findIndex((agent) => { return agent.email === a.agent_email })].name}</strong></p>
+                                                        <p style={{ color: "white" }}>Agent: <strong>{this.state.agents[this.state.agents.findIndex((agent) => { return agent.userId === a.userId })].name}</strong></p>
                                                     </CardBody>
                                                 </Card>
                                             )
