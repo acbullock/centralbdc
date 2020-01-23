@@ -93,6 +93,7 @@ class SalesTVDashboard extends React.Component {
     componentWillUnmount() {
         this._isMounted = false
         document.body.classList.toggle("sidebar-mini");
+        window.stop()
     }
     async getDepartmentCallCount() {
         let { agents } = this.state;
@@ -195,12 +196,12 @@ class SalesTVDashboard extends React.Component {
     }
     async getMTDData() {
         this.setState({ mtdDataLoading: true })
-        let dealerships = await this.props.mongo.find("dealerships", { isSales: true, isActive: true })
+        let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isSales: true, isActive: true })
         this.setState({ dealerships })
         let agents = this.state.agents
         this.setState({ mtdDataLoading: false })
         for (let a in agents) {
-            this.getAgentMTDData(agents[a])
+            this._isMounted && this.getAgentMTDData(agents[a])
         }
     }
     async getAgentMTDData(agent) {
@@ -209,7 +210,7 @@ class SalesTVDashboard extends React.Component {
             return a.email === agent.email
         })
         let apps = agents[agentIndex].appointments.slice();
-        let all_apps = await this.props.mongo.find("all_appointments", { agent_id: agent._id })
+        let all_apps = this._isMounted && await this.props.mongo.find("all_appointments", { agent_id: agent._id })
         for (let a in all_apps) {
             if (apps.findIndex((appoint => {
                 return new Date(appoint.verified).getTime() === new Date(all_apps[a].verified).getTime()
@@ -276,7 +277,7 @@ class SalesTVDashboard extends React.Component {
 
         }
         agent.seven_day_avg = Math.round(10 * total / days) / 10
-        if(isNaN(agent.seven_day_avg)){
+        if (isNaN(agent.seven_day_avg)) {
             agent.seven_day_avg = 0;
         }
         // console.log("\n", total, days, agent.name, total / days)
@@ -296,7 +297,7 @@ class SalesTVDashboard extends React.Component {
 
         }
         agent.agent_MTD_Avg = Math.round(10 * total / days) / 10;
-        if(isNaN(agent.agent_MTD_Avg)){
+        if (isNaN(agent.agent_MTD_Avg)) {
             agent.agent_MTD_Avg = 0;
         }
         agent.mtdHigh = max;

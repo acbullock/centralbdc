@@ -123,6 +123,7 @@ class Dashboard extends React.Component {
   }
   componentWillUnmount() {
     this._isMounted = false
+    window.stop()
   }
 
 
