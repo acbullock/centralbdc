@@ -123,7 +123,7 @@ class Dashboard extends React.Component {
   }
   componentWillUnmount() {
     this._isMounted = false
-    window.stop()
+    // window.stop()
   }
 
 
@@ -468,15 +468,15 @@ class Dashboard extends React.Component {
 
   }
   async getMtdTop5() {
-    this._isMounted && this.setState({ loading: true, mtdloadnew:true })
+    this._isMounted && this.setState({ loading: true, mtdloadnew: true })
     let allAgents = this.state.agents;
     let allApps = []
     let apps = []
     for (let a in allAgents) {
       apps = allAgents[a].appointments;
-      allApps = await this.props.mongo.find("all_appointments", { agent_id: allAgents[a]._id })
+      allApps = this._isMounted && await this.props.mongo.find("all_appointments", { agent_id: allAgents[a]._id })
       for (let app in apps) {
-        if (allApps.findIndex((appt) => {
+        if (this._isMounted && allApps.findIndex((appt) => {
           return new Date(appt.verified).getTime() === new Date(apps[app].verified).getTime()
         }) === -1) {
           allApps.push(apps[app])
@@ -485,7 +485,7 @@ class Dashboard extends React.Component {
       let first = new Date();
       new Date(first.setDate(1));
       first = new Date(first.setHours(0, 0, 0, 0))
-      allApps = allApps.filter((a) => {
+      allApps = this._isMounted && allApps.filter((a) => {
         return new Date(a.verified).getTime() >= first.getTime() && a.dealership_department !== "Service"
       })
 
