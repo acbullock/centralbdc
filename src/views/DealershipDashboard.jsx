@@ -210,7 +210,7 @@ class DealershipDashboard extends React.Component {
 
     let dealership = this._isMounted && await this.props.mongo.findOne("dealerships", { value })
     this._isMounted && this.setState({ dealership })
-    let appointments = this._isMounted && await this.props.mongo.findOne("appointments", { dealership: dealership.value });
+    let appointments = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealership.value });
     let agents = this._isMounted && await this.props.mongo.find("agents");
     let agent_apps = [];
     for (let a in agents) {
@@ -220,7 +220,6 @@ class DealershipDashboard extends React.Component {
       return a.dealership.value === dealership.value
     })
 
-    appointments = appointments.appointments;
     let appt_verifieds = appointments.map(a => {
       return a.verified
     })
