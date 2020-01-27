@@ -109,6 +109,17 @@ class Dashboard extends React.Component {
         this._isMounted && this.getBreakDown(agent)
         this._isMounted && this.setState({ selected_agent: selected })
       }
+      for (let a in agents) {
+        let imageUrl = ""
+        if (agents[a].fileBinary !== undefined) {
+          imageUrl = await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agents[a].fileBinary.data))
+        }
+        agents[a].imageUrl = imageUrl;
+      }
+      if (agent.fileBinary !== undefined) {
+        let imageUrl = await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
+        agent.imageUrl = imageUrl
+      }
       this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
       this._isMounted && await this.getAppointmentData()
       this._isMounted && await this.getChartData()
@@ -810,6 +821,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
+                  <img src={this.state.agent.imageUrl == undefined ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
                 </CardHeader>
                 <CardBody>
                   {
@@ -844,6 +856,8 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong>{this.state.mtdloadnew ? " (still loading)" : null}</p></CardTitle>
+                  <img src={this.state.agent.imageUrl == undefined ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100"/>
+                  {/* style={{ background: 'url("https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image")' }}  */}
                 </CardHeader>
                 <CardBody>
                   <CardImg top width="100%" hidden={!this.state.mtdtop5loading} src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
@@ -896,10 +910,11 @@ class Dashboard extends React.Component {
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Top 10 Agents Today</strong></p></CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <Table responsive >
+                  <Table >
                     <thead className="text-primary" >
                       <tr>
                         <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Rank</p></th>
+                        <th style={{ borderBottom: "1px solid white" }}></th>
                         <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Agent Name</p></th>
                         <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}># Approved Appointments</p></th>
                       </tr>
@@ -907,10 +922,12 @@ class Dashboard extends React.Component {
                     <tbody>
                       {
                         this.state.top5.map((agent, index) => {
+                          console.log("!@#", agent.iamgeUrl)
                           if (index > 9) return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img src={agent.imageUrl == undefined ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -929,10 +946,11 @@ class Dashboard extends React.Component {
                 </CardHeader>
                 <CardBody>
                   <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.mtdtop5loading} style={{ backgroundColor: "white" }} />
-                  <Table responsive style={this.state.mtdtop5loading ? { display: "none" } : {}}>
+                  <Table style={this.state.mtdtop5loading ? { display: "none" } : {}}>
                     <thead className="text-primary" >
                       <tr >
                         <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Rank</p></th>
+                        <th style={{ borderBottom: "1px solid white" }}></th>
                         <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Agent Name</p></th>
                         <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}># Approved Appointments</p></th>
                       </tr>
@@ -945,6 +963,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" >
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img src={agent.imageUrl == undefined ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -964,9 +983,10 @@ class Dashboard extends React.Component {
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Record Breakers </strong><i style={{ color: "yellow" }} className="tim-icons icon-trophy" /></p></CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <Table responsive >
+                  <Table  >
                     <thead className="text-primary" >
                       <tr>
+                        <th style={{ borderBottom: "1px solid white" }}></th>
                         <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Agent Name</p></th>
                         <th style={{ borderBottom: "1px solid white" }} className="text-center"><p style={{ color: "white" }}>Appointment Count</p></th>
                       </tr>
@@ -977,6 +997,7 @@ class Dashboard extends React.Component {
                           if (agent.appointments.length === 0 || agent.appointments.length < agent.personalRecord || agent.account_type !== "agent") return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
+                              <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? 'https://dummyimage.com/50x50/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.appointments.length}</strong></p></td>
                             </tr>
@@ -1023,7 +1044,7 @@ class Dashboard extends React.Component {
                 </CardBody>
               </Card>
                */}
-              <Card className="card-raised card-white" hidden={!this.state.isAdmin}>
+              <Card className="card-raised card-white" hidden={!this.state.isAdmin} style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
 
                   {/* <div className="tools float-right">
@@ -1074,15 +1095,15 @@ class Dashboard extends React.Component {
                       </DropdownMenu>
                     </UncontrolledDropdown>
                   </div> */}
-                  <CardTitle tag="h3">Created Appointments</CardTitle>
+                  <CardTitle tag="h3" className="text-white">Created Appointments</CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <Table responsive>
+                  <Table>
                     <thead className="text-primary">
                       <tr>
                         {/* <th className="text-center"></th> */}
-                        <th>Agent Name</th>
-                        <th>Today</th>
+                        <th className="text-white" style={{ borderBottom: "1px white solid" }}>Agent Name</th>
+                        <th className="text-white" style={{ borderBottom: "1px white solid" }}>Today</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1098,8 +1119,8 @@ class Dashboard extends React.Component {
                                 />
                               </div>
                               </td> */}
-                              <td key={index + "-name"}>{app.name}</td>
-                              <td key={index + "-day"}>{this.createdAppointmentsSince(app.appointments, 0)}</td>
+                              <td key={index + "-name"} style={{ borderBottom: "1px white solid" }}><p className="text-white">{app.name}</p></td>
+                              <td key={index + "-day"} style={{ borderBottom: "1px white solid" }}><p className="text-white">{this.createdAppointmentsSince(app.appointments, 0)}</p></td>
                             </tr>
                           )
                         })
@@ -1158,7 +1179,7 @@ class Dashboard extends React.Component {
                   <CardTitle tag="h3">Today's Appointments <strong>total: {this.state.todays_appts.length}</strong></CardTitle>
                 </CardHeader>
                 <CardBody >
-                  <Table responsive>
+                  <Table>
                     <thead className="text-primary">
                       <tr>
                         {/* <th className="text-center"></th> */}

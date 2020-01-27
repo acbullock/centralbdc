@@ -39,6 +39,10 @@ class DealershipManagement extends React.Component {
             addIsActive: "",
             addIsSales: false,
             addIsService: false,
+            addSalesRequired: false,
+            addServiceToSalesRequired: false,
+            addServiceRequired: false,
+            addTextEmailRequired: false,
             newTextContact: "",
             newServiceContact: "",
             dealershipGroups: [],
@@ -195,7 +199,11 @@ class DealershipManagement extends React.Component {
             addSales: "",
             addIsSales: false,
             addIsService: false,
-            addIsActive: ""
+            addIsActive: "",
+            addSalesRequired: false,
+            addServiceToSalesRequired: false,
+            addServiceRequired: false,
+            addTextEmailRequired: false
 
         })
     }
@@ -354,6 +362,10 @@ class DealershipManagement extends React.Component {
                     isClosed: false
                 },
             ],
+            salesRequired: this.state.addSalesRequired,
+            serviceToSalesRequired: this.state.addServiceToSalesRequired,
+            serviceRequired: this.state.addServiceRequired,
+            textEmailRequired: this.state.addTextEmailRequired
         }
         //insert dealer
         let inserted = this._isMounted && await this.props.mongo.insertOne("dealerships", newDealership)
@@ -394,7 +406,11 @@ class DealershipManagement extends React.Component {
             sales: "+1" + this.state.editSales,
             isActive: this.state.editIsActive === "active",
             isSales: this.state.editIsSales,
-            isService: this.state.editIsService
+            isService: this.state.editIsService,
+            salesRequired: this.state.editSalesRequired,
+            serviceToSalesRequired: this.state.editServiceToSalesRequired,
+            serviceRequired: this.state.editServiceRequired,
+            textEmailRequired: this.state.editTextEmailRequired
         }
         //update dealer
         this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: update_value }, update)
@@ -641,6 +657,32 @@ class DealershipManagement extends React.Component {
                                                         </Label>
                                                     </FormGroup>
                                                 </FormGroup>
+                                                <hr />
+                                                <legend>Required Services (Rooftop Selection)</legend>
+                                                <FormGroup>
+                                                    <Label check>
+                                                        <Input type="checkbox" name="addSalesRequired" value="inactive" checked={this.state.addSalesRequired} onChange={(e) => { this.onValueChange("addSalesRequired", !this.state.addSalesRequired) }} />
+                                                        {' Sales BDC'}
+                                                    </Label>
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label check>
+                                                        <Input type="checkbox" name="addServiceToSalesRequired" value="inactive" checked={this.state.addServiceToSalesRequired} onChange={(e) => { this.onValueChange("addServiceToSalesRequired", !this.state.addServiceToSalesRequired) }} />
+                                                        {' Service to Sales'}
+                                                    </Label>
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label check>
+                                                        <Input type="checkbox" name="addServiceRequired" value="inactive" checked={this.state.addServiceRequired} onChange={(e) => { this.onValueChange("addServiceRequired", !this.state.addServiceRequired) }} />
+                                                        {' Service'}
+                                                    </Label>
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label check>
+                                                        <Input type="checkbox" name="addTextEmailRequired" value="inactive" checked={this.state.addTextEmailRequired} onChange={(e) => { this.onValueChange("addTextEmailRequired", !this.state.addTextEmailRequired) }} />
+                                                        {' Text/Email'}
+                                                    </Label>
+                                                </FormGroup>
                                                 <Button color="warning" onClick={() => { this.toggle("addModal") }}>Cancel</Button>
                                                 <Button onClick={() => {
                                                     this.addNewDealershp()
@@ -778,7 +820,11 @@ class DealershipManagement extends React.Component {
                                             editSales: this.state.editDealership.sales.substring(2, 12) || "",
                                             editIsActive: this.state.editDealership.isActive == true ? "active" : "inactive",
                                             editIsSales: this.state.editDealership.isSales,
-                                            editIsService: this.state.editDealership.isService
+                                            editIsService: this.state.editDealership.isService,
+                                            editSalesRequired: this.state.editDealership.salesRequired || false,
+                                            editServiceToSalesRequired: this.state.editDealership.serviceToSalesRequired || false,
+                                            editServiceRequired: this.state.editDealership.serviceRequired || false,
+                                            editTextEmailRequired: this.state.editDealership.textEmailRequired || false
                                         })
                                         this.setState({ loading: false })
                                         this.toggle("editDealerModal");
@@ -980,7 +1026,32 @@ class DealershipManagement extends React.Component {
                                                     </FormGroup>
                                                 </FormGroup>
 
-
+                                                <hr />
+                                                <legend>Required Services (Rooftop Selection)</legend>
+                                                <FormGroup>
+                                                    <Label check>
+                                                        <Input type="checkbox" name="editSalesRequired" value="inactive" checked={this.state.editSalesRequired} onChange={(e) => { this.onValueChange("editSalesRequired", !this.state.editSalesRequired) }} />
+                                                        {' Sales BDC'}
+                                                    </Label>
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label check>
+                                                        <Input type="checkbox" name="editServiceToSalesRequired" value="inactive" checked={this.state.editServiceToSalesRequired} onChange={(e) => { this.onValueChange("editServiceToSalesRequired", !this.state.editServiceToSalesRequired) }} />
+                                                        {' Service to Sales'}
+                                                    </Label>
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label check>
+                                                        <Input type="checkbox" name="editServiceRequired" value="inactive" checked={this.state.editServiceRequired} onChange={(e) => { this.onValueChange("editServiceRequired", !this.state.editServiceRequired) }} />
+                                                        {' Service'}
+                                                    </Label>
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <Label check>
+                                                        <Input type="checkbox" name="editTextEmailRequired" value="inactive" checked={this.state.editTextEmailRequired} onChange={(e) => { this.onValueChange("editTextEmailRequired", !this.state.editTextEmailRequired) }} />
+                                                        {' Text/Email'}
+                                                    </Label>
+                                                </FormGroup>
                                                 <Button color="warning" onClick={() => {
                                                     this.toggle("editDealerModal")
                                                     this.setState({ editDealership: { label: "", value: "" } })

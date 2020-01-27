@@ -41,7 +41,50 @@ class UserManagement extends React.Component {
             editUserEmail: "",
             editType: "",
             editDepartment: "",
-            editActive: ""
+            editActive: "",
+            editSkills: {
+                sales: {},
+                serviceToSales: {},
+                service: {},
+                textEmail: {}
+            },
+            addSkills: {
+                sales: {
+                    newLeads: false,
+                    day1And2: false,
+                    day3And4: false,
+                    missedAppointments: false,
+                    day7: false,
+                    day10: false,
+                    day15: false,
+                    day20: false
+                },
+                serviceToSales: {
+                    newLeads: false,
+                    day1And2: false,
+                    day3And4: false,
+                    missedAppointments: false,
+                    day7: false,
+                    day10: false,
+                    day15: false,
+                    day20: false
+                },
+                service: {
+                    missedAppointments: false,
+                    day7: false,
+                    day15: false,
+                    firstService: false,
+                    serviceReminder: false
+                },
+                textEmail: {
+                    newLeads: false,
+                    day1And2: false,
+                    day5: false,
+                    day10: false,
+                    day20: false,
+                    missedAppointments: false
+                }
+            }
         }
         this.toggle = this.toggle.bind(this)
         this.onValueChange = this.onValueChange.bind(this)
@@ -96,7 +139,44 @@ class UserManagement extends React.Component {
             addUserTeam: { label: "", value: "" },
             addType: "",
             addActive: "",
-            addDepartment: ""
+            addDepartment: "",
+            addSkills: {
+                sales: {
+                    newLeads: false,
+                    day1And2: false,
+                    day3And4: false,
+                    missedAppointments: false,
+                    day7: false,
+                    day10: false,
+                    day15: false,
+                    day20: false
+                },
+                serviceToSales: {
+                    newLeads: false,
+                    day1And2: false,
+                    day3And4: false,
+                    missedAppointments: false,
+                    day7: false,
+                    day10: false,
+                    day15: false,
+                    day20: false
+                },
+                service: {
+                    missedAppointments: false,
+                    day7: false,
+                    day15: false,
+                    firstService: false,
+                    serviceReminder: false
+                },
+                textEmail: {
+                    newLeads: false,
+                    day1And2: false,
+                    day5: false,
+                    day10: false,
+                    day20: false,
+                    missedAppointments: false
+                }
+            }
         })
     }
     async addNewGroup() {
@@ -162,7 +242,8 @@ class UserManagement extends React.Component {
             assistance: [],
             extension: "",
             inboundToday: 0,
-            outboundToday: 0
+            outboundToday: 0,
+            skills: this.state.addSkills
         }
         console.log(newUser)
         //register user with "password" as password.. they can always reset password on login page..
@@ -195,6 +276,7 @@ class UserManagement extends React.Component {
             isActive: this.state.editActive === "active" ? true : false,
             team: this.state.editUserTeam,
             department: this.state.editDepartment,
+            skills: this.state.editSkills
         }
         //update user
         this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { email: this.state.editUserEmail }, update)
@@ -212,7 +294,7 @@ class UserManagement extends React.Component {
                 value: agents[a]._id
             }
         }
-        this.toggle("editUserModal")
+        // this.toggle("editUserModal")
         this.setState({ users, editUser: { label: "", value: "" }, loading: false })
     }
     render() {
@@ -233,14 +315,14 @@ class UserManagement extends React.Component {
             <div className="content">
                 <Container>
                     <Row>
-                        <Col className="ml-auto mr-auto text-center" md="8">
+                        <Col className="ml-auto mr-auto text-center" md="10">
                             <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <h2 style={{color: "white"}}>Add User</h2>
-                                    <Button color="neutral" onClick={() => { this.toggle("addModal") }}>
+                                    <h2 style={{ color: "white" }}>Add User</h2>
+                                    <Button color="neutral" onClick={() => { this.setState({ editUserEmail: "" }); this.toggle("addModal") }}>
                                         <i className="tim-icons icon-simple-add"></i>
                                     </Button>
-                                    <Modal isOpen={this.state.addModal} toggle={() => { this.toggle("addModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
+                                    <Modal isOpen={this.state.addModals} toggle={() => { this.toggle("addModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("addModal") }}>Add User</ModalHeader>
                                         <ModalBody>
                                             <Form>
@@ -367,10 +449,10 @@ class UserManagement extends React.Component {
                         </Col>
                     </Row>
                     <Row>
-                        <Col className="ml-auto mr-auto text-center" md="8">
+                        <Col className="ml-auto mr-auto text-center" md="10">
                             <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
-                                    <h2 style={{color: "white"}}>Edit User</h2>
+                                    <h2 style={{ color: "white" }}>Edit User</h2>
                                     <Select
                                         name="editUser"
                                         id="editUser"
@@ -390,10 +472,11 @@ class UserManagement extends React.Component {
                                             editUserTeam: u.team,
                                             editType: u.account_type,
                                             editDepartment: u.department,
-                                            editActive: u.isActive == true ? "active" : "inactive"
+                                            editActive: u.isActive == true ? "active" : "inactive",
+                                            editSkills: u.skills || { sales: {}, serviceToSales: {}, service: {}, textEmail: {} }
                                         })
-                                        this.setState({ loading: false })
-                                        this.toggle("editUserModal");
+                                        this.setState({ loading: false, addModal: false })
+                                        // this.toggle("editUserModal");
                                     }}><i className="tim-icons icon-pencil" /></Button>
                                     <Modal isOpen={this.state.editUserModal} toggle={() => { this.toggle("editUserModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("editUserModal") }}>
@@ -517,6 +600,907 @@ class UserManagement extends React.Component {
                                             </Form>
                                         </ModalBody>
                                     </Modal>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    <Row hidden={this.state.editUserEmail.length < 1}>
+                        <Col className="ml-auto mr-auto text-center" md="10">
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <CardBody>
+                                    <h2 style={{ color: "white" }}>Edit {this.state.editUser.label || ""}</h2>
+                                    <Row className="ml-auto mr-auto text-center">
+                                        <h3 className="text-white" style={{ textDecoration: "underline" }}>Edit Contact Info</h3>
+                                        <Col md="12">
+                                            <Form>
+                                                <FormGroup>
+                                                    <p className="text-white text-left">Edit Name</p>
+                                                    <Input
+                                                        style={{ backgroundColor: "white" }}
+                                                        value={this.state.editUserName}
+                                                        onChange={(e) => { this.onValueChange("editUserName", e.target.value) }}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <p className="text-white text-left">Edit Email</p>
+                                                    <Input
+                                                        disabled
+                                                        style={{ backgroundColor: "white" }}
+                                                        value={this.state.editUserEmail}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <p className="text-white text-left">Edit Phone</p>
+                                                    <Input
+                                                        style={{ backgroundColor: "white" }}
+                                                        value={this.state.editUserPhone}
+                                                        onChange={(e) => { this.onValueChange("editUserPhone", e.target.value) }}
+                                                    />
+                                                </FormGroup>
+                                            </Form>
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto text-center">
+                                        <h3 style={{ textDecoration: "underline" }} className="text-white">Edit Team</h3>
+                                        <Col md="12">
+                                            <Select
+                                                options={this.state.teams}
+                                                value={this.state.editUserTeam}
+                                                onChange={(e) => { this.onValueChange("editUserTeam", e) }}
+                                            />
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto">
+                                        <h3 style={{ textDecoration: "underline" }} className="text-white">Edit Department</h3>
+                                        <Col md="12">
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="sales"
+                                                    checked={this.state.editDepartment === "sales"}
+                                                    onChange={(e) => { this.onValueChange("editDepartment", e.target.value) }}
+                                                /> SALES</h4>
+                                            </FormGroup>
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="service"
+                                                    checked={this.state.editDepartment === "service"}
+                                                    onChange={(e) => { this.onValueChange("editDepartment", e.target.value) }}
+                                                /> SERVICE</h4>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto">
+                                        <h3 style={{ textDecoration: "underline" }} className="text-white">Edit Account Type</h3>
+                                        <Col md="12">
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="admin"
+                                                    checked={this.state.editType === "admin"}
+                                                    onChange={(e) => { this.onValueChange("editType", e.target.value) }}
+                                                /> ADMIN</h4>
+                                            </FormGroup>
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="agent"
+                                                    checked={this.state.editType === "agent"}
+                                                    onChange={(e) => { this.onValueChange("editType", e.target.value) }}
+                                                /> AGENT</h4>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto">
+                                        <h3 style={{ textDecoration: "underline" }} className="text-white">User Is Active</h3>
+                                        <Col md="12">
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="active"
+                                                    checked={this.state.editActive === "active"}
+                                                    onChange={(e) => { this.onValueChange("editActive", e.target.value) }}
+                                                /> YES</h4>
+                                            </FormGroup>
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="inactive"
+                                                    checked={this.state.editActive === "inactive"}
+                                                    onChange={(e) => { this.onValueChange("editActive", e.target.value) }}
+                                                /> NO</h4>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto">
+                                        <Col md="12"><h3 style={{ textDecoration: "underline" }} className="text-white">User Skills</h3></Col>
+                                        <Col md="3">
+                                            <p className="text-white" style={{ textDecoration: "underline" }}>Sales BDC</p>
+                                            <FormGroup>
+                                                <p className="text-white">
+                                                    <Input
+                                                        checked={this.state.editSkills.sales.newLeads}
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.sales.newLeads = !this.state.editSkills.sales.newLeads;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        type="checkbox"
+                                                    /> New Leads
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.sales.day1And2 = !this.state.editSkills.sales.day1And2;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.sales.day1And2}
+                                                        type="checkbox"
+                                                    /> Day 1 & 2
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.sales.day3And4 = !this.state.editSkills.sales.day3And4;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.sales.day3And4}
+                                                        type="checkbox"
+                                                    /> Day 3 & 4
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.sales.missedAppointments = !this.state.editSkills.sales.missedAppointments;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.sales.missedAppointments}
+                                                        type="checkbox"
+                                                    /> Missed Appointments
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.sales.day7 = !this.state.editSkills.sales.day7;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.sales.day7}
+                                                        type="checkbox"
+                                                    /> Day 7
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.sales.day10 = !this.state.editSkills.sales.day10;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.sales.day10}
+                                                        type="checkbox"
+                                                    /> Day 10
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.sales.day15 = !this.state.editSkills.sales.day15;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.sales.day15}
+                                                        type="checkbox"
+                                                    /> Day 15
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.sales.day20 = !this.state.editSkills.sales.day20;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.sales.day20}
+                                                        type="checkbox"
+                                                    /> Day 20
+                                                </p>
+                                            </FormGroup>
+                                        </Col>
+                                        <Col md="3">
+                                            <p className="text-white" style={{ textDecoration: "underline" }}>Service To Sales</p>
+                                            <FormGroup>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.serviceToSales.newLeads = !this.state.editSkills.serviceToSales.newLeads;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.serviceToSales.newLeads}
+                                                        type="checkbox"
+                                                    /> New Leads
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.serviceToSales.day1And2 = !this.state.editSkills.serviceToSales.day1And2;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.serviceToSales.day1And2}
+                                                        type="checkbox"
+                                                    /> Day 1 & 2
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.serviceToSales.day3And4 = !this.state.editSkills.serviceToSales.day3And4;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.serviceToSales.day3And4}
+                                                        type="checkbox"
+                                                    /> Day 3 & 4
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.serviceToSales.missedAppointments = !this.state.editSkills.serviceToSales.missedAppointments;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.serviceToSales.missedAppointments}
+                                                        type="checkbox"
+                                                    /> Missed Appointments
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.serviceToSales.day7 = !this.state.editSkills.serviceToSales.day7;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.serviceToSales.day7}
+                                                        type="checkbox"
+                                                    /> Day 7
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.serviceToSales.day10 = !this.state.editSkills.serviceToSales.day10;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.serviceToSales.day10}
+                                                        type="checkbox"
+                                                    /> Day 10
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.serviceToSales.day15 = !this.state.editSkills.serviceToSales.day15;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.serviceToSales.day15}
+                                                        type="checkbox"
+                                                    /> Day 15
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.serviceToSales.day20 = !this.state.editSkills.serviceToSales.day20;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.serviceToSales.day20}
+                                                        type="checkbox"
+                                                    /> Day 20
+                                                </p>
+                                            </FormGroup>
+                                        </Col>
+                                        <Col md="3">
+                                            <p className="text-white" style={{ textDecoration: "underline" }}>Service</p>
+                                            <FormGroup>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.service.missedAppointments = !this.state.editSkills.service.missedAppointments;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.service.missedAppointments}
+                                                        type="checkbox"
+                                                    /> Missed Appointments
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.service.day7 = !this.state.editSkills.service.day7;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.service.day7}
+                                                        type="checkbox"
+                                                    /> Day 7
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.service.day14 = !this.state.editSkills.service.day14;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.service.day14}
+                                                        type="checkbox"
+                                                    /> Day 14
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.service.firstService = !this.state.editSkills.service.firstService;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.service.firstService}
+                                                        type="checkbox"
+                                                    /> First Service
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.service.serviceReminder = !this.state.editSkills.service.serviceReminder;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.service.serviceReminder}
+                                                        type="checkbox"
+                                                    /> Service Reminder
+                                                </p>
+
+                                            </FormGroup>
+                                        </Col>
+                                        <Col md="3">
+                                            <p className="text-white" style={{ textDecoration: "underline" }}>Text/Email</p>
+                                            <FormGroup>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.textEmail.newLeads = !this.state.editSkills.textEmail.newLeads;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.textEmail.newLeads}
+                                                        type="checkbox"
+                                                    /> New Leads
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.textEmail.day1And2 = !this.state.editSkills.textEmail.day1And2;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.textEmail.day1And2}
+                                                        type="checkbox"
+                                                    /> Day 1 & 2
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.textEmail.day5 = !this.state.editSkills.textEmail.day5;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.textEmail.day5}
+                                                        type="checkbox"
+                                                    /> Day 5
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.textEmail.day10 = !this.state.editSkills.textEmail.day10;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.textEmail.day10}
+                                                        type="checkbox"
+                                                    /> Day 10
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.textEmail.day20 = !this.state.editSkills.textEmail.day20;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.textEmail.day20}
+                                                        type="checkbox"
+                                                    /> Day 20
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.editSkills;
+                                                            currSkills.textEmail.missedAppointments = !this.state.editSkills.textEmail.missedAppointments;
+                                                            this.setState({ editSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.editSkills.textEmail.missedAppointments}
+                                                        type="checkbox"
+                                                    /> Missed Appointments
+                                                </p>
+                                            </FormGroup>
+
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Button color="warning" onClick={() => {
+                                        this.setState({ editUserEmail: "" })
+                                    }}>Cancel</Button>
+                                    <Button color="success" onClick={() => { this.updateUser(); this.setState({ editUserEmail: "" }) }}>Save</Button>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+                    <Row hidden={!this.state.addModal}>
+                        <Col className="ml-auto mr-auto text-center" md="10">
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <CardBody>
+                                    <h2 style={{ color: "white" }}>Add User</h2>
+                                    <Row className="ml-auto mr-auto text-center">
+                                        <h3 className="text-white" style={{ textDecoration: "underline" }}>Contact Info</h3>
+                                        <Col md="12">
+                                            <Form>
+                                                <FormGroup>
+                                                    <p className="text-white text-left">Name</p>
+                                                    <Input
+                                                        style={{ backgroundColor: "white" }}
+                                                        value={this.state.addUserName}
+                                                        onChange={(e) => { this.onValueChange("addUserName", e.target.value) }}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <p className="text-white text-left">Email</p>
+                                                    <Input
+                                                        style={{ backgroundColor: "white" }}
+                                                        value={this.state.addUserEmail}
+                                                        onChange={(e) => { this.onValueChange("addUserEmail", e.target.value) }}
+                                                    />
+                                                </FormGroup>
+                                                <FormGroup>
+                                                    <p className="text-white text-left">Phone</p>
+                                                    <Input
+                                                        style={{ backgroundColor: "white" }}
+                                                        value={this.state.addUserPhone}
+                                                        onChange={(e) => { this.onValueChange("addUserPhone", e.target.value) }}
+                                                    />
+                                                </FormGroup>
+                                            </Form>
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto text-center">
+                                        <h3 style={{ textDecoration: "underline" }} className="text-white">Team</h3>
+                                        <Col md="12">
+                                            <Select
+                                                options={this.state.teams}
+                                                value={this.state.addUserTeam}
+                                                onChange={(e) => { this.onValueChange("addUserTeam", e) }}
+                                            />
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto">
+                                        <h3 style={{ textDecoration: "underline" }} className="text-white">Department</h3>
+                                        <Col md="12">
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="sales"
+                                                    checked={this.state.addDepartment === "sales"}
+                                                    onChange={(e) => { this.onValueChange("addDepartment", e.target.value) }}
+                                                /> SALES</h4>
+                                            </FormGroup>
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="service"
+                                                    checked={this.state.addDepartment === "service"}
+                                                    onChange={(e) => { this.onValueChange("addDepartment", e.target.value) }}
+                                                /> SERVICE</h4>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto">
+                                        <h3 style={{ textDecoration: "underline" }} className="text-white">Account Type</h3>
+                                        <Col md="12">
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="admin"
+                                                    checked={this.state.addType === "admin"}
+                                                    onChange={(e) => { this.onValueChange("addType", e.target.value) }}
+                                                /> ADMIN</h4>
+                                            </FormGroup>
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="agent"
+                                                    checked={this.state.addType === "agent"}
+                                                    onChange={(e) => { this.onValueChange("addType", e.target.value) }}
+                                                /> AGENT</h4>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto">
+                                        <h3 style={{ textDecoration: "underline" }} className="text-white">User Is Active</h3>
+                                        <Col md="12">
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="active"
+                                                    checked={this.state.addActive === "active"}
+                                                    onChange={(e) => { this.onValueChange("addActive", e.target.value) }}
+                                                /> YES</h4>
+                                            </FormGroup>
+                                            <FormGroup>
+                                                <h4 className="text-white"><Input
+                                                    type="radio"
+                                                    value="inactive"
+                                                    checked={this.state.addActive === "inactive"}
+                                                    onChange={(e) => { this.onValueChange("addActive", e.target.value) }}
+                                                /> NO</h4>
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Row className="ml-auto mr-auto">
+                                        <Col md="12"><h3 style={{ textDecoration: "underline" }} className="text-white">User Skills</h3></Col>
+                                        <Col md="3">
+                                            <p className="text-white" style={{ textDecoration: "underline" }}>Sales BDC</p>
+                                            <FormGroup>
+                                                <p className="text-white">
+                                                    <Input
+                                                        checked={this.state.addSkills.sales.newLeads || ""}
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.sales.newLeads = !this.state.addSkills.sales.newLeads;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        type="checkbox"
+                                                    /> New Leads
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.sales.day1And2 = !this.state.addSkills.sales.day1And2;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.sales.day1And2 || ""}
+                                                        type="checkbox"
+                                                    /> Day 1 & 2
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.sales.day3And4 = !this.state.addSkills.sales.day3And4;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.sales.day3And4 || ""}
+                                                        type="checkbox"
+                                                    /> Day 3 & 4
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.sales.missedAppointments = !this.state.addSkills.sales.missedAppointments;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.sales.missedAppointments || ""}
+                                                        type="checkbox"
+                                                    /> Missed Appointments
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.sales.day7 = !this.state.addSkills.sales.day7;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.sales.day7 || ""}
+                                                        type="checkbox"
+                                                    /> Day 7
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.sales.day10 = !this.state.addSkills.sales.day10;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.sales.day10 || ""}
+                                                        type="checkbox"
+                                                    /> Day 10
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.sales.day15 = !this.state.addSkills.sales.day15;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.sales.day15 || ""}
+                                                        type="checkbox"
+                                                    /> Day 15
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.sales.day20 = !this.state.addSkills.sales.day20;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.sales.day20 || ""}
+                                                        type="checkbox"
+                                                    /> Day 20
+                                                </p>
+                                            </FormGroup>
+                                        </Col>
+                                        <Col md="3">
+                                            <p className="text-white" style={{ textDecoration: "underline" }}>Service To Sales</p>
+                                            <FormGroup>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.serviceToSales.newLeads = !this.state.addSkills.serviceToSales.newLeads;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.serviceToSales.newLeads || ""}
+                                                        type="checkbox"
+                                                    /> New Leads
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.serviceToSales.day1And2 = !this.state.addSkills.serviceToSales.day1And2;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.serviceToSales.day1And2 || ""}
+                                                        type="checkbox"
+                                                    /> Day 1 & 2
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.serviceToSales.day3And4 = !this.state.addSkills.serviceToSales.day3And4;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.serviceToSales.day3And4 || ""}
+                                                        type="checkbox"
+                                                    /> Day 3 & 4
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.serviceToSales.missedAppointments = !this.state.addSkills.serviceToSales.missedAppointments;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.serviceToSales.missedAppointments || ""}
+                                                        type="checkbox"
+                                                    /> Missed Appointments
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.serviceToSales.day7 = !this.state.addSkills.serviceToSales.day7;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.serviceToSales.day7 || ""}
+                                                        type="checkbox"
+                                                    /> Day 7
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.serviceToSales.day10 = !this.state.addSkills.serviceToSales.day10;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.serviceToSales.day10 || ""}
+                                                        type="checkbox"
+                                                    /> Day 10
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.serviceToSales.day15 = !this.state.addSkills.serviceToSales.day15;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.serviceToSales.day15 || ""}
+                                                        type="checkbox"
+                                                    /> Day 15
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.serviceToSales.day20 = !this.state.addSkills.serviceToSales.day20;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.serviceToSales.day20 || ""}
+                                                        type="checkbox"
+                                                    /> Day 20
+                                                </p>
+                                            </FormGroup>
+                                        </Col>
+                                        <Col md="3">
+                                            <p className="text-white" style={{ textDecoration: "underline" }}>Service</p>
+                                            <FormGroup>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.service.missedAppointments = !this.state.addSkills.service.missedAppointments;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.service.missedAppointments || ""}
+                                                        type="checkbox"
+                                                    /> Missed Appointments
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.service.day7 = !this.state.addSkills.service.day7;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.service.day7 || ""}
+                                                        type="checkbox"
+                                                    /> Day 7
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.service.day14 = !this.state.addSkills.service.day14;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.service.day14 || ""}
+                                                        type="checkbox"
+                                                    /> Day 14
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.service.firstService = !this.state.addSkills.service.firstService;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.service.firstService || ""}
+                                                        type="checkbox"
+                                                    /> First Service
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.service.serviceReminder = !this.state.addSkills.service.serviceReminder;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.service.serviceReminder || ""}
+                                                        type="checkbox"
+                                                    /> Service Reminder
+                                                </p>
+
+                                            </FormGroup>
+                                        </Col>
+                                        <Col md="3">
+                                            <p className="text-white" style={{ textDecoration: "underline" }}>Text/Email</p>
+                                            <FormGroup>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.textEmail.newLeads = !this.state.addSkills.textEmail.newLeads;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.textEmail.newLeads || ""}
+                                                        type="checkbox"
+                                                    /> New Leads
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.textEmail.day1And2 = !this.state.addSkills.textEmail.day1And2;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.textEmail.day1And2 || ""}
+                                                        type="checkbox"
+                                                    /> Day 1 & 2
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.textEmail.day5 = !this.state.addSkills.textEmail.day5;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.textEmail.day5 || ""}
+                                                        type="checkbox"
+                                                    /> Day 5
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.textEmail.day10 = !this.state.addSkills.textEmail.day10;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.textEmail.day10 || ""}
+                                                        type="checkbox"
+                                                    /> Day 10
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.textEmail.day20 = !this.state.addSkills.textEmail.day20;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.textEmail.day20 || ""}
+                                                        type="checkbox"
+                                                    /> Day 20
+                                                </p>
+                                                <p className="text-white">
+                                                    <Input
+                                                        onChange={(e) => {
+                                                            let currSkills = this.state.addSkills;
+                                                            currSkills.textEmail.missedAppointments = !this.state.addSkills.textEmail.missedAppointments;
+                                                            this.setState({ addSkills: currSkills })
+                                                        }}
+                                                        checked={this.state.addSkills.textEmail.missedAppointments || ""}
+                                                        type="checkbox"
+                                                    /> Missed Appointments
+                                                </p>
+                                            </FormGroup>
+
+                                        </Col>
+                                    </Row>
+                                    <hr style={{ border: "1px solid white" }} />
+                                    <Button color='warning' onClick={() => { this.setState({ addModal: false }); this.clearAddValues() }}>Cancel</Button>
+                                    <Button onClick={() => {
+                                        this.addNewUser()
+                                    }}
+                                        color="success"
+                                        disabled={
+                                            this.state.addUserName.length === 0 ||
+                                            this.state.addUserEmail.length === 0 ||
+                                            this.state.addUserPhone.length !== 10 ||
+                                            this.state.addUserTeam.label == undefined ||
+                                            this.state.addActive.length === 0 ||
+                                            this.state.addType.length === 0 ||
+                                            this.state.addDepartment.length === 0
+                                        }>Save</Button>
                                 </CardBody>
                             </Card>
                         </Col>
