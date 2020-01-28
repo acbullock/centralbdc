@@ -91,15 +91,15 @@ class UserManagement extends React.Component {
     }
     async componentWillMount() {
         this._isMounted = true
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let users = this._isMounted && await this.props.mongo.find("agents")
-        users.sort((a, b) => {
+        this._isMounted && users.sort((a, b) => {
             if (a.name < b.name) return -1
             if (b.name < a.name) return 1
             return 0
         })
         let teams = this._isMounted && await this.props.mongo.find("teams");
-        teams.sort((a, b) => {
+        this._isMounted && teams.sort((a, b) => {
             if (a.label < b.label) return -1
             if (b.label < a.label) return 1
             return 0
@@ -110,7 +110,7 @@ class UserManagement extends React.Component {
             userOptions[u].label = users[u].name
             userOptions[u].value = users[u]._id
         }
-        this.setState({ loading: false, users: userOptions, teams })
+        this._isMounted && this.setState({ loading: false, users: userOptions, teams })
         // this.setState({dealershipGroups: groups})
     }
     componentDidMount() {
@@ -123,10 +123,10 @@ class UserManagement extends React.Component {
         if (this.state[modal_name] == false) {
             this.clearAddValues()
         }
-        this.setState({ [modal_name]: !this.state[modal_name] })
+        this._isMounted && this.setState({ [modal_name]: !this.state[modal_name] })
     }
     onValueChange(key, value) {
-        this.setState({ [key]: value })
+        this._isMounted && this.setState({ [key]: value })
     }
     clearAddValues() {
         this.setState({
@@ -174,7 +174,7 @@ class UserManagement extends React.Component {
         })
     }
     async addNewGroup() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let groups = this._isMounted && await this.props.mongo.find("dealership_groups")
         let names = groups.map((g) => {
             return g.label
@@ -186,42 +186,42 @@ class UserManagement extends React.Component {
             })
             this._isMounted && await this.props.mongo.findOneAndUpdate("dealership_groups", { label: newGroup }, { value: x.insertedId })
             groups = this._isMounted && await this.props.mongo.find("dealership_groups")
-            groups.sort((a, b) => {
+            this._isMounted && groups.sort((a, b) => {
                 if (a.label > b.label) return 1;
                 if (b.label > a.label) return -1;
                 return 0;
             })
-            this.setState({ dealershipGroups: groups })
+            this._isMounted && this.setState({ dealershipGroups: groups })
         }
         this.toggle("addDealerModal")
-        this.setState({ loading: false, newDealershipGroup: "" })
+        this._isMounted && this.setState({ loading: false, newDealershipGroup: "" })
     }
     async updateGroupName() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         this._isMounted && await this.props.mongo.findOneAndUpdate("dealership_groups", { value: this.state.editGroupValue }, { label: this.state.editGroupName })
         let groups = this._isMounted && await this.props.mongo.find("dealership_groups")
-        groups.sort((a, b) => {
+        this._isMounted && groups.sort((a, b) => {
             if (a.label < b.label) return -1
             if (a.label > b.label) return 1
             return 0
         })
         this.toggle("editGroupModal")
-        this.setState({ loading: false, dealershipGroups: groups, editDealershipGroup: { label: "", value: "" } })
+        this._isMounted && this.setState({ loading: false, dealershipGroups: groups, editDealershipGroup: { label: "", value: "" } })
     }
     async deleteGroup() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         this._isMounted && await this.props.mongo.findOneAndDelete("dealership_groups", this.state.editDealershipGroup)
         let groups = this._isMounted && await this.props.mongo.find("dealership_groups")
-        groups.sort((a, b) => {
+        this._isMounted && groups.sort((a, b) => {
             if (a.label < b.label) return -1
             if (a.label > b.label) return 1
             return 0
         })
-        this.setState({ editDealershipGroup: { label: "", value: "" }, dealershipGroups: groups })
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ editDealershipGroup: { label: "", value: "" }, dealershipGroups: groups })
+        this._isMounted && this.setState({ loading: false })
     }
     async addNewUser() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
 
         let newUser = {
             name: this.props.utils.toTitleCase(this.state.addUserName),
@@ -241,12 +241,12 @@ class UserManagement extends React.Component {
         }
         console.log(newUser)
         //register user with "password" as password.. they can always reset password on login page..
-        await this.props.mongo.handleRegister(newUser.email, "password").catch((err => this.setState({ err })))
+        this._isMounted && await this.props.mongo.handleRegister(newUser.email, "password").catch((err => {this._isMounted && this.setState({ err })}))
         // insert user
         this._isMounted && await this.props.mongo.insertOne("agents", newUser)
         //re-get agents..
-        let agents = await this.props.mongo.find("agents");
-        agents.sort((a, b) => {
+        let agents = this._isMounted && await this.props.mongo.find("agents");
+        this._isMounted && agents.sort((a, b) => {
             if (a.name > b.name) return 1;
             if (a.name < b.name) return -1;
             return 0;
@@ -259,10 +259,10 @@ class UserManagement extends React.Component {
         this.toggle("addModal")
         this.clearAddValues()
         // this.setState({ dealerships: dealers, loading: false })
-        this.setState({ loading: false, users: agents })
+        this._isMounted && this.setState({ loading: false, users: agents })
     }
     async updateUser() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let update = {
             name: this.props.utils.toTitleCase(this.state.editUserName),
             phone: this.state.editUserPhone,
@@ -275,8 +275,8 @@ class UserManagement extends React.Component {
         //update user
         this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { email: this.state.editUserEmail }, update)
         //then get dealers and sort..
-        let agents = await this.props.mongo.find("agents")
-        agents.sort((a, b) => {
+        let agents = this._isMounted && await this.props.mongo.find("agents")
+        this._isMounted && agents.sort((a, b) => {
             if (a.name < b.name) return -1;
             if (a.name > b.name) return 1;
             return 0;
@@ -289,7 +289,7 @@ class UserManagement extends React.Component {
             }
         }
         // this.toggle("editUserModal")
-        this.setState({ users, editUser: { label: "", value: "" }, loading: false })
+        this._isMounted && this.setState({ users, editUser: { label: "", value: "" }, loading: false })
     }
     render() {
         if (this.state.loading) {
@@ -313,7 +313,7 @@ class UserManagement extends React.Component {
                             <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardBody>
                                     <h2 style={{ color: "white" }}>Add User</h2>
-                                    <Button color="neutral" onClick={() => { this.setState({ editUserEmail: "" }); this.toggle("addModal") }}>
+                                    <Button color="neutral" onClick={() => { this._isMounted && this.setState({ editUserEmail: "" }); this.toggle("addModal") }}>
                                         <i className="tim-icons icon-simple-add"></i>
                                     </Button>
                                     <Modal isOpen={this.state.addModals} toggle={() => { this.toggle("addModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
@@ -363,7 +363,7 @@ class UserManagement extends React.Component {
                                                         placeholder="Team Name"
                                                         options={this.state.teams}
                                                         value={this.state.addUserTeam}
-                                                        onChange={(e) => { this.setState({ addUserTeam: e }) }}
+                                                        onChange={(e) => { this._isMounted && this.setState({ addUserTeam: e }) }}
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -456,10 +456,10 @@ class UserManagement extends React.Component {
                                     />
                                     <br />
                                     <Button color="neutral" disabled={this.state.editUser.label.length == 0} onClick={async () => {
-                                        this.setState({ loading: true })
+                                        this._isMounted && this.setState({ loading: true })
                                         console.log("!@#", this.state.editUser)
-                                        let u = await this.props.mongo.findOne("agents", { _id: this.state.editUser.value })
-                                        this.setState({
+                                        let u = this._isMounted && await this.props.mongo.findOne("agents", { _id: this.state.editUser.value })
+                                        this._isMounted && this.setState({
                                             editUserName: u.name,
                                             editUserPhone: u.phone || "",
                                             editUserEmail: u.email || "",
@@ -502,7 +502,7 @@ class UserManagement extends React.Component {
                                                 }
                                             }
                                         })
-                                        this.setState({ loading: false, addModal: false })
+                                        this._isMounted && this.setState({ loading: false, addModal: false })
                                         // this.toggle("editUserModal");
                                     }}><i className="tim-icons icon-pencil" /></Button>
                                     <Modal isOpen={this.state.editUserModal} toggle={() => { this.toggle("editUserModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
@@ -555,7 +555,7 @@ class UserManagement extends React.Component {
                                                         placeholder="Edit Team"
                                                         options={this.state.teams}
                                                         value={this.state.editUserTeam}
-                                                        onChange={(e) => { this.setState({ editUserTeam: e }) }}
+                                                        onChange={(e) => { this._isMounted && this.setState({ editUserTeam: e }) }}
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -609,7 +609,7 @@ class UserManagement extends React.Component {
                                                 <hr />
                                                 <Button color="warning" onClick={() => {
                                                     this.toggle("editUserModal")
-                                                    this.setState({ editUser: { label: "", value: "" } })
+                                                    this._isMounted && this.setState({ editUser: { label: "", value: "" } })
                                                 }}>Cancel</Button>
                                                 <Button
                                                     onClick={() => {
@@ -757,7 +757,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.sales.newLeads = !this.state.editSkills.sales.newLeads;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         type="checkbox"
                                                     /> New Leads
@@ -767,7 +767,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.sales.day1And2 = !this.state.editSkills.sales.day1And2;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.sales.day1And2}
                                                         type="checkbox"
@@ -778,7 +778,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.sales.day3And4 = !this.state.editSkills.sales.day3And4;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.sales.day3And4}
                                                         type="checkbox"
@@ -789,7 +789,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.sales.missedAppointments = !this.state.editSkills.sales.missedAppointments;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.sales.missedAppointments}
                                                         type="checkbox"
@@ -800,7 +800,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.sales.day7 = !this.state.editSkills.sales.day7;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.sales.day7}
                                                         type="checkbox"
@@ -811,7 +811,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.sales.day10 = !this.state.editSkills.sales.day10;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.sales.day10}
                                                         type="checkbox"
@@ -822,7 +822,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.sales.day15 = !this.state.editSkills.sales.day15;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.sales.day15}
                                                         type="checkbox"
@@ -833,7 +833,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.sales.day20 = !this.state.editSkills.sales.day20;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.sales.day20}
                                                         type="checkbox"
@@ -849,7 +849,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.serviceToSales.serviceDriveRd1 = !this.state.editSkills.serviceToSales.serviceDriveRd1;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.serviceToSales.serviceDriveRd1}
                                                         type="checkbox"
@@ -860,7 +860,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.serviceToSales.serviceDriveRd2 = !this.state.editSkills.serviceToSales.serviceDriveRd2;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.serviceToSales.serviceDriveRd2}
                                                         type="checkbox"
@@ -871,7 +871,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.serviceToSales.dataMiningHighInterest = !this.state.editSkills.serviceToSales.dataMiningHighInterest;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.serviceToSales.dataMiningHighInterest}
                                                         type="checkbox"
@@ -882,7 +882,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.serviceToSales.dataMiningLeases = !this.state.editSkills.serviceToSales.dataMiningLeases;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.serviceToSales.dataMiningLeases}
                                                         type="checkbox"
@@ -893,7 +893,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
                                                             currSkills.serviceToSales.dataMiningBuyBack = !this.state.editSkills.serviceToSales.dataMiningBuyBack;
-                                                            this.setState({ editSkills: currSkills })
+                                                            this._isMounted && this.setState({ editSkills: currSkills })
                                                         }}
                                                         checked={this.state.editSkills.serviceToSales.dataMiningBuyBack}
                                                         type="checkbox"
@@ -1039,7 +1039,7 @@ class UserManagement extends React.Component {
                                     <Button color="warning" onClick={() => {
                                         this.setState({ editUserEmail: "" })
                                     }}>Cancel</Button>
-                                    <Button color="success" onClick={() => { this.updateUser(); this.setState({ editUserEmail: "" }) }}>Save</Button>
+                                    <Button color="success" onClick={() => { this.updateUser(); this._isMounted && this.setState({ editUserEmail: "" }) }}>Save</Button>
                                 </CardBody>
                             </Card>
                         </Col>
@@ -1169,7 +1169,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.sales.newLeads = !this.state.addSkills.sales.newLeads;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         type="checkbox"
                                                     /> New Leads
@@ -1179,7 +1179,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.sales.day1And2 = !this.state.addSkills.sales.day1And2;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.sales.day1And2 || ""}
                                                         type="checkbox"
@@ -1190,7 +1190,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.sales.day3And4 = !this.state.addSkills.sales.day3And4;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.sales.day3And4 || ""}
                                                         type="checkbox"
@@ -1201,7 +1201,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.sales.missedAppointments = !this.state.addSkills.sales.missedAppointments;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.sales.missedAppointments || ""}
                                                         type="checkbox"
@@ -1212,7 +1212,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.sales.day7 = !this.state.addSkills.sales.day7;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.sales.day7 || ""}
                                                         type="checkbox"
@@ -1223,7 +1223,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.sales.day10 = !this.state.addSkills.sales.day10;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.sales.day10 || ""}
                                                         type="checkbox"
@@ -1234,7 +1234,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.sales.day15 = !this.state.addSkills.sales.day15;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.sales.day15 || ""}
                                                         type="checkbox"
@@ -1245,7 +1245,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.sales.day20 = !this.state.addSkills.sales.day20;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.sales.day20 || ""}
                                                         type="checkbox"
@@ -1261,7 +1261,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.serviceToSales.serviceDriveRd1 = !this.state.addSkills.serviceToSales.serviceDriveRd1;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.serviceToSales.serviceDriveRd1 || ""}
                                                         type="checkbox"
@@ -1272,7 +1272,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.serviceToSales.serviceDriveRd2 = !this.state.addSkills.serviceToSales.serviceDriveRd2;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.serviceToSales.serviceDriveRd2 || ""}
                                                         type="checkbox"
@@ -1283,7 +1283,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.serviceToSales.dataMiningHighInterest = !this.state.addSkills.serviceToSales.dataMiningHighInterest;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.serviceToSales.dataMiningHighInterest || ""}
                                                         type="checkbox"
@@ -1294,7 +1294,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.serviceToSales.dataMiningLeases = !this.state.addSkills.serviceToSales.dataMiningLeases;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.serviceToSales.dataMiningLeases || ""}
                                                         type="checkbox"
@@ -1305,7 +1305,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.serviceToSales.dataMiningBuyBack = !this.state.addSkills.serviceToSales.dataMiningBuyBack;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.serviceToSales.dataMiningBuyBack || ""}
                                                         type="checkbox"
@@ -1322,7 +1322,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.service.missedAppointments = !this.state.addSkills.service.missedAppointments;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.service.missedAppointments || ""}
                                                         type="checkbox"
@@ -1333,7 +1333,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.service.day7 = !this.state.addSkills.service.day7;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.service.day7 || ""}
                                                         type="checkbox"
@@ -1344,7 +1344,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.service.day14 = !this.state.addSkills.service.day14;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.service.day14 || ""}
                                                         type="checkbox"
@@ -1355,7 +1355,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.service.firstService = !this.state.addSkills.service.firstService;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.service.firstService || ""}
                                                         type="checkbox"
@@ -1366,7 +1366,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.service.serviceReminder = !this.state.addSkills.service.serviceReminder;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.service.serviceReminder || ""}
                                                         type="checkbox"
@@ -1383,7 +1383,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.textEmail.newLeads = !this.state.addSkills.textEmail.newLeads;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.textEmail.newLeads || ""}
                                                         type="checkbox"
@@ -1394,7 +1394,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.textEmail.day1And2 = !this.state.addSkills.textEmail.day1And2;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.textEmail.day1And2 || ""}
                                                         type="checkbox"
@@ -1405,7 +1405,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.textEmail.day5 = !this.state.addSkills.textEmail.day5;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.textEmail.day5 || ""}
                                                         type="checkbox"
@@ -1416,7 +1416,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.textEmail.day10 = !this.state.addSkills.textEmail.day10;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.textEmail.day10 || ""}
                                                         type="checkbox"
@@ -1427,7 +1427,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.textEmail.day20 = !this.state.addSkills.textEmail.day20;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.textEmail.day20 || ""}
                                                         type="checkbox"
@@ -1438,7 +1438,7 @@ class UserManagement extends React.Component {
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
                                                             currSkills.textEmail.missedAppointments = !this.state.addSkills.textEmail.missedAppointments;
-                                                            this.setState({ addSkills: currSkills })
+                                                            this._isMounted && this.setState({ addSkills: currSkills })
                                                         }}
                                                         checked={this.state.addSkills.textEmail.missedAppointments || ""}
                                                         type="checkbox"
@@ -1449,7 +1449,7 @@ class UserManagement extends React.Component {
                                         </Col>
                                     </Row>
                                     <hr style={{ border: "1px solid white" }} />
-                                    <Button color='warning' onClick={() => { this.setState({ addModal: false }); this.clearAddValues() }}>Cancel</Button>
+                                    <Button color='warning' onClick={() => { this._isMounted && this.setState({ addModal: false }); this.clearAddValues() }}>Cancel</Button>
                                     <Button onClick={() => {
                                         this.addNewUser()
                                     }}

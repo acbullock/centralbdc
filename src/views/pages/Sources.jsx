@@ -45,45 +45,45 @@ class SourceManagement extends React.Component {
         this._isMounted = false;
     }
     toggle(modal_name) {
-        this.setState({ [modal_name]: !this.state[modal_name] })
+        this._isMounted && this.setState({ [modal_name]: !this.state[modal_name] })
     }
     async componentWillMount() {
         this._isMounted = true;
-        this.setState({ loading: true })
-        await this.getSources()
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: true })
+        this._isMounted && await this.getSources()
+        this._isMounted && this.setState({ loading: false })
     }
     async componentWillUnmount() {
         this._isMounted = false;
     }
     async getSources() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let sources = this._isMounted && await this.props.mongo.find("sources")
-        sources.sort((a, b) => {
+        this._isMounted && sources.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
             return 0;
         })
-        this.setState({ loading: false, sources })
+        this._isMounted && this.setState({ loading: false, sources })
     }
     async addSource() {
-        this.setState({ loading: true });
+        this._isMounted && this.setState({ loading: true });
         let inserted = this._isMounted && await this.props.mongo.insertOne("sources", { label: this.props.utils.toTitleCase(this.state.sourceName) });
         this._isMounted && await this.props.mongo.findOneAndUpdate("sources", { label: this.props.utils.toTitleCase(this.state.sourceName) }, { value: inserted.insertedId })
         this._isMounted && await this.getSources()
-        this.setState({ loading: false, sourceName: "" });
+        this._isMounted && this.setState({ loading: false, sourceName: "" });
     }
     async editSource() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         this._isMounted && await this.props.mongo.findOneAndUpdate("sources", { value: this.state.selected_source.value }, { label: this.props.utils.toTitleCase(this.state.editSourceName) })
         this._isMounted && this.getSources();
-        this.setState({ loading: false, selected_source: {label: "", value: ""} })
+        this._isMounted && this.setState({ loading: false, selected_source: {label: "", value: ""} })
     }
     async removeSource() {
-        this.setState({ loading: true });
+        this._isMounted && this.setState({ loading: true });
         let source = this._isMounted && await this.props.mongo.findOneAndDelete("sources", { value: this.state.selected_source.value });
         this._isMounted && await this.getSources()
-        this.setState({ loading: false, selected_source: { label: "", value: "" } });
+        this._isMounted && this.setState({ loading: false, selected_source: { label: "", value: "" } });
     }
     render() {
         if (this.state.loading) {
@@ -113,7 +113,7 @@ class SourceManagement extends React.Component {
                                     <Modal isOpen={this.state.addModal} toggle={() => { this.toggle("addModal") }}>
                                         <ModalHeader toggle={() => { this.toggle("addModal") }}>Add Source</ModalHeader>
                                         <ModalBody>
-                                            <Form onSubmit={(e) => { e.preventDefault(); this.state.sourceName.length > 0 ? this.addSource() : this.setState({ sourceName: "" }); this.toggle("addModal") }}>
+                                            <Form onSubmit={(e) => { e.preventDefault(); this.state.sourceName.length > 0 ? this.addSource() : this._isMounted && this.setState({ sourceName: "" }); this.toggle("addModal") }}>
                                                 <FormGroup>
                                                     <Label for="avgMonthlyPhoneUps">Source Name</Label>
                                                     <Input
@@ -122,13 +122,13 @@ class SourceManagement extends React.Component {
                                                         id="sourceName"
                                                         placeholder="Source Name"
                                                         value={this.state.sourceName}
-                                                        onChange={(e) => { this.setState({ sourceName: e.target.value }) }}
+                                                        onChange={(e) => { this._isMounted && this.setState({ sourceName: e.target.value }) }}
                                                     />
                                                 </FormGroup>
                                             </Form>
                                         </ModalBody>
                                         <ModalFooter>
-                                            <Button color="warning" onClick={() => { this.setState({ sourceName: "" }); this.toggle("addModal") }}>Cancel</Button>
+                                            <Button color="warning" onClick={() => { this._isMounted && this.setState({ sourceName: "" }); this.toggle("addModal") }}>Cancel</Button>
                                             <Button type="submit" disabled={this.state.sourceName.length < 1} color="success" onClick={() => { this.toggle("addModal"); this.addSource() }}>Add Source</Button>{' '}
 
                                         </ModalFooter>
@@ -147,14 +147,14 @@ class SourceManagement extends React.Component {
                                     <Select
                                         options={this.state.sources}
                                         value={this.state.selected_source}
-                                        onChange={(e) => { this.setState({ selected_source: e }) }}
+                                        onChange={(e) => { this._isMounted && this.setState({ selected_source: e }) }}
                                     />
                                     <Button color="danger" disabled={this.state.selected_source.label.length < 1} onClick={this.removeSource}><i className="tim-icons icon-simple-remove" /></Button>
                                     <Button color="info" disabled={this.state.selected_source.label.length < 1} onClick={() => { this.toggle("editModal"); this.setState({ editSourceName: this.state.selected_source.label }) }}><i className="tim-icons icon-pencil" /></Button>
                                     <Modal isOpen={this.state.editModal} toggle={() => { this.toggle("editModal") }}>
                                         <ModalHeader toggle={() => { this.toggle("editModal") }}>Edit Source</ModalHeader>
                                         <ModalBody>
-                                            <Form onSubmit={(e) => { e.preventDefault(); this.state.editSourceName.length > 0 ? this.editSource() : this.setState({ editSourceName: "" }); this.toggle("editModal") }}>
+                                            <Form onSubmit={(e) => { e.preventDefault(); this.state.editSourceName.length > 0 ? this.editSource() : this._isMounted && this.setState({ editSourceName: "" }); this.toggle("editModal") }}>
                                                 <FormGroup>
                                                     <Label for="editSourceName">Source Name</Label>
                                                     <Input
@@ -163,13 +163,13 @@ class SourceManagement extends React.Component {
                                                         id="editSourceName"
                                                         placeholder="Edit Source Name"
                                                         value={this.state.editSourceName}
-                                                        onChange={(e) => { this.setState({ editSourceName: e.target.value }) }}
+                                                        onChange={(e) => { this._isMounted && this.setState({ editSourceName: e.target.value }) }}
                                                     />
                                                 </FormGroup>
                                             </Form>
                                         </ModalBody>
                                         <ModalFooter>
-                                            <Button color="warning" onClick={() => { this.setState({ editSourceName: "" }); this.toggle("editModal") }}>Cancel</Button>
+                                            <Button color="warning" onClick={() => { this._isMounted && this.setState({ editSourceName: "" }); this.toggle("editModal") }}>Cancel</Button>
                                             <Button type="submit" disabled={this.state.editSourceName.length < 1} color="success" onClick={() => { this.toggle("editModal"); this.editSource() }}>Update</Button>{' '}
 
                                         </ModalFooter>

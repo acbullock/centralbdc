@@ -42,134 +42,136 @@ class Scenarios extends React.Component {
             editScenarioName: "",
             editScenarioType: ""
         }
+        this._isMounted = false;
         this.editScenario = this.editScenario.bind(this)
     }
     addModalToggle = () => {
-        this.setState({ addScenarioModal: !this.state.addScenarioModal })
+        this._isMounted && this.setState({ addScenarioModal: !this.state.addScenarioModal })
     }
     editModalToggle = (s) => {
-        this.setState({
+        this._isMounted && this.setState({
             editScenarioName: s.label,
             editScenarioValue: s.value,
             editScenarioType: s.type
         })
-        this.setState({ editScenarioModal: !this.state.editScenarioModal })
-        
+        this._isMounted && this.setState({ editScenarioModal: !this.state.editScenarioModal })
+
     }
     async componentWillMount() {
         // let x = await this.props.mongo.db.getUsers()
         // console.log(x)
-        await this.cleanUpDepartments()
-        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        this._isMounted && await this.cleanUpDepartments()
+        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         if (user.userId == undefined) {
             this.props.history.push("/admin/dashboard")
         }
         // let agents = await this.props.mongo.getCollection("agents")
         // let agent = await agents.findOne({ userId: user.userId })
-        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
+        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
         if (agent.account_type != "admin") {
 
             this.props.history.push("/admin/dashboard")
         }
         // let scenarios = await this.props.mongo.getCollection("scenarios")
         // scenarios = await scenarios.find().toArray()
-        await this.getScenarios()
+        this._isMounted && await this.getScenarios()
     }
-    async cleanUpDepartments(){
-        let deps = await this.props.mongo.find("departments")
-        let scens = await this.props.mongo.find("scenarios")
+    async cleanUpDepartments() {
+        let deps = this._isMounted && await this.props.mongo.find("departments")
+        let scens = this._isMounted && await this.props.mongo.find("scenarios")
         let found = false
-        for(let d in deps){
+        for (let d in deps) {
             found = false
-            for(let s in scens){
-                if(scens[s].type == deps[d].label){
+            for (let s in scens) {
+                if (scens[s].type == deps[d].label) {
                     found = true
                     break;
                 }
 
             }
-            if(!found){
-                await this.props.mongo.findOneAndDelete("departments", deps[d])
+            if (!found) {
+                this._isMounted && await this.props.mongo.findOneAndDelete("departments", deps[d])
             }
         }
     }
     async componentWillUnmount() {
+        this._isMounted = false;
         // document.body.classList.toggle("white-content");
     }
     async getScenarios() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         // let scenarios = await this.props.mongo.getCollection("scenarios")
         // scenarios = await scenarios.find().toArray()
-        let scenarios = await this.props.mongo.find("scenarios")
-        scenarios = scenarios.sort((a,b)=>{
-            if(a.type > b.type) return 1
-            if(a.type < b.type) return -1
+        let scenarios = this._isMounted && await this.props.mongo.find("scenarios")
+        scenarios = this._isMounted && scenarios.sort((a, b) => {
+            if (a.type > b.type) return 1
+            if (a.type < b.type) return -1
             return 0
         })
-        await this.setState({ scenarios, loading: false })
+        this._isMounted && await this.setState({ scenarios, loading: false })
 
     }
     async handleRemove(agent) {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let newAgent = agent
         newAgent.isActive = false
         // let agents = await this.props.mongo.getCollection("agents")
         // await agents.findOneAndUpdate({ email: agent.email }, newAgent)
-        await this.cleanUpDepartments()
-        await this.props.mongo.findOneAndUpdate("agents", {email: agent.email}, newAgent)
-        this.setState({ loading: false })
+        this._isMounted && await this.cleanUpDepartments()
+        this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { email: agent.email }, newAgent)
+        this._isMounted && this.setState({ loading: false })
     }
     async editScenario() {
-        
-        this.setState({loading: true})
+
+        this._isMounted && this.setState({ loading: true })
         // let update = await this.props.mongo.getCollection("scenarios")
         // await update.findOneAndUpdate({_id: this.state.editScenarioValue}, {value: this.state.editScenarioValue, label: this.state.editScenarioName})
-        await this.props.mongo.findOneAndUpdate("scenarios", {_id: this.state.editScenarioValue}, {value: this.state.editScenarioValue, label: this.state.editScenarioName, type: this.state.editScenarioType})
-        
+        this._isMounted && await this.props.mongo.findOneAndUpdate("scenarios", { _id: this.state.editScenarioValue }, { value: this.state.editScenarioValue, label: this.state.editScenarioName, type: this.state.editScenarioType })
+
         //if new department doesnt exist, add it..
-        let departments = await this.props.mongo.find("departments")
+        let departments = this._isMounted && await this.props.mongo.find("departments")
         let found = false
-        for(let d in departments){
-            if(departments[d].label === this.state.editScenarioType){
+        for (let d in departments) {
+            if (departments[d].label === this.state.editScenarioType) {
                 found = true;
                 break;
             }
         }
-        if(!found){
-            let x = await this.props.mongo.insertOne("departments", {label: this.state.editScenarioType})
-            let newdep = await this.props.mongo.findOneAndUpdate("departments", {label: this.state.editScenarioType}, {label: this.state.editScenarioType, value:x.insertedId})
+        if (!found) {
+            let x = this._isMounted && await this.props.mongo.insertOne("departments", { label: this.state.editScenarioType })
+            let newdep = this._isMounted && await this.props.mongo.findOneAndUpdate("departments", { label: this.state.editScenarioType }, { label: this.state.editScenarioType, value: x.insertedId })
         }
-        await this.cleanUpDepartments()
-        await this.getScenarios()
-        await this.editModalToggle({value:"", label:"", type: ""})
-        this.setState({loading:false})
+        this._isMounted && await this.cleanUpDepartments()
+        this._isMounted && await this.getScenarios()
+        this._isMounted && await this.editModalToggle({ value: "", label: "", type: "" })
+        this._isMounted && this.setState({ loading: false })
     }
-    
+
     addScenario = async () => {
 
-        this.setState({ loading: true, err: { message: "" } })
+        this._isMounted && this.setState({ loading: true, err: { message: "" } })
         // let scenarios = await this.props.mongo.getCollection("scenarios")
-        
+
         // let x = await scenarios.insertOne({
         //     label: this.state.newScenarioName,
         //     value: ""
         // })
-        let deps = await this.props.mongo.find("departments")
+        let deps = this._isMounted && await this.props.mongo.find("departments")
         let found = false
-        for(let d in deps){
-            if(deps[d].label == this.state.newScenarioType ){
+        for (let d in deps) {
+            if (deps[d].label == this.state.newScenarioType) {
                 found = true;
                 break;
             }
         }
-        if(!found){
-            let x = await this.props.mongo.insertOne("departments", {label: this.state.newScenarioType})
-            await this.props.mongo.findOneAndUpdate("departments", {label: this.state.newScenarioType}, {
+        if (!found) {
+            let x = this._isMounted && await this.props.mongo.insertOne("departments", { label: this.state.newScenarioType })
+            this._isMounted && await this.props.mongo.findOneAndUpdate("departments", { label: this.state.newScenarioType }, {
                 label: this.state.newScenarioType,
                 value: x.insertedId
             })
         }
-        let x = await this.props.mongo.insertOne("scenarios", {
+        let x = this._isMounted && await this.props.mongo.insertOne("scenarios", {
             label: this.state.newScenarioName,
             type: this.state.newScenarioType,
             value: ""
@@ -178,16 +180,16 @@ class Scenarios extends React.Component {
         //     label: this.state.newScenarioName,
         //     value: x.insertedId
         // })
-        await this.props.mongo.findOneAndUpdate("scenarios", {_id: x.insertedId}, {
+        this._isMounted && await this.props.mongo.findOneAndUpdate("scenarios", { _id: x.insertedId }, {
             label: this.state.newScenarioName,
             value: x.insertedId
         })
         this.addModalToggle()
         // scenarios = await this.props.mongo.getCollection("scenarios")
         // scenarios = await scenarios.find().toArray()
-        await this.cleanUpDepartments()
-        await this.getScenarios()
-        this.setState({ loading: false })
+        this._isMounted && await this.cleanUpDepartments()
+        this._isMounted && await this.getScenarios()
+        this._isMounted && this.setState({ loading: false })
     }
     render() {
         return (
@@ -240,33 +242,33 @@ class Scenarios extends React.Component {
                                                                 "input-group-focus": this.state.scenarioNameFocus
                                                             })}
                                                         >
-                                                            
+
                                                             <Input
 
                                                                 placeholder="Scenario Name"
                                                                 type="text"
-                                                                onFocus={e => this.setState({ scenarioNameFocus: true })}
-                                                                onBlur={e => this.setState({ scenarioNameFocus: false })}
-                                                                onChange={e => this.setState({ newScenarioName: e.target.value })}
+                                                                onFocus={e => this._isMounted && this.setState({ scenarioNameFocus: true })}
+                                                                onBlur={e => this._isMounted && this.setState({ scenarioNameFocus: false })}
+                                                                onChange={e => this._isMounted && this.setState({ newScenarioName: e.target.value })}
                                                             />
-                                                            
+
                                                         </InputGroup>
                                                         <InputGroup
                                                             className={classnames("no-border form-control-lg", {
                                                                 "input-group-focus": this.state.scenarioTypeFocus
                                                             })}
                                                         >
-                                                            
-                                                            <Input 
+
+                                                            <Input
                                                                 placeholder="Scenario Type"
                                                                 type="text"
-                                                                onFocus={e => this.setState({ scenarioTypeFocus: true })}
-                                                                onBlur={e => this.setState({ scenarioTypeFocus: false })}
-                                                                onChange={e => this.setState({ newScenarioType: e.target.value })}
+                                                                onFocus={e => this._isMounted && this.setState({ scenarioTypeFocus: true })}
+                                                                onBlur={e => this._isMounted && this.setState({ scenarioTypeFocus: false })}
+                                                                onChange={e => this._isMounted && this.setState({ newScenarioType: e.target.value })}
                                                             />
-                                                            
+
                                                         </InputGroup>
-                                                        
+
 
 
                                                     </div>
@@ -303,7 +305,7 @@ class Scenarios extends React.Component {
                                     className="card-collapse"
                                     id="accordian"
                                     role="tablist">
-                                    {this.state.scenarios.map((s, i) => {
+                                    {this._isMounted && this.state.scenarios.map((s, i) => {
                                         if (s.label === "None") {
                                             return null
                                         }
@@ -324,7 +326,7 @@ class Scenarios extends React.Component {
                                                                 <i className="tim-icons icon-pencil" />
 
                                                             </Button>
-                                                            
+
                                                         </Col></Row>
                                                     {/* <Button className="btn btn-round" color="primary" disabled={this.state.loading} onClick={() => this.editModalToggle(s)}>
                                                         <i className="tim-icons icon-pencil" />
@@ -332,7 +334,7 @@ class Scenarios extends React.Component {
                                                     </Button> */}
 
 
-                                                    <Modal isOpen={this.state.editScenarioModal} toggle={(e) => this.editModalToggle(s || {value:"", label: "" })}>
+                                                    <Modal isOpen={this.state.editScenarioModal} toggle={(e) => this.editModalToggle(s || { value: "", label: "" })}>
                                                         <div className="modal-header">
                                                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={(e) => this.editModalToggle({ value: "", label: "" })}>
                                                                 <i className="tim-icons icon-simple-remove"></i>
@@ -345,14 +347,14 @@ class Scenarios extends React.Component {
                                                                     <Label >
                                                                         Scenario Name:
                                                                     </Label>
-                                                                    <Input placeholder="Edit scenario" type="text" value={this.state.editScenarioName} onChange={(e) => { this.setState({ editScenarioName: e.target.value }) }}></Input>
-                                                                    <Input placeholder= "Scenario Type" type="text" value={this.state.editScenarioType} onChange={(e)=>{this.setState({editScenarioType: e.target.value})}}></Input>
+                                                                    <Input placeholder="Edit scenario" type="text" value={this.state.editScenarioName} onChange={(e) => { this._isMounted && this.setState({ editScenarioName: e.target.value }) }}></Input>
+                                                                    <Input placeholder="Scenario Type" type="text" value={this.state.editScenarioType} onChange={(e) => { this._isMounted && this.setState({ editScenarioType: e.target.value }) }}></Input>
                                                                 </div>
                                                             </Form>
                                                         </ModalBody>
                                                         <ModalFooter>
-                                                            
-                                                            <Button color="secondary" onClick={(e) => this.editModalToggle({value:"", label: "" })}>
+
+                                                            <Button color="secondary" onClick={(e) => this.editModalToggle({ value: "", label: "" })}>
                                                                 Close
                                                                     </Button>
                                                             <Button color="primary" onClick={this.editScenario} disabled={
@@ -360,22 +362,22 @@ class Scenarios extends React.Component {
                                                                 this.state.editScenarioName.length == 0 ||
                                                                 this.state.editScenarioType.length == 0
                                                             }>
-                                                             Save changes
+                                                                Save changes
                                                                     </Button>
-                                                                    <Button className="btn btn-round" color="danger" disabled={this.state.loading} onClick={async (e) => {
-                                                                        this.setState({loading: true})
-                                                                    //    let scenarios =  await this.props.mongo.getCollection("scenarios");
-                                                                    //    await scenarios.findOneAndDelete({_id: this.state.editScenarioValue})
-                                                                        await this.props.mongo.findOneAndDelete("scenarios", {_id: this.state.editScenarioValue})
-                                                                       await this.editModalToggle({label: "", value: "", type: ""})
-                                                                       await this.cleanUpDepartments()
-                                                                       await this.getScenarios()
-                                                                       this.setState({loading: false})
-                                                                    }}>
+                                                            <Button className="btn btn-round" color="danger" disabled={this.state.loading} onClick={async (e) => {
+                                                                this._isMounted && this.setState({ loading: true })
+                                                                //    let scenarios =  await this.props.mongo.getCollection("scenarios");
+                                                                //    await scenarios.findOneAndDelete({_id: this.state.editScenarioValue})
+                                                                this._isMounted && await this.props.mongo.findOneAndDelete("scenarios", { _id: this.state.editScenarioValue })
+                                                                this._isMounted && await this.editModalToggle({ label: "", value: "", type: "" })
+                                                                this._isMounted && await this.cleanUpDepartments()
+                                                                this._isMounted && await this.getScenarios()
+                                                                this._isMounted && this.setState({ loading: false })
+                                                            }}>
                                                                 <i className="tim-icons icon-simple-remove" />
 
                                                             </Button>
-                                                                    
+
                                                         </ModalFooter>
                                                     </Modal>
 

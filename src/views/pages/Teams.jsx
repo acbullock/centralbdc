@@ -41,83 +41,86 @@ class Teams extends React.Component {
             editTeamName: "",
         }
         this.editTeam = this.editTeam.bind(this)
+        this._isMounted = false;
     }
     addModalToggle = () => {
-        this.setState({ addTeamModal: !this.state.addTeamModal })
+        this._isMounted && this.setState({ addTeamModal: !this.state.addTeamModal })
     }
     editModalToggle = (s) => {
-        this.setState({
+        this._isMounted && this.setState({
             editTeamName: s.label,
             editTeamValue: s.value
         })
-        this.setState({ editTeamModal: !this.state.editTeamModal })
+        this._isMounted && this.setState({ editTeamModal: !this.state.editTeamModal })
         console.log(this.state.editTeamModal)
     }
     async componentWillMount() {
+        this._isMounted = true;
         // let x = await this.props.mongo.db.getUsers()
         // console.log(x)
-        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         if (user.userId == undefined) {
             this.props.history.push("/admin/dashboard")
         }
         // let agents = await this.props.mongo.getCollection("agents")
         // let agent = await agents.findOne({ userId: user.userId })
-        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
+        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
         if (agent.account_type != "admin") {
 
             this.props.history.push("/admin/dashboard")
         }
         // let teams = await this.props.mongo.getCollection("teams")
         // teams = await teams.find().toArray()
-        await this.getTeams()
+        this._isMounted && await this.getTeams()
     }
     async componentWillUnmount() {
+        this._isMounted = false
         // document.body.classList.toggle("white-content");
     }
     async getTeams() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         // let teams = await this.props.mongo.getCollection("teams")
         // teams = await teams.find().toArray()
-        let teams = await this.props.mongo.find("teams")
-        teams.sort((a,b)=>{
-            if(a.label < b.label)
+        let teams = this._isMounted && await this.props.mongo.find("teams")
+        this._isMounted && teams.sort((a, b) => {
+            if (a.label < b.label)
                 return -1;
-            if(b.label < a.label)
+            if (b.label < a.label)
                 return 1
             return 0
         })
-        await this.setState({ teams, loading: false })
+        this._isMounted && await this.setState({ teams, loading: false })
 
     }
     async handleRemove(agent) {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let newAgent = agent
         newAgent.isActive = false
         // let agents = await this.props.mongo.getCollection("agents")
         // await agents.findOneAndUpdate({ email: agent.email }, newAgent)
-        await this.props.mongo.findOneAndUpdate("agents", {email: agent.email}, newAgent)
-        this.setState({ loading: false })
+        this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { email: agent.email }, newAgent)
+        this._isMounted && this.setState({ loading: false })
     }
     async editTeam() {
-        
-        this.setState({loading: true})
+
+        this._isMounted && this.setState({ loading: true })
         // let update = await this.props.mongo.getCollection("teams")
         // await update.findOneAndUpdate({_id: this.state.editTeamValue}, {value: this.state.editTeamValue, label: this.state.editTeamName})
-        await this.props.mongo.findOneAndUpdate("teams", {_id: this.state.editTeamValue},{value: this.state.editTeamValue, label: this.state.editTeamName})
-        await this.getTeams()
-        await this.editModalToggle({value:"", label:""})
-        this.setState({loading:false})
+        this._isMounted && await this.props.mongo.findOneAndUpdate("teams", { _id: this.state.editTeamValue }, { value: this.state.editTeamValue, label: this.state.editTeamName })
+        this._isMounted && await this.getTeams()
+        this._isMounted && await this.editModalToggle({ value: "", label: "" })
+        this._isMounted && this.setState({ loading: false })
     }
-    
+
     addTeam = async () => {
 
-        this.setState({ loading: true, err: { message: "" } })
+        this._isMounted && this.setState({ loading: true, err: { message: "" } })
         // let teams = await this.props.mongo.getCollection("teams")
         // let x = await teams.insertOne({
         //     label: this.state.newTeamName,
         //     value: ""
         // })
-        let x =await this.props.mongo.insertOne("teams", {
+        let x = this._isMounted && await this.props.mongo.insertOne("teams", {
             label: this.state.newTeamName,
             value: ""
         })
@@ -125,13 +128,13 @@ class Teams extends React.Component {
         //     label: this.state.newTeamName,
         //     value: x.insertedId
         // })
-        await this.props.mongo.findOneAndUpdate("teams", { _id: x.insertedId }, {
+        this._isMounted && await this.props.mongo.findOneAndUpdate("teams", { _id: x.insertedId }, {
             label: this.state.newTeamName,
             value: x.insertedId
         })
         this.addModalToggle()
-        await this.getTeams()
-        this.setState({ loading: false })
+        this._isMounted && await this.getTeams()
+        this._isMounted && this.setState({ loading: false })
     }
     render() {
         return (
@@ -193,9 +196,9 @@ class Teams extends React.Component {
 
                                                                 placeholder="Team Name"
                                                                 type="text"
-                                                                onFocus={e => this.setState({ sourceNameFocus: true })}
-                                                                onBlur={e => this.setState({ sourceNameFocus: false })}
-                                                                onChange={e => this.setState({ newTeamName: e.target.value })}
+                                                                onFocus={e => this._isMounted && this.setState({ sourceNameFocus: true })}
+                                                                onBlur={e => this._isMounted && this.setState({ sourceNameFocus: false })}
+                                                                onChange={e => this._isMounted && this.setState({ newTeamName: e.target.value })}
                                                             />
                                                         </InputGroup>
 
@@ -234,7 +237,7 @@ class Teams extends React.Component {
                                     className="card-collapse"
                                     id="accordian"
                                     role="tablist">
-                                    {this.state.teams.map((s, i) => {
+                                    {this._isMounted && this.state.teams.map((s, i) => {
                                         if (s.label === "None") {
                                             return null
                                         }
@@ -254,7 +257,7 @@ class Teams extends React.Component {
                                                                 <i className="tim-icons icon-pencil" />
 
                                                             </Button>
-                                                            
+
                                                         </Col></Row>
                                                     {/* <Button className="btn btn-round" color="primary" disabled={this.state.loading} onClick={() => this.editModalToggle(s)}>
                                                         <i className="tim-icons icon-pencil" />
@@ -262,7 +265,7 @@ class Teams extends React.Component {
                                                     </Button> */}
 
 
-                                                    <Modal isOpen={this.state.editTeamModal} toggle={(e) => this.editModalToggle(s || {value:"", label: "" })}>
+                                                    <Modal isOpen={this.state.editTeamModal} toggle={(e) => this.editModalToggle(s || { value: "", label: "" })}>
                                                         <div className="modal-header">
                                                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={(e) => this.editModalToggle({ value: "", label: "" })}>
                                                                 <i className="tim-icons icon-simple-remove"></i>
@@ -275,36 +278,36 @@ class Teams extends React.Component {
                                                                     <Label >
                                                                         Team Name:
                                                                     </Label>
-                                                                    <Input placeholder="Edit source" type="text" value={this.state.editTeamName} onChange={(e) => { this.setState({ editTeamName: e.target.value }) }}></Input>
+                                                                    <Input placeholder="Edit source" type="text" value={this.state.editTeamName} onChange={(e) => { this._isMounted && this.setState({ editTeamName: e.target.value }) }}></Input>
 
                                                                 </div>
                                                             </Form>
                                                         </ModalBody>
                                                         <ModalFooter>
-                                                            
-                                                            <Button color="secondary" onClick={(e) => this.editModalToggle({value:"", label: "" })}>
+
+                                                            <Button color="secondary" onClick={(e) => this.editModalToggle({ value: "", label: "" })}>
                                                                 Close
                                                                     </Button>
-                                                                    <Button className="btn btn-round" color="danger" disabled={this.state.loading} onClick={async (e) => {
-                                                                        this.setState({loading: true})
-                                                                    //    let teams =  await this.props.mongo.getCollection("teams");
-                                                                    //    await teams.findOneAndDelete({_id: this.state.editTeamValue})
-                                                                    await this.props.mongo.findOneAndDelete("teams", {_id: this.state.editTeamValue})
-                                                                       await this.editModalToggle({label: "", value: ""})
-                                                                       await this.getTeams()
-                                                                       this.setState({loading: false})
-                                                                    }}>
-                                                                 Remove Team
+                                                            <Button className="btn btn-round" color="danger" disabled={this.state.loading} onClick={async (e) => {
+                                                                this._isMounted && this.setState({ loading: true })
+                                                                //    let teams =  await this.props.mongo.getCollection("teams");
+                                                                //    await teams.findOneAndDelete({_id: this.state.editTeamValue})
+                                                                this._isMounted && await this.props.mongo.findOneAndDelete("teams", { _id: this.state.editTeamValue })
+                                                                this._isMounted && await this.editModalToggle({ label: "", value: "" })
+                                                                this._isMounted && await this.getTeams()
+                                                                this._isMounted && this.setState({ loading: false })
+                                                            }}>
+                                                                Remove Team
 
                                                             </Button>
                                                             <Button color="primary" onClick={this.editTeam} disabled={
                                                                 this.state.loading ||
                                                                 this.state.editTeamName.length == 0
                                                             }>
-                                                             Save changes
+                                                                Save changes
                                                                     </Button>
-                                                                    
-                                                                    
+
+
                                                         </ModalFooter>
                                                     </Modal>
 

@@ -95,20 +95,20 @@ class DealershipManagement extends React.Component {
     }
     async componentWillMount() {
         this._isMounted = true
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let groups = this._isMounted && await this.props.mongo.find("dealership_groups")
-        groups.sort((a, b) => {
+        this._isMounted && groups.sort((a, b) => {
             if (a.label < b.label) return -1
             if (b.label < a.label) return 1
             return 0
         })
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
-        dealerships.sort((a, b) => {
+        this._isMounted && dealerships.sort((a, b) => {
             if (a.label < b.label) return -1
             if (b.label < a.label) return 1
             return 0
         })
-        this.setState({ loading: false, dealershipGroups: groups, dealerships: dealerships })
+        this._isMounted && this.setState({ loading: false, dealershipGroups: groups, dealerships: dealerships })
         // this.setState({dealershipGroups: groups})
     }
     componentDidMount() {
@@ -121,65 +121,65 @@ class DealershipManagement extends React.Component {
         if (this.state[modal_name] == false) {
             this.clearAddValues()
         }
-        this.setState({ [modal_name]: !this.state[modal_name] })
+        this._isMounted && this.setState({ [modal_name]: !this.state[modal_name] })
     }
     async getGroup(id) {
-        let g = await this.props.mongo.findOne("dealership_groups", { _id: id })
+        let g = this._isMounted && await this.props.mongo.findOne("dealership_groups", { _id: id })
         return g
     }
     addToTextList(phoneNumber) {
         let arr = this.state.addTextList
         if (arr.indexOf(phoneNumber) == -1)
             arr.push(phoneNumber)
-        this.setState({ addTextList: arr, newTextContact: "" })
+        this._isMounted && this.setState({ addTextList: arr, newTextContact: "" })
     }
     addToServiceList(phoneNumber) {
         let arr = this.state.addServiceTextList
         if (arr.indexOf(phoneNumber) == -1)
             arr.push(phoneNumber)
-        this.setState({ addServiceTextList: arr, newServiceContact: "" })
+        this._isMounted && this.setState({ addServiceTextList: arr, newServiceContact: "" })
     }
     removeFromTextList(phoneNumber) {
         let arr = this.state.addTextList
         if (arr.indexOf(phoneNumber) != -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
-        this.setState({ addTextList: arr, newTextContact: "" })
+        this._isMounted && this.setState({ addTextList: arr, newTextContact: "" })
     }
     removeFromServiceList(phoneNumber) {
         let arr = this.state.addServiceTextList
         if (arr.indexOf(phoneNumber) != -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
-        this.setState({ addServiceTextList: arr, newServiceContact: "" })
+        this._isMounted && this.setState({ addServiceTextList: arr, newServiceContact: "" })
     }
     async addToEditTextList(phoneNumber) {
         let arr = this.state.editTextList
         if (arr.indexOf(phoneNumber) == -1)
             arr.push(phoneNumber)
-        this.setState({ editTextList: arr, newEditTextContact: "" })
+        this._isMounted && this.setState({ editTextList: arr, newEditTextContact: "" })
     }
     async addToEditServiceList(phoneNumber) {
         let arr = this.state.editServiceTextList
         if (arr.indexOf(phoneNumber) == -1)
             arr.push(phoneNumber)
-        this.setState({ editServiceTextList: arr, newEditServiceContact: "" })
+        this._isMounted && this.setState({ editServiceTextList: arr, newEditServiceContact: "" })
     }
     removeFromEditTextList(phoneNumber) {
         let arr = this.state.editTextList
         if (arr.indexOf(phoneNumber) != -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
-        this.setState({ editTextList: arr, newEditTextContact: "" })
+        this._isMounted && this.setState({ editTextList: arr, newEditTextContact: "" })
     }
     removeFromEditServiceList(phoneNumber) {
         let arr = this.state.editServiceTextList
         if (arr.indexOf(phoneNumber) != -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
-        this.setState({ editServiceTextList: arr, newEditServiceContact: "" })
+        this._isMounted && this.setState({ editServiceTextList: arr, newEditServiceContact: "" })
     }
     onValueChange(key, value) {
-        this.setState({ [key]: value })
+        this._isMounted && this.setState({ [key]: value })
     }
     clearAddValues() {
-        this.setState({
+        this._isMounted && this.setState({
             addDealershipName: "",
             newTextContact: "",
             newServiceContact: "",
@@ -208,54 +208,54 @@ class DealershipManagement extends React.Component {
         })
     }
     async addNewGroup() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let groups = this._isMounted && await this.props.mongo.find("dealership_groups")
-        let names = groups.map((g) => {
+        let names = this._isMounted && groups.map((g) => {
             return g.label
         })
-        let newGroup = this.props.utils.toTitleCase(this.state.newDealershipGroup)
+        let newGroup = this._isMounted && this.props.utils.toTitleCase(this.state.newDealershipGroup)
         if (names.indexOf(newGroup) === -1) {
             let x = this._isMounted && await this.props.mongo.insertOne("dealership_groups", {
                 label: newGroup,
             })
             this._isMounted && await this.props.mongo.findOneAndUpdate("dealership_groups", { label: newGroup }, { value: x.insertedId })
             groups = this._isMounted && await this.props.mongo.find("dealership_groups")
-            groups.sort((a, b) => {
+            this._isMounted && groups.sort((a, b) => {
                 if (a.label > b.label) return 1;
                 if (b.label > a.label) return -1;
                 return 0;
             })
-            this.setState({ dealershipGroups: groups })
+            this._isMounted && this.setState({ dealershipGroups: groups })
         }
         this.toggle("addDealerModal")
-        this.setState({ loading: false, newDealershipGroup: "" })
+        this._isMounted && this.setState({ loading: false, newDealershipGroup: "" })
     }
     async updateGroupName() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         this._isMounted && await this.props.mongo.findOneAndUpdate("dealership_groups", { value: this.state.editGroupValue }, { label: this.state.editGroupName })
         let groups = this._isMounted && await this.props.mongo.find("dealership_groups")
-        groups.sort((a, b) => {
+        this._isMounted && groups.sort((a, b) => {
             if (a.label < b.label) return -1
             if (a.label > b.label) return 1
             return 0
         })
         this.toggle("editGroupModal")
-        this.setState({ loading: false, dealershipGroups: groups, editDealershipGroup: { label: "", value: "" } })
+        this._isMounted && this.setState({ loading: false, dealershipGroups: groups, editDealershipGroup: { label: "", value: "" } })
     }
     async deleteGroup() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         this._isMounted && await this.props.mongo.findOneAndDelete("dealership_groups", this.state.editDealershipGroup)
         let groups = this._isMounted && await this.props.mongo.find("dealership_groups")
-        groups.sort((a, b) => {
+        this._isMounted && groups.sort((a, b) => {
             if (a.label < b.label) return -1
             if (a.label > b.label) return 1
             return 0
         })
-        this.setState({ editDealershipGroup: { label: "", value: "" }, dealershipGroups: groups })
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ editDealershipGroup: { label: "", value: "" }, dealershipGroups: groups })
+        this._isMounted && this.setState({ loading: false })
     }
     async addNewDealershp() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let newDealership = {
             label: this.props.utils.toTitleCase(this.state.addDealershipName),
             group: this.state.addDealershipGroup.value,
@@ -376,18 +376,18 @@ class DealershipManagement extends React.Component {
         this._isMounted && await this.props.mongo.insertOne("appointments", { dealership: inserted.insertedId, appointments: [] })
         this._isMounted && await this.props.mongo.insertOne("recordings", { dealership: inserted.insertedId, lastMonthCount: 0, thisMonthCount: 0 })
         //then get dealers and sort..
-        let dealers = await this.props.mongo.find("dealerships")
-        dealers.sort((a, b) => {
+        let dealers = this._isMounted && await this.props.mongo.find("dealerships")
+        this._isMounted && dealers.sort((a, b) => {
             if (a.label < b.label) return -1;
             if (a.label > b.label) return 1;
             return 0;
         })
         this.toggle("addModal")
         this.clearAddValues()
-        this.setState({ dealerships: dealers, loading: false })
+        this._isMounted && this.setState({ dealerships: dealers, loading: false })
     }
     async updateDealership() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let update_value = this.state.editDealership.value
         let update = {
             label: this.props.utils.toTitleCase(this.state.editDealershipName),
@@ -415,29 +415,29 @@ class DealershipManagement extends React.Component {
         //update dealer
         this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: update_value }, update)
         //then get dealers and sort..
-        let dealers = await this.props.mongo.find("dealerships")
-        dealers.sort((a, b) => {
+        let dealers = this._isMounted && await this.props.mongo.find("dealerships")
+        this._isMounted && dealers.sort((a, b) => {
             if (a.label < b.label) return -1;
             if (a.label > b.label) return 1;
             return 0;
         })
         this.toggle("editDealerModal")
-        this.setState({ dealerships: dealers, editDealership: { label: "", value: "" }, loading: false })
+        this._isMounted && this.setState({ dealerships: dealers, editDealership: { label: "", value: "" }, loading: false })
     }
     async deleteDealership() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         //delete dealership, also delete from appts and recordings..
         this._isMounted && await this.props.mongo.findOneAndDelete("dealerships", this.state.editDealership)
         this._isMounted && await this.props.mongo.findOneAndDelete("recordings", { dealership: this.state.editDealership.value })
         this._isMounted && await this.props.mongo.findOneAndDelete("appointments", { dealership: this.state.editDealership.value })
         //get dealerships
         let dealers = this._isMounted && await this.props.mongo.find("dealerships")
-        dealers.sort((a, b) => {
+        this._isMounted && dealers.sort((a, b) => {
             if (a.label < b.label) return -1
             if (a.label > b.label) return 1
             return 0
         })
-        this.setState({ loading: false, dealerships: dealers, editDealership: { label: "", value: "" } })
+        this._isMounted && this.setState({ loading: false, dealerships: dealers, editDealership: { label: "", value: "" } })
     }
 
     render() {
@@ -510,7 +510,7 @@ class DealershipManagement extends React.Component {
                                                         id="dealershipGroup"
                                                         placeholder="Dealership Group"
                                                         options={this.state.dealershipGroups}
-                                                        onChange={(e) => { this.setState({ addDealershipGroup: e }) }}
+                                                        onChange={(e) => { this._isMounted && this.setState({ addDealershipGroup: e }) }}
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -563,7 +563,7 @@ class DealershipManagement extends React.Component {
                                                 <legend>Sales Contact List</legend>
                                                 <FormGroup>
                                                     {
-                                                        this.state.addTextList.map((phoneNumber, i) => {
+                                                        this._isMounted && this.state.addTextList.map((phoneNumber, i) => {
                                                             return <p key={i}>{phoneNumber}</p>
                                                         })
                                                     }
@@ -579,7 +579,7 @@ class DealershipManagement extends React.Component {
                                                 <legend>Service Contact List</legend>
                                                 <FormGroup>
                                                     {
-                                                        this.state.addServiceTextList.map((phoneNumber, i) => {
+                                                        this._isMounted && this.state.addServiceTextList.map((phoneNumber, i) => {
                                                             return <p key={i}>{phoneNumber}</p>
                                                         })
                                                     }
@@ -632,12 +632,12 @@ class DealershipManagement extends React.Component {
                                                 <legend>Departments</legend>
                                                 <FormGroup tag="fieldset">
                                                     <Label check>
-                                                        <Input type="checkbox" checked={this.state.addIsSales} onChange={(e) => { this.setState({ addIsSales: !this.state.addIsSales }) }} />{' '}
+                                                        <Input type="checkbox" checked={this.state.addIsSales} onChange={(e) => { this._isMounted && this.setState({ addIsSales: !this.state.addIsSales }) }} />{' '}
                                                         Sales
                                                     </Label>
                                                     <br />
                                                     <Label check>
-                                                        <Input type="checkbox" checked={this.state.addIsService} onChange={(e) => { this.setState({ addIsService: !this.state.addIsService }) }} />{' '}
+                                                        <Input type="checkbox" checked={this.state.addIsService} onChange={(e) => { this._isMounted && this.setState({ addIsService: !this.state.addIsService }) }} />{' '}
                                                         Service
                                                     </Label>
                                                 </FormGroup>
@@ -762,11 +762,11 @@ class DealershipManagement extends React.Component {
                                         id="editDealershipGroup"
                                         options={this.state.dealershipGroups}
                                         value={this.state.editDealershipGroup}
-                                        onChange={(e) => { this.onValueChange("editDealershipGroup", e); this.setState({ editGroupValue: e.value }) }}
+                                        onChange={(e) => { this.onValueChange("editDealershipGroup", e); this._isMounted && this.setState({ editGroupValue: e.value }) }}
                                     />
                                     <br />
                                     {/* <Button color="warning" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.deleteGroup() }}>Delete Group Name</Button> */}
-                                    <Button color="neutral" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.toggle("editGroupModal"); this.setState({ editGroupName: this.state.editDealershipGroup.label }) }}>Edit Group Name</Button>
+                                    <Button color="neutral" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.toggle("editGroupModal"); this._isMounted && this.setState({ editGroupName: this.state.editDealershipGroup.label }) }}>Edit Group Name</Button>
                                     <Modal isOpen={this.state.editGroupModal} toggle={() => { this.toggle("editGroupModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("editGroupModal") }}>Edit Group</ModalHeader>
                                         <ModalBody>
@@ -775,7 +775,7 @@ class DealershipManagement extends React.Component {
                                                 onChange={(e) => { this.onValueChange("editGroupName", e.target.value); }}
                                             />
                                             <br />
-                                            <Button color="warning" onClick={() => { this.toggle("editGroupModal"); this.setState({ editDealershipGroup: { label: "", value: "" } }) }}>Cancel</Button>
+                                            <Button color="warning" onClick={() => { this.toggle("editGroupModal"); this._isMounted && this.setState({ editDealershipGroup: { label: "", value: "" } }) }}>Cancel</Button>
                                             <Button color="primary" onClick={() => { this.updateGroupName() }}>Save</Button>
                                         </ModalBody>
                                     </Modal>
@@ -794,16 +794,16 @@ class DealershipManagement extends React.Component {
                                         id="editDealership"
                                         options={this.state.dealerships}
                                         value={this.state.editDealership}
-                                        onChange={(e) => { this.onValueChange("editDealership", e); this.setState({ editDealershipValue: e.value }) }}
+                                        onChange={(e) => { this.onValueChange("editDealership", e); this._isMounted && this.setState({ editDealershipValue: e.value }) }}
                                     />
                                     <br />
                                     {/* <Button color="danger" disabled={this.state.editDealership.label.length == 0} onClick={() => { this.deleteDealership() }}>Delete Dealership</Button> */}
                                     <Button color="neutral" disabled={this.state.editDealership.label.length == 0} onClick={async () => {
-                                        this.setState({ loading: true })
-                                        let d = await this.props.mongo.findOne("dealerships", { value: this.state.editDealership.value })
-                                        let group = await this.getGroup(this.state.editDealership.group)
-                                        this.setState({ editDealership: d })
-                                        this.setState({
+                                        this._isMounted && this.setState({ loading: true })
+                                        let d = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.editDealership.value })
+                                        let group = this._isMounted && await this.getGroup(this.state.editDealership.group)
+                                        this._isMounted && this.setState({ editDealership: d })
+                                        this._isMounted && this.setState({
                                             editDealershipName: this.state.editDealership.label,
                                             editDealershipPhone: this.state.editDealership.phone || "",
                                             editDealershipAddress: this.state.editDealership.address || "",
@@ -826,7 +826,7 @@ class DealershipManagement extends React.Component {
                                             editServiceRequired: this.state.editDealership.serviceRequired || false,
                                             editTextEmailRequired: this.state.editDealership.textEmailRequired || false
                                         })
-                                        this.setState({ loading: false })
+                                        this._isMounted && this.setState({ loading: false })
                                         this.toggle("editDealerModal");
                                     }}>Edit Dealership</Button>
                                     <Modal isOpen={this.state.editDealerModal} toggle={() => { this.toggle("editDealerModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
@@ -877,7 +877,7 @@ class DealershipManagement extends React.Component {
                                                         placeholder="Edit Dealership Group"
                                                         options={this.state.dealershipGroups}
                                                         value={this.state.editDealershipGroup2}
-                                                        onChange={(e) => { this.setState({ editDealershipGroup2: e }) }}
+                                                        onChange={(e) => { this._isMounted && this.setState({ editDealershipGroup2: e }) }}
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -930,7 +930,7 @@ class DealershipManagement extends React.Component {
                                                 <legend>Edit Sales Contact List</legend>
                                                 <FormGroup>
                                                     {
-                                                        this.state.editTextList.map((phoneNumber, i) => {
+                                                        this._isMounted && this.state.editTextList.map((phoneNumber, i) => {
                                                             return <p key={i}>{phoneNumber}</p>
                                                         })
                                                     }
@@ -946,7 +946,7 @@ class DealershipManagement extends React.Component {
                                                 <legend>Edit Service Contact List</legend>
                                                 <FormGroup>
                                                     {
-                                                        this.state.editServiceTextList.map((phoneNumber, i) => {
+                                                        this._isMounted && this.state.editServiceTextList.map((phoneNumber, i) => {
                                                             return <p key={i}>{phoneNumber}</p>
                                                         })
                                                     }
@@ -999,12 +999,12 @@ class DealershipManagement extends React.Component {
                                                 <legend>Edit Departments</legend>
                                                 <FormGroup tag="fieldset">
                                                     <Label check>
-                                                        <Input type="checkbox" checked={this.state.editIsSales} onChange={(e) => { this.setState({ editIsSales: !this.state.editIsSales }) }} />{' '}
+                                                        <Input type="checkbox" checked={this.state.editIsSales} onChange={(e) => { this._isMounted && this.setState({ editIsSales: !this.state.editIsSales }) }} />{' '}
                                                         Sales
                                                     </Label>
                                                     <br />
                                                     <Label check>
-                                                        <Input type="checkbox" checked={this.state.editIsService} onChange={(e) => { this.setState({ editIsService: !this.state.editIsService }) }} />{' '}
+                                                        <Input type="checkbox" checked={this.state.editIsService} onChange={(e) => { this._isMounted && this.setState({ editIsService: !this.state.editIsService }) }} />{' '}
                                                         Service
                                                     </Label>
                                                 </FormGroup>
@@ -1054,7 +1054,7 @@ class DealershipManagement extends React.Component {
                                                 </FormGroup>
                                                 <Button color="warning" onClick={() => {
                                                     this.toggle("editDealerModal")
-                                                    this.setState({ editDealership: { label: "", value: "" } })
+                                                    this._isMounted && this.setState({ editDealership: { label: "", value: "" } })
                                                 }}>Cancel</Button>
                                                 <Button onClick={() => {
                                                     this.updateDealership()

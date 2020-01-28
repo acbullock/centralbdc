@@ -924,7 +924,6 @@ class Dashboard extends React.Component {
                     <tbody>
                       {
                         this.state.top5.map((agent, index) => {
-                          console.log("!@#", agent.imageUrl)
                           if (index > 9) return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>

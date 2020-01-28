@@ -83,7 +83,7 @@ class DealershipHistoryNew extends React.Component {
         this._isMounted && this.setState({ loading: true })
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true, isSales: true })
         let agents = this._isMounted && await this.props.mongo.find("agents", { department: "sales" })
-        dealerships.sort((a, b) => {
+        this._isMounted && dealerships.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
             return 0;
@@ -100,7 +100,7 @@ class DealershipHistoryNew extends React.Component {
             appts = appts.concat(agents[a].appointments)
             assistance = assistance.concat(agents[a].assistance)
         }
-        appts = appts.filter((a) => {
+        appts = this._isMounted && appts.filter((a) => {
             return a.dealership.value === dealer.value
         })
         assistance = assistance.filter((a) => {
@@ -108,7 +108,7 @@ class DealershipHistoryNew extends React.Component {
         })
         let all_appts = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealer.value })
         appts = appts.concat(all_appts)
-        appts = appts.filter((a) => {
+        appts = this._isMounted && appts.filter((a) => {
             return a.dealership_department !== "Service"
         })
         this._isMounted && this.setState({ historyLoading: false, history: appts, historyAssistance: assistance })
@@ -118,21 +118,21 @@ class DealershipHistoryNew extends React.Component {
         this._isMounted && await this.setState({ searched: true, resultsLoading: true, resultsAssistanceLoading: true, results: [], resultsAssistance: [] })
         let from = new Date(this.state.fromDate).setHours(0, 0, 0, 0)
         let to = new Date(this.state.toDate).setHours(23, 59, 59, 999)
-        let results = this.state.history.filter((a) => {
+        let results = this._isMounted && this.state.history.filter((a) => {
             let verified = new Date(a.verified)
             return verified.getTime() >= new Date(from).getTime() && verified.getTime() <= new Date(to).getTime()
         })
-        results.sort((a, b) => {
+        this._isMounted && results.sort((a, b) => {
             if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return 1;
             if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return -1;
             return 0
         })
 
-        let resultsAssistance = this.state.historyAssistance.filter((a) => {
+        let resultsAssistance = this._isMounted && this.state.historyAssistance.filter((a) => {
             let created = new Date(a.created)
             return created.getTime() >= new Date(from).getTime() && created.getTime() <= new Date(to).getTime()
         })
-        resultsAssistance.sort((a, b) => {
+        this._isMounted && resultsAssistance.sort((a, b) => {
             if (new Date(a.created).getTime() > new Date(b.created).getTime()) return 1;
             if (new Date(a.created).getTime() < new Date(b.created).getTime()) return -1;
             return 0
@@ -276,7 +276,7 @@ class DealershipHistoryNew extends React.Component {
                                         <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.resultsLoading} />
                                     </Card>
                                     <h2 style={{ color: "white" }}>Appointments: {this.state.results.length} Results</h2>
-                                    {this.state.results.map((a, i) => {
+                                    {this._isMounted && this.state.results.map((a, i) => {
                                         return (
                                             <Card key={i} color="transparent" className="card-raised card-white shadow">
                                                 <CardBody style={{ whiteSpace: "pre-wrap" }}>
@@ -297,16 +297,16 @@ class DealershipHistoryNew extends React.Component {
                                         <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.resultsAssistanceLoading} />
                                     </Card>
                                     <h2 style={{ color: "white" }}>Follow-ups: {this.state.resultsAssistance.length} Results</h2>
-                                    {this.state.resultsAssistance.map((a, i) => {
+                                    {this._isMounted && this.state.resultsAssistance.map((a, i) => {
                                         return (
                                             <Card key={i} color="transparent" className="card-raised card-white shadow">
                                                 <CardBody style={{ whiteSpace: "pre-wrap" }}>
                                                     <p style={{ color: "white" }}><strong>{i + 1}.</strong></p>
-                                                    <p style={{color: "white"}}><strong>{a.dealership.label}</strong></p>
+                                                    <p style={{ color: "white" }}><strong>{a.dealership.label}</strong></p>
                                                     <p style={{ color: "white" }}><strong>{a.customer_firstname} {a.customer_lastname}</strong></p>
-                                                    <p style={{ color: "white" }}><strong>({a.customer_phone.substring(0,3)}) {a.customer_phone.substring(3,6)} - {a.customer_phone.substring(6,10)}</strong></p>
+                                                    <p style={{ color: "white" }}><strong>({a.customer_phone.substring(0, 3)}) {a.customer_phone.substring(3, 6)} - {a.customer_phone.substring(6, 10)}</strong></p>
                                                     <p style={{ color: "white" }}><strong>{a.message}</strong></p>
-                                                    <p style={{color: "white"}}>Source: <strong>{a.source.label}</strong></p>
+                                                    <p style={{ color: "white" }}>Source: <strong>{a.source.label}</strong></p>
                                                     <p style={{ color: "white" }}>Created: <strong>{new Date(a.created).toLocaleString()}</strong></p>
                                                     <p style={{ color: "white" }}>Agent Name: <strong>{a.agent_name}</strong></p>
                                                 </CardBody>

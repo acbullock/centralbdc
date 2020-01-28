@@ -50,11 +50,11 @@ class FailedTexts extends React.Component {
 
     }
     _isMounted = false
-    async componentWillMount(){
+    async componentWillMount() {
         this._isMounted = true
-        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
-        if(agent.account_type !== "admin"){
+        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
+        if (agent.account_type !== "admin") {
             this._isMounted = false;
             this.props.history.push("/admin/dashboard")
         }
@@ -64,45 +64,45 @@ class FailedTexts extends React.Component {
         this._isMounted && await this.refreshList()
 
 
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
 
     }
-    async refreshList(){
-        this.setState({loading: true})
-        let failed_texts =  this._isMounted && await this.props.mongo.find("failed_texts")
-       this.setState({  failed_texts: failed_texts, loading: false })
+    async refreshList() {
+        this._isMounted && this.setState({ loading: true })
+        let failed_texts = this._isMounted && await this.props.mongo.find("failed_texts")
+        this._isMounted && this.setState({ failed_texts: failed_texts, loading: false })
     }
-    async resendText(failed_text){
-        let query = {_id: failed_text._id}
-        this.setState({loading: true})
+    async resendText(failed_text) {
+        let query = { _id: failed_text._id }
+        this._isMounted && this.setState({ loading: true })
         let token = this._isMounted && await this.props.mongo.getToken()
-        this._isMounted && await this.props.mongo.sendGroupText(failed_text.item.body.from.phoneNumber, failed_text.item.body.text, [failed_text.item.body.to[0].phoneNumber], token) 
-        
+        this._isMounted && await this.props.mongo.sendGroupText(failed_text.item.body.from.phoneNumber, failed_text.item.body.text, [failed_text.item.body.to[0].phoneNumber], token)
+
         //remove from list..
         this._isMounted && await this.props.mongo.findOneAndDelete("failed_texts", query)
         this._isMounted && await this.refreshList()
-        this.setState({loading:false})
+        this._isMounted && this.setState({ loading: false })
     }
     timeout(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-    async resendAll(){
-        this.setState({loading: true})
+    async resendAll() {
+        this._isMounted && this.setState({ loading: true })
         let failed_texts = this.state.failed_texts;
-        for(let t in failed_texts){
-            this.setState({loading: true})
-            await this.resendText(failed_texts[t])
-            this.setState({loading: true})
-            await this.timeout(1000)
+        for (let t in failed_texts) {
+            this._isMounted && this.setState({ loading: true })
+            this._isMounted && await this.resendText(failed_texts[t])
+            this._isMounted && this.setState({ loading: true })
+            this._isMounted && await this.timeout(1000)
         }
-        this.setState({loading: false})
+        this._isMounted && this.setState({ loading: false })
     }
-    async removeText(failed_text){
-        this.setState({loading: true})
-        this._isMounted && await this.props.mongo.findOneAndDelete("failed_texts", {_id: failed_text._id})
+    async removeText(failed_text) {
+        this._isMounted && this.setState({ loading: true })
+        this._isMounted && await this.props.mongo.findOneAndDelete("failed_texts", { _id: failed_text._id })
         this._isMounted && await this.refreshList()
 
-        this.setState({loading: false})
+        this._isMounted && this.setState({ loading: false })
     }
     componentWillUnmount() {
         this._isMounted = false
@@ -116,7 +116,7 @@ class FailedTexts extends React.Component {
                         <Container>
                             <Col className="ml-auto mr-auto text-center" md="6">
                                 {/* <Card color="transparent"> */}
-                                    <CardImg top width="100%" src={this.props.utils.loading} />
+                                <CardImg top width="100%" src={this.props.utils.loading} />
                                 {/* </Card> */}
                             </Col>
                         </Container>
@@ -130,7 +130,7 @@ class FailedTexts extends React.Component {
                     <Container >
                         <Row>
                             <Col className="ml-auto mr-auto text-center" md="6">
-                                
+
                                 <h1 className="title">Failed Texts</h1>
                                 <h1 hidden={!this.state.loading}>Loading</h1>
                                 <br />
@@ -138,15 +138,15 @@ class FailedTexts extends React.Component {
                         </Row>
                         <br /><br /><br />
                         <Row>
-                            
+
                             <Col lg="12" md="12">
                                 <h2>Failed Text Count: {this.state.failed_texts.length}</h2>
-                                <Button  disabled={this.state.loading} onClick={()=>{this.refreshList()}}>Refresh</Button>
-                                <Button disabled={this.state.loading || this.state.failed_texts.length == 0} color="info" onClick={()=>{this.resendAll()}}>Resend All</Button>
+                                <Button disabled={this.state.loading} onClick={() => { this.refreshList() }}>Refresh</Button>
+                                <Button disabled={this.state.loading || this.state.failed_texts.length == 0} color="info" onClick={() => { this.resendAll() }}>Resend All</Button>
                                 <Card className="card-warning card-raised card-white" >
                                     <CardBody >
                                         {
-                                            this.state.failed_texts.map((f, i) => {
+                                            this._isMounted && this.state.failed_texts.map((f, i) => {
                                                 return (
                                                     <div key={f._id} style={{ whiteSpace: "pre-wrap" }} >
                                                         {/* <p>Agent Name: <strong>{appt.agent_name}</strong></p> */}
@@ -155,8 +155,8 @@ class FailedTexts extends React.Component {
                                                         <blockquote>{f.item.body.text}</blockquote>
 
                                                         <p><strong>Error Message: </strong> {f.item.message}</p>
-                                                        <Button disabled={this.state.loading} color="primary" onClick={()=>{this.resendText(f)}}>Resend Text</Button>
-                                                        <Button disabled={this.state.loading} color="warning" onClick={()=>this.removeText(f)}>Cancel Text</Button>
+                                                        <Button disabled={this.state.loading} color="primary" onClick={() => { this.resendText(f) }}>Resend Text</Button>
+                                                        <Button disabled={this.state.loading} color="warning" onClick={() => this.removeText(f)}>Cancel Text</Button>
                                                         <hr />
                                                     </div>
                                                 )

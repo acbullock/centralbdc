@@ -42,7 +42,7 @@ class DealershipUsers extends React.Component {
             editAccess: "",
             editActive: "",
             editUserDealership: { label: "", value: "" },
-            editGroup: {label: "", value: ""},
+            editGroup: { label: "", value: "" },
             dealership_groups: []
         }
         this.toggle = this.toggle.bind(this)
@@ -54,39 +54,39 @@ class DealershipUsers extends React.Component {
     async componentWillMount() {
         this._isMounted = true
 
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let users = this._isMounted && await this.props.mongo.find("dealership_users")
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
         let dealership_groups = this._isMounted && await this.props.mongo.find("dealership_groups")
-        users.sort((a, b) => {
+        this._isMounted && users.sort((a, b) => {
             if (a.name < b.name) return -1
             if (b.name < a.name) return 1
             return 0
         })
-        users = users.map((u)=>{
+        users = this._isMounted && users.map((u) => {
             let group = "";
-            for(let d in dealerships){
-                if(dealerships[d].value === u.dealership){
+            for (let d in dealerships) {
+                if (dealerships[d].value === u.dealership) {
                     group = dealerships[d].group;
                     break;
                 }
             }
-            return Object.assign(u, {group: group})
+            return Object.assign(u, { group: group })
         });
-        dealerships.sort((a, b) => {
+        this._isMounted && dealerships.sort((a, b) => {
             if (a.label < b.label) return -1
             if (b.label < a.label) return 1
             return 0
         })
-        dealership_groups.sort((a, b) => {
+        this._isMounted && dealership_groups.sort((a, b) => {
             if (a.label < b.label) return -1
             if (b.label < a.label) return 1
             return 0
         })
-        let userOptions = users.map((u)=>{
-            return Object.assign(u, {label: u.name, value: u._id})
+        let userOptions = this._isMounted && users.map((u) => {
+            return Object.assign(u, { label: u.name, value: u._id })
         })
-        this.setState({ loading: false, users: userOptions, dealerships, dealership_groups })
+        this._isMounted && this.setState({ loading: false, users: userOptions, dealerships, dealership_groups })
         // this.setState({dealershipGroups: groups})
     }
     componentDidMount() {
@@ -99,13 +99,13 @@ class DealershipUsers extends React.Component {
         if (this.state[modal_name] == false) {
             this.clearAddValues()
         }
-        this.setState({ [modal_name]: !this.state[modal_name] })
+        this._isMounted && this.setState({ [modal_name]: !this.state[modal_name] })
     }
     onValueChange(key, value) {
-        this.setState({ [key]: value })
+        this._isMounted && this.setState({ [key]: value })
     }
     clearAddValues() {
-        this.setState({
+        this._isMounted && this.setState({
             addUserName: "",
             addUserEmail: "",
             addUserPhone: "",
@@ -117,7 +117,7 @@ class DealershipUsers extends React.Component {
         })
     }
     async addNewUser() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
 
         let newUser = {
             name: this.props.utils.toTitleCase(this.state.addUserName),
@@ -130,12 +130,12 @@ class DealershipUsers extends React.Component {
         }
         console.log(newUser)
         //register user with "password" as password.. they can always reset password on login page..
-        await this.props.mongo.handleRegister(newUser.email, "password").catch((err => this.setState({ err })))
+        this._isMounted && await this.props.mongo.handleRegister(newUser.email, "password").catch((err => this._isMounted && this.setState({ err })))
         // insert user
         this._isMounted && await this.props.mongo.insertOne("dealership_users", newUser)
         //re-get agents..
-        let agents = await this.props.mongo.find("dealership_users");
-        agents.sort((a, b) => {
+        let agents = this._isMounted && await this.props.mongo.find("dealership_users");
+        this._isMounted && agents.sort((a, b) => {
             if (a.name > b.name) return 1;
             if (a.name < b.name) return -1;
             return 0;
@@ -148,10 +148,10 @@ class DealershipUsers extends React.Component {
         this.toggle("addModal")
         this.clearAddValues()
         // this.setState({ dealerships: dealers, loading: false })
-        this.setState({ loading: false, users: agents })
+        this._isMounted && this.setState({ loading: false, users: agents })
     }
     async updateUser() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let update = {
             name: this.props.utils.toTitleCase(this.state.editUserName),
             phone: this.state.editUserPhone,
@@ -164,8 +164,8 @@ class DealershipUsers extends React.Component {
         //update user
         this._isMounted && await this.props.mongo.findOneAndUpdate("dealership_users", { email: this.state.editUserEmail }, update)
         //then get dealers and sort..
-        let agents = await this.props.mongo.find("dealership_users")
-        agents.sort((a, b) => {
+        let agents = this._isMounted && await this.props.mongo.find("dealership_users")
+        this._isMounted && agents.sort((a, b) => {
             if (a.name < b.name) return -1;
             if (a.name > b.name) return 1;
             return 0;
@@ -178,7 +178,7 @@ class DealershipUsers extends React.Component {
             }
         }
         this.toggle("editUserModal")
-        this.setState({ users, editUser: { label: "", value: "" }, loading: false })
+        this._isMounted && this.setState({ users, editUser: { label: "", value: "" }, loading: false })
     }
     render() {
         if (this.state.loading) {
@@ -263,7 +263,7 @@ class DealershipUsers extends React.Component {
                                                         placeholder="Dealership Name"
                                                         options={this.state.dealerships}
                                                         value={this.state.addUserDealership}
-                                                        onChange={(e) => { this.setState({ addUserDealership: e }) }}
+                                                        onChange={(e) => { this._isMounted && this.setState({ addUserDealership: e }) }}
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -345,7 +345,7 @@ class DealershipUsers extends React.Component {
                                                 isDisabled={this.state.editGroup.label.length < 1}
                                                 name="editUser"
                                                 id="editUser"
-                                                options={this.state.users.filter((u)=>{return u.group === this.state.editGroup.value})}
+                                                options={this._isMounted && this.state.users.filter((u) => { return u.group === this.state.editGroup.value })}
                                                 value={this.state.editUser}
                                                 onChange={(e) => { this.onValueChange("editUser", e); }}
                                             />
@@ -354,10 +354,10 @@ class DealershipUsers extends React.Component {
                                     </Form>
                                     <br />
                                     <Button color="primary" disabled={this.state.editUser.label.length == 0} onClick={async () => {
-                                        this.setState({ loading: true })
-                                        let u = await this.props.mongo.findOne("dealership_users", { _id: this.state.editUser.value })
-                                        let d = await this.props.mongo.findOne("dealerships", { value: u.dealership })
-                                        this.setState({
+                                        this._isMounted && this.setState({ loading: true })
+                                        let u = this._isMounted && await this.props.mongo.findOne("dealership_users", { _id: this.state.editUser.value })
+                                        let d = this._isMounted && await this.props.mongo.findOne("dealerships", { value: u.dealership })
+                                        this._isMounted && this.setState({
                                             editUserName: u.name,
                                             editUserPhone: u.phone || "",
                                             editUserEmail: u.email || "",
@@ -366,7 +366,7 @@ class DealershipUsers extends React.Component {
                                             editAccess: u.access,
                                             editActive: u.isActive == true ? "active" : "inactive"
                                         })
-                                        this.setState({ loading: false })
+                                        this._isMounted && this.setState({ loading: false })
                                         this.toggle("editUserModal");
                                     }}><i className="tim-icons icon-pencil" /></Button>
                                     <Modal isOpen={this.state.editUserModal} toggle={() => { this.toggle("editUserModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
@@ -419,7 +419,7 @@ class DealershipUsers extends React.Component {
                                                         placeholder="Edit Dealership"
                                                         options={this.state.dealerships}
                                                         value={this.state.editUserDealership}
-                                                        onChange={(e) => { this.setState({ editUserDealership: e }) }}
+                                                        onChange={(e) => { this._isMounted && this.setState({ editUserDealership: e }) }}
                                                     />
                                                 </FormGroup>
                                                 <hr />
@@ -464,7 +464,7 @@ class DealershipUsers extends React.Component {
                                                 <hr />
                                                 <Button color="warning" onClick={() => {
                                                     this.toggle("editUserModal")
-                                                    this.setState({ editUser: { label: "", value: "" } })
+                                                    this._isMounted && this.setState({ editUser: { label: "", value: "" } })
                                                 }}>Cancel</Button>
                                                 <Button
                                                     onClick={() => {

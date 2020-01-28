@@ -57,11 +57,11 @@ class AgentProfile extends React.Component {
     async componentDidMount() {
         this._isMounted = true
         this._isMounted && await this.setState({ loading: true })
-        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = await this.props.mongo.findOne("agents", { userId: user.userId })
+        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
         let imageUrl = "";
         if (agent.fileBinary !== undefined) {
-            imageUrl = await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
+            imageUrl = this._isMounted && await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
 
 
         }
@@ -84,7 +84,7 @@ class AgentProfile extends React.Component {
             this.setState({ editImageUrl: url })
         }
 
-        await reader.readAsArrayBuffer(this.state.newProfileImg)
+        this._isMounted && await reader.readAsArrayBuffer(this.state.newProfileImg)
 
     }
 
@@ -135,8 +135,8 @@ class AgentProfile extends React.Component {
                                             <input style={{ display: "none" }} ref={this.inputRef} accept="image/png, image/jpeg" type="file" id="exampleCustomFileBrowser" name="customFile" value={this.state.newImage} onChange={async (e) => {
                                                 console.log(e.target.files[0])
                                                 if (e.target.files[0].size > 1000000) { return }
-                                                await this.setState({ newProfileImg: e.target.files[0] })
-                                                await this.imageToBuffer()
+                                                this._isMounted && await this.setState({ newProfileImg: e.target.files[0] })
+                                                this._isMounted && await this.imageToBuffer()
                                             }}
                                             />
                                             Edit Image
@@ -159,7 +159,7 @@ class AgentProfile extends React.Component {
                                                 var imageUrl = this.props.utils.imageUrlFromBuffer(this.state.fileBinary)
                                                 this.setState({ editImageUrl: imageUrl, imageUrl: imageUrl })
                                                 console.log(this.props.utils.toBuffer(this.state.fileBinary))
-                                                await this.props.mongo.findOneAndUpdate("agents", { _id: this.state.agent._id }, Object.assign(this.state.agent, { fileBinary: this.props.utils.toBuffer(this.state.fileBinary) }))
+                                                this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { _id: this.state.agent._id }, Object.assign(this.state.agent, { fileBinary: this.props.utils.toBuffer(this.state.fileBinary) }))
                                                 window.location.reload(false);
                                             }}>Save</Button>
                                     </Col>
