@@ -60,19 +60,16 @@ class UserManagement extends React.Component {
                     day20: false
                 },
                 serviceToSales: {
-                    newLeads: false,
-                    day1And2: false,
-                    day3And4: false,
-                    missedAppointments: false,
-                    day7: false,
-                    day10: false,
-                    day15: false,
-                    day20: false
+                    serviceDriveRd1: false,
+                    serviceDriveRd2: false,
+                    dataMiningHighInterest: false,
+                    dataMiningLeases: false,
+                    dataMiningBuyBack: false
                 },
                 service: {
                     missedAppointments: false,
                     day7: false,
-                    day15: false,
+                    day14: false,
                     firstService: false,
                     serviceReminder: false
                 },
@@ -152,19 +149,16 @@ class UserManagement extends React.Component {
                     day20: false
                 },
                 serviceToSales: {
-                    newLeads: false,
-                    day1And2: false,
-                    day3And4: false,
-                    missedAppointments: false,
-                    day7: false,
-                    day10: false,
-                    day15: false,
-                    day20: false
+                    serviceDriveRd1: false,
+                    serviceDriveRd2: false,
+                    dataMiningHighInterest: false,
+                    dataMiningLeases: false,
+                    dataMiningBuyBack: false
                 },
                 service: {
                     missedAppointments: false,
                     day7: false,
-                    day15: false,
+                    day14: false,
                     firstService: false,
                     serviceReminder: false
                 },
@@ -473,7 +467,40 @@ class UserManagement extends React.Component {
                                             editType: u.account_type,
                                             editDepartment: u.department,
                                             editActive: u.isActive == true ? "active" : "inactive",
-                                            editSkills: u.skills || { sales: {}, serviceToSales: {}, service: {}, textEmail: {} }
+                                            editSkills: u.skills || {
+                                                sales: {
+                                                    newLeads: false,
+                                                    day1And2: false,
+                                                    day3And4: false,
+                                                    missedAppointments: false,
+                                                    day7: false,
+                                                    day10: false,
+                                                    day15: false,
+                                                    day20: false
+                                                },
+                                                serviceToSales: {
+                                                    serviceDriveRd1: false,
+                                                    serviceDriveRd2: false,
+                                                    dataMiningHighInterest: false,
+                                                    dataMiningLeases: false,
+                                                    dataMiningBuyBack: false
+                                                },
+                                                service: {
+                                                    missedAppointments: false,
+                                                    day7: false,
+                                                    day14: false,
+                                                    firstService: false,
+                                                    serviceReminder: false
+                                                },
+                                                textEmail: {
+                                                    newLeads: false,
+                                                    day1And2: false,
+                                                    day5: false,
+                                                    day10: false,
+                                                    day20: false,
+                                                    missedAppointments: false
+                                                }
+                                            }
                                         })
                                         this.setState({ loading: false, addModal: false })
                                         // this.toggle("editUserModal");
@@ -821,89 +848,56 @@ class UserManagement extends React.Component {
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
-                                                            currSkills.serviceToSales.newLeads = !this.state.editSkills.serviceToSales.newLeads;
+                                                            currSkills.serviceToSales.serviceDriveRd1 = !this.state.editSkills.serviceToSales.serviceDriveRd1;
                                                             this.setState({ editSkills: currSkills })
                                                         }}
-                                                        checked={this.state.editSkills.serviceToSales.newLeads}
+                                                        checked={this.state.editSkills.serviceToSales.serviceDriveRd1}
                                                         type="checkbox"
-                                                    /> New Leads
+                                                    /> Service Drive: Round 1
                                                 </p>
                                                 <p className="text-white">
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
-                                                            currSkills.serviceToSales.day1And2 = !this.state.editSkills.serviceToSales.day1And2;
+                                                            currSkills.serviceToSales.serviceDriveRd2 = !this.state.editSkills.serviceToSales.serviceDriveRd2;
                                                             this.setState({ editSkills: currSkills })
                                                         }}
-                                                        checked={this.state.editSkills.serviceToSales.day1And2}
+                                                        checked={this.state.editSkills.serviceToSales.serviceDriveRd2}
                                                         type="checkbox"
-                                                    /> Day 1 & 2
+                                                    /> Service Drive: Round 2
                                                 </p>
                                                 <p className="text-white">
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
-                                                            currSkills.serviceToSales.day3And4 = !this.state.editSkills.serviceToSales.day3And4;
+                                                            currSkills.serviceToSales.dataMiningHighInterest = !this.state.editSkills.serviceToSales.dataMiningHighInterest;
                                                             this.setState({ editSkills: currSkills })
                                                         }}
-                                                        checked={this.state.editSkills.serviceToSales.day3And4}
+                                                        checked={this.state.editSkills.serviceToSales.dataMiningHighInterest}
                                                         type="checkbox"
-                                                    /> Day 3 & 4
+                                                    /> Data-mining: High Interest
                                                 </p>
                                                 <p className="text-white">
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
-                                                            currSkills.serviceToSales.missedAppointments = !this.state.editSkills.serviceToSales.missedAppointments;
+                                                            currSkills.serviceToSales.dataMiningLeases = !this.state.editSkills.serviceToSales.dataMiningLeases;
                                                             this.setState({ editSkills: currSkills })
                                                         }}
-                                                        checked={this.state.editSkills.serviceToSales.missedAppointments}
+                                                        checked={this.state.editSkills.serviceToSales.dataMiningLeases}
                                                         type="checkbox"
-                                                    /> Missed Appointments
+                                                    /> Data-mining: Leases
                                                 </p>
                                                 <p className="text-white">
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.editSkills;
-                                                            currSkills.serviceToSales.day7 = !this.state.editSkills.serviceToSales.day7;
+                                                            currSkills.serviceToSales.dataMiningBuyBack = !this.state.editSkills.serviceToSales.dataMiningBuyBack;
                                                             this.setState({ editSkills: currSkills })
                                                         }}
-                                                        checked={this.state.editSkills.serviceToSales.day7}
+                                                        checked={this.state.editSkills.serviceToSales.dataMiningBuyBack}
                                                         type="checkbox"
-                                                    /> Day 7
-                                                </p>
-                                                <p className="text-white">
-                                                    <Input
-                                                        onChange={(e) => {
-                                                            let currSkills = this.state.editSkills;
-                                                            currSkills.serviceToSales.day10 = !this.state.editSkills.serviceToSales.day10;
-                                                            this.setState({ editSkills: currSkills })
-                                                        }}
-                                                        checked={this.state.editSkills.serviceToSales.day10}
-                                                        type="checkbox"
-                                                    /> Day 10
-                                                </p>
-                                                <p className="text-white">
-                                                    <Input
-                                                        onChange={(e) => {
-                                                            let currSkills = this.state.editSkills;
-                                                            currSkills.serviceToSales.day15 = !this.state.editSkills.serviceToSales.day15;
-                                                            this.setState({ editSkills: currSkills })
-                                                        }}
-                                                        checked={this.state.editSkills.serviceToSales.day15}
-                                                        type="checkbox"
-                                                    /> Day 15
-                                                </p>
-                                                <p className="text-white">
-                                                    <Input
-                                                        onChange={(e) => {
-                                                            let currSkills = this.state.editSkills;
-                                                            currSkills.serviceToSales.day20 = !this.state.editSkills.serviceToSales.day20;
-                                                            this.setState({ editSkills: currSkills })
-                                                        }}
-                                                        checked={this.state.editSkills.serviceToSales.day20}
-                                                        type="checkbox"
-                                                    /> Day 20
+                                                    /> Data-mining: Buy Back
                                                 </p>
                                             </FormGroup>
                                         </Col>
@@ -1266,90 +1260,58 @@ class UserManagement extends React.Component {
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
-                                                            currSkills.serviceToSales.newLeads = !this.state.addSkills.serviceToSales.newLeads;
+                                                            currSkills.serviceToSales.serviceDriveRd1 = !this.state.addSkills.serviceToSales.serviceDriveRd1;
                                                             this.setState({ addSkills: currSkills })
                                                         }}
-                                                        checked={this.state.addSkills.serviceToSales.newLeads || ""}
+                                                        checked={this.state.addSkills.serviceToSales.serviceDriveRd1 || ""}
                                                         type="checkbox"
-                                                    /> New Leads
+                                                    /> Service Drive: Round 1
                                                 </p>
                                                 <p className="text-white">
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
-                                                            currSkills.serviceToSales.day1And2 = !this.state.addSkills.serviceToSales.day1And2;
+                                                            currSkills.serviceToSales.serviceDriveRd2 = !this.state.addSkills.serviceToSales.serviceDriveRd2;
                                                             this.setState({ addSkills: currSkills })
                                                         }}
-                                                        checked={this.state.addSkills.serviceToSales.day1And2 || ""}
+                                                        checked={this.state.addSkills.serviceToSales.serviceDriveRd2 || ""}
                                                         type="checkbox"
-                                                    /> Day 1 & 2
+                                                    /> Service Drive: Round 2
                                                 </p>
                                                 <p className="text-white">
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
-                                                            currSkills.serviceToSales.day3And4 = !this.state.addSkills.serviceToSales.day3And4;
+                                                            currSkills.serviceToSales.dataMiningHighInterest = !this.state.addSkills.serviceToSales.dataMiningHighInterest;
                                                             this.setState({ addSkills: currSkills })
                                                         }}
-                                                        checked={this.state.addSkills.serviceToSales.day3And4 || ""}
+                                                        checked={this.state.addSkills.serviceToSales.dataMiningHighInterest || ""}
                                                         type="checkbox"
-                                                    /> Day 3 & 4
+                                                    /> Data-mining: High Interest
                                                 </p>
                                                 <p className="text-white">
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
-                                                            currSkills.serviceToSales.missedAppointments = !this.state.addSkills.serviceToSales.missedAppointments;
+                                                            currSkills.serviceToSales.dataMiningLeases = !this.state.addSkills.serviceToSales.dataMiningLeases;
                                                             this.setState({ addSkills: currSkills })
                                                         }}
-                                                        checked={this.state.addSkills.serviceToSales.missedAppointments || ""}
+                                                        checked={this.state.addSkills.serviceToSales.dataMiningLeases || ""}
                                                         type="checkbox"
-                                                    /> Missed Appointments
+                                                    /> Data-mining: Leases
                                                 </p>
                                                 <p className="text-white">
                                                     <Input
                                                         onChange={(e) => {
                                                             let currSkills = this.state.addSkills;
-                                                            currSkills.serviceToSales.day7 = !this.state.addSkills.serviceToSales.day7;
+                                                            currSkills.serviceToSales.dataMiningBuyBack = !this.state.addSkills.serviceToSales.dataMiningBuyBack;
                                                             this.setState({ addSkills: currSkills })
                                                         }}
-                                                        checked={this.state.addSkills.serviceToSales.day7 || ""}
+                                                        checked={this.state.addSkills.serviceToSales.dataMiningBuyBack || ""}
                                                         type="checkbox"
-                                                    /> Day 7
+                                                    /> Data-mining: Buy Back
                                                 </p>
-                                                <p className="text-white">
-                                                    <Input
-                                                        onChange={(e) => {
-                                                            let currSkills = this.state.addSkills;
-                                                            currSkills.serviceToSales.day10 = !this.state.addSkills.serviceToSales.day10;
-                                                            this.setState({ addSkills: currSkills })
-                                                        }}
-                                                        checked={this.state.addSkills.serviceToSales.day10 || ""}
-                                                        type="checkbox"
-                                                    /> Day 10
-                                                </p>
-                                                <p className="text-white">
-                                                    <Input
-                                                        onChange={(e) => {
-                                                            let currSkills = this.state.addSkills;
-                                                            currSkills.serviceToSales.day15 = !this.state.addSkills.serviceToSales.day15;
-                                                            this.setState({ addSkills: currSkills })
-                                                        }}
-                                                        checked={this.state.addSkills.serviceToSales.day15 || ""}
-                                                        type="checkbox"
-                                                    /> Day 15
-                                                </p>
-                                                <p className="text-white">
-                                                    <Input
-                                                        onChange={(e) => {
-                                                            let currSkills = this.state.addSkills;
-                                                            currSkills.serviceToSales.day20 = !this.state.addSkills.serviceToSales.day20;
-                                                            this.setState({ addSkills: currSkills })
-                                                        }}
-                                                        checked={this.state.addSkills.serviceToSales.day20 || ""}
-                                                        type="checkbox"
-                                                    /> Day 20
-                                                </p>
+
                                             </FormGroup>
                                         </Col>
                                         <Col md="3">

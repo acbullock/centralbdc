@@ -260,64 +260,41 @@ class AgentProfile extends React.Component {
                                         {(() => {
                                             if (!this.state.agent) return null;
                                             return (<div>
-
-
                                                 <p className="text-white"><input readOnly type="checkbox" checked={
                                                     (() => {
                                                         if (!this.state.agent.skills) return false;
                                                         if (!this.state.agent.skills.serviceToSales) return false;
-                                                        return this.state.agent.skills.serviceToSales.newLeads
+                                                        return this.state.agent.skills.serviceToSales.serviceDriveRd1
                                                     })()
-                                                } /> New Leads</p>
+                                                } /> Service Drive: Round 1</p>
                                                 <p className="text-white"><input readOnly type="checkbox" checked={
                                                     (() => {
                                                         if (!this.state.agent.skills) return false;
                                                         if (!this.state.agent.skills.serviceToSales) return false;
-                                                        return this.state.agent.skills.serviceToSales.day1And2
+                                                        return this.state.agent.skills.serviceToSales.serviceDriveRd2
                                                     })()
-                                                } /> Day 1 & 2</p>
+                                                } /> Service Drive: Round 2</p>
                                                 <p className="text-white"><input readOnly type="checkbox" checked={
                                                     (() => {
                                                         if (!this.state.agent.skills) return false;
                                                         if (!this.state.agent.skills.serviceToSales) return false;
-                                                        return this.state.agent.skills.serviceToSales.day3And4
+                                                        return this.state.agent.skills.serviceToSales.dataMiningHighInterest
                                                     })()
-                                                } /> Day 3 & 4</p>
+                                                } /> Data-mining: High Interest</p>
                                                 <p className="text-white"><input readOnly type="checkbox" checked={
                                                     (() => {
                                                         if (!this.state.agent.skills) return false;
                                                         if (!this.state.agent.skills.serviceToSales) return false;
-                                                        return this.state.agent.skills.serviceToSales.missedAppointments
+                                                        return this.state.agent.skills.serviceToSales.dataMiningLeases
                                                     })()
-                                                } /> Missed Appointments</p>
+                                                } /> Data-mining: Leases</p>
                                                 <p className="text-white"><input readOnly type="checkbox" checked={
                                                     (() => {
                                                         if (!this.state.agent.skills) return false;
                                                         if (!this.state.agent.skills.serviceToSales) return false;
-                                                        return this.state.agent.skills.serviceToSales.day7
+                                                        return this.state.agent.skills.serviceToSales.dataMiningBuyBack
                                                     })()
-                                                } /> Day 7</p>
-                                                <p className="text-white"><input readOnly type="checkbox" checked={
-                                                    (() => {
-                                                        if (!this.state.agent.skills) return false;
-                                                        if (!this.state.agent.skills.serviceToSales) return false;
-                                                        return this.state.agent.skills.serviceToSales.day10
-                                                    })()
-                                                } /> Day 10</p>
-                                                <p className="text-white"><input readOnly type="checkbox" checked={
-                                                    (() => {
-                                                        if (!this.state.agent.skills) return false;
-                                                        if (!this.state.agent.skills.serviceToSales) return false;
-                                                        return this.state.agent.skills.serviceToSales.day15
-                                                    })()
-                                                } /> Day 15</p>
-                                                <p className="text-white"><input readOnly type="checkbox" checked={
-                                                    (() => {
-                                                        if (!this.state.agent.skills) return false;
-                                                        if (!this.state.agent.skills.serviceToSales) return false;
-                                                        return this.state.agent.skills.serviceToSales.day20
-                                                    })()
-                                                } /> Day 20</p>
+                                                } /> Data-mining: Buy Back</p>
                                             </div>);
                                         })()}
                                     </Col>
