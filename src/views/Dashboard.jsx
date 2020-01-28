@@ -823,7 +823,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
-                  <img src={(this.state.agent.imageUrl == undefined || this.state.agent.iamgeUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
+                  <img src={(this.state.agent.imageUrl == undefined || this.state.agent.imageUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
                 </CardHeader>
                 <CardBody>
                   {
@@ -924,7 +924,7 @@ class Dashboard extends React.Component {
                     <tbody>
                       {
                         this.state.top5.map((agent, index) => {
-                          console.log("!@#", agent.iamgeUrl)
+                          console.log("!@#", agent.imageUrl)
                           if (index > 9) return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
