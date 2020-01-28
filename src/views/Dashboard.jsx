@@ -448,7 +448,8 @@ class Dashboard extends React.Component {
     for (let a in allAgents) {
       let user = {
         name: allAgents[a].name,
-        count: 0
+        count: 0,
+        imageUrl: allAgents[a].imageUrl
       }
 
       for (let b in allAgents[a].appointments) {
@@ -505,7 +506,8 @@ class Dashboard extends React.Component {
       let currApps = allApps
       let user = {
         name: allAgents[a].name,
-        count: currApps.length
+        count: currApps.length,
+        imageUrl: allAgents[a].imageUrl
       }
       nums.push(user)
 
@@ -821,7 +823,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
-                  <img src={this.state.agent.imageUrl == undefined ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
+                  <img src={(this.state.agent.imageUrl == undefined || this.state.agent.iamgeUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
                 </CardHeader>
                 <CardBody>
                   {
@@ -856,7 +858,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong>{this.state.mtdloadnew ? " (still loading)" : null}</p></CardTitle>
-                  <img src={this.state.agent.imageUrl == undefined ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100"/>
+                  <img src={(this.state.agent.imageUrl == undefined || this.state.agent.imageUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
                   {/* style={{ background: 'url("https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image")' }}  */}
                 </CardHeader>
                 <CardBody>
@@ -927,7 +929,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img src={agent.imageUrl == undefined ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -963,7 +965,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" >
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img src={agent.imageUrl == undefined ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
