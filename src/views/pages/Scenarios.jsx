@@ -60,6 +60,7 @@ class Scenarios extends React.Component {
     async componentWillMount() {
         // let x = await this.props.mongo.db.getUsers()
         // console.log(x)
+        this._isMounted = true
         this._isMounted && await this.cleanUpDepartments()
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         if (user.userId == undefined) {
@@ -69,7 +70,6 @@ class Scenarios extends React.Component {
         // let agent = await agents.findOne({ userId: user.userId })
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
         if (agent.account_type != "admin") {
-
             this.props.history.push("/admin/dashboard")
         }
         // let scenarios = await this.props.mongo.getCollection("scenarios")
