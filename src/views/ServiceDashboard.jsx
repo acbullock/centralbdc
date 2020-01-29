@@ -88,19 +88,19 @@ class ServiceDashboard extends React.Component {
         }
         else {
             let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true })
-            agents = agents.map((a, i) => {
+            agents = this._isMounted && agents.map((a, i) => {
                 return Object.assign(a, { label: a.name, value: i })
             })
-            agents = agents.filter((a) => {
+            agents = this._isMounted && agents.filter((a) => {
                 return a.department === "service" || a.account_type === "admin"
             })
-            agents.sort((a, b) => {
+            this._isMounted && agents.sort((a, b) => {
                 if (a.label > b.label) return 1;
                 if (a.label < b.label) return -1;
                 return 0;
             })
             if (agent.account_type !== "admin") {
-                let selected = agents.filter((a) => {
+                let selected = this._isMounted && agents.filter((a) => {
                     return a._id == agent._id
                 })
                 selected = selected[0]
@@ -161,7 +161,7 @@ class ServiceDashboard extends React.Component {
                     appointments.push(allAgents[agent].appointments[a])
                 }
             }
-            let approved_appointments = appointments.filter((a) => {
+            let approved_appointments = this._isMounted && appointments.filter((a) => {
 
                 return a.verified != undefined
             })
@@ -258,8 +258,8 @@ class ServiceDashboard extends React.Component {
         this._isMounted && this.setState({ loading: true })
         // let allAgents = this._isMounted && await this.state.agents.find().toArray()
         let allAgents = this.state.agents
-        let dealerships = await this.props.mongo.find("dealerships")
-        dealerships.sort((a, b) => {
+        let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
+        this._isMounted && dealerships.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1
             return 0
@@ -282,7 +282,7 @@ class ServiceDashboard extends React.Component {
                     appointments.push(allAgents[agent].appointments[a])
                 }
             }
-            let approved_appointments = appointments.filter((a) => {
+            let approved_appointments = this._isMounted && appointments.filter((a) => {
                 let today = new Date()
                 today.setHours(0, 0, 0, 0)
                 return new Date(a.verified).getTime() >= today.getTime()
@@ -408,7 +408,7 @@ class ServiceDashboard extends React.Component {
         let elements = []
 
         let counts = this.state.todays_dealer_counts
-        counts.sort((a, b) => {
+        this._isMounted && counts.sort((a, b) => {
             if (a.count > b.count) return -1
             if (a.count < b.count) return 1
             return 0
@@ -467,7 +467,7 @@ class ServiceDashboard extends React.Component {
     async getMtdTop5() {
         this._isMounted && this.setState({ loading: true, mtdtop5loading: true })
         let allAgents = this.state.agents;
-        let appointments = await this.props.mongo.find("appointments");
+        let appointments = this._isMounted && await this.props.mongo.find("appointments");
         let allApps = [];
         for (let a in appointments) {
             allApps = allApps.concat(appointments[a].appointments)
@@ -475,12 +475,12 @@ class ServiceDashboard extends React.Component {
         let first = new Date();
         first.setDate(1);
         first = new Date(first.setHours(0, 0, 0, 0))
-        allApps = allApps.filter((a) => {
+        allApps = this._isMounted && allApps.filter((a) => {
             return new Date(a.verified).getTime() >= first.getTime()
         })
         let nums = [];
         for (let a in allAgents) {
-            let currApps = allApps.filter((app) => { return app.agent_id === allAgents[a]._id })
+            let currApps = this._isMounted && allApps.filter((app) => { return app.agent_id === allAgents[a]._id })
             let user = {
                 name: allAgents[a].name,
                 count: currApps.length
@@ -617,7 +617,7 @@ class ServiceDashboard extends React.Component {
                 continue;
             }
             let color = "red";
-            let count = appointments.filter((a) => {
+            let count = this._isMounted && appointments.filter((a) => {
                 return new Date(a.verified).getTime() >= start.getTime() && new Date(a.verified).getTime() < end.getTime()
             })
             if (count.length == 2) {
@@ -771,7 +771,7 @@ class ServiceDashboard extends React.Component {
                                 <CardBody>
                                     {
 
-                                        this.state.top5.map((a, i) => {
+                                        this._isMounted && this.state.top5.map((a, i) => {
                                             let namecount = {
                                                 name: this.state.agent.name,
                                                 count: 0
@@ -807,8 +807,8 @@ class ServiceDashboard extends React.Component {
 
                                     {
 
-                                        this.state.mtdTop5.map((a, i) => {
-                                            let thisAgent = this.state.mtdTop5.filter((a) => {
+                                        this._isMounted && this.state.mtdTop5.map((a, i) => {
+                                            let thisAgent = this._isMounted && this.state.mtdTop5.filter((a) => {
                                                 return a.name === this.state.agent.name
                                             })
                                             thisAgent = thisAgent[0]
@@ -860,7 +860,7 @@ class ServiceDashboard extends React.Component {
                                         </thead>
                                         <tbody>
                                             {
-                                                this.state.top5.map((agent, index) => {
+                                                this._isMounted && this.state.top5.map((agent, index) => {
                                                     if (index > 9) return null;
                                                     return (
                                                         <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
@@ -894,7 +894,7 @@ class ServiceDashboard extends React.Component {
                                         <tbody>
 
                                             {
-                                                this.state.mtdTop5.map((agent, index) => {
+                                                this._isMounted && this.state.mtdTop5.map((agent, index) => {
                                                     if (index > 9) return null;
                                                     return (
                                                         <tr key={index} className="text-center" >
@@ -995,20 +995,20 @@ class ServiceDashboard extends React.Component {
                       </DropdownMenu>
                     </UncontrolledDropdown>
                   </div> */}
-                                    <CardTitle tag="h3"><p style={{color: "white"}}><strong>Created Appointments</strong></p></CardTitle>
+                                    <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Created Appointments</strong></p></CardTitle>
                                 </CardHeader>
                                 <CardBody>
                                     <Table responsive>
                                         <thead className="text-primary">
                                             <tr>
                                                 {/* <th className="text-center"></th> */}
-                                                <th style={{color: "white", borderBottom: "1px solid white"}}>Agent Name</th>
-                                                <th style={{color: "white", borderBottom: "1px solid white"}}>Today</th>
+                                                <th style={{ color: "white", borderBottom: "1px solid white" }}>Agent Name</th>
+                                                <th style={{ color: "white", borderBottom: "1px solid white" }}>Today</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {
-                                                this.state.appointments.map((app, index) => {
+                                                this._isMounted && this.state.appointments.map((app, index) => {
                                                     return (
                                                         <tr key={index}>
                                                             {/* <td className="text-center">
@@ -1019,8 +1019,8 @@ class ServiceDashboard extends React.Component {
                                 />
                               </div>
                               </td> */}
-                                                            <td key={index + "-name"} style={{ borderBottom: "1px solid white" }}><p style={{color: "white"}}><strong>{app.name}</strong></p></td>
-                                                            <td key={index + "-day"} style={{ borderBottom: "1px solid white" }}><p style={{color: "white"}}><strong>{this.createdAppointmentsSince(app.appointments, 0)}</strong></p></td>
+                                                            <td key={index + "-name"} style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{app.name}</strong></p></td>
+                                                            <td key={index + "-day"} style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{this.createdAppointmentsSince(app.appointments, 0)}</strong></p></td>
                                                         </tr>
                                                     )
                                                 })
