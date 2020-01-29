@@ -55,33 +55,38 @@ class Assistance extends React.Component {
             loading: false,
             error: ""
         };
+        this._isMounted = false;
         this.makeAssistanceMessage = this.makeAssistanceMessage.bind(this)
         this.addToPending = this.addToPending.bind(this)
     }
     async componentWillMount() {
+        this._isMounted = true
         // let d = await this.props.mongo.getCollection("dealerships")
         // let s = await this.props.mongo.getCollection("sources")
         // d = await d.find({}).toArray()
         // s = await  s.find({}).toArray()
-        let d = await this.props.mongo.find("dealerships")
-        let s = await this.props.mongo.find("sources")
-        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = await this.props.mongo.findOne("agents", {userId: user.userId})
+        let d = this._isMounted && await this.props.mongo.find("dealerships")
+        let s = this._isMounted && await this.props.mongo.find("sources")
+        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
 
-        if(agent.department !== "sales"){
+        if (agent.department !== "sales") {
             this.props.history.push("/admin/dashboard")
         }
-        d.sort((a, b) => {
+        this._isMounted && d.sort((a, b) => {
             if (a.label < b.label) return -1;
             if (a.label > b.label) return 1;
             return 0
         })
-        s.sort((a, b) => {
+        this._isMounted && s.sort((a, b) => {
             if (a.label < b.label) return -1;
             if (a.label > b.label) return 1;
             return 0
         })
-        this.setState({ dealerships: d, sources: s })
+        this._isMounted && this.setState({ dealerships: d, sources: s })
+    }
+    componentWillUnmount() {
+        this._isMounted = false;
     }
     makeTitleCase(name) {
         let title = name
@@ -95,12 +100,12 @@ class Assistance extends React.Component {
     }
     async addToPending(e) {
         e.preventDefault();
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         //get active user..
-        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         // let agents = await this.props.mongo.getCollection("agents");
         // let activeAgent = await agents.findOne({userId: user.userId})
-        let activeAgent = await this.props.mongo.findOne("agents", { userId: user.userId })
+        let activeAgent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
         let newAssistanceArray = activeAgent.assistance
 
         let newAssistanceObject = {
@@ -119,8 +124,8 @@ class Assistance extends React.Component {
         newAssistanceArray.push(newAssistanceObject)
         activeAgent.assistance = newAssistanceArray
         // await agents.findOneAndUpdate({userId: user.userId}, activeAgent)
-        await this.props.mongo.findOneAndUpdate("agents", { userId: user.userId }, { assistance: newAssistanceArray })
-        await this.setState({
+        this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { userId: user.userId }, { assistance: newAssistanceArray })
+        this._isMounted && await this.setState({
             loading: false,
             firstName: "",
             lastName: "",
@@ -144,22 +149,22 @@ class Assistance extends React.Component {
         message += `${this.state.phone}\n${this.state.message}\n`
         message += `Source: ${this.state.source.label}`
         if (message.length > 1000) {
-            this.setState({ error: "Message too long." })
+            this._isMounted && this.setState({ error: "Message too long." })
         }
         else {
-            this.setState({ error: "" })
+            this._isMounted && this.setState({ error: "" })
         }
-        this.setState({ text: message })
+        this._isMounted && this.setState({ text: message })
     }
     async sendText(appointment) {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let data = new FormData();
         // await this.setState({loading: true})
         let contacts = appointment.dealership.contacts
-        let token = await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
+        let token = this._isMounted && await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
         token = token.data
         for (let i = 0; i < contacts.length; i++) {
-            let x = await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
+            let x = this._isMounted && await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
                 text: appointment.internal_msg
             }, {
                 headers: {
@@ -168,7 +173,7 @@ class Assistance extends React.Component {
             })
         }
 
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
 
     }
     render() {
@@ -190,7 +195,7 @@ class Assistance extends React.Component {
                                         placeholder="Dealership"
                                         value={this.state.dealership}
                                         options={this.state.dealerships}
-                                        onChange={async (e) => { await this.setState({ dealership: e }); this.makeAssistanceMessage() }}
+                                        onChange={async (e) => { this._isMounted && await this.setState({ dealership: e }); this.makeAssistanceMessage() }}
                                     /><br />
                                     <Label>
                                         Customer First Name
@@ -198,7 +203,7 @@ class Assistance extends React.Component {
                                     <Input
                                         placeholder="Customer First Name"
                                         value={this.state.firstName}
-                                        onChange={async (e) => { await this.setState({ firstName: e.target.value }); this.makeAssistanceMessage() }}
+                                        onChange={async (e) => { this._isMounted && await this.setState({ firstName: e.target.value }); this.makeAssistanceMessage() }}
                                     />
                                     <Label>
                                         Customer Last Name
@@ -206,7 +211,7 @@ class Assistance extends React.Component {
                                     <Input
                                         placeholder="Customer Last Name"
                                         value={this.state.lastName}
-                                        onChange={async (e) => { await this.setState({ lastName: e.target.value }); this.makeAssistanceMessage() }}
+                                        onChange={async (e) => { this._isMounted && await this.setState({ lastName: e.target.value }); this.makeAssistanceMessage() }}
                                     />
                                     <Label>
                                         Customer Phone Number
@@ -214,7 +219,7 @@ class Assistance extends React.Component {
                                     <Input
                                         placeholder="Customer Phone Number"
                                         value={this.state.phone}
-                                        onChange={async (e) => { await this.setState({ phone: e.target.value }); this.makeAssistanceMessage() }}
+                                        onChange={async (e) => { this._isMounted && await this.setState({ phone: e.target.value }); this.makeAssistanceMessage() }}
                                     />
 
                                     <Label>
@@ -224,7 +229,7 @@ class Assistance extends React.Component {
                                         placeholder="Source"
                                         options={this.state.sources}
                                         value={this.state.source}
-                                        onChange={async (e) => { await this.setState({ source: e }); this.makeAssistanceMessage() }}
+                                        onChange={async (e) => { this._isMounted && await this.setState({ source: e }); this.makeAssistanceMessage() }}
                                     /><br />
                                     <Label for="message">Follow-up Reason</Label>
                                     <Input
@@ -234,7 +239,7 @@ class Assistance extends React.Component {
                                         id="message"
                                         style={{ height: "500px", whiteSpace: "pre-wrap" }}
                                         value={this.state.message}
-                                        onChange={async (e) => { await this.setState({ message: e.target.value }); this.makeAssistanceMessage() }}
+                                        onChange={async (e) => { this._isMounted && await this.setState({ message: e.target.value }); this.makeAssistanceMessage() }}
                                     />
                                     <hr />
                                     <Card lg="6">

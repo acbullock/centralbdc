@@ -76,7 +76,7 @@ class SalesTVDashboard extends React.Component {
 
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { "userId": user.userId })
         let agents = this._isMounted && await this.props.mongo.find("agents", { "department": "sales", isActive: true, account_type: "agent" })
-        agents = agents.sort((a, b) => {
+        agents = this._isMounted && agents.sort((a, b) => {
             if (a.appointments.length > b.appointments.length) return -1;
             if (a.appointments.length < b.appointments.length) return 1;
             return 0
@@ -102,7 +102,7 @@ class SalesTVDashboard extends React.Component {
             totalCallCountToday += agents[a].inboundToday + agents[a].outboundToday;
         }
         this._isMounted && await this.setState({ totalCallCountToday })
-        let callSortedAgents = agents.slice().sort((a, b) => {
+        let callSortedAgents = this._isMounted && agents.slice().sort((a, b) => {
             if ((a.inboundToday + a.outboundToday) > (b.inboundToday + b.outboundToday)) return -1;
             if ((a.inboundToday + a.outboundToday) < (b.inboundToday + b.outboundToday)) return 1;
             return 0;
@@ -117,7 +117,7 @@ class SalesTVDashboard extends React.Component {
             totalCallCountMTD += agents[a].inboundMTD + agents[a].outboundMTD
         }
         this._isMounted && await this.setState({ totalCallCountMTD })
-        let callMTDSortedAgents = agents.slice().sort((a, b) => {
+        let callMTDSortedAgents = this._isMounted && agents.slice().sort((a, b) => {
             if ((a.inboundMTD + a.outboundMTD) > (b.inboundMTD + b.outboundMTD)) return -1;
             if ((a.inboundMTD + a.outboundMTD) < (b.inboundMTD + b.outboundMTD)) return 1;
             return 0;
@@ -134,7 +134,7 @@ class SalesTVDashboard extends React.Component {
     }
     async getApptsMTD() {
         this._isMounted && this.setState({ apptMtdLoading: true })
-        let apptMtdTotal = await this.props.mongo.findOne("admin_dashboard", { label: "centralbdc_metrics" })
+        let apptMtdTotal = this._isMounted && await this.props.mongo.findOne("admin_dashboard", { label: "centralbdc_metrics" })
         apptMtdTotal = apptMtdTotal.total_mtd;
         this._isMounted && this.setState({ apptMtdLoading: false, apptMtdTotal })
     }
@@ -159,7 +159,7 @@ class SalesTVDashboard extends React.Component {
                 continue;
             }
             let color = "red";
-            let count = appointments.filter((a) => {
+            let count = this._isMounted && appointments.filter((a) => {
                 return new Date(a.verified).getTime() >= start.getTime() && new Date(a.verified).getTime() < end.getTime()
             })
             if (count.length == 2) {
@@ -173,7 +173,7 @@ class SalesTVDashboard extends React.Component {
             end.setHours(end.getHours() + 1, 0, 0, 0)
         }
         counts["total"] = { count: appointments.length, color: "black" }
-        this.setState({ counts })
+        this._isMounted && this.setState({ counts })
     }
     getProjection(curr) {
         let now = new Date();
@@ -195,11 +195,11 @@ class SalesTVDashboard extends React.Component {
 
     }
     async getMTDData() {
-        this.setState({ mtdDataLoading: true })
+        this._isMounted && this.setState({ mtdDataLoading: true })
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isSales: true, isActive: true })
-        this.setState({ dealerships })
+        this._isMounted && this.setState({ dealerships })
         let agents = this.state.agents
-        this.setState({ mtdDataLoading: false })
+        this._isMounted && this.setState({ mtdDataLoading: false })
         for (let a in agents) {
             this._isMounted && this.getAgentMTDData(agents[a])
         }
@@ -218,17 +218,17 @@ class SalesTVDashboard extends React.Component {
                 apps.push(all_apps[a])
             }
         }
-        apps = apps.filter((a) => {
+        apps = this._isMounted && apps.filter((a) => {
             if (a.dealership_department === "Service") return false
             return true
         })
         let first = new Date(new Date().setDate(1))
         first = new Date(first.setHours(0, 0, 0, 0))
-        apps = apps.filter((a) => {
+        apps = this._isMounted && apps.filter((a) => {
             return new Date(a.verified).getTime() >= first.getTime()
         })
 
-        let agent_MTD = apps.filter((a) => {
+        let agent_MTD = this._isMounted && apps.filter((a) => {
             // console.log(a.agent_id, agent._id)
             return a.agent_id == agent._id
         })
@@ -307,16 +307,16 @@ class SalesTVDashboard extends React.Component {
                 break;
             }
         }
-        agents.sort((a, b) => {
+        this._isMounted && agents.sort((a, b) => {
             return b.agent_MTD - a.agent_MTD
         })
-        this.setState({ agents })
-        let todayAge = agents.slice().sort((a, b) => {
+        this._isMounted && this.setState({ agents })
+        let todayAge = this._isMounted && agents.slice().sort((a, b) => {
             if (a.appointments.length > b.appointments.length) return -1;
             if (a.appointments.length < b.appointments.length) return 1;
             return 0;
         })
-        this.setState({ todayAgents: todayAge })
+        this._isMounted && this.setState({ todayAgents: todayAge })
         // console.log(agents)
     }
     render() {
@@ -390,7 +390,7 @@ class SalesTVDashboard extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.callSortedAgents.map((a, i) => {
+                                            {this._isMounted && this.state.callSortedAgents.map((a, i) => {
                                                 if (i > 9) return null
                                                 return (<tr key={i}>
                                                     <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
@@ -428,7 +428,7 @@ class SalesTVDashboard extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.agents.map((a, i) => {
+                                            {this._isMounted && this.state.agents.map((a, i) => {
                                                 // console.log(a.appointments.length, a.personalRecord, a.name)
                                                 // if (i > 0) return null
                                                 return <tr key={i}>
@@ -467,7 +467,7 @@ class SalesTVDashboard extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.callMTDSortedAgents.map((a, i) => {
+                                            {this._isMounted && this.state.callMTDSortedAgents.map((a, i) => {
                                                 if (isNaN(a.inboundMTD) || isNaN(a.outboundMTD)) return null
                                                 // if (i > 9) return null
                                                 return (<tr key={i}>
@@ -499,7 +499,7 @@ class SalesTVDashboard extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.todayAgents.map((a, i) => {
+                                            {this._isMounted && this.state.todayAgents.map((a, i) => {
                                                 if (i > 9) return null
                                                 return <tr key={i}>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>

@@ -33,27 +33,25 @@ class DealershipPerformance extends React.Component {
         this.todayDealerCount = this.todayDealerCount.bind(this)
     }
     async componentWillMount() {
-        console.log(new Date())
         this._isMounted = true
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
         // let appointments = this._isMounted && await this.props.mongo.find("appointments");
         let agents = this._isMounted && await this.props.mongo.find("agents");
         // this.setState({appointments})
-        this.setState({ agents })
-        dealerships = dealerships.filter((d) => { return d.isActive === true })
-        dealerships.sort((a, b) => {
+        this._isMounted && this.setState({ agents })
+        dealerships = this._isMounted && dealerships.filter((d) => { return d.isActive === true })
+        this._isMounted && dealerships.sort((a, b) => {
             if (parseInt(a.goal) > parseInt(b.goal)) return -1;
             if (parseInt(a.goal) < parseInt(b.goal)) return 1;
             return 0;
         })
-        this.setState({ dealerships })
+        this._isMounted && this.setState({ dealerships })
 
         for (let d in dealerships) {
             this._isMounted && await this.todayDealerCount(dealerships[d])
         }
-        console.log(new Date())
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
     }
     componentDidMount() {
         this._isMounted = true
@@ -65,7 +63,7 @@ class DealershipPerformance extends React.Component {
         let apps = [];
         for (let a in this.state.agents) {
             for (let b in this.state.agents[a].appointments) {
-                if (this.state.agents[a].appointments[b].dealership.value === dealership.value && this.state.agents[a].appointments[b].dealership_department!== "Service") {
+                if (this.state.agents[a].appointments[b].dealership.value === dealership.value && this.state.agents[a].appointments[b].dealership_department !== "Service") {
                     apps.push(this.state.agents[a].appointments[b])
                 }
             }
@@ -102,12 +100,12 @@ class DealershipPerformance extends React.Component {
                 return d;
             }
         })
-        dlr.sort((a, b) => {
+        this._isMounted && dlr.sort((a, b) => {
             if ((a.goal - a.projection) > (b.goal - b.projection)) return -1;
             if ((a.goal - a.projection) < (b.goal - b.projection)) return 1;
             return 0;
         })
-        this.setState({ dealerships: dlr });
+        this._isMounted && this.setState({ dealerships: dlr });
     }
 
 
@@ -143,14 +141,14 @@ class DealershipPerformance extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.state.dealerships.map((d, i) => {
+                                        {this._isMounted && this.state.dealerships.map((d, i) => {
                                             return (
                                                 <tr key={i}>
-                                                    <td ><Progress style={{height: "25px", width: "150px", fontSize: "18px"}} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td>
-                                                    <td><p style={{fontSize: "18px"}}>{d.label}</p></td>
-                                                    <td><p style={{fontSize: "18px"}}>{d.totalCount}</p></td>
-                                                    <td><p style={{fontSize: "18px"}}>{d.goal}</p></td>
-                                                    <td><i solid style={{ fontSize: "24pt", fontWeight: "bolder", color: d.projection / d.goal >= .9 ? "green" : "red" }} className={d.projection / d.goal >= .9 ? "tim-icons icon-check-2" : "tim-icons icon-simple-remove"} /></td>
+                                                    <td ><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td>
+                                                    <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
+                                                    <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
+                                                    <td><p style={{ fontSize: "18px" }}>{d.goal}</p></td>
+                                                    <td><i solid={"true"} style={{ fontSize: "24pt", fontWeight: "bolder", color: d.projection / d.goal >= .9 ? "green" : "red" }} className={d.projection / d.goal >= .9 ? "tim-icons icon-check-2" : "tim-icons icon-simple-remove"} /></td>
                                                 </tr>
                                             );
 

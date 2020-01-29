@@ -70,13 +70,13 @@ class ServiceTVDashboard extends React.Component {
 
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { "userId": user.userId })
         let agents = this._isMounted && await this.props.mongo.find("agents", { "department": "service", isActive: true, account_type: "agent" })
-        agents.sort((a, b) => {
+        this._isMounted && agents.sort((a, b) => {
             if (a.appointments.length > b.appointments.length) return -1;
             if (a.appointments.length < b.appointments.length) return 1;
             return 0
         })
         let callSortedAgents = this._isMounted && await this.props.mongo.find("agents", { "department": "service", isActive: true, account_type: "agent" });
-        callSortedAgents.sort((a, b) => {
+        this._isMounted && callSortedAgents.sort((a, b) => {
             if ((a.inboundToday + a.outboundToday) > (b.inboundToday + b.outboundToday)) return -1;
             if ((a.inboundToday + a.outboundToday) < (b.inboundToday + b.outboundToday)) return 1;
             return 0;
@@ -127,8 +127,8 @@ class ServiceTVDashboard extends React.Component {
         let apptMtdTotal = 0;
         for (let a in agents) {
             let query = { agent_id: agents[a]._id.toString() }
-            let agent_apps = await this.props.mongo.find("all_appointments", query)
-            agent_apps = agent_apps.filter((a) => {
+            let agent_apps = this._isMounted && await this.props.mongo.find("all_appointments", query)
+            agent_apps = this._isMounted && agent_apps.filter((a) => {
                 return new Date(a.verified).getTime() >= thisMonth.getTime()
             })
             apptMtdTotal += agent_apps.length
@@ -156,7 +156,7 @@ class ServiceTVDashboard extends React.Component {
                 continue;
             }
             let color = "red";
-            let count = appointments.filter((a) => {
+            let count = this._isMounted && appointments.filter((a) => {
                 return new Date(a.verified).getTime() >= start.getTime() && new Date(a.verified).getTime() < end.getTime()
             })
             if (count.length == 2) {
@@ -259,7 +259,7 @@ class ServiceTVDashboard extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.state.callSortedAgents.map((a, i) => {
+                                        {this._isMounted && this.state.callSortedAgents.map((a, i) => {
                                             if (i > 9) return null
                                             return (<tr key={i}>
                                                 <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
@@ -290,7 +290,7 @@ class ServiceTVDashboard extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.state.agents.map((a, i) => {
+                                        {this._isMounted && this.state.agents.map((a, i) => {
                                             if (i > 9) return null
                                             return <tr key={i}>
                                                 <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>

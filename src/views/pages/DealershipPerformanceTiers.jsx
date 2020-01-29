@@ -37,17 +37,16 @@ class DealershipPerformanceTiers extends React.Component {
         this.todayDealerCount = this.todayDealerCount.bind(this)
     }
     async componentWillMount() {
-        console.log(new Date())
         this._isMounted = true
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
 
         // let appointments = this._isMounted && await this.props.mongo.find("appointments");
         let agents = this._isMounted && await this.props.mongo.find("agents");
         // this.setState({appointments})
-        this.setState({ agents })
-        dealerships = dealerships.filter((d) => { return d.isActive === true })
-        dealerships.sort((a, b) => {
+        this._isMounted && this.setState({ agents })
+        dealerships = this._isMounted && dealerships.filter((d) => { return d.isActive === true })
+        this._isMounted && dealerships.sort((a, b) => {
             if (parseInt(a.goal) > parseInt(b.goal)) return -1;
             if (parseInt(a.goal) < parseInt(b.goal)) return 1;
             return 0;
@@ -71,8 +70,8 @@ class DealershipPerformanceTiers extends React.Component {
                 dealership4.push(dealerships[i])
             }
         }
-        
-        this.setState({ dealerships, dealership1, dealership2, dealership3, dealership4 })
+
+        this._isMounted && this.setState({ dealerships, dealership1, dealership2, dealership3, dealership4 })
         for (let d in dealerships) {
             this._isMounted && await this.todayDealerCount(dealerships[d], "dealerships")
         }
@@ -88,10 +87,7 @@ class DealershipPerformanceTiers extends React.Component {
         for (let d in dealership4) {
             this._isMounted && await this.todayDealerCount(dealership4[d], "dealership4")
         }
-        
-        
-        console.log(new Date())
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
     }
     componentDidMount() {
         this._isMounted = true
@@ -108,7 +104,7 @@ class DealershipPerformanceTiers extends React.Component {
                 }
             }
         }
-        let dlr = this.state[dealerships].map((d) => {
+        let dlr = this._isMounted && this.state[dealerships].map((d) => {
             if (d.value === dealership.value) {
                 let progressValue = Math.round(apps.length * 10 / d.goal * 100) / 10;
                 let progressColor = "red";
@@ -140,13 +136,13 @@ class DealershipPerformanceTiers extends React.Component {
                 return d;
             }
         })
-        dlr.sort((a, b) => {
+        this._isMounted && dlr.sort((a, b) => {
             if ((a.goal - a.projection) > (b.goal - b.projection)) return -1;
             if ((a.goal - a.projection) < (b.goal - b.projection)) return 1;
             return 0;
         })
-        
-        this.setState({ [dealerships]: dlr });
+
+        this._isMounted && this.setState({ [dealerships]: dlr });
     }
 
 
@@ -181,11 +177,11 @@ class DealershipPerformanceTiers extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.state.dealership1.map((d, i) => {
+                                        {this._isMounted && this.state.dealership1.map((d, i) => {
                                             return (
                                                 <tr key={i}>
                                                     {/* <td ><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td> */}
-                                                    <td ><p style={{color: d.progressColor}}><strong>{d.progressValue}%</strong></p></td>
+                                                    <td ><p style={{ color: d.progressColor }}><strong>{d.progressValue}%</strong></p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.goal}</p></td>
@@ -211,10 +207,10 @@ class DealershipPerformanceTiers extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.state.dealership2.map((d, i) => {
+                                        {this._isMounted && this.state.dealership2.map((d, i) => {
                                             return (
                                                 <tr key={i}>
-                                                    <td ><p style={{color: d.progressColor}}><strong>{d.progressValue}%</strong></p></td>
+                                                    <td ><p style={{ color: d.progressColor }}><strong>{d.progressValue}%</strong></p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.goal}</p></td>
@@ -240,10 +236,10 @@ class DealershipPerformanceTiers extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.state.dealership3.map((d, i) => {
+                                        {this._isMounted && this.state.dealership3.map((d, i) => {
                                             return (
                                                 <tr key={i}>
-                                                    <td><p style={{color: d.progressColor}}><strong>{d.progressValue}</strong></p></td>
+                                                    <td><p style={{ color: d.progressColor }}><strong>{d.progressValue}</strong></p></td>
                                                     {/* <td ><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td> */}
                                                     <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
@@ -270,10 +266,10 @@ class DealershipPerformanceTiers extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.state.dealership4.map((d, i) => {
+                                        {this._isMounted && this.state.dealership4.map((d, i) => {
                                             return (
                                                 <tr key={i}>
-                                                    <td><p style={{color: d.progressColor}}><strong>{d.progressValue}%</strong></p></td>
+                                                    <td><p style={{ color: d.progressColor }}><strong>{d.progressValue}%</strong></p></td>
                                                     {/* <td style={{ height: "75px", maxHeight: "75px" }}><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td> */}
                                                     <td ><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td ><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>

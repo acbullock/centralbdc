@@ -47,42 +47,46 @@ class ApproveAssistance extends React.Component {
             feedback: "Loading..",
             texts: []
         };
-
+        this._isMounted = false;
     }
     async componentWillMount() {
-        this.setState({ loading: true })
-        let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        this._isMounted = true;
+        this._isMounted && this.setState({ loading: true })
+        let currUser = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         // let agent = await this.props.mongo.getCollection("agents")
         // agent = await agent.findOne({ userId: currUser.userId })
-        let agent = await this.props.mongo.findOne("agents", { userId: currUser.userId })
-        this.setState({ isApprover: agent.isApprover })
+        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: currUser.userId })
+        this._isMounted && this.setState({ isApprover: agent.isApprover })
         if (agent.isApprover === true) {
 
-            await this.getPendingAssistance()
+            this._isMounted && await this.getPendingAssistance()
         }
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
+    }
+    componentWillUnmount(){
+        this._isMounted = false
     }
     // with this function we create an array with the opened collapses
     // it is like a toggle function for all collapses from this page
     collapsesToggle = collapse => {
 
         let openedCollapses = this.state.openedCollapses;
-        this.setState({ rejected_reason: "" })
+        this._isMounted && this.setState({ rejected_reason: "" })
         if (openedCollapses.includes(collapse)) {
-            this.setState({
+            this._isMounted && this.setState({
                 openedCollapses: []
             });
         } else {
-            this.setState({
+            this._isMounted && this.setState({
                 openedCollapses: [collapse]
             });
         }
     };
     async getPendingAssistance() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         // let agents = await this.props.mongo.getCollection("agents")
         // agents = await agents.find().toArray()
-        let agents = await this.props.mongo.find("agents")
+        let agents = this._isMounted && await this.props.mongo.find("agents")
         let assistance = []
         //loop thru agents
         for (let agent in agents) {
@@ -98,7 +102,7 @@ class ApproveAssistance extends React.Component {
                 assistance.push(newApp)
             }
         }
-        await assistance.sort((a, b) => {
+        this._isMounted && await assistance.sort((a, b) => {
             if (new Date(a.created).getTime() > new Date(b.created).getTime())
                 return 1;
             if (new Date(a.created).getTime() < new Date(b.created).getTime())
@@ -109,10 +113,10 @@ class ApproveAssistance extends React.Component {
         for (let a in assistance) {
             texts.push(assistance[a].text)
         }
-        this.setState({ pendingAssistance: assistance, loading: false, texts })
+        this._isMounted && this.setState({ pendingAssistance: assistance, loading: false, texts })
     }
     async acceptAssistance(assistance, i) {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         //find user that has that assistance record
         //update that record to be isRejected = false, isPending=false
         let newAssistance = {}
@@ -125,8 +129,8 @@ class ApproveAssistance extends React.Component {
         newAssistance.text = this.state.texts[i]
         //    let agents = await this.props.mongo.getCollection("agents")
         //    let owner = await agents.findOne({userId: newAssistance.userId})
-        let owner = await this.props.mongo.findOne("agents", { userId: newAssistance.userId })
-        let ownerAssistance = await owner.assistance.filter((a) => {
+        let owner = this._isMounted && await this.props.mongo.findOne("agents", { userId: newAssistance.userId })
+        let ownerAssistance = this._isMounted && await owner.assistance.filter((a) => {
             return a.text == assistance.text
         })
         console.log(assistance.isPending)
@@ -136,20 +140,20 @@ class ApproveAssistance extends React.Component {
             owner.assistance[index] = newAssistance
         }
         //    await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
-        await this.props.mongo.findOneAndUpdate("agents", { userId: newAssistance.userId }, {
+        this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { userId: newAssistance.userId }, {
             assistance: owner.assistance,
             isPending: false,
             isRejected: false
         })
-        await this.setState({ feedback: "Sending texts to dealers" })
-        await this.sendText(newAssistance)
+        this._isMounted && await this.setState({ feedback: "Sending texts to dealers" })
+        this._isMounted && await this.sendText(newAssistance)
 
-        await this.getPendingAssistance()
-        this.setState({ loading: false, feedback: "Loading.." })
+        this._isMounted && await this.getPendingAssistance()
+        this._isMounted && this.setState({ loading: false, feedback: "Loading.." })
     }
     async rejectAssistance(assistance) {
 
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         //find user that has that assistance record
         //update that record to be isRejected = true, isPending=false
         let newAssistance = assistance
@@ -158,8 +162,8 @@ class ApproveAssistance extends React.Component {
         newAssistance.rejectedReason = this.state.rejected_reason
         //    let agents = await this.props.mongo.getCollection("agents")
         //    let owner = await agents.findOne({userId: newAssistance.userId})
-        let owner = await this.props.mongo.findOne("agents", { userId: newAssistance.userId })
-        let ownerAssistance = await owner.assistance.filter((a) => {
+        let owner = this._isMounted && await this.props.mongo.findOne("agents", { userId: newAssistance.userId })
+        let ownerAssistance = this._isMounted && await owner.assistance.filter((a) => {
             return a.text == assistance.text
         })
         let index = owner.assistance.indexOf(ownerAssistance[0])
@@ -167,20 +171,20 @@ class ApproveAssistance extends React.Component {
             owner.assistance[index] = newAssistance
         }
         //    await agents.findOneAndReplace({userId: newAssistance.userId}, owner)
-        await this.props.mongo.findOneAndUpdate("agents", { userId: newAssistance.userId }, {
+        this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { userId: newAssistance.userId }, {
             assistance: owner.assistance,
             isPending: false,
             isRejected: true,
             rejectedReason: this.state.rejected_reason
         })
-        await this.getPendingAssistance()
-        this.setState({ loading: false })
+        this._isMounted && await this.getPendingAssistance()
+        this._isMounted && this.setState({ loading: false })
     }
     async sendText(assistance) {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         // await this.setState({loading: true})
         let contacts = assistance.dealership.contacts
-        let token = await this.props.mongo.getToken()
+        let token = this._isMounted && await this.props.mongo.getToken()
         let arr = []
         for (let c in contacts) {
             contacts[c] = "1" + contacts[c]
@@ -191,7 +195,7 @@ class ApproveAssistance extends React.Component {
         }
 
 
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
 
     }
     render() {
@@ -220,7 +224,7 @@ class ApproveAssistance extends React.Component {
                         >
                             <h1>Approve/Reject Pending Assistance Requests</h1>
                             {
-                                this.state.pendingAssistance.map((app, index) => {
+                                this._isMounted && this.state.pendingAssistance.map((app, index) => {
                                     return (
                                         <div key={app.agent_name + "_" + index}>
 
@@ -265,7 +269,7 @@ class ApproveAssistance extends React.Component {
                                                                 <textarea id="edit" value={this.state.texts[index]} onChange={(e) => {
                                                                     let t = this.state.texts
                                                                     t[index] = e.target.value;
-                                                                    this.setState({ texts: t })
+                                                                    this._isMounted && this.setState({ texts: t })
                                                                 }} rows={16} cols={48}></textarea>
                                                             </Col>
                                                             <Col sm="6">

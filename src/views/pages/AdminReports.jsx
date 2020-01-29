@@ -53,32 +53,32 @@ class AdminReports extends React.Component {
     }
     async componentWillMount() {
         this._isMounted = true
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId });
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
         let agents = this._isMounted && await this.props.mongo.find("agents");
-        dealerships = dealerships.filter((a) => {
+        dealerships = this._isMounted && dealerships.filter((a) => {
             return a.isActive === true
         })
-        agents = agents.filter((a) => {
+        agents = this._isMounted && agents.filter((a) => {
             return a.isActive === true
         })
-        agents = agents.map((a) => {
+        agents = this._isMounted && agents.map((a) => {
             return Object.assign(a, { label: a.name, value: a._id })
         })
-        dealerships.sort((a, b) => {
+        this._isMounted && dealerships.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
             return 0;
         })
-        agents.sort((a, b) => {
+        this._isMounted && agents.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
             return 0;
         })
         let reports = ["Dealership Goals", "Appointment Count"];
-        reports.sort((a, b) => {
+        this._isMounted && reports.sort((a, b) => {
             if (a > b) return 1;
             if (a < b) return -1;
             return 0;
@@ -90,7 +90,7 @@ class AdminReports extends React.Component {
         this._isMounted && this.setState({ agent, reports: report_options, dealerships, agents })
 
 
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
     }
     componentDidMount() {
         this._isMounted = true
@@ -99,13 +99,13 @@ class AdminReports extends React.Component {
         this._isMounted = false
     }
     async getGoalForRange() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
 
-        let apps = await this.props.mongo.findOne("appointments", { dealership: this.state.selected_dealership.value })
+        let apps = this._isMounted && await this.props.mongo.findOne("appointments", { dealership: this.state.selected_dealership.value })
         apps = apps.appointments;
 
         //find all apps in given range..
-        apps = apps.filter((a) => {
+        apps = this._isMounted && apps.filter((a) => {
             return a.dealership_department !== "Service" && new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() && new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
         })
         let range = new Date(this.state.toDate).getTime() - new Date(this.state.fromDate).getTime()
@@ -122,10 +122,10 @@ class AdminReports extends React.Component {
         }
 
 
-        this.setState({ loading: false, goal, reportDone: true, appCount: apps.length, progressValue, progressColor })
+        this._isMounted && this.setState({ loading: false, goal, reportDone: true, appCount: apps.length, progressValue, progressColor })
     }
     clearForm() {
-        this.setState({
+        this._isMounted && this.setState({
             toDate: "",
             fromDate: "",
             selected_agent: { label: "", value: "" },
@@ -135,8 +135,8 @@ class AdminReports extends React.Component {
         })
     }
     async getGoalForRangeFull() {
-        this.setState({ loading: true })
-        let apps = await this.props.mongo.find("appointments")
+        this._isMounted && this.setState({ loading: true })
+        let apps = this._isMounted && await this.props.mongo.find("appointments")
         let full_results = []
         for (let a in apps) {
             let curr_apps = apps[a].appointments;
@@ -150,7 +150,7 @@ class AdminReports extends React.Component {
             if (!currDealer.isActive) {
                 continue;
             }
-            curr_apps = curr_apps.filter((a) => {
+            curr_apps = this._isMounted && curr_apps.filter((a) => {
                 return a.dealership_department !== "Service" && new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() && new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
             });
             let range = new Date(this.state.toDate).getTime() - new Date(this.state.fromDate).getTime()
@@ -173,33 +173,33 @@ class AdminReports extends React.Component {
                 progressColor
             })
         }
-        full_results.sort((a, b) => {
+        this._isMounted && full_results.sort((a, b) => {
             if (parseInt(a.goal) > parseInt(b.goal)) return -1;
             if (parseInt(a.goal) < parseInt(b.goal)) return 1;
             return 0;
 
         })
-        this.setState({ loading: false, full_results, reportDone: true });
+        this._isMounted && this.setState({ loading: false, full_results, reportDone: true });
     }
     async getAppCount() {
-        this.setState({ loading: true });
-        let appointments = await this.props.mongo.find("appointments");
-        let allApps = [];
-        for (let a in appointments) {
-            allApps = allApps.concat(appointments[a].appointments)
-        }
-        allApps = allApps.filter((a) => {
+        this._isMounted && this.setState({ loading: true });
+        let appointments = this._isMounted && await this.props.mongo.find("all_appointments", {agent_id: this.state.selected_agent._id});
+        let allApps = appointments.concat(this.state.selected_agent.appointments)
+        // for (let a in appointments) {
+        //     allApps = allApps.concat(appointments[a].appointments)
+        // }
+        allApps = this._isMounted && allApps.filter((a) => {
             return a.agent_id === this.state.selected_agent._id
         })
-        allApps = allApps.filter((a) => {
+        allApps = this._isMounted && allApps.filter((a) => {
             return new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() &&
                 new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime() && a.dealership_department !== "Service"
         })
 
-        this.setState({ loading: false, agentCount: allApps.length, reportDone: true });
+        this._isMounted && this.setState({ loading: false, agentCount: allApps.length, reportDone: true });
     }
     async getAppCountFull() {
-        this.setState({ loading: true });
+        this._isMounted && this.setState({ loading: true });
         let full_results = []
         let appointments = await this.props.mongo.find("appointments");
         let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" })
@@ -208,7 +208,7 @@ class AdminReports extends React.Component {
             allApps = allApps.concat(appointments[a].appointments);
         }
         for (let a in agents) {
-            let currApps = allApps.filter((app) => {
+            let currApps = this._isMounted && allApps.filter((app) => {
                 return (app.agent_id === agents[a]._id &&
                     new Date(app.verified) >= new Date(this.state.fromDate) &&
                     new Date(app.verified) <= new Date(this.state.toDate)) && app.dealership_department !== "Service"
@@ -218,10 +218,10 @@ class AdminReports extends React.Component {
                 appCount: currApps.length
             })
         }
-        full_results.sort((a, b) => {
+        this._isMounted && full_results.sort((a, b) => {
             return b.appCount - a.appCount
         })
-        this.setState({ loading: false, full_results, reportDone: true });
+        this._isMounted && this.setState({ loading: false, full_results, reportDone: true });
     }
     render() {
         if (this.state.loading) {
@@ -247,7 +247,7 @@ class AdminReports extends React.Component {
                                 isDisabled={this.state.loading}
                                 options={this.state.reports}
                                 value={this.state.selected_report}
-                                onChange={(e) => { this.clearForm(); this.setState({ selected_report: e, reportDone: false }) }}
+                                onChange={(e) => { this.clearForm(); this._isMounted && this.setState({ selected_report: e, reportDone: false }) }}
                             />
                         </Col>
                     </Row>
@@ -266,7 +266,7 @@ class AdminReports extends React.Component {
                                                 style={{ width: "50%" }}
                                                 options={this.state.dealerships}
                                                 value={this.state.selected_dealership}
-                                                onChange={(e) => { this.setState({ reportDone: false, selected_dealership: e }) }}
+                                                onChange={(e) => { this._isMounted && this.setState({ reportDone: false, selected_dealership: e }) }}
                                             />
                                         </FormGroup>
                                         <FormGroup>
@@ -280,7 +280,7 @@ class AdminReports extends React.Component {
                                                 }}
                                                 value={this.state.fromDate}
                                                 onChange={(value) => {
-                                                    this.setState({ reportDone: false, fromDate: new Date(value) })
+                                                    this._isMounted && this.setState({ reportDone: false, fromDate: new Date(value) })
                                                 }
                                                 }
                                                 className="primary"
@@ -297,7 +297,7 @@ class AdminReports extends React.Component {
                                                 }}
                                                 value={this.state.toDate}
                                                 onChange={(value) => {
-                                                    this.setState({ reportDone: false, toDate: new Date(new Date(value).setHours(23, 59, 59, 999)) })
+                                                    this._isMounted && this.setState({ reportDone: false, toDate: new Date(new Date(value).setHours(23, 59, 59, 999)) })
                                                 }
                                                 }
                                                 className="primary"
@@ -307,7 +307,7 @@ class AdminReports extends React.Component {
                                             <FormGroup tag="fieldset">
                                                 <Label check>
 
-                                                    <Input type="checkbox" checked={this.state.allDealers} onChange={(e) => { this.setState({ reportDone: false, allDealers: !this.state.allDealers }) }} />
+                                                    <Input type="checkbox" checked={this.state.allDealers} onChange={(e) => { this._isMounted && this.setState({ reportDone: false, allDealers: !this.state.allDealers }) }} />
                                                     All Dealerships
                                             </Label>
                                             </FormGroup>
@@ -348,7 +348,7 @@ class AdminReports extends React.Component {
                                                 <td>{this.state.appCount}</td>
                                                 <td>{this.state.goal}</td>
                                             </tr>
-                                            {this.state.full_results.map((r, i) => {
+                                            {this._isMounted && this.state.full_results.map((r, i) => {
                                                 if (this.state.allDealers === false) {
                                                     return null;
                                                 }
@@ -383,7 +383,7 @@ class AdminReports extends React.Component {
                                                 style={{ width: "50%" }}
                                                 options={this.state.agents}
                                                 value={this.state.selected_agent}
-                                                onChange={(e) => { this.setState({ reportDone: false, selected_agent: e }) }}
+                                                onChange={(e) => { this._isMounted && this.setState({ reportDone: false, selected_agent: e }) }}
                                             />
                                         </FormGroup>
                                         <FormGroup>
@@ -397,7 +397,7 @@ class AdminReports extends React.Component {
                                                 }}
                                                 value={this.state.fromDate}
                                                 onChange={(value) => {
-                                                    this.setState({ reportDone: false, fromDate: new Date(value) })
+                                                    this._isMounted && this.setState({ reportDone: false, fromDate: new Date(value) })
                                                 }
                                                 }
                                                 className="primary"
@@ -414,7 +414,7 @@ class AdminReports extends React.Component {
                                                 }}
                                                 value={this.state.toDate}
                                                 onChange={(value) => {
-                                                    this.setState({ reportDone: false, toDate: new Date(new Date(value).setHours(23, 59, 59, 999)) })
+                                                    this._isMounted && this.setState({ reportDone: false, toDate: new Date(new Date(value).setHours(23, 59, 59, 999)) })
                                                 }
                                                 }
                                                 className="primary"
@@ -424,7 +424,7 @@ class AdminReports extends React.Component {
                                             <FormGroup tag="fieldset">
                                                 <Label check>
 
-                                                    <Input type="checkbox" checked={this.state.allAgents} onChange={(e) => { console.log(this.state.allAgents); this.setState({ reportDone: false, allAgents: !this.state.allAgents }) }} />
+                                                    <Input type="checkbox" checked={this.state.allAgents} onChange={(e) => { console.log(this.state.allAgents); this._isMounted && this.setState({ reportDone: false, allAgents: !this.state.allAgents }) }} />
                                                     All Agents
                                             </Label>
                                             </FormGroup>
@@ -459,7 +459,7 @@ class AdminReports extends React.Component {
                                                 <td>{new Date(this.state.toDate).toLocaleDateString()}</td>
                                                 <td>{this.state.agentCount}</td>
                                             </tr>
-                                            {this.state.full_results.map((r, i) => {
+                                            {this._isMounted && this.state.full_results.map((r, i) => {
                                                 if (this.state.allAgents === false) {
                                                     return null;
                                                 }

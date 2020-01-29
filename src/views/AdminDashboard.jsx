@@ -78,7 +78,7 @@ class AdminDashboard extends React.Component {
         this._isMounted && this.setState({ loading: true });
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
-        this.setState({ agent });
+        this._isMounted && this.setState({ agent });
         if (user.userId == undefined || agent.account_type !== "admin") {
             this._isMounted && this.props.history.push("/auth/login")
         }
@@ -90,7 +90,7 @@ class AdminDashboard extends React.Component {
                 agents[a].label = agents[a].name;
                 agents[a].value = agents[a]._id
             }
-            agents.sort((a, b) => {
+            this._isMounted && agents.sort((a, b) => {
                 if (a.name > b.name) return 1;
                 if (a.name < b.name) return -1;
                 return 0;
@@ -105,7 +105,7 @@ class AdminDashboard extends React.Component {
         this._isMounted = false
     }
     async sortLastAppts() {
-        this.setState({ lastAppsLoading: true })
+        this._isMounted && this.setState({ lastAppsLoading: true })
         let last_appts = [];
         let appointments = this._isMounted && await this.props.mongo.find("appointments")
         let dealervals = this._isMounted && await this.state.dealerships.map((d) => {
@@ -169,7 +169,7 @@ class AdminDashboard extends React.Component {
         this._isMounted && this.setState({ lifetime_appts, month_appts, today_appts: today_appts, projected_today, projected_month })
     }
     async getTop10() {
-        this.setState({ top10Loading: true })
+        this._isMounted && this.setState({ top10Loading: true })
         let agents = this.state.agents
         let today_appts = [];
         for (let a in agents) {
@@ -191,7 +191,7 @@ class AdminDashboard extends React.Component {
         for (let a in agent_counts) {
             sortable.push([a, agent_counts[a]])
         }
-        sortable.sort((a, b) => {
+        this._isMounted && sortable.sort((a, b) => {
             return b[1] - a[1]
         })
         this._isMounted && this.setState({ top10: sortable, top10Loading: false })
@@ -221,18 +221,15 @@ class AdminDashboard extends React.Component {
         for (let d in dealer_counts) {
             sortable.push([d, dealer_counts[d]])
         }
-        sortable.sort((a, b) => {
+        this._isMounted && sortable.sort((a, b) => {
             return b[1] - a[1];
         })
         this._isMounted && this.setState({ agent_top_5: sortable, agent5Loading: false })
 
     }
     async getDealerTop5(dealer) {
-        this.setState({ dlrtop5loading: true })
-        let apps = await this.props.mongo.find("all_appointments")
-        let dlr_apps = apps.filter((a) => {
-            return a.dealership.label === dealer.label
-        })
+        this._isMounted && this.setState({ dlrtop5loading: true })
+        let dlr_apps = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.label": dealer.label })
         let dict = {};
         for (let d in dlr_apps) {
             if (dict[dlr_apps[d].agent_id] == undefined) {
@@ -244,14 +241,17 @@ class AdminDashboard extends React.Component {
         }
         let sortable = [];
         for (let d in dict) {
-            let name = await this.props.mongo.findOne("agents", { _id: d })
+            let index = this.state.agents.findIndex((a)=>{return a._id ==d})
+            if(index === -1 ){console.log(d); continue}
+            // let name = this._isMounted && await this.props.mongo.findOne("agents", { _id: d })
+            let name = this.state.agents[this.state.agents.findIndex((a)=>{return a._id ==d})]
             sortable.push({ name: name.name, count: dict[d] })
         }
-        sortable.sort((a, b) => {
+        this._isMounted && sortable.sort((a, b) => {
             return b.count - a.count
         })
         console.log(sortable)
-        this.setState({ dlrtop5loading: false, dlrTop5: sortable })
+        this._isMounted && this.setState({ dlrtop5loading: false, dlrTop5: sortable })
     }
     render() {
         if (this.state.loading) {
@@ -293,7 +293,7 @@ class AdminDashboard extends React.Component {
                                         </thead>
                                         <tbody>
                                             {
-                                                this.state.last_appts.map((a, i) => {
+                                                this._isMounted && this.state.last_appts.map((a, i) => {
                                                     if (i > 9) return null
                                                     let dealership_name = ""
                                                     for (let d in this.state.dealerships) {
@@ -344,7 +344,7 @@ class AdminDashboard extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.top10.map((a, i) => {
+                                            {this._isMounted && this.state.top10.map((a, i) => {
                                                 if (i > 9) return null;
                                                 let name = "Unavailable"
                                                 for (let b in this.state.agents) {
@@ -381,7 +381,7 @@ class AdminDashboard extends React.Component {
                                         options={this.state.agents}
                                         value={this.state.selected_agent}
                                         onChange={(e) => {
-                                            this.setState({ selected_agent: e })
+                                            this._isMounted && this.setState({ selected_agent: e })
                                             this.getAgentTop5(e)
                                         }}
                                     />
@@ -397,7 +397,7 @@ class AdminDashboard extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.agent_top_5.map((d, i) => {
+                                            {this._isMounted && this.state.agent_top_5.map((d, i) => {
 
                                                 if (i > 4) return null;
                                                 let stale = false
@@ -491,17 +491,17 @@ class AdminDashboard extends React.Component {
                                         </thead>
                                         <tbody>
                                             {(() => {
-                                                let agents = this.state.agents.filter((a) => { return a.lastCall !== null && !isNaN(new Date(a.lastCall).getTime()) })
+                                                let agents = this._isMounted && this.state.agents.filter((a) => { return a.lastCall !== null && !isNaN(new Date(a.lastCall).getTime()) })
                                                 for (let a in agents) {
                                                     agents[a].elapsed = Math.round(10 * ((new Date().getTime() - new Date(agents[a].lastCall).getTime()) / (60000))) / 10
                                                     // console.log(Math.round(10 * (new Date().getTime() - new Date(agents[a].lastCall).getTime()) / (1000 * 60)) / 10)
                                                 }
-                                                agents = agents.sort((a, b) => {
+                                                agents = this._isMounted && agents.sort((a, b) => {
                                                     if (a.elapsed > b.elapsed) return -1;
                                                     if (a.elapsed < b.elapsed) return 1;
                                                     return 0;
                                                 })
-                                                return agents.map((a, i) => {
+                                                return this._isMounted && agents.map((a, i) => {
                                                     if (a.lastCall === null) return null
                                                     return (
                                                         <tr key={i}>
@@ -509,12 +509,12 @@ class AdminDashboard extends React.Component {
                                                             <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a.lastCall === null ? "No Calls Today" : Math.round(10 * (new Date().getTime() - new Date(a.lastCall).getTime()) / (1000 * 60)) / 10 + " min"}</strong></p></td>
                                                             <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
                                                             <td style={{ borderBottom: "solid 1px white" }}><Button color="neutral" disabled={this.state.latestLoading} onClick={async () => {
-                                                                this.setState({ latestLoading: true })
+                                                                this._isMounted && this.setState({ latestLoading: true })
                                                                 //get voice token
-                                                                let token = await this.props.mongo.findOne("utils", { "_id": "5df2b825f195a16a1dbd4bf5" })
+                                                                let token = this._isMounted && await this.props.mongo.findOne("utils", { "_id": "5df2b825f195a16a1dbd4bf5" })
                                                                 token = token.voice_token
                                                                 //get curr users records
-                                                                let currCount = await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/extension/${a.extension}/call-log?dateFrom=${new Date(new Date().setHours(0, 0, 0, 0)).toISOString()}&access_token=${token}&perPage=1000`).catch()
+                                                                let currCount = this._isMounted && await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/extension/${a.extension}/call-log?dateFrom=${new Date(new Date().setHours(0, 0, 0, 0)).toISOString()}&access_token=${token}&perPage=1000`).catch()
                                                                 let records = currCount.data.records;
                                                                 let lastTime = null
                                                                 for (let i in records) {
@@ -526,14 +526,14 @@ class AdminDashboard extends React.Component {
                                                                         break;
                                                                     }
                                                                 }
-                                                                let outbound = records.filter(r => { return r.direction === "Outbound" })
-                                                                let inbound = records.filter(r => { return r.direction === "Inbound" && r.result === "Accepted" })
-                                                                await this.props.mongo.findOneAndUpdate("agents", { name: a.name }, { inboundToday: inbound.length, outboundToday: outbound.length, callCountLastUpdated: new Date(), lastCall: lastTime })
-                                                                let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" })
-                                                                this.setState({ agents })
+                                                                let outbound = this._isMounted && records.filter(r => { return r.direction === "Outbound" })
+                                                                let inbound = this._isMounted && records.filter(r => { return r.direction === "Inbound" && r.result === "Accepted" })
+                                                                this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { name: a.name }, { inboundToday: inbound.length, outboundToday: outbound.length, callCountLastUpdated: new Date(), lastCall: lastTime })
+                                                                let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" })
+                                                                this._isMounted && this.setState({ agents })
                                                                 //force update
                                                                 setTimeout(() => {
-                                                                    this.setState({ latestLoading: false })
+                                                                    this._isMounted && this.setState({ latestLoading: false })
                                                                 }, 7000);
                                                             }}><i className="tim-icons icon-refresh-01" /></Button></td>
                                                         </tr>
@@ -555,26 +555,26 @@ class AdminDashboard extends React.Component {
                                     <Select
                                         options={this.state.dealerships}
                                         value={this.state.selected_dlr}
-                                        onChange={(e) => { this.setState({ selected_dlr: e }); this.getDealerTop5(e) }}
-                                        inputProps={{disabled: this.state.dlrtop5loading}}
+                                        onChange={(e) => { this._isMounted && this.setState({ selected_dlr: e }); this.getDealerTop5(e) }}
+                                        inputProps={{ disabled: this.state.dlrtop5loading }}
                                     />
                                     <br />
                                     <CardImg hidden={!this.state.dlrtop5loading} style={{ backgroundColor: "white" }} top width="100%" src={this.props.utils.loading} />
                                     <Table responsive striped hidden={this.state.dlrtop5loading || this.state.selected_dlr.label.length < 1}>
                                         <thead>
                                             <tr>
-                                                <th style={{color: "white"}}>#</th>
-                                                <th style={{color: "white"}}>Name</th>
-                                                <th style={{color: "white"}}>Count</th>
+                                                <th style={{ color: "white" }}>#</th>
+                                                <th style={{ color: "white" }}>Name</th>
+                                                <th style={{ color: "white" }}>Count</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.dlrTop5.map((d, i)=>{
-                                                if(i > 9) return null;
+                                            {this._isMounted && this.state.dlrTop5.map((d, i) => {
+                                                if (i > 9) return null;
                                                 return (<tr key={i}>
-                                                    <td style={{borderBottom: "1px solid white"}}><p style={{color: "white"}}><strong>{i+1}</strong></p></td>
-                                                    <td style={{borderBottom: "1px solid white"}}><p style={{color: "white"}}><strong>{d.name}</strong></p></td>
-                                                    <td style={{borderBottom: "1px solid white"}}><p style={{color: "white"}}><strong>{d.count}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{d.name}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{d.count}</strong></p></td>
                                                 </tr>);
                                             })}
                                         </tbody>

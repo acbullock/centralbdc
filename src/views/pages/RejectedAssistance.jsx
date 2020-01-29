@@ -56,18 +56,20 @@ class RejectedAssistance extends React.Component {
             fixed_source: { label: "", value:""},
             fixed_message: ""
         };
+        this._isMounted = false
     }
     async componentWillMount() {
-        this.setState({ loading: true })
-        let currUser = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        this._isMounted = true
+        this._isMounted && this.setState({ loading: true })
+        let currUser = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         // let agent = await this.props.mongo.getCollection("agents")
         // let dealerships = await this.props.mongo.getCollection("dealerships")
         // let sources = await this.props.mongo.getCollection("sources")
-        let dealerships = await this.props.mongo.find("dealerships")
-        let sources = await this.props.mongo.find("sources")
+        let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
+        let sources = this._isMounted && await this.props.mongo.find("sources")
         // sources = await sources.find().toArray()
         // dealerships = await dealerships.find().toArray()
-        dealerships.sort((a,b)=>{
+        this._isMounted && dealerships.sort((a,b)=>{
             if(a.label < b.label){
               return -1
             }
@@ -76,7 +78,7 @@ class RejectedAssistance extends React.Component {
             }
             return 0
         })
-        sources.sort((a,b)=>{
+        this._isMounted && sources.sort((a,b)=>{
         if(a.label < b.label){
             return -1
         }
@@ -85,12 +87,15 @@ class RejectedAssistance extends React.Component {
         }
         return 0
         })
-        await this.setState({ dealerships, sources })
+        this._isMounted && await this.setState({ dealerships, sources })
         // agent = await agent.findOne({ userId: currUser.userId })
-        let agent = await this.props.mongo.findOne("agents", {userId: currUser.userId})
-        await this.setState({ agent })
-        await this.getRejectedAssistance()
-        await this.setState({ loading: false, agent })
+        let agent = this._isMounted && await this.props.mongo.findOne("agents", {userId: currUser.userId})
+        this._isMounted && await this.setState({ agent })
+        this._isMounted && await this.getRejectedAssistance()
+        this._isMounted && await this.setState({ loading: false, agent })
+    }
+    componentWillUnmount(){
+        this._isMounted = false;
     }
     // with this function we create an array with the opened collapses
     // it is like a toggle function for all collapses from this page
@@ -99,7 +104,7 @@ class RejectedAssistance extends React.Component {
 
         let openedCollapses = this.state.openedCollapses;
         if (openedCollapses.includes(collapse)) {
-            await this.setState({
+            this._isMounted && await this.setState({
                 openedCollapses: [],
                 index: -1,
                 fixed_customer_first_name: "",
@@ -114,7 +119,7 @@ class RejectedAssistance extends React.Component {
         } else {
             console.log(app)
 
-            await this.setState({
+            this._isMounted && await this.setState({
                 openedCollapses: [collapse],
                 index: parseInt(collapse[collapse.length - 1]),
                 fixed_customer_first_name: app.customer_firstname,
@@ -128,7 +133,7 @@ class RejectedAssistance extends React.Component {
 
     };
     async getRejectedAssistance() {
-        this.setState({ loading: true, feedback: "Getting assistance requests.." })
+        this._isMounted && this.setState({ loading: true, feedback: "Getting assistance requests.." })
         let assistance = []
         //loop thru agents
 
@@ -140,8 +145,8 @@ class RejectedAssistance extends React.Component {
             }
             assistance.push(this.state.agent.assistance[a])
         }
-        this.setState({ feedback: "Sorting assistance by date.." })
-        await assistance.sort((a, b) => {
+        this._isMounted && this.setState({ feedback: "Sorting assistance by date.." })
+        this._isMounted && await assistance.sort((a, b) => {
             if (a.created > b.created)
                 return 1;
             if (a.created < b.created)
@@ -149,10 +154,10 @@ class RejectedAssistance extends React.Component {
             return 0;
         })
 
-        this.setState({ rejectedAssistance: assistance, loading: false, feedback: "Loading.." })
+        this._isMounted && this.setState({ rejectedAssistance: assistance, loading: false, feedback: "Loading.." })
     }
     async resendAssistance() {
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let text = "CUSTOMER NEEDS ASSISTANCE\n"
         text += `${this.state.fixed_dealership.label}\n${this.state.fixed_customer_first_name} ${this.state.fixed_customer_last_name}\n`
         text += `${this.state.fixed_customer_phone}\n${this.state.fixed_message}\n`
@@ -174,7 +179,7 @@ class RejectedAssistance extends React.Component {
         }
 
         //find current agent's appointment that needs to be updated
-        let x = this.state.agent.assistance.filter((a) => {
+        let x = this._isMounted && this.state.agent.assistance.filter((a) => {
             return new Date(a.created).getTime() != new Date(old.created).getTime()
 
         })
@@ -185,12 +190,12 @@ class RejectedAssistance extends React.Component {
         a.assistance = x
         // console.log(a)
         // await this.state.agents.findOneAndUpdate({ email: this.state.agent.email }, a)
-        await this.props.mongo.findOneAndUpdate("agents", {email: this.state.agent.email}, {
+        this._isMounted && await this.props.mongo.findOneAndUpdate("agents", {email: this.state.agent.email}, {
             assistance: a.assistance
         })
-        await this.getRejectedAssistance()
+        this._isMounted && await this.getRejectedAssistance()
         
-        this.setState({ loading: false,openedCollapses: [] })
+        this._isMounted && this.setState({ loading: false,openedCollapses: [] })
         
 
     }
@@ -225,7 +230,7 @@ class RejectedAssistance extends React.Component {
 
                             <h1>Rejected Assistance Requests</h1>
                             {
-                                this.state.rejectedAssistance.map((app, index) => {
+                                this._isMounted && this.state.rejectedAssistance.map((app, index) => {
                                     return (
                                         <div key={app.agent_name + "_" + index}>
 
@@ -266,14 +271,14 @@ class RejectedAssistance extends React.Component {
 
                                                             <Col sm="6">
                                                                 <Label  >Customer First Name</Label>
-                                                                <Input placeholder="Customer First Name" value={this.state.fixed_customer_first_name} onChange={(e) => { this.setState({ fixed_customer_first_name: e.target.value }) }}></Input>
+                                                                <Input placeholder="Customer First Name" value={this.state.fixed_customer_first_name} onChange={(e) => { this._isMounted && this.setState({ fixed_customer_first_name: e.target.value }) }}></Input>
                                                                 <br />
                                                                 <Label  >Cutomer Last Name: </Label>
-                                                                <Input placeholder="Customer Last Name" value={this.state.fixed_customer_last_name} onChange={(e) => { this.setState({ fixed_customer_last_name: e.target.value }) }}></Input>
+                                                                <Input placeholder="Customer Last Name" value={this.state.fixed_customer_last_name} onChange={(e) => { this._isMounted && this.setState({ fixed_customer_last_name: e.target.value }) }}></Input>
                                                                 <br />
 
                                                                 <Label  >Cutomer Phone: </Label>
-                                                                <Input type="tel" placeholder="Customer Phone" value={this.state.fixed_customer_phone} onChange={(e) => { this.setState({ fixed_customer_phone: e.target.value }) }}></Input>
+                                                                <Input type="tel" placeholder="Customer Phone" value={this.state.fixed_customer_phone} onChange={(e) => { this._isMounted && this.setState({ fixed_customer_phone: e.target.value }) }}></Input>
                                                                 <br />
                                                                 
                                                             </Col>
@@ -285,7 +290,7 @@ class RejectedAssistance extends React.Component {
                                                                     classNamePrefix="react-select"
                                                                     name="dealership"
                                                                     value={this.state.fixed_dealership}
-                                                                    onChange={value => { this.setState({ fixed_dealership: value }) }}
+                                                                    onChange={value => { this._isMounted && this.setState({ fixed_dealership: value }) }}
                                                                     options={this.state.dealerships}
                                                                     placeholder="Dealership"
                                                                 /><br />
@@ -297,7 +302,7 @@ class RejectedAssistance extends React.Component {
                                                                     classNamePrefix="react-select"
                                                                     name="source"
                                                                     value={this.state.fixed_source}
-                                                                    onChange={value => this.setState({ fixed_source: value })}
+                                                                    onChange={value => this._isMounted && this.setState({ fixed_source: value })}
                                                                     options={this.state.sources}
                                                                     placeholder="Source (optional)"
                                                                 />
@@ -314,7 +319,7 @@ class RejectedAssistance extends React.Component {
                                                                     id="message"
                                                                     style={{height: "500px", whiteSpace: "pre-wrap"}}
                                                                     value={this.state.fixed_message}
-                                                                    onChange={async (e)=> {await this.setState({fixed_message: e.target.value}); }}
+                                                                    onChange={async (e)=> {this._isMounted && await this.setState({fixed_message: e.target.value}); }}
                                                                 />
                                                             </Col>
                                                         </Row>
