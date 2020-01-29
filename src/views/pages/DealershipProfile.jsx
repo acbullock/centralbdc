@@ -171,17 +171,17 @@ class DealershipProfile extends React.Component {
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
         let agent = this._isMounted && await this.props.mongo.findOne("dealership_users", { userId: user.userId });
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
-        dealerships = dealerships.filter((a) => {
+        dealerships = this._isMounted && dealerships.filter((a) => {
             return a.isActive === true
         })
-        dealerships.sort((a, b) => {
+        this._isMounted && dealerships.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
             return 0;
         })
         let agent_group = this._isMounted && await this.props.mongo.findOne("dealerships", { value: agent.dealership });
         agent_group = agent_group.group;
-        dealerships = dealerships.filter((d) => {
+        dealerships = this._isMounted && dealerships.filter((d) => {
             if (agent.access === "store") {
                 return d.value === agent.dealership
             }
@@ -205,7 +205,7 @@ class DealershipProfile extends React.Component {
         this._isMounted = false
     }
     async toggle(modal_name) {
-        let dlr = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value })
+        let dlr = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value })
         let defaultHrs = [
             {
                 day: "Monday",
@@ -503,20 +503,20 @@ class DealershipProfile extends React.Component {
                                                                 let update = this.state.selected_dealership
                                                                 update.salesHours = this.state.editSalesHours
 
-                                                                await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, { salesHours: this.state.editSalesHours })
-                                                                let dlr = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                                this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, { salesHours: this.state.editSalesHours })
+                                                                let dlr = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
                                                                 let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
-                                                                dealerships = dealerships.filter((a) => {
+                                                                dealerships = this._isMounted && dealerships.filter((a) => {
                                                                     return a.isActive === true
                                                                 })
-                                                                dealerships.sort((a, b) => {
+                                                                this._isMounted && dealerships.sort((a, b) => {
                                                                     if (a.label > b.label) return 1;
                                                                     if (a.label < b.label) return -1;
                                                                     return 0;
                                                                 })
                                                                 let agent_group = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.agent.dealership });
                                                                 agent_group = agent_group.group;
-                                                                dealerships = dealerships.filter((d) => {
+                                                                dealerships = this._isMounted && dealerships.filter((d) => {
                                                                     if (this.state.agent.access === "store") {
                                                                         return d.value === this.state.agent.dealership
                                                                     }
@@ -697,20 +697,20 @@ class DealershipProfile extends React.Component {
                                                             onClick={async () => {
                                                                 let update = this.state.selected_dealership
                                                                 update.serviceHours = this.state.editServiceHours
-                                                                await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, { serviceHours: this.state.editServiceHours })
-                                                                let dlr = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                                this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, { serviceHours: this.state.editServiceHours })
+                                                                let dlr = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
                                                                 let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
-                                                                dealerships = dealerships.filter((a) => {
+                                                                dealerships = this._isMounted && dealerships.filter((a) => {
                                                                     return a.isActive === true
                                                                 })
-                                                                dealerships.sort((a, b) => {
+                                                                this._isMounted && dealerships.sort((a, b) => {
                                                                     if (a.label > b.label) return 1;
                                                                     if (a.label < b.label) return -1;
                                                                     return 0;
                                                                 })
                                                                 let agent_group = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.agent.dealership });
                                                                 agent_group = agent_group.group;
-                                                                dealerships = dealerships.filter((d) => {
+                                                                dealerships = this._isMounted && dealerships.filter((d) => {
                                                                     if (this.state.agent.access === "store") {
                                                                         return d.value === this.state.agent.dealership
                                                                     }
@@ -799,13 +799,13 @@ class DealershipProfile extends React.Component {
                                                         }} /></td>
                                                         <td><i style={{ color: "#fd5d93", fontWeight: "solid", fontSize: "24pt", cursor: "pointer" }} className="tim-icons icon-trash-simple" onClick={async () => {
                                                             let arr = this.state.selected_dealership.profileContacts
-                                                            arr = arr.filter((a) => {
+                                                            arr = this._isMounted && arr.filter((a) => {
                                                                 return a.name != c.name && c.title != a.title && a.email != c.email
                                                             })
                                                             let dlr = this.state.selected_dealership;
                                                             dlr.profileContacts = arr;
-                                                            await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, dlr)
-                                                            let updated = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value })
+                                                            this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, dlr)
+                                                            let updated = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value })
                                                             this.setState({ selected_dealership: updated })
                                                         }} /></td>
                                                     </tr>
@@ -908,11 +908,11 @@ class DealershipProfile extends React.Component {
                                                         e.preventDefault();
                                                         let contacts = this.state.selected_dealership.profileContacts || [];
                                                         contacts.push(this.state.newContact)
-                                                        let dlr = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                        let dlr = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
                                                         dlr.profileContacts = contacts
-                                                        await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, dlr)
+                                                        this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, dlr)
 
-                                                        let updated = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                        let updated = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
                                                         this.setState({
                                                             selected_dealership: updated,
                                                             newContact: {
@@ -1027,11 +1027,11 @@ class DealershipProfile extends React.Component {
                                                         }
                                                     }
                                                     contacts[i] = this.state.editContact;
-                                                    let dlr = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                    let dlr = this._isMounted &&  this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
                                                     dlr.profileContacts = contacts
-                                                    await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, dlr)
+                                                    this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: this.state.selected_dealership.value }, dlr)
 
-                                                    let updated = await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
+                                                    let updated = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.selected_dealership.value });
                                                     this.setState({
                                                         selected_dealership: updated,
                                                         editContact: {

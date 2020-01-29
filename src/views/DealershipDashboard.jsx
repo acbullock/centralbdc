@@ -147,7 +147,7 @@ class DealershipDashboard extends React.Component {
     if (this.state.agent.access === "group") {
       let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true, group: this.state.dealership.group })
 
-      dealerships.sort((a, b) => {
+      this._isMounted && dealerships.sort((a, b) => {
         if (a.label > b.label) return 1;
         if (a.label < b.label) return -1;
         return 0;
@@ -162,7 +162,7 @@ class DealershipDashboard extends React.Component {
       // dealerships = dealerships.filter((d) => {
       //   return d.isActive === true
       // })
-      dealerships.sort((a, b) => {
+      this._isMounted && dealerships.sort((a, b) => {
         if (a.label > b.label) return 1;
         if (a.label < b.label) return -1;
         return 0;
@@ -172,7 +172,7 @@ class DealershipDashboard extends React.Component {
 
   }
   async getCallCountForMonth(phoneNumber, month, year) {
-    this.setState({ loading: true })
+    this._isMounted && this.setState({ loading: true })
     let stop = false;
     let page = 1;
     let voiceToken = this._isMounted && await this.props.mongo.findOne("utils", { _id: "5df2b825f195a16a1dbd4bf5" });
@@ -193,7 +193,7 @@ class DealershipDashboard extends React.Component {
       stop = currRecs.paging.pageEnd["$numberDouble"] % 1000 !== 999;
       // console.log(currRecs.paging.pageEnd["$numberDouble"])
       page++
-      await this.timeout(7000)
+      this._isMounted && await this.timeout(7000)
     }
     this._isMounted && this.setState({ loading: false })
     return records.length;
@@ -216,11 +216,11 @@ class DealershipDashboard extends React.Component {
     for (let a in agents) {
       agent_apps = agent_apps.concat(agents[a].appointments)
     }
-    agent_apps = agent_apps.filter((a) => {
+    agent_apps = this._isMounted && agent_apps.filter((a) => {
       return a.dealership.value === dealership.value
     })
 
-    let appt_verifieds = appointments.map(a => {
+    let appt_verifieds = this._isMounted && appointments.map(a => {
       return a.verified
     })
     for (let a in agent_apps) {
@@ -230,7 +230,7 @@ class DealershipDashboard extends React.Component {
     }
     // appointments = appointments.concat(agent_apps);
     console.log(appointments.length)
-    let todayApps = appointments.filter((a) => {
+    let todayApps = this._isMounted && appointments.filter((a) => {
       let x = new Date();
       x.setHours(0, 0, 0, 0)
       let tomorrow = new Date()
@@ -238,15 +238,15 @@ class DealershipDashboard extends React.Component {
       tomorrow.setHours(0, 0, 0, 0)
       return new Date(a.appointment_date).getTime() >= x.getTime() && new Date(a.appointment_date).getTime() < tomorrow.getTime()
     })
-    let svcApps = todayApps.filter((a) => {
+    let svcApps = this._isMounted && todayApps.filter((a) => {
       return a.dealership_department === "Service"
     })
-    let salesApps = todayApps.filter((a) => {
+    let salesApps = this._isMounted && todayApps.filter((a) => {
       return a.dealership_department !== "Service"
     })
     console.log("svc", svcApps.length)
     console.log("sales", salesApps.length)
-    let tomorrowApps = appointments.filter((a) => {
+    let tomorrowApps = this._isMounted && appointments.filter((a) => {
       let x = new Date();
       x.setDate(x.getDate() + 1);
       x.setHours(0, 0, 0, 0)
@@ -255,26 +255,26 @@ class DealershipDashboard extends React.Component {
       next.setHours(0, 0, 0, 0)
       return new Date(a.appointment_date).getTime() >= x.getTime() && new Date(a.appointment_date).getTime() < next.getTime()
     })
-    let svcApps2m = tomorrowApps.filter((a) => {
+    let svcApps2m = this._isMounted && tomorrowApps.filter((a) => {
       return a.dealership_department === "Service"
     })
-    let salesApps2m = tomorrowApps.filter((a) => {
+    let salesApps2m = this._isMounted && tomorrowApps.filter((a) => {
       return a.dealership_department !== "Service"
     })
-    let thisMonthApps = appointments.filter((a) => {
+    let thisMonthApps = this._isMounted && appointments.filter((a) => {
       let x = new Date()
       x.setDate(1)
       x.setHours(0, 0, 0, 0)
       return new Date(a.verified).getTime() >= x.getTime()
 
     })
-    let thisMonthService = thisMonthApps.filter((a) => {
+    let thisMonthService = this._isMounted && thisMonthApps.filter((a) => {
       return a.dealership_department === "Service"
     })
-    let thisMonthSales = thisMonthApps.filter((a) => {
+    let thisMonthSales = this._isMounted && thisMonthApps.filter((a) => {
       return a.dealership_department !== "Service"
     })
-    let lastMonthApps = appointments.filter((a) => {
+    let lastMonthApps = this._isMounted && appointments.filter((a) => {
       let x = new Date()
       x.setDate(1)
       x.setMonth(x.getMonth() - 1)
@@ -286,10 +286,10 @@ class DealershipDashboard extends React.Component {
 
       return new Date(a.verified).getTime() >= x.getTime() && new Date(a.verified).getTime() <= y.getTime()
     })
-    let lastMonthService = lastMonthApps.filter((a) => {
+    let lastMonthService = this._isMounted && lastMonthApps.filter((a) => {
       return a.dealership_department === "Service"
     })
-    let lastMonthSales = lastMonthApps.filter((a) => {
+    let lastMonthSales = this._isMounted && lastMonthApps.filter((a) => {
       return a.dealership_department !== "Service"
     })
     this._isMounted && this.setState({
@@ -352,9 +352,9 @@ class DealershipDashboard extends React.Component {
                 <legend><h1 style={{ color: "#1d67a8" }}><strong>{this.state.dealership.label}</strong></h1></legend>
                 <FormGroup>
                   <Label md="3">
-                    <Input name="showTypeSales" type="radio" value="sales" checked={this.state.showType === "sales"} onChange={(e) => { this.setState({ showType: e.target.value }) }} />{' '} <h3 style={{ marginLeft: "75px", color: "#1d67a8" }}><strong>Sales</strong></h3> </Label>
+                    <Input name="showTypeSales" type="radio" value="sales" checked={this.state.showType === "sales"} onChange={(e) => { this._isMounted && this.setState({ showType: e.target.value }) }} />{' '} <h3 style={{ marginLeft: "75px", color: "#1d67a8" }}><strong>Sales</strong></h3> </Label>
                   <Label md="3">
-                    <Input name="showTypeService" type="radio" value="service" checked={this.state.showType === "service"} onChange={(e) => { this.setState({ showType: e.target.value }) }} />{' '} <h3 style={{ marginLeft: "100px", color: "#1d67a8" }}><strong>Service</strong></h3> </Label>
+                    <Input name="showTypeService" type="radio" value="service" checked={this.state.showType === "service"} onChange={(e) => { this._isMounted && this.setState({ showType: e.target.value }) }} />{' '} <h3 style={{ marginLeft: "100px", color: "#1d67a8" }}><strong>Service</strong></h3> </Label>
                 </FormGroup >
               </CardTitle>
             </CardHeader>

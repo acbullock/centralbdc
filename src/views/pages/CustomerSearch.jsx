@@ -84,7 +84,7 @@ class CustomerSearch extends React.Component {
         //get user's group
         let dealer = this._isMounted &&  await this.props.mongo.findOne("dealerships", { value: this.state.agent.dealership })
         let group = this._isMounted && await this.props.mongo.findOne("dealership_groups", { value: dealer.group })
-        let dealersInGroup = this.state.dealerships.filter((d) => {
+        let dealersInGroup = this._isMounted && this.state.dealerships.filter((d) => {
             return d.group == group.value
         })
         let validNumbers = [];
@@ -126,7 +126,7 @@ class CustomerSearch extends React.Component {
 
 
         results = results.data.records
-        results = results.filter((r) => {
+        results = this._isMounted && results.filter((r) => {
             let useMe = false;
             for (let v in validNumbers) {
                 if(r.to.phoneNumber == undefined || r.from.phoneNumber == undefined){
@@ -210,7 +210,7 @@ class CustomerSearch extends React.Component {
                                     </CardTitle>
                                     <CardBody>
                                         {
-                                            this.state.urls.map((u, i) => {
+                                            this._isMounted && this.state.urls.map((u, i) => {
                                                 return (<div key={i} className="text-center">
                                                     <p><strong>Call Started: </strong>{new Date(this.state.results[i].startTime).toLocaleString()}</p>
                                                     <p><strong>To: </strong>{this.state.results[i].to.phoneNumber}</p>

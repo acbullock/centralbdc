@@ -42,21 +42,21 @@ class Reports extends React.Component {
     }
     async componentWillMount() {
         this._isMounted = true
-        this.setState({ loading: true })
+        this._isMounted && this.setState({ loading: true })
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
         let agent = this._isMounted && await this.props.mongo.findOne("dealership_users", { userId: user.userId });
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
-        dealerships.filter((a) => {
+        this._isMounted && dealerships.filter((a) => {
             return a.isActive === true
         })
-        dealerships.sort((a, b) => {
+        this._isMounted && dealerships.sort((a, b) => {
             if (a.label > b.label) return 1;
             if (a.label < b.label) return -1;
             return 0;
         })
         let agent_group = this._isMounted && await this.props.mongo.findOne("dealerships", { value: agent.dealership });
         agent_group = agent_group.group;
-        dealerships = dealerships.filter((d) => {
+        dealerships = this._isMounted && dealerships.filter((d) => {
             if (agent.access === "store") {
                 return d.value === agent.dealership
             }
@@ -73,7 +73,7 @@ class Reports extends React.Component {
         this._isMounted && this.setState({ agent, reports: report_options, dealerships })
 
 
-        this.setState({ loading: false })
+        this._isMounted && this.setState({ loading: false })
     }
     componentDidMount() {
         this._isMounted = true
@@ -82,16 +82,16 @@ class Reports extends React.Component {
         this._isMounted = false
     }
     async appCountReport() {
-        this.setState({ loading: true, clicked: false })
-        let appointments = await this.props.mongo.findOne("appointments", { dealership: this.state.selected_dealership.value });
-        appointments = appointments.appointments;
-        let verifieds = appointments.map((a)=>{return a.verified})
-        let agents = await this.props.mongo.find("agents")
+        this._isMounted && this.setState({ loading: true, clicked: false })
+        let appointments = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": this.state.selected_dealership.value });
+        // appointments = appointments.appointments;
+        let verifieds = this._isMounted && appointments.map((a)=>{return a.verified})
+        let agents = this._isMounted && await this.props.mongo.find("agents")
         let agent_apps = [];
         for (let a in agents) {
             agent_apps = agent_apps.concat(agents[a].appointments);
         }
-        agent_apps = agent_apps.filter((a) => {
+        agent_apps = this._isMounted && agent_apps.filter((a) => {
             return a.dealership.value === this.state.selected_dealership.value
         })
         for(let a in agent_apps){
@@ -100,17 +100,17 @@ class Reports extends React.Component {
             }
         }
         // appointments = appointments.concat(agent_apps)
-        appointments = appointments.filter((a) => {
+        appointments = this._isMounted && appointments.filter((a) => {
             return (new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() &&
                 new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()) && a.dealership_department !== "Service"
         })
-        appointments.sort((a, b) => {
+        this._isMounted && appointments.sort((a, b) => {
             if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return 1;
             if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return -1;
             return 0;
 
         })
-        this.setState({ reportDone: true, appCount: appointments.length, appointments, loading: false })
+        this._isMounted && this.setState({ reportDone: true, appCount: appointments.length, appointments, loading: false })
     }
 
 
@@ -137,7 +137,7 @@ class Reports extends React.Component {
                             <Select
                                 options={this.state.reports}
                                 value={this.state.selected_report}
-                                onChange={(e) => { this.setState({ selected_report: e }) }}
+                                onChange={(e) => { this._isMounted && this.setState({ selected_report: e }) }}
                             />
                         </Col>
                     </Row>
@@ -154,7 +154,7 @@ class Reports extends React.Component {
                                             <Select style={{ width: "50%" }}
                                                 options={this.state.dealerships}
                                                 value={this.state.selected_dealership}
-                                                onChange={(e) => { this.setState({ clicked: false, reportDone: false, selected_dealership: e }) }}
+                                                onChange={(e) => { this._isMounted && this.setState({ clicked: false, reportDone: false, selected_dealership: e }) }}
                                             />
                                         </FormGroup>
                                         <FormGroup>
@@ -169,7 +169,7 @@ class Reports extends React.Component {
                                                     }}
                                                     value={this.state.fromDate}
                                                     onChange={(value) => {
-                                                        this.setState({ reportDone: false, fromDate: new Date(value) })
+                                                        this._isMounted && this.setState({ reportDone: false, fromDate: new Date(value) })
                                                     }
                                                     }
                                                     className="primary"
@@ -188,7 +188,7 @@ class Reports extends React.Component {
                                                     }}
                                                     value={this.state.toDate}
                                                     onChange={(value) => {
-                                                        this.setState({ reportDone: false, toDate: new Date(new Date(value).setHours(23, 59, 59, 999)) })
+                                                        this._isMounted && this.setState({ reportDone: false, toDate: new Date(new Date(value).setHours(23, 59, 59, 999)) })
                                                     }
                                                     }
                                                     className="primary"
@@ -226,7 +226,7 @@ class Reports extends React.Component {
                                                 <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}>{new Date(this.state.toDate).toLocaleDateString()}</p></td>
                                                 <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}> {this.state.appCount}</p></td>
                                                 <td style={{ borderBottom: "1px solid white" }}><p style={{ cursor: "pointer", color: "#ff8d72" }} onClick={() => {
-                                                    this.setState({ clicked: true })
+                                                    this._isMounted && this.setState({ clicked: true })
                                                 }}> Show</p></td>
                                             </tr>
                                         </tbody>
@@ -236,7 +236,7 @@ class Reports extends React.Component {
                             <Card className="card-raised card-white" hidden={!this.state.clicked} style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader><strong>{this.state.appointments.length} Results</strong></CardHeader>
                                 <CardBody>
-                                    {this.state.appointments.map((a, i) => {
+                                    {this._isMounted && this.state.appointments.map((a, i) => {
                                         return (
                                             <Card key={i} color="transparent" className="card-raised card-white">
 
