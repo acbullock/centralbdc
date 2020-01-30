@@ -290,6 +290,7 @@ class AppointmnetSearchNew extends React.Component {
                                                 <Card color="transparent" className="card-raised card-white" color="transparent" key={i}>
                                                     <CardBody style={{ whiteSpace: "pre-wrap" }}>
                                                         <p style={{ color: "white" }}><strong>{i + 1}.</strong></p>
+                                                        <p style={{ color: "white" }}>Dealership: <strong>{a.dealership.label}</strong></p>
                                                         <p style={{ color: "white" }}>Message: <strong>{a.message}</strong></p>
                                                         <p style={{ color: "white" }}>Customer Phone: <strong>{a.customer_phone}</strong></p>
                                                         <p style={{ color: "white" }}>Created: <strong>{new Date(a.created).toLocaleString()}</strong></p>
