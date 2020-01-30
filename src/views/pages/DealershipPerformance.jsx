@@ -63,8 +63,13 @@ class DealershipPerformance extends React.Component {
         let apps = [];
         for (let a in this.state.agents) {
             for (let b in this.state.agents[a].appointments) {
-                if (this.state.agents[a].appointments[b].dealership.value === dealership.value && this.state.agents[a].appointments[b].dealership_department !== "Service") {
+                if (dealership.label === "Paragon Honda" && (this.state.agents[a].appointments[b].dealership.label === "Paragon Honda" || this.state.agents[a].appointments[b].dealership.label === "Paragon Honda Used")) {
                     apps.push(this.state.agents[a].appointments[b])
+                }
+                else {
+                    if (this.state.agents[a].appointments[b].dealership.value === dealership.value && this.state.agents[a].appointments[b].dealership_department !== "Service") {
+                        apps.push(this.state.agents[a].appointments[b])
+                    }
                 }
             }
         }
@@ -142,12 +147,13 @@ class DealershipPerformance extends React.Component {
                                     </thead>
                                     <tbody>
                                         {this._isMounted && this.state.dealerships.map((d, i) => {
+                                            if(d.label === "Paragon Honda Used") return null
                                             return (
                                                 <tr key={i}>
                                                     <td ><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
-                                                    <td><p style={{ fontSize: "18px" }}>{d.goal}</p></td>
+                                                    <td><p style={{ fontSize: "18px" }}>{d.label ==="Paragon Honda"? parseInt(d.goal) + 1 : d.goal}</p></td>
                                                     <td><i solid={"true"} style={{ fontSize: "24pt", fontWeight: "bolder", color: d.projection / d.goal >= .9 ? "green" : "red" }} className={d.projection / d.goal >= .9 ? "tim-icons icon-check-2" : "tim-icons icon-simple-remove"} /></td>
                                                 </tr>
                                             );
