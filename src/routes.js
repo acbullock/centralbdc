@@ -74,6 +74,7 @@ import SalesTVDashboard from "./views/pages/SalesTVDashboard.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 import DealershipProfile from "./views/pages/DealershipProfile.jsx"
 import AgentProfile from "./views/pages/AgentProfile.jsx"
+import Leads from "./views/pages/Leads.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -240,6 +241,13 @@ const routes = [
         rtlMini: "هعذا",
         component: Login,
         layout: "/auth",
+      },
+      {
+        path: "/leads",
+        name: "Leads",
+        component: Leads,
+        layout: "/auth",
+        adminOnly: true
       },
       {
         path: "/login",
