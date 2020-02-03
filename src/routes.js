@@ -75,6 +75,7 @@ import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 import DealershipProfile from "./views/pages/DealershipProfile.jsx"
 import AgentProfile from "./views/pages/AgentProfile.jsx"
 import Leads from "./views/pages/Leads.jsx"
+import PaymentCalculator from "./views/pages/PaymentCalculator.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
 
@@ -85,6 +86,13 @@ const routes = [
     icon: "tim-icons icon-badge",
     component: AgentProfile,
     layout: "/admin"
+  },
+  {
+    path: "/payment_calculator",
+    name: "Payment Calculator",
+    icon: "tim-icons icon-money-coins",
+    component: PaymentCalculator,
+    layout: "/auth"
   },
   {
     collapse: true,
