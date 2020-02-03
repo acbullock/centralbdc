@@ -133,8 +133,13 @@ class AgentProfile extends React.Component {
                                         <br />
                                         <Button color="info" onClick={() => { this.inputRef.current.click() }}>
                                             <input style={{ display: "none" }} ref={this.inputRef} accept="image/png, image/jpeg" type="file" id="exampleCustomFileBrowser" name="customFile" value={this.state.newImage} onChange={async (e) => {
-                                                console.log(e.target.files[0])
-                                                if (e.target.files[0].size > 1000000) { return }
+                                                if (e.target.files[0].size > 1000000) {
+                                                    this._isMounted && this.setState({ showError: true })
+                                                    setTimeout(() => {
+                                                        this._isMounted && this.setState({ showError: false })
+                                                    }, 5000);
+                                                    return;
+                                                }
                                                 this._isMounted && await this.setState({ newProfileImg: e.target.files[0] })
                                                 this._isMounted && await this.imageToBuffer()
                                             }}
@@ -142,6 +147,8 @@ class AgentProfile extends React.Component {
                                             Edit Image
                                         </Button>
                                         <p className="text-white">(Limit: 1 MB)</p>
+                                        <p className="text-white">For best results, choose a square image.</p>
+                                        <p hidden={!this.state.showError} style={{ color: "red" }}><strong>Error: File too large.</strong></p>
                                         <br />
                                         <Button
                                             color="warning" onClick={() => {
