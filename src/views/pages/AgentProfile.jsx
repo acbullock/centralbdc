@@ -134,7 +134,7 @@ class AgentProfile extends React.Component {
                                         <Button color="info" onClick={() => { this.inputRef.current.click() }}>
                                             <input style={{ display: "none" }} ref={this.inputRef} accept="image/png, image/jpeg" type="file" id="exampleCustomFileBrowser" name="customFile" value={this.state.newImage} onChange={async (e) => {
                                                 if (e.target.files[0].size > 1000000) {
-                                                    this._isMounted && this.setState({ showError: true })
+                                                    this._isMounted && this.setState({ showError: true, fileBinary: null, editImageUrl: this.state.agent.fileBinary !== undefined ? this._isMounted && await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(this.state.agent.fileBinary.data)) : "" })
                                                     setTimeout(() => {
                                                         this._isMounted && this.setState({ showError: false })
                                                     }, 5000);
@@ -160,7 +160,7 @@ class AgentProfile extends React.Component {
                                                 this.setState({ editImageUrl: imageUrl })
                                             }}>Cancel</Button>
                                         <Button
-                                            disabled={this.state.saveDisabled}
+                                            disabled={this.state.fileBinary === null}
                                             color="success" onClick={async () => {
                                                 this.setState({ saveDisabled: true })
                                                 var imageUrl = this.props.utils.imageUrlFromBuffer(this.state.fileBinary)

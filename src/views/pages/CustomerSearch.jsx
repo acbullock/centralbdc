@@ -54,17 +54,24 @@ class CustomerSearch extends React.Component {
     _isMounted = false
     async componentWillMount() {
         this._isMounted = true;
-        let mappings = this._isMounted && await this.props.mongo.find("dealer_mappings")
         this._isMounted && this.setState({ loading: true })
         //get user..
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
         let agent = this._isMounted && await this.props.mongo.findOne("dealership_users", { "userId": user.userId })
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
+        let mappingsArr = dealerships.map((d) => {
+            return { name: d.label, sales: d.sales, dm: d.dataMining }
+        })
+        let mappings = {
+
+        }
+        for (let m in mappingsArr) {
+            mappings[mappingsArr[m].sales] = `Sales BDC - ${mappingsArr[m].name}`
+            mappings[mappingsArr[m].dm] = `Data-Mining - ${mappingsArr[m].name}`
+        }
         //get user's dealership
         let dealership = this._isMounted && await this.props.mongo.findOne("dealerships", { "_id": agent.dealership })
-        this._isMounted && await this.setState({ loading: false, agent: agent, dealership: dealership, dealerships: dealerships, mappings: mappings[0] });
-
-
+        this._isMounted && await this.setState({ loading: false, agent: agent, dealership: dealership, dealerships: dealerships, mappings: mappings });
     }
     async componentDidMount() {
         this._isMounted = true
@@ -82,7 +89,7 @@ class CustomerSearch extends React.Component {
         this._isMounted && this.setState({ loading: true, results: [] })
         e.preventDefault()
         //get user's group
-        let dealer = this._isMounted &&  await this.props.mongo.findOne("dealerships", { value: this.state.agent.dealership })
+        let dealer = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.agent.dealership })
         let group = this._isMounted && await this.props.mongo.findOne("dealership_groups", { value: dealer.group })
         let dealersInGroup = this._isMounted && this.state.dealerships.filter((d) => {
             return d.group == group.value
@@ -97,7 +104,7 @@ class CustomerSearch extends React.Component {
                 if (dealersInGroup[d].dataMining.length == 12)
                     validNumbers.push(dealersInGroup[d].dataMining.substring(1, 12))
                 if (dealersInGroup[d].sales.length == 12)
-                validNumbers.push(dealersInGroup[d].sales.substring(1, 12))
+                    validNumbers.push(dealersInGroup[d].sales.substring(1, 12))
             }
         }
         else if (this.state.agent.access == "admin") {
@@ -105,7 +112,7 @@ class CustomerSearch extends React.Component {
                 if (this.state.dealerships[d].dataMining.length == 12)
                     validNumbers.push(this.state.dealerships[d].dataMining.substring(1, 12))
                 if (this.state.dealerships[d].sales.length == 12)
-                validNumbers.push(this.state.dealerships[d].sales.substring(1, 12))
+                    validNumbers.push(this.state.dealerships[d].sales.substring(1, 12))
             }
         }
         // console.log("valid", validNumbers)
@@ -115,21 +122,24 @@ class CustomerSearch extends React.Component {
         token = token.voice_token;
         let lastMonth = new Date()
         lastMonth = new Date(lastMonth.setDate(lastMonth.getDate() - 10))
-        
+
         let nextMonth = new Date()
-        nextMonth = new Date(nextMonth.setDate(nextMonth.getDate() +1))
+        nextMonth = new Date(nextMonth.setDate(nextMonth.getDate() + 1))
         // console.log(lastMonth, nextMonth)
         // nextMonth = new Date(nextMonth.setMonth(nextMonth.getMonth() + 1))
 
-        let results = this._isMounted && await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/call-log?access_token=${token}&phoneNumber=${this.state.searchPhone}&withRecording=true&view=Detailed&dateFrom=${lastMonth.getFullYear()}-${lastMonth.getMonth() + 1}-${lastMonth.getDate()}&dateTo=${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}-${nextMonth.getDate()}&perPage=1000&page=1`)
-
-
+        let results;
+        try {
+            results = this._isMounted && await axios.get(`https://platform.ringcentral.com/restapi/v1.0/account/~/call-log?access_token=${token}&phoneNumber=${this.state.searchPhone}&withRecording=true&view=Detailed&dateFrom=${lastMonth.getFullYear()}-${lastMonth.getMonth() + 1}-${lastMonth.getDate()}&dateTo=${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}-${nextMonth.getDate()}&perPage=1000&page=1`)
+        } catch (error) {
+            results = { data: { records: [] } };
+        }
 
         results = results.data.records
         results = this._isMounted && results.filter((r) => {
             let useMe = false;
             for (let v in validNumbers) {
-                if(r.to.phoneNumber == undefined || r.from.phoneNumber == undefined){
+                if (r.to.phoneNumber == undefined || r.from.phoneNumber == undefined || r.recording == undefined) {
                     continue;
                 }
                 useMe = r.to.phoneNumber.indexOf(validNumbers[v]) != -1 ||
@@ -152,7 +162,13 @@ class CustomerSearch extends React.Component {
         token = token.voice_token;
 
         let urls = this.state.urls;
-        urls[i] = this.state.results[i].recording.contentUri + "?access_token=" + token
+        if (this.state.results[i].recording === undefined || this.state.results[i].recording.contentUri === undefined) {
+            urls[i] = ""
+        }
+        else {
+
+            urls[i] = this.state.results[i].recording.contentUri + "?access_token=" + token
+        }
         this.setState(urls)
     }
     render() {
@@ -175,7 +191,7 @@ class CustomerSearch extends React.Component {
             <>
                 <div className="content">
                     <Container >
-                        <Row style={{justifyContent: "center"}}>
+                        <Row style={{ justifyContent: "center" }}>
                             <Col lg="8" >
                                 <Card className="card-raised card-white">
                                     <CardBody>
@@ -200,7 +216,7 @@ class CustomerSearch extends React.Component {
                             </Col>
                         </Row>
 
-                        <Row style={{justifyContent: "center"}}>
+                        <Row style={{ justifyContent: "center" }}>
                             <Col lg="8">
                                 <Card className="card-raised card-white">
                                     <CardTitle className="text-center">
@@ -218,9 +234,9 @@ class CustomerSearch extends React.Component {
                                                     <p><strong>Dealership: </strong> {this.state.mappings[this.state.results[i].direction === "Inbound" ? this.state.results[i].to.phoneNumber : this.state.results[i].from.phoneNumber] || "Unavailable"}</p>
                                                     <p><strong>Agent: </strong>{this.state.results[i].from.name || "Not available.."}</p>
                                                     <p><strong>Direction: </strong>{this.state.results[i].direction || "Not available.."}</p>
-                                                    <br/>
-                                                    <audio controls src={u} hidden={u.length < 1 || this.state.agent.access !== "admin"}/>
-                                                    <audio controls src={u} hidden={u.length < 1 || this.state.agent.access === "admin"} controlsList="nodownload"/>
+                                                    <br />
+                                                    <audio controls src={u} hidden={u.length < 1 || this.state.agent.access !== "admin"} />
+                                                    <audio controls src={u} hidden={u.length < 1 || this.state.agent.access === "admin"} controlsList="nodownload" />
                                                     <br />
                                                     <Button onClick={() => this.loadAudio(i)}>Load Audio</Button>
                                                     <hr />
