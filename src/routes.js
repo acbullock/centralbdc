@@ -88,11 +88,11 @@ const routes = [
     layout: "/admin"
   },
   {
-    path: "/payment_calculator",
-    name: "Payment Calculator",
+    path: "/pay_plan_calculator",
+    name: "Pay Plan Calculator",
     icon: "tim-icons icon-money-coins",
     component: PaymentCalculator,
-    layout: "/auth"
+    layout: "/admin"
   },
   {
     collapse: true,

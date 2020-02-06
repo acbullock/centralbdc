@@ -142,20 +142,20 @@ class PaymentCalculator extends React.Component {
                     <Row style={{ textAlign: "center" }}>
                         <Col md="12" >
                             <img src={logo} alt="react-logo" height="100" style={{ textAlign: "center", display: "block", margin: "auto" }} />
-                            <h1 style={{ background: "-webkit-linear-gradient(#1d67a8, #000000)", "WebkitBackgroundClip": "text", "WebkitTextFillColor": "transparent" }}><strong>Payment Calculator</strong></h1>
+                            <h1 style={{ background: "-webkit-linear-gradient(#1d67a8, #000000)", "WebkitBackgroundClip": "text", "WebkitTextFillColor": "transparent" }}><strong>Pay Plan Calculator</strong></h1>
                             {/* <h1 style={{ color: "#1d67a8", textAlign: "center" }}><strong>Service Department</strong></h1> */}
                         </Col>
                     </Row>
                     <br />
-                    <Row >
-                        <Col md="12" >
+                    <Row style={{justifyContent:"center"}}>
+                        <Col md="8" >
                             <Card style={{ padding: "20px", background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardTitle>
                                     <h1 className="text-white"><strong>Performance Pay</strong></h1>
                                     <hr style={{ border: "1px solid white" }} />
                                 </CardTitle>
                                 <CardBody>
-                                    <Form>
+                                    <Form onSubmit={this.calculatePay}>
                                         <FormGroup>
                                             <Label style={{ color: "white" }}>Appointment Count:</Label>
                                             <Input type="number"
@@ -181,7 +181,7 @@ class PaymentCalculator extends React.Component {
                                         <Button color="warning" onClick={(e) => { e.preventDefault(); this.clearForm() }}>Clear Form</Button>
                                         <Button color="success" onClick={(e) => { e.preventDefault(); this.calculatePay() }}>Calculate Pay</Button>
                                         <p style={{ color: "red" }}>{this.state.errorText}</p>
-                                        <h3 style={{ color: "green" }} hidden={isNaN(this.state.payment)}>{this.state.appointmentCount} Appointments{this.state.standing !== null ? " + " + this.state.standing.label + " Standing" : null} = ${this.state.payment}</h3>
+                                        <h3 style={{ color: "green" }} hidden={isNaN(this.state.payment)}>{this.state.appointmentCount} Appointments{this.state.standing !== null ? " + " + this.state.standing.label + " Standing" : null} = <strong>${this.state.payment}</strong></h3>
                                     </Form>
                                 </CardBody>
                             </Card>
