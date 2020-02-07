@@ -32,7 +32,8 @@ import {
   Col,
   FormGroup,
   Input,
-  Label
+  Label,
+  Tooltip
 } from "reactstrap";
 import Select from 'react-select'
 class DealershipDashboard extends React.Component {
@@ -57,7 +58,11 @@ class DealershipDashboard extends React.Component {
         label: "",
         value: ""
       },
-      showType: "sales"
+      showType: "sales",
+      dmApps: [],
+      sApps: [],
+      s2sApps: [],
+      appBreakdownTooltip: false
     };
 
     this.getCallCountForMonth = this.getCallCountForMonth.bind(this)
@@ -211,7 +216,7 @@ class DealershipDashboard extends React.Component {
     let dealership = this._isMounted && await this.props.mongo.findOne("dealerships", { value })
     this._isMounted && this.setState({ dealership })
     let appointments = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealership.value });
-    let agents = this._isMounted && await this.props.mongo.find("agents");
+    let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, "$where": "this.appointments.length > 0" });
     let agent_apps = [];
     for (let a in agents) {
       agent_apps = agent_apps.concat(agents[a].appointments)
@@ -236,14 +241,32 @@ class DealershipDashboard extends React.Component {
       let tomorrow = new Date()
       tomorrow.setDate(tomorrow.getDate() + 1)
       tomorrow.setHours(0, 0, 0, 0)
-      return new Date(a.appointment_date).getTime() >= x.getTime() && new Date(a.appointment_date).getTime() < tomorrow.getTime()
+      return new Date(a.verified).getTime() >= x.getTime() && new Date(a.verified).getTime() < tomorrow.getTime()
     })
-    let svcApps = this._isMounted && todayApps.filter((a) => {
-      return a.dealership_department === "Service"
-    })
-    let salesApps = this._isMounted && todayApps.filter((a) => {
-      return a.dealership_department !== "Service"
-    })
+
+    let svcApps = []
+    let salesApps = []
+    let dmApps = []
+    let sApps = []
+    let s2sApps = []
+    for (let today in todayApps) {
+      if (todayApps[today].dealership_department === "Service") {
+        svcApps.push(todayApps[today])
+      }
+      else {
+        salesApps.push(todayApps[today])
+      }
+      if (todayApps[today].dealership_department === "Data-Mining") {
+        dmApps.push(todayApps[today])
+      }
+      else if (todayApps[today].dealership_department === "Sales") {
+        sApps.push(todayApps[today])
+      }
+      else if (todayApps[today].dealership_department === "Service to Sales") {
+        s2sApps.push(todayApps[today])
+      }
+    }
+    this._isMounted && this.setState({ dmApps, sApps, s2sApps })
     console.log("svc", svcApps.length)
     console.log("sales", salesApps.length)
     let tomorrowApps = this._isMounted && appointments.filter((a) => {
@@ -362,10 +385,10 @@ class DealershipDashboard extends React.Component {
             <Row style={{ justifyContent: "center" }}>
               <legend className="text-center">Upcoming Appointments</legend>
               <Col sm="4">
-                <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }} id="todaysApps" >
                   <CardHeader>
                     <CardTitle tag="h3" >
-                      <p style={{ color: "white" }}><strong>Today's Appointments</strong></p>
+                      <p style={{ color: "white" }}><strong>Appts Created Today</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
@@ -379,6 +402,7 @@ class DealershipDashboard extends React.Component {
                     })()}</h1>
                   </CardBody>
                 </Card>
+                <Tooltip style={{ whiteSpace: "pre-wrap" }} placement="auto" isOpen={this.state.appBreakdownTooltip} target="todaysApps" toggle={() => { return this.state.showType === "sales" ? this.setState({ appBreakdownTooltip: !this.state.appBreakdownTooltip }) : null; }}>Data-Mining: <strong>{this.state.dmApps.length + "\n"}</strong> Sales: <strong>{this.state.sApps.length + "\n"}</strong> Service to Sales: <strong>{this.state.s2sApps.length}</strong></Tooltip>
               </Col>
               <Col sm="4">
                 <Card className="card-raised card-white" color="success" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
@@ -386,7 +410,7 @@ class DealershipDashboard extends React.Component {
                     <div className="tools float-right">
                     </div>
                     <CardTitle tag="h3" >
-                      <p style={{ color: "white" }}><strong>Tomorrow's Appointments</strong></p>
+                      <p style={{ color: "white" }}><strong>Tomorrow's Appts</strong></p>
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="text-center">
