@@ -78,6 +78,7 @@ import Leads from "./views/pages/Leads.jsx"
 import PaymentCalculator from "./views/pages/PaymentCalculator.jsx"
 // import Rtl from "./views/pages/Rtl.jsx";
 // import Lock from "./views/pages/Lock.jsx";
+import MojoDealershipProfile from "./views/pages/MojoDealershipProfile.jsx"
 
 const routes = [
   {
@@ -206,6 +207,13 @@ const routes = [
     icon: "tim-icons icon-badge",
     component: DealershipProfile,
     layout: "/dealership"
+  },
+  {
+    path: "/dealership_profile",
+    name: "MOJO - Dealership Profile",
+    icon: "tim-icons icon-badge",
+    component: MojoDealershipProfile,
+    layout: "/auth"
   },
   {
     collapse: true,
