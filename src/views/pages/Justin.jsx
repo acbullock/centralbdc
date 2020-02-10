@@ -30,7 +30,13 @@ class Justin extends React.Component {
             selected_dealership: null,
             todayCount: 0,
             tomorrowCount: 0,
-            dayAfterTomorrowCount: 0
+            dayAfterTomorrowCount: 0,
+            todayAppts: [],
+            tomorrowAppts: [],
+            dayAfterTomorrowAppts: [],
+            todayShowHide: "Show",
+            tomorrowShowHide: "Show",
+            dayAfterTomrorowShowHide: "Show"
 
         }
 
@@ -81,13 +87,21 @@ class Justin extends React.Component {
             let app_day = app_date.getDate();
 
             if (app_month === today.getMonth() && app_day === today.getDate()) {
-                console.log(dealer_appts[a].customer_phone)
+                let todayAppts = this.state.todayAppts;
+                todayAppts.push(dealer_appts[a])
+                this.setState({ todayAppts })
                 todayCount++;
             }
             else if (app_month === tomorrow.getMonth() && app_day === tomorrow.getDate()) {
+                let tomorrowAppts = this.state.tomorrowAppts;
+                tomorrowAppts.push(dealer_appts[a])
+                this.setState({ tomorrowAppts })
                 tomorrowCount++;
             }
             else if (app_month === dayAfterTomorrow.getMonth() && app_day === dayAfterTomorrow.getDate()) {
+                let dayAfterTomorrowAppts = this.state.dayAfterTomorrowAppts;
+                dayAfterTomorrowAppts.push(dealer_appts[a])
+                this.setState({ dayAfterTomorrowAppts })
                 dayAfterTomorrowCount++;
             }
         }
@@ -122,7 +136,7 @@ class Justin extends React.Component {
                                         })}
                                         value={this.state.selected_dealership}
                                         onChange={async (e) => {
-                                            await this.setState({ selected_dealership: e });
+                                            await this.setState({ selected_dealership: e, todayShowHide: "Show", tomorrowShowHide: "Show", dayAfterTomrorowShowHide: "Show" });
                                             this.getCount()
                                         }}
                                     />
@@ -144,9 +158,24 @@ class Justin extends React.Component {
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td><p className="text-white">{this.state.todayCount}</p></td>
-                                                <td><p className="text-white">{this.state.tomorrowCount}</p></td>
-                                                <td><p className="text-white">{this.state.dayAfterTomorrowCount}</p></td>
+                                                <td>
+                                                    <p className="text-white">{this.state.todayCount}</p>
+                                                    <Button onClick={(e) => {
+                                                        this.state.todayShowHide === "Show" ? this.setState({ todayShowHide: "Hide" }) : this.setState({ todayShowHide: "Show" })
+                                                    }}>{this.state.todayShowHide}</Button>
+                                                </td>
+                                                <td>
+                                                    <p className="text-white">{this.state.tomorrowCount}</p>
+                                                    <Button onClick={(e) => {
+                                                        this.state.tomorrowShowHide === "Show" ? this.setState({ tomorrowShowHide: "Hide" }) : this.setState({ tomorrowShowHide: "Show" })
+                                                    }}>{this.state.tomorrowShowHide}</Button>
+                                                </td>
+                                                <td>
+                                                    <p className="text-white">{this.state.dayAfterTomorrowCount}</p>
+                                                    <Button onClick={(e) => {
+                                                        this.state.dayAfterTomrorowShowHide === "Show" ? this.setState({ dayAfterTomrorowShowHide: "Hide" }) : this.setState({ dayAfterTomrorowShowHide: "Show" })
+                                                    }}>{this.state.dayAfterTomrorowShowHide}</Button>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </Table>
@@ -154,6 +183,44 @@ class Justin extends React.Component {
                             </Card>
                         </Col>
                     </Row>
+                    <Row hidden={this.state.selected_dealership === null || (this.state.todayShowHide === "Show" && this.state.tomorrowShowHide === "Show" && this.state.dayAfterTomrorowShowHide === "Show")}>
+                        <Col className="ml-auto mr-auto text-center" md="8">
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <CardBody>
+                                    <Row>
+                                        <Col md="4" hidden={this.state.todayShowHide === "Show"}>
+                                            <h3 className="text-white">Appts Scheduled for Today</h3>
+                                            {this.state.todayAppts.map((a, i) => {
+                                                return (
+                                                    <Card key={i} >
+                                                        <p style={{ whiteSpace: "pre-wrap" }} >{a.internal_msg}</p>
+                                                    </Card>)
+                                            })}
+                                        </Col>
+                                        <Col md="4" hidden={this.state.tomorrowShowHide === "Show"}>
+                                            <h3 className="text-white">Appts Scheduled for Tomorrow</h3>
+                                            {this.state.tomorrowAppts.map((a, i) => {
+                                                return (
+                                                    <Card key={i} >
+                                                        <p style={{ whiteSpace: "pre-wrap" }} >{a.internal_msg}</p>
+                                                    </Card>)
+                                            })}
+                                        </Col>
+                                        <Col md="4" hidden={this.state.dayAfterTomrorowShowHide === "Show"}>
+                                            <h3 className="text-white">Appts Scheduled for Day After Tomorrow</h3>
+                                            {this.state.dayAfterTomorrowAppts.map((a, i) => {
+                                                return (
+                                                    <Card key={i} >
+                                                        <p style={{ whiteSpace: "pre-wrap" }} >{a.internal_msg}</p>
+                                                    </Card>)
+                                            })}
+                                        </Col>
+                                    </Row>
+                                </CardBody>
+                            </Card></Col>
+
+                    </Row>
+
                 </Container>
             </div>
         );
