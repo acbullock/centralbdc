@@ -62,7 +62,7 @@ class Justin extends React.Component {
         this._isMounted = false
     }
     async getCount() {
-        this._isMounted && this.setState({ loading: true })
+        this._isMounted && await this.setState({ loading: true, todayAppts: [], tomorrowAppts: [], dayAfterTomorrowAppts: [] })
         let dealer_appts = await this.props.mongo.find("all_appointments", { dealership_department: "Service", "dealership.value": this.state.selected_dealership.value })
         let agents = await this.props.mongo.find("agents", { department: "service" })
         for (let a in agents) {
