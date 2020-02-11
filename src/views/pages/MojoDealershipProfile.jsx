@@ -30,6 +30,7 @@ class MojoDealershipProfile extends React.Component {
             addHidden: true,
             editHidden: true,
             // add values
+            addMojoActive: false,
             addDealerName: "",
             addDealerAddress: "",
             regMondayOpen: null,
@@ -106,6 +107,7 @@ class MojoDealershipProfile extends React.Component {
             addDocumentaionFees: "",
             addOtherFees: "",
             //edit values
+            editMojoActive: false,
             editDealerName: "",
             editDealerAddress: "",
             regMondayOpen: null,
@@ -183,6 +185,7 @@ class MojoDealershipProfile extends React.Component {
             editDocumentaionFees: "",
             editOtherFees: "",
             //tooltips
+            addMojoActiveTooltip: false,
             addDealerNameTooltip: false,
             addDealerAddressTooltip: false,
             addDealerPhoneTooltip: false,
@@ -205,7 +208,6 @@ class MojoDealershipProfile extends React.Component {
             addRegistrationFeesTooltip: false,
             addDocumentationFeesTooltip: false,
             addOtherFeesTooltip: false,
-            addDealerNameTooltip: false,
 
             //error texts
             addErrorText: "",
@@ -243,6 +245,7 @@ class MojoDealershipProfile extends React.Component {
         e.preventDefault();
         this.setState({ addErrorText: "" })
         let newDealerProfile = {
+            mojoActive: this.state.addMojoActive,
             dealershipName: this.props.utils.toTitleCase(this.state.addDealerName),
             dealershipAddress: this.state.addDealerAddress,
             normalHours: {
@@ -379,6 +382,7 @@ class MojoDealershipProfile extends React.Component {
         e.preventDefault();
         this.setState({ editErrorText: "" })
         let updateDealerProfile = {
+            mojoActive: this.state.editMojoActive,
             dealershipName: this.props.utils.toTitleCase(this.state.editDealerName),
             dealershipAddress: this.state.editDealerAddress,
             normalHours: {
@@ -519,6 +523,7 @@ class MojoDealershipProfile extends React.Component {
     clearAddValues() {
         this._isMounted && this.setState({
             addErrorText: "",
+            addMojoActive: false,
             addDealerName: "",
             addDealerAddress: "",
             regMondayOpen: null,
@@ -599,6 +604,7 @@ class MojoDealershipProfile extends React.Component {
     }
     clearEditValues() {
         this._isMounted && this.setState({
+            editMojoActive: false,
             editDealerName: "",
             editDealerAddress: "",
             regMondayOpen: null,
@@ -681,6 +687,7 @@ class MojoDealershipProfile extends React.Component {
     async populateEditFormValues() {
         let profile = this.state.profiles.find((p) => p._id === this.state.selected_profile.value)
         this._isMounted && await this.setState({
+            editMojoActive: profile.mojoActive,
             editDealerName: profile.dealershipName,
             editDealerAddress: profile.dealershipAddress,
             editMondayOpen: (profile.normalHours.monday.open === null || profile.normalHours.monday.closed) ? null : new Date(new Date().setHours(profile.normalHours.monday.open / 60, profile.normalHours.monday.open % 60, 0, 0)),
@@ -851,6 +858,15 @@ class MojoDealershipProfile extends React.Component {
                                     <Row style={{ justifyContent: 'center' }}>
                                         <Col md="10" >
                                             <Form>
+                                                <FormGroup>
+                                                    <Tooltip placement="auto" isOpen={this.state.addMojoActiveTooltip} target="mojoActiveTooltip" toggle={() => this.toggleTooltip("addMojoActiveTooltip")}>Specify whether to share this Dealer Profile with MOJO for AI Chat purposes</Tooltip>
+                                                    <p id="mojoActiveTooltip" style={{ margin: "20px" }} className="text-white"><Input
+                                                        type="checkbox"
+                                                        checked={this.state.addMojoActive}
+                                                        onClick={() => { this.setState({ addMojoActive: !this.state.addMojoActive }) }}
+                                                    />MOJO Active</p>
+                                                </FormGroup>
+                                                <hr style={{ borderBottom: "1px solid white" }} />
                                                 <FormGroup>
                                                     <p id="dealerNameTooltip" className="text-white">Dealership Name
                                                     <Tooltip placement="auto" isOpen={this.state.addDealerNameTooltip} target="dealerNameTooltip" toggle={() => this.toggleTooltip("addDealerNameTooltip")}>Provide customer with personalized information about the store that the vehicle’s located at</Tooltip>
@@ -1585,6 +1601,14 @@ class MojoDealershipProfile extends React.Component {
                                         <Col md="10" >
                                             <h3 className="text-white" >Edit Dealership</h3>
                                             <Form>
+                                                <FormGroup>
+                                                    <p style={{ margin: "20px" }} className="text-white"><Input
+                                                        type="checkbox"
+                                                        checked={this.state.editMojoActive}
+                                                        onClick={() => { this.setState({ editMojoActive: !this.state.editMojoActive }) }}
+                                                    />MOJO Active</p>
+                                                </FormGroup>
+                                                <hr style={{ borderBottom: "1px solid white" }} />
                                                 <FormGroup>
                                                     <p className="text-white">Dealership Name</p>
                                                     <Input
