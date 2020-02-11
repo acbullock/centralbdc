@@ -481,26 +481,15 @@ class Dashboard extends React.Component {
   }
   async getMtdTop5() {
     this._isMounted && this.setState({ loading: true, mtdloadnew: true })
+    //will need to get rid of this when appts are no longer a part of agent record
     let allAgents = this.state.agents;
     let allApps = []
     let apps = []
+    let totalApps = this._isMounted && await this.props.mongo.find("all_appointments", { dealership_department: { "$ne": "Service" }, verified: { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)) } })
     for (let a in allAgents) {
       apps = allAgents[a].appointments;
-      allApps = this._isMounted && await this.props.mongo.find("all_appointments", { agent_id: allAgents[a]._id })
-      for (let app in apps) {
-        if (this._isMounted && allApps.findIndex((appt) => {
-          return new Date(appt.verified).getTime() === new Date(apps[app].verified).getTime()
-        }) === -1) {
-          allApps.push(apps[app])
-        }
-      }
-      let first = new Date();
-      new Date(first.setDate(1));
-      first = new Date(first.setHours(0, 0, 0, 0))
-      allApps = this._isMounted && allApps.filter((a) => {
-        return new Date(a.verified).getTime() >= first.getTime() && a.dealership_department !== "Service"
-      })
-
+      allApps = totalApps.filter((aps) => { return aps.agent_id === allAgents[a]._id })
+      allApps = allApps.concat(apps)
       let nums = this.state.mtdTop5;
 
       let currApps = allApps
@@ -522,43 +511,6 @@ class Dashboard extends React.Component {
       })
       this._isMounted && this.setState({ mtdTop5: nums })
     }
-    // let appointments = await this.props.mongo.find("appointments");
-    // let allApps = [];
-    // for (let a in appointments) {
-    //   allApps = allApps.concat(appointments[a].appointments)
-    // }
-    // let first = new Date();
-    // first.setDate(1);
-    // first = new Date(first.setHours(0, 0, 0, 0))
-    // allApps = allApps.filter((a) => {
-    //   return new Date(a.verified).getTime() >= first.getTime() && a.dealership_department !== "Service"
-    // })
-    // let nums = [];
-    // for (let a in allAgents) {
-    //   let currApps = allApps.filter((app) => { return app.agent_id === allAgents[a]._id })
-    //   let user = {
-    //     name: allAgents[a].name,
-    //     count: currApps.length
-    //   }
-    //   // for (let b in currApps) {
-    //   //   if (currApps[b].verified != undefined) {
-    //   //     if (new Date(currApps[b].verified).getTime() >= first.getTime()) {
-    //   //       user.count++;
-    //   //     }
-    //   //   }
-    //   // }
-    //   nums.push(user)
-    // }
-    // this._isMounted && await nums.sort((a, b) => {
-    //   if (a.count > b.count) {
-    //     return -1;
-    //   }
-    //   if (a.count < b.count) {
-    //     return 1
-    //   }
-    //   return 0;
-    // })
-    // this._isMounted && this.setState({ loading: false, mtdtop5loading: false, mtdTop5: nums })
     this._isMounted && this.setState({ loading: false, mtdloadnew: false })
   }
   async getAppointmentData() {
