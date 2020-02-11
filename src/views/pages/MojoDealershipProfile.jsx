@@ -243,7 +243,7 @@ class MojoDealershipProfile extends React.Component {
     async addNewDealerProfile(e) {
 
         e.preventDefault();
-        this.setState({ addErrorText: "" })
+        this.setState({ addErrorText: "", loading: true })
         let newDealerProfile = {
             mojoActive: this.state.addMojoActive,
             dealershipName: this.props.utils.toTitleCase(this.state.addDealerName),
@@ -363,6 +363,7 @@ class MojoDealershipProfile extends React.Component {
         }
 
         if (!await this.validateProfile(newDealerProfile)) {
+            this.setState({ loading: false })
             return
         }
         let profiles = this.state.profiles
@@ -374,13 +375,13 @@ class MojoDealershipProfile extends React.Component {
         }
         this._isMounted && this.setState({ profiles })
         this.clearAddValues()
-
+        this.setState({ loading: false })
         console.log(newDealerProfile)
     }
     async updateNewDealerProfile(e) {
 
         e.preventDefault();
-        this.setState({ editErrorText: "" })
+        this.setState({ editErrorText: "", loading: true })
         let updateDealerProfile = {
             mojoActive: this.state.editMojoActive,
             dealershipName: this.props.utils.toTitleCase(this.state.editDealerName),
@@ -500,6 +501,7 @@ class MojoDealershipProfile extends React.Component {
         }
 
         if (!await this.validateProfile(updateDealerProfile)) {
+            this.setState({ loading: false })
             return
         }
         let profiles = this.state.profiles
@@ -511,7 +513,7 @@ class MojoDealershipProfile extends React.Component {
         }
         this._isMounted && this.setState({ profiles })
         this.clearEditValues()
-
+        this.setState({ loading: false })
         console.log(updateDealerProfile)
     }
     toggleTooltip(name) {
@@ -863,7 +865,7 @@ class MojoDealershipProfile extends React.Component {
                                                     <p id="mojoActiveTooltip" style={{ margin: "20px" }} className="text-white"><Input
                                                         type="checkbox"
                                                         checked={this.state.addMojoActive}
-                                                        onClick={() => { this.setState({ addMojoActive: !this.state.addMojoActive }) }}
+                                                        onChange={() => { this.setState({ addMojoActive: !this.state.addMojoActive }) }}
                                                     />MOJO Active</p>
                                                 </FormGroup>
                                                 <hr style={{ borderBottom: "1px solid white" }} />
@@ -1605,7 +1607,7 @@ class MojoDealershipProfile extends React.Component {
                                                     <p style={{ margin: "20px" }} className="text-white"><Input
                                                         type="checkbox"
                                                         checked={this.state.editMojoActive}
-                                                        onClick={() => { this.setState({ editMojoActive: !this.state.editMojoActive }) }}
+                                                        onChange={() => { this.setState({ editMojoActive: !this.state.editMojoActive }) }}
                                                     />MOJO Active</p>
                                                 </FormGroup>
                                                 <hr style={{ borderBottom: "1px solid white" }} />
