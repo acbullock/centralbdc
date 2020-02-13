@@ -79,7 +79,6 @@ class AppointmnetSearchNew extends React.Component {
 
     componentWillUnmount() {
         this._isMounted = false
-
     }
     async searchForAppt() {
         this.setState({ loading: true })
@@ -111,11 +110,16 @@ class AppointmnetSearchNew extends React.Component {
                 today_asst = today_asst.concat(this.state.agents[a].assistance)
             }
         }
-
+        let from = new Date(new Date(this.state.fromDate).setHours(0, 0, 0, 0))
+        let to = new Date(new Date(this.state.toDate).setHours(23, 59, 59, 999))
         //get phone apps
         if (this.state.search_phone.length === 10) {
-            phone_apps = await this.props.mongo.find("all_appointments", { customer_phone: this.state.search_phone });
-            console.log(phone_apps)
+            phone_apps = await this.props.mongo.find("all_appointments", {
+                customer_phone: this.state.search_phone, verified: {
+                    "$gte": new Date(from).toISOString(),
+                    "$lte": new Date(to).toISOString()
+                }
+            });
             let today_phone = phone_apps.concat(today_apps.filter((a) => {
                 return a.customer_phone.indexOf(this.state.search_phone) !== -1
             }))
@@ -142,8 +146,15 @@ class AppointmnetSearchNew extends React.Component {
         }
         else {
             total_apps = today_apps
-            total_asst = today_asst
-            let all_agent_apps = await this.props.mongo.find("all_appointments", { agent_id: this.state.search_agent.value });
+            total_asst = today_asst.slice().filter((asst) => {
+                return new Date(asst.created).getTime() >= new Date(from).getTime() && new Date(asst.created).getTime() <= new Date(to).getTime()
+            })
+            let all_agent_apps = await this.props.mongo.find("all_appointments", {
+                agent_id: this.state.search_agent.value, verified: {
+                    "$gte": new Date(from).toISOString(),
+                    "$lte": new Date(to).toISOString()
+                }
+            });
             for (let a in all_agent_apps) {
                 if (total_apps.findIndex((app) => { return app.verified === all_agent_apps[a].verified }) === -1) {
                     total_apps.push(all_agent_apps[a])
@@ -233,6 +244,26 @@ class AppointmnetSearchNew extends React.Component {
                                                     onChange={(e) => { this.onInputChange("search_agent", e) }}
                                                 />
                                             </FormGroup>
+                                            <FormGroup>
+                                                <legend style={{ color: "white" }}>From</legend>
+                                                <Card>
+                                                    <ReactDatetime
+                                                        timeFormat={false}
+                                                        value={this.state.fromDate}
+                                                        onChange={(e) => { this.setState({ fromDate: e }) }}
+                                                    />
+                                                </Card>
+                                            </FormGroup>
+                                            <FormGroup>
+                                                <legend style={{ color: "white" }}>To</legend>
+                                                <Card>
+                                                    <ReactDatetime
+                                                        timeFormat={false}
+                                                        value={this.state.toDate}
+                                                        onChange={(e) => { this.setState({ toDate: e }) }}
+                                                    />
+                                                </Card>
+                                            </FormGroup>
                                             <Button
 
                                                 color="warning"
@@ -245,7 +276,9 @@ class AppointmnetSearchNew extends React.Component {
                                                 disabled={
                                                     (this.state.search_agent.label.length < 1 &&
                                                         this.state.search_phone.length !== 10) ||
-                                                    (new Date(this.state.fromDate).getTime() > new Date(this.state.toDate).getTime())
+                                                    (new Date(this.state.fromDate).getTime() > new Date(this.state.toDate).getTime()) ||
+                                                    isNaN(new Date(this.state.fromDate).getTime()) ||
+                                                    isNaN(new Date(this.state.toDate).getTime())
 
                                                 }
                                                 color="neutral"
