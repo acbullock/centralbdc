@@ -183,7 +183,9 @@ class AgentProfile extends React.Component {
                                                     </Card>
                                                 </Col>
                                                 <Col md="12">
-                                                    <h3 style={{ textDecoration: "underline" }} className="text-white"><strong>Date Received: {new Date(f.received_at_text).toLocaleString()}</strong></h3>
+                                                    <p className="text-white">Lead Source: <strong>{f.rules.lead_source}</strong></p>
+                                                    <p className="text-white">Sub-Lead Source: <strong>{f.rules.sub_lead_source}</strong></p>
+                                                    <p className="text-white">Date Received: <strong>{new Date(f.received_at_text).toLocaleString()}</strong></p>
                                                 </Col>
                                             </Row>
 
