@@ -80,11 +80,13 @@ class ServiceDashboard extends React.Component {
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         if (user.userId == undefined) {
             this.props.history.push("/auth/login")
+            return;
         }
         this._isMounted && this.setState({ user })
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { "userId": user.userId })
         if (agent.department === "sales" && agent.account_type !== "admin") {
             this.props.history.push("/admin/dashboard")
+            return
         }
         else {
             let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true })
@@ -109,7 +111,7 @@ class ServiceDashboard extends React.Component {
             }
             this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
             this._isMounted && await this.getAppointmentData()
-            this._isMounted && await this.getChartData()
+            // this._isMounted && await this.getChartData()
             // this._isMounted && await this.getBarChartData()
             this._isMounted && await this.getCountData()
             this._isMounted && await this.renderCount()
@@ -434,7 +436,8 @@ class ServiceDashboard extends React.Component {
         for (let a in allAgents) {
             let user = {
                 name: allAgents[a].name,
-                count: 0
+                count: 0,
+                type: allAgents[a].account_type
             }
 
             for (let b in allAgents[a].appointments) {
@@ -466,45 +469,36 @@ class ServiceDashboard extends React.Component {
     }
     async getMtdTop5() {
         this._isMounted && this.setState({ loading: true, mtdtop5loading: true })
-        let allAgents = this.state.agents;
-        let appointments = this._isMounted && await this.props.mongo.find("appointments");
-        let allApps = [];
-        for (let a in appointments) {
-            allApps = allApps.concat(appointments[a].appointments)
-        }
-        let first = new Date();
-        first.setDate(1);
-        first = new Date(first.setHours(0, 0, 0, 0))
-        allApps = this._isMounted && allApps.filter((a) => {
-            return new Date(a.verified).getTime() >= first.getTime()
+        let allAgents = this.state.agents.slice()
+        let allApps = this._isMounted && await this.props.mongo.find("all_appointments", {
+            dealership_department: "Service", verified: {
+                "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
+            }
         })
-        let nums = [];
+
+        let nums = []
         for (let a in allAgents) {
-            let currApps = this._isMounted && allApps.filter((app) => { return app.agent_id === allAgents[a]._id })
+            allApps = allApps.concat(allAgents[a].appointments)
+
+            let agentApps = allApps.slice().filter((ap) => {
+                return ap.agent_id === allAgents[a]._id
+            })
             let user = {
                 name: allAgents[a].name,
-                count: currApps.length
+                count: agentApps.length,
+                type: allAgents[a].account_type
             }
-            // for (let b in currApps) {
-            //   if (currApps[b].verified != undefined) {
-            //     if (new Date(currApps[b].verified).getTime() >= first.getTime()) {
-            //       user.count++;
-            //     }
-            //   }
-            // }
+
             nums.push(user)
         }
-        this._isMounted && await nums.sort((a, b) => {
-            if (a.count > b.count) {
-                return -1;
-            }
-            if (a.count < b.count) {
-                return 1
-            }
-            return 0;
+        nums.sort((a, b) => {
+            if (a.count > b.count) return -1;
+            if (a.count < b.count) return 1;
+            return 0
         })
         this._isMounted && this.setState({ loading: false, mtdtop5loading: false, mtdTop5: nums })
     }
+
     async getAppointmentData() {
         this._isMounted && this.setState({ loading: true })
         let agents;
@@ -517,7 +511,6 @@ class ServiceDashboard extends React.Component {
             // agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
             agents = this.state.agent
         }
-        // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
         if (this.state.isAdmin === true) {
             let appointments = []
             this._isMounted && await agents.map((agent) => {
@@ -861,7 +854,7 @@ class ServiceDashboard extends React.Component {
                                         <tbody>
                                             {
                                                 this._isMounted && this.state.top5.map((agent, index) => {
-                                                    if (index > 9) return null;
+                                                    if (index > 9 || agent.type === "admin") return null;
                                                     return (
                                                         <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
                                                             <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
@@ -895,7 +888,7 @@ class ServiceDashboard extends React.Component {
 
                                             {
                                                 this._isMounted && this.state.mtdTop5.map((agent, index) => {
-                                                    if (index > 9) return null;
+                                                    if (index > 9 || agent.type === "admin") return null;
                                                     return (
                                                         <tr key={index} className="text-center" >
                                                             <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
