@@ -80,6 +80,7 @@ import PaymentCalculator from "./views/pages/PaymentCalculator.jsx"
 // import Lock from "./views/pages/Lock.jsx";
 import MojoDealershipProfile from "./views/pages/MojoDealershipProfile.jsx"
 import Justin from "./views/pages/Justin.jsx"
+import TeamStandings from "./views/pages/TeamStandings"
 
 const routes = [
   {
@@ -109,6 +110,13 @@ const routes = [
         rtlName: "لوحة القيادة",
         icon: "tim-icons icon-chart-pie-36",
         component: Dashboard,
+        layout: "/admin"
+      },
+      {
+        path: "/team_standings",
+        name: "Team Standings",
+        icon: "tim-icons icon-chart-bar-32",
+        component: TeamStandings,
         layout: "/admin"
       },
       {

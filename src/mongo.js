@@ -76,9 +76,15 @@ async function handleLogout(client) {
     return auth;
 }
 
-async function find(collection, query) {
+async function find(collection, query, options) {
     let req_query = query || {}
-    let arr = await axios.post(`${SERVER_URL}/find`, { "collection": collection, "query": req_query })
+    let req_options = options || {}
+    let arr = await axios.post(`${SERVER_URL}/find`, { "collection": collection, "query": req_query, options: req_options })
+    return arr.data
+}
+async function count(collection, query) {
+    let req_query = query || {}
+    let arr = await axios.post(`${SERVER_URL}/count`, { "collection": collection, "query": req_query })
     return arr.data
 }
 
@@ -139,6 +145,7 @@ export default {
     findOneAndUpdate,
     findOneAndDelete,
     insertOne,
+    count,
     sendGroupText,
     getToken,
     handlePasswordReset,
