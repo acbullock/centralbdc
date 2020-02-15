@@ -42,7 +42,7 @@ class DealershipPerformanceTiers extends React.Component {
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
 
         // let appointments = this._isMounted && await this.props.mongo.find("appointments");
-        let agents = this._isMounted && await this.props.mongo.find("agents");
+        let agents = this._isMounted && await this.props.mongo.find("agents", {}, {projection: {appointments: 1}});
         // this.setState({appointments})
         this._isMounted && this.setState({ agents })
         dealerships = this._isMounted && dealerships.filter((d) => { return d.isActive === true })
