@@ -106,10 +106,6 @@ class ServiceDashboard extends React.Component {
             }
             this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
             this._isMounted && await this.getAppointmentData()
-            // this._isMounted && await this.getChartData()
-            // this._isMounted && await this.getBarChartData()
-            this._isMounted && await this.getCountData()
-            this._isMounted && await this.renderCount()
             this._isMounted && this.getTop5()
             this._isMounted && this.getMtdTop5()
             this._isMounted && await this.isOld()
@@ -250,179 +246,6 @@ class ServiceDashboard extends React.Component {
         this._isMounted && this.setState({ options, data, loading: false })
 
     }
-    async getBarChartData() {
-        // let allAgents = []
-        this._isMounted && this.setState({ loading: true })
-        // let allAgents = this._isMounted && await this.state.agents.find().toArray()
-        let allAgents = this.state.agents
-        let dealerships = this._isMounted && await this.props.mongo.find("dealerships")
-        this._isMounted && dealerships.sort((a, b) => {
-            if (a.label > b.label) return 1;
-            if (a.label < b.label) return -1
-            return 0
-        })
-        const data = (canvas) => {
-            var ctx = canvas.getContext("2d");
-
-            var gradientStroke = ctx.createLinearGradient(500, 0, 100, 0);
-            gradientStroke.addColorStop(0, '#80b6f4');
-            gradientStroke.addColorStop(1, '#FFFFFF');
-
-            var gradientFill = ctx.createLinearGradient(0, 170, 0, 50);
-            gradientFill.addColorStop(0, "rgba(128, 182, 244, 0)");
-            gradientFill.addColorStop(1, "rgba(249, 99, 59, 0.40)");
-
-
-            let appointments = []
-            for (let agent in allAgents) {
-                for (let a in allAgents[agent].appointments) {
-                    appointments.push(allAgents[agent].appointments[a])
-                }
-            }
-            let approved_appointments = this._isMounted && appointments.filter((a) => {
-                let today = new Date()
-                today.setHours(0, 0, 0, 0)
-                return new Date(a.verified).getTime() >= today.getTime()
-
-            })
-            let dealerLabels = []
-            let dealerData = []
-            for (let d in dealerships) {
-                dealerLabels.push(dealerships[d].label)
-            }
-            for (let i in dealerLabels) {
-                let count = 0;
-                for (let a in approved_appointments) {
-
-                    if (approved_appointments[a].dealership.label == dealerLabels[i]) {
-                        count++;
-
-                    }
-                }
-                dealerData.push(count)
-
-            }
-            return {
-                labels: dealerLabels,
-                datasets: [{
-                    label: "Appointment Count\n",
-                    borderColor: "#f96332",
-                    pointBorderColor: "#FFF",
-                    pointBackgroundColor: "#f96332",
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 4,
-                    pointHoverBorderWidth: 1,
-                    pointRadius: 4,
-                    fill: true,
-                    backgroundColor: gradientFill,
-                    borderWidth: 2,
-                    data: dealerData
-                }]
-            }
-        };
-        const options = {
-            maintainAspectRatio: false,
-            legend: {
-                display: false
-            },
-            tooltips: {
-                bodySpacing: 4,
-                mode: "nearest",
-                intersect: 0,
-                position: "nearest",
-                xPadding: 10,
-                yPadding: 10,
-                caretPadding: 10,
-            },
-            responsive: 1,
-            scales: {
-                yAxes: [{
-                    display: 1,
-                    ticks: {
-                        display: true
-                    },
-                    gridLines: {
-                        zeroLineColor: "transparent",
-                        drawTicks: false,
-                        display: true,
-                        drawBorder: false
-                    }
-                }],
-                xAxes: [{
-                    display: 1,
-                    ticks: {
-                        display: false
-                    },
-                    gridLines: {
-                        zeroLineColor: "transparent",
-                        drawTicks: false,
-                        display: false,
-                        drawBorder: false
-                    }
-                }]
-            },
-            layout: {
-                padding: { left: 15, right: 15, top: 15, bottom: 15 }
-            }
-
-
-        };
-
-        this._isMounted && this.setState({ barOptions: options, barData: data, loading: false })
-
-    }
-    async getCountData() {
-        this.setState({ loading: true })
-        let agents = this.state.agents
-        let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
-        let todays_appts = []
-        let today = new Date()
-        today.setHours(0, 0, 0, 0)
-        for (let a in agents) {
-            for (let b in agents[a].appointments) {
-                if (new Date(agents[a].appointments[b].verified).getTime() > today.getTime()) {
-                    todays_appts.push(agents[a].appointments[b])
-                }
-            }
-        }
-        let todays_dealer_counts = []
-        let newObj = {}
-        for (let d in dealerships) {
-            newObj = { label: dealerships[d].label, count: 0 }
-            todays_dealer_counts[dealerships[d].label] = 0;
-            for (let a in todays_appts) {
-                if (todays_appts[a].dealership.label == dealerships[d].label) {
-                    newObj.count++;
-
-                }
-            }
-            todays_dealer_counts.push(newObj)
-        }
-        this._isMounted && this.setState({ todays_appts: todays_appts, todays_dealer_counts: todays_dealer_counts, loading: false })
-
-    }
-    async renderCount() {
-        let elements = []
-
-        let counts = this.state.todays_dealer_counts
-        this._isMounted && counts.sort((a, b) => {
-            if (a.count > b.count) return -1
-            if (a.count < b.count) return 1
-            return 0
-        })
-        for (let a in counts) {
-            if (counts[a].label != undefined && counts[a].count != undefined)
-                elements.push(<p>{counts[a].label}: {counts[a].count}</p>)
-        }
-
-        // for(let d in dealerships){
-        //   elements.push(<p key={dealerships[d]._id}>{dealerships[d].label}: {this.state.todays_dealer_counts[dealerships[d].label]}</p>)
-        // }
-        this.setState({ elements: elements })
-        // return elements
-
-
-    }
     async getTop5() {
         this._isMounted && this.setState({ loading: true })
         // let allAgents = this._isMounted && await this.state.agents.find().toArray()
@@ -469,9 +292,13 @@ class ServiceDashboard extends React.Component {
             dealership_department: "Service", verified: {
                 "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
             }
-        }, {projection: {
-            agent_id: 1
-        }})
+        }, {
+            projection: {
+                agent_id: 1,
+                "dealership.value": 1,
+
+            }
+        })
 
         let nums = []
         for (let a in allAgents) {
