@@ -77,19 +77,14 @@ class ServiceDashboard extends React.Component {
     async componentDidMount() {
         this._isMounted = true
         this._isMounted && this.setState({ loading: true })
-        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        if (user.userId == undefined) {
-            this.props.history.push("/auth/login")
-            return;
-        }
-        this._isMounted && this.setState({ user })
-        let agent = this._isMounted && await this.props.mongo.findOne("agents", { "userId": user.userId })
+        let agent = this.props.agent
         if (agent.department === "sales" && agent.account_type !== "admin") {
             this.props.history.push("/admin/dashboard")
+            this._isMounted = false;
             return
         }
         else {
-            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true })
+            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true }, { projection: { account_type: 1, department: 1, "name": 1, "appointments.verified": 1, "appointments.dealership_department": 1, "appointments.agent_id": 1 } })
             agents = this._isMounted && agents.map((a, i) => {
                 return Object.assign(a, { label: a.name, value: i })
             })
@@ -474,13 +469,15 @@ class ServiceDashboard extends React.Component {
             dealership_department: "Service", verified: {
                 "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
             }
-        })
+        }, {projection: {
+            agent_id: 1
+        }})
 
         let nums = []
         for (let a in allAgents) {
             allApps = allApps.concat(allAgents[a].appointments)
 
-            let agentApps = allApps.slice().filter((ap) => {
+            let agentApps = this._isMounted && allApps.slice().filter((ap) => {
                 return ap.agent_id === allAgents[a]._id
             })
             let user = {
@@ -491,7 +488,7 @@ class ServiceDashboard extends React.Component {
 
             nums.push(user)
         }
-        nums.sort((a, b) => {
+        this._isMounted && nums.sort((a, b) => {
             if (a.count > b.count) return -1;
             if (a.count < b.count) return 1;
             return 0
