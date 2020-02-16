@@ -54,14 +54,11 @@ class Login extends React.Component {
   }
   async componentDidMount() {
     document.body.classList.toggle("login-page");
-    let agent = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    console.log(agent)
   }
   onLogin(email, password){
     this.setState({loading: true})
     Mongo.handleLogin(email, password)
     .then((user) => {
-      
       this.setState({user, isLoggedIn: user.isLoggedIn, loading:false})
       this.props.history.push('/admin/dashboard')
     })

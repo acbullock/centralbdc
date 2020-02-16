@@ -38,7 +38,6 @@ class TeamStandings extends React.Component {
         this.refreshPage = this.refreshPage.bind(this)
     }
     async componentWillMount() {
-        console.log(new Date().toISOString())
         this._isMounted = true
         this._isMounted && this.setState({ loading: true })
         let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales", account_type: "agent" }, { projection: { name: 1, team: 1, "appointments.verified": 1 } })
@@ -56,7 +55,7 @@ class TeamStandings extends React.Component {
         let teams = {
         }
         for (let agent in agents) {
-            mtdApps = mtdApps.concat(agents[agent].appointments)
+            mtdApps = this._isMounted && mtdApps.concat(agents[agent].appointments)
             if (teams[agents[agent].team.label] === undefined) {
                 teams[agents[agent].team.label] = [agents[agent]]
             }

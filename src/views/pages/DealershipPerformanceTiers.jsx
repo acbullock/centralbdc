@@ -39,13 +39,12 @@ class DealershipPerformanceTiers extends React.Component {
     async componentWillMount() {
         this._isMounted = true
         this._isMounted && this.setState({ loading: true })
-        let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
+        let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true }, { projection: { goal: 1, label: 1, value: 1 } });
 
         // let appointments = this._isMounted && await this.props.mongo.find("appointments");
-        let agents = this._isMounted && await this.props.mongo.find("agents", {}, {projection: {appointments: 1}});
+        let agents = this._isMounted && await this.props.mongo.find("agents", {}, { projection: { "appointments.dealership.label": 1, "appointments.dealership.value": 1, "appointments.dealership_department": 1 } });
         // this.setState({appointments})
         this._isMounted && this.setState({ agents })
-        dealerships = this._isMounted && dealerships.filter((d) => { return d.isActive === true })
         this._isMounted && dealerships.sort((a, b) => {
             if (parseInt(a.goal) > parseInt(b.goal)) return -1;
             if (parseInt(a.goal) < parseInt(b.goal)) return 1;
