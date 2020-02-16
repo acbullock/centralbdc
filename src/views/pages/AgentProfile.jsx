@@ -47,7 +47,6 @@ class AgentProfile extends React.Component {
             imageUrl: "",
             editImageUrl: "",
             agent: null,
-            user: null,
             saveDisabled: false
         };
         this.imageToBuffer = this.imageToBuffer.bind(this)
@@ -57,8 +56,7 @@ class AgentProfile extends React.Component {
     async componentDidMount() {
         this._isMounted = true
         this._isMounted && await this.setState({ loading: true })
-        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
+        let agent = this.props.agent
         let imageUrl = "";
         if (agent.fileBinary !== undefined) {
             imageUrl = this._isMounted && await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
@@ -66,7 +64,7 @@ class AgentProfile extends React.Component {
 
         }
         console.log(imageUrl)
-        this._isMounted && await this.setState({ loading: false, user, agent, imageUrl, editImageUrl: imageUrl })
+        this._isMounted && await this.setState({ loading: false, agent, imageUrl, editImageUrl: imageUrl })
 
     }
     componentWillUnmount() {

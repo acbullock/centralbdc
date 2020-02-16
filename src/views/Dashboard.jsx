@@ -30,6 +30,7 @@ import {
   Table,
   Row,
   Col,
+  Tooltip
 } from "reactstrap";
 import Select from "react-select"
 class Dashboard extends React.Component {
@@ -37,6 +38,7 @@ class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      mtdTooltip: false,
       bigChartData: "data1",
       barData: {},
       user: {
@@ -56,79 +58,88 @@ class Dashboard extends React.Component {
       options: {},
       top5: [],
       mtdTop5: [],
-      mostRecent: {
-        name: "no one",
-        time: new Date(0), dealership: ""
-      },
-      isOld: true,
       todays_appts: [],
       todays_dealer_counts: [],
       elements: [],
       selected_agent: { label: "", value: "" },
       counts: {},
       mtdtop5loading: false,
-      mtdloadnew: false
+      mtdloadnew: false,
+      payment: 0
     };
     this.getAppointmentData = this.getAppointmentData.bind(this)
     this.getBreakDown = this.getBreakDown.bind(this)
     this.getMtdTop5 = this.getMtdTop5.bind(this)
     this.getProjection = this.getProjection.bind(this)
+    this.calculatePay = this.calculatePay.bind(this)
   }
   _isMounted = false;
   async componentDidMount() {
     this._isMounted = true
     this._isMounted && this.setState({ loading: true })
-    let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    if (user.userId == undefined) {
-      this.props.history.push("/auth/login")
-    }
-    this._isMounted && this.setState({ user })
-    let agent = this._isMounted && await this.props.mongo.findOne("agents", { "userId": user.userId })
+    let agent = this.props.agent
     if (agent.department === "service" && agent.account_type !== "admin") {
       this._isMounted = false;
       this.props.history.push("/admin/service_dashboard")
     }
     else {
-      let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true })
+      let agents = this._isMounted && await this.props.mongo.find("agents",
+        {
+          isActive: true,
+          department: "sales"
+        },
+        {
+          projection: {
+            personalRecord: 1,
+            inboundToday: 1,
+            outboundToday: 1,
+            callCountLastUpdated: 1,
+            "fileBinary": 1,
+            name: 1,
+            department: 1,
+            account_type: 1,
+            "appointments.verified": 1,
+            "appointments.dealership.label": 1
+          }
+        })
+
       agents = this._isMounted && agents.map((a, i) => {
         return Object.assign(a, { label: a.name, value: i })
       })
-      agents = this._isMounted && agents.filter((a) => {
-        return a.department === "sales" || a.account_type === "admin"
-      })
-      this._isMounted && agents.sort((a, b) => {
-        if (a.label > b.label) return 1;
-        if (a.label < b.label) return -1;
-        return 0;
-      })
+
+      // agents = this._isMounted && agents.filter((a) => {
+      //   return a.department === "sales" || a.account_type === "admin"
+      // })
+      // this._isMounted && agents.sort((a, b) => {
+      //   if (a.label > b.label) return 1;
+      //   if (a.label < b.label) return -1;
+      //   return 0;
+      // })
       if (agent.account_type !== "admin") {
-        let selected = this._isMounted && agents.filter((a) => {
-          return a._id == agent._id
-        })
-        selected = selected[0]
+        let index = this._isMounted && agents.findIndex((a) => { return a._id === agent._id })
+        let selected = agents[index]
         this._isMounted && this.getBreakDown(agent)
         this._isMounted && this.setState({ selected_agent: selected })
       }
       for (let a in agents) {
         let imageUrl = ""
         if (agents[a].fileBinary !== undefined) {
-          imageUrl = await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agents[a].fileBinary.data))
+          imageUrl = this._isMounted && await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agents[a].fileBinary.data))
         }
         agents[a].imageUrl = imageUrl;
       }
       if (agent.fileBinary !== undefined) {
-        let imageUrl = await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
+        let imageUrl = this._isMounted && await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
         agent.imageUrl = imageUrl
       }
       this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
       this._isMounted && await this.getAppointmentData()
-      this._isMounted && await this.getChartData()
+      // this._isMounted && await this.getChartData()
       // this._isMounted && await this.getBarChartData()
       this._isMounted && await this.getCountData()
       this._isMounted && await this.renderCount()
-      this._isMounted && this.getTop5()
-      this._isMounted && this.getMtdTop5()
-      this._isMounted && await this.isOld()
+      this._isMounted && await this.getTop5()
+      this._isMounted && await this.getMtdTop5()
       this._isMounted && this.setState({ loading: false })
     }
   }
@@ -137,21 +148,34 @@ class Dashboard extends React.Component {
     // window.stop()
   }
 
-
-  isOld() {
-    this._isMounted && this.setState({ loading: true })
-    let time = this.state.mostRecent.time
-    let twoHoursAgo = new Date(new Date().getTime() - (3600 * 1000 + 1800 * 1000))
-    if (new Date(time).getTime() < twoHoursAgo.getTime()) {
-
-      this._isMounted && this.setState({ isOld: true })
+  calculatePay(count) {
+    if (isNaN(parseInt(count))) {
+      this._isMounted && this.setState({ errorText: "Appointment Count must be a number" });
+      return
     }
-    else {
+    let payment = 2000 //base
+    if (count <= 400) {
 
-      this._isMounted && this.setState({ isOld: false })
+      payment += 0
     }
-    this._isMounted && this.setState({ loading: false })
+    else if (count > 400 && count < 600) {
+      payment += (4 * (count - 400))
+    }
+    else if (count >= 600 && count < 800) {
+      payment += (5 * (count - 400))
+    }
+    else if (count >= 800 && count < 1000) {
+      payment += (6 * (count - 400))
+    }
+    else if (count >= 1000 && count < 1200) {
+      payment += (7 * (count - 400))
+    }
+    else if (count >= 1200) {
+      payment += (9 * (count - 400))
+    }
+    this._isMounted && this.setState({ payment })
   }
+
   async getChartData() {
     // let allAgents = []
     this._isMounted && this.setState({ loading: true })
@@ -175,7 +199,7 @@ class Dashboard extends React.Component {
           appointments.push(allAgents[agent].appointments[a])
         }
       }
-      let approved_appointments = appointments.filter((a) => {
+      let approved_appointments = this._isMounted && appointments.filter((a) => {
 
         return a.verified != undefined
       })
@@ -272,8 +296,8 @@ class Dashboard extends React.Component {
     this._isMounted && this.setState({ loading: true })
     // let allAgents = this._isMounted && await this.state.agents.find().toArray()
     let allAgents = this.state.agents
-    let dealerships = await this.props.mongo.find("dealerships")
-    dealerships.sort((a, b) => {
+    let dealerships = this._isMounted && await this.props.mongo.find("dealerships", {}, { projection: { label: 1, value: 1 } })
+    this._isMounted && dealerships.sort((a, b) => {
       if (a.label > b.label) return 1;
       if (a.label < b.label) return -1
       return 0
@@ -296,7 +320,7 @@ class Dashboard extends React.Component {
           appointments.push(allAgents[agent].appointments[a])
         }
       }
-      let approved_appointments = appointments.filter((a) => {
+      let approved_appointments = this._isMounted && appointments.filter((a) => {
         let today = new Date()
         today.setHours(0, 0, 0, 0)
         return new Date(a.verified).getTime() >= today.getTime()
@@ -391,16 +415,12 @@ class Dashboard extends React.Component {
   async getCountData() {
     this.setState({ loading: true })
     let agents = this.state.agents
-    let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
+    let dealerships = this._isMounted && await this.props.mongo.find("dealerships", {}, { projection: { label: 1, value: 1 } });
     let todays_appts = []
     let today = new Date()
     today.setHours(0, 0, 0, 0)
     for (let a in agents) {
-      for (let b in agents[a].appointments) {
-        if (new Date(agents[a].appointments[b].verified).getTime() > today.getTime() && agents[a].appointments[b].dealership_department !== "Service") {
-          todays_appts.push(agents[a].appointments[b])
-        }
-      }
+      todays_appts = this._isMounted && todays_appts.concat(agents[a].appointments)
     }
     let todays_dealer_counts = []
     let newObj = {}
@@ -422,7 +442,7 @@ class Dashboard extends React.Component {
     let elements = []
 
     let counts = this.state.todays_dealer_counts
-    counts.sort((a, b) => {
+    this._isMounted && counts.sort((a, b) => {
       if (a.count > b.count) return -1
       if (a.count < b.count) return 1
       return 0
@@ -435,7 +455,7 @@ class Dashboard extends React.Component {
     // for(let d in dealerships){
     //   elements.push(<p key={dealerships[d]._id}>{dealerships[d].label}: {this.state.todays_dealer_counts[dealerships[d].label]}</p>)
     // }
-    this.setState({ elements: elements })
+    this._isMounted && this.setState({ elements: elements })
     // return elements
 
 
@@ -454,9 +474,6 @@ class Dashboard extends React.Component {
 
       for (let b in allAgents[a].appointments) {
         if (allAgents[a].appointments[b].verified != undefined) {
-          if (new Date(this.state.mostRecent.time).getTime() < new Date(allAgents[a].appointments[b].verified).getTime()) {
-            this._isMounted && this.setState({ mostRecent: { name: allAgents[a].name, time: allAgents[a].appointments[b].verified, dealership: allAgents[a].appointments[b].dealership } })
-          }
           let curr = new Date()
           curr.setHours(0, 0, 0, 0)
           if (new Date(allAgents[a].appointments[b].verified).getTime() >= curr.getTime() &&
@@ -485,19 +502,22 @@ class Dashboard extends React.Component {
     let allAgents = this.state.agents;
     let allApps = []
     let apps = []
-    let totalApps = this._isMounted && await this.props.mongo.find("all_appointments", { dealership_department: { "$ne": "Service" }, verified: { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)) } })
+    let totalApps = this._isMounted && await this.props.mongo.find("all_appointments", { dealership_department: { "$ne": "Service" }, verified: { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)) } }, { projection: { verified: 1, agent_id: 1 } })
     for (let a in allAgents) {
       apps = allAgents[a].appointments;
-      allApps = totalApps.filter((aps) => { return aps.agent_id === allAgents[a]._id })
-      allApps = allApps.concat(apps)
+      allApps = this._isMounted && totalApps.filter((aps) => { return aps.agent_id === allAgents[a]._id })
+      allApps = this._isMounted && allApps.concat(apps)
       let nums = this.state.mtdTop5;
-
+      let first = new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0))
       let currApps = allApps
       let user = {
         name: allAgents[a].name,
         count: currApps.length,
-        imageUrl: allAgents[a].imageUrl
+        imageUrl: allAgents[a].imageUrl,
+        mtdProj: Math.round(10 * 26 * (currApps.length / ((new Date().getTime() - first.getTime()) / (1000 * 60 * 60 * 24)))) / 10
       }
+      if (allAgents[a]._id === this.state.agent._id)
+        this.calculatePay(Math.round(user.mtdProj))
       nums.push(user)
 
       this._isMounted && await nums.sort((a, b) => {
@@ -525,7 +545,7 @@ class Dashboard extends React.Component {
       // agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
       agents = this.state.agent
     }
-    // let agents = await this.props.mongo.db.collection("agents").find({}).asArray();
+    // let agents = this._isMounted && await this.props.mongo.db.collection("agents").find({}).asArray();
     if (this.state.isAdmin === true) {
       let appointments = []
       this._isMounted && await agents.map((agent) => {
@@ -625,7 +645,7 @@ class Dashboard extends React.Component {
         continue;
       }
       let color = "red";
-      let count = appointments.filter((a) => {
+      let count = this._isMounted && appointments.filter((a) => {
         return new Date(a.verified).getTime() >= start.getTime() && new Date(a.verified).getTime() < end.getTime()
       })
       if (count.length == 2) {
@@ -639,7 +659,7 @@ class Dashboard extends React.Component {
       end.setHours(end.getHours() + 1, 0, 0, 0)
     }
     counts["total"] = { count: appointments.length, color: "black" }
-    this.setState({ counts })
+    this._isMounted && this.setState({ counts })
   }
   getProjection(curr) {
     let now = new Date();
@@ -693,7 +713,7 @@ class Dashboard extends React.Component {
                     options={this.state.agent.account_type == "admin" ? this.state.agents : this.state.agents.filter((a) => { return a.label === this.state.agent.name })}
                     value={this.state.agent.account_type == "admin" ? this.state.selected_agent : this.state.agents.filter((a) => { return a.label === this.state.agent.name })[0]}
                     onChange={(e) => {
-                      this.setState({ selected_agent: e })
+                      this._isMounted && this.setState({ selected_agent: e })
                       this.getBreakDown(e)
                     }}
                   />
@@ -780,7 +800,7 @@ class Dashboard extends React.Component {
                 <CardBody>
                   {
 
-                    this.state.top5.map((a, i) => {
+                    this._isMounted && this.state.top5.map((a, i) => {
                       let namecount = {
                         name: this.state.agent.name,
                         count: 0
@@ -798,6 +818,7 @@ class Dashboard extends React.Component {
                       return (
                         <div key={i}>
                           <h4 style={{ color: "white" }}>Appointment Count: <strong>{this.state.agent.appointments.length}</strong></h4>
+                          <h4 hidden={true} className="text-white">Daily Projection: <strong>{this.getProjection(this.state.agent.appointments.length)}</strong></h4>
                           <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{rank}</strong></h4>
                         </div>
                       );
@@ -818,8 +839,9 @@ class Dashboard extends React.Component {
 
                   {
 
-                    this.state.mtdTop5.map((a, i) => {
-                      let thisAgent = this.state.mtdTop5.filter((ag) => {
+                    this._isMounted && this.state.mtdTop5.map((a, i) => {
+                      let bonus = 0;
+                      let thisAgent = this._isMounted && this.state.mtdTop5.filter((ag) => {
                         return ag.name === this.state.agent.name
                       })
                       thisAgent = thisAgent[0];
@@ -836,9 +858,27 @@ class Dashboard extends React.Component {
                           break;
                         }
                       }
+                      if (parseInt(rank) === 1) {
+                        bonus += 2500
+                      }
+                      else if (parseInt(rank) === 2) {
+                        bonus += 2000
+                      }
+                      else if (parseInt(rank) === 3) {
+                        bonus += 1500
+                      }
+                      else if (parseInt(rank) === 4) {
+                        bonus += 1000
+                      }
+                      else if (parseInt(rank) === 5) {
+                        bonus += 500
+                      }
                       return (
                         <div key={i}>
                           <h4 style={{ color: "white" }}>Appointment Count: <strong>{thisAgent.count}</strong></h4>
+                          {/* <h4 className="text-white">MTD Projection: <strong>{thisAgent.mtdProj} = <span style={{ color: "green" }}>${this.state.payment + bonus}</span></strong></h4> */}
+                          <h4 hidden={true} id="mtdProjection" className="text-white">MTD Projection: <strong>{thisAgent.mtdProj}</strong></h4>
+                          {/* <Tooltip isOpen={this.state.mtdTooltip} target="mtdProjection" toggle={() => { this._isMounted && this.setState({ mtdTooltip: !this.state.mtdTooltip }) }}>This estimate is based on working 26 days in the month.</Tooltip>  */}
                           <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{rank}</strong></h4>
                         </div>
                       );
@@ -875,7 +915,7 @@ class Dashboard extends React.Component {
                     </thead>
                     <tbody>
                       {
-                        this.state.top5.map((agent, index) => {
+                        this._isMounted && this.state.top5.map((agent, index) => {
                           if (index > 9) return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
@@ -911,7 +951,7 @@ class Dashboard extends React.Component {
                     <tbody>
 
                       {
-                        this.state.mtdTop5.map((agent, index) => {
+                        this._isMounted && this.state.mtdTop5.map((agent, index) => {
                           if (index > 9) return null;
                           return (
                             <tr key={index} className="text-center" >
@@ -946,7 +986,7 @@ class Dashboard extends React.Component {
                     </thead>
                     <tbody>
                       {
-                        this.state.agents.map((agent, index) => {
+                        this._isMounted && this.state.agents.map((agent, index) => {
                           if (agent.appointments.length === 0 || agent.appointments.length < agent.personalRecord || agent.account_type !== "agent") return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
@@ -961,168 +1001,6 @@ class Dashboard extends React.Component {
                   </Table>
                 </CardBody>
               </Card>
-            </Col>
-          </Row>
-
-          <Row style={{ justifyContent: "center" }}>
-            <Col lg="12">
-
-              {/* <Card hidden={!this.state.isAdmin}>
-                <CardHeader>
-                  <div className="tools float-right">
-                  </div>
-                  <CardTitle tag="h3">Approved Appointments</CardTitle>
-                </CardHeader>
-                <CardBody >
-                  
-                  <Line
-                    data={this.state.data}
-                    options={this.state.options}
-                    height={100}
-
-                  />
-                </CardBody>
-              </Card> */}
-              {/* <Card hidden={!this.state.isAdmin}>
-                <CardHeader>
-                  <CardTitle tag="h3">Approved Appointments <strong>today</strong></CardTitle>
-                </CardHeader>
-                <CardBody >
-                 <Bar
-                    data={this.state.barData}
-                    width={100}
-                    height={50}
-                    options={this.state.barOptions}
-                  />
-                </CardBody>
-              </Card>
-               */}
-              <Card className="card-raised card-white" hidden={!this.state.isAdmin} style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
-                <CardHeader>
-
-                  {/* <div className="tools float-right">
-                    <Button
-                      onClick={(e) => { e.preventDefault(); this.getAppointmentData() }}
-                    >
-
-                      <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
-                    </Button>
-                  </div> */}
-                  {/* <div className="tools float-right">
-                    <UncontrolledDropdown>
-                      <DropdownToggle
-                        caret
-                        className="btn-icon"
-                        color="link"
-                        data-toggle="dropdown"
-                        type="button"
-                      >
-                        <i className="tim-icons icon-settings-gear-63" />
-                      </DropdownToggle>
-                      <DropdownMenu right>
-                        <DropdownItem
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Action
-                        </DropdownItem>
-                        <DropdownItem
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Another action
-                        </DropdownItem>
-                        <DropdownItem
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Something else
-                        </DropdownItem>
-                        <DropdownItem
-                          className="text-danger"
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Remove Data
-                        </DropdownItem>
-                      </DropdownMenu>
-                    </UncontrolledDropdown>
-                  </div> */}
-                  <CardTitle tag="h3" className="text-white">Created Appointments</CardTitle>
-                </CardHeader>
-                <CardBody>
-                  <Table>
-                    <thead className="text-primary">
-                      <tr>
-                        {/* <th className="text-center"></th> */}
-                        <th className="text-white" style={{ borderBottom: "1px white solid" }}>Agent Name</th>
-                        <th className="text-white" style={{ borderBottom: "1px white solid" }}>Today</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {
-                        this.state.appointments.map((app, index) => {
-                          return (
-                            <tr key={index}>
-                              {/* <td className="text-center">
-                              <div className="photo">
-                                <img
-                                  alt="..."
-                                  src={require("../assets/img/tania.jpg")}
-                                />
-                              </div>
-                              </td> */}
-                              <td key={index + "-name"} style={{ borderBottom: "1px white solid" }}><p className="text-white">{app.name}</p></td>
-                              <td key={index + "-day"} style={{ borderBottom: "1px white solid" }}><p className="text-white">{this.createdAppointmentsSince(app.appointments, 0)}</p></td>
-                            </tr>
-                          )
-                        })
-                      }
-                    </tbody>
-                  </Table>
-                </CardBody>
-              </Card>
-              {/* <Card>
-                <CardHeader>
-                  <div className="tools float-right">
-                    <Button
-                      onClick={(e) => { e.preventDefault(); this.getAppointmentData(); }}
-                    >
-
-                      <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02"} />
-                    </Button>
-                  </div>
-                  
-                  <CardTitle tag="h3">Pending Appointments</CardTitle>
-
-                </CardHeader>
-                <CardBody>
-                  <Table responsive>
-                    <thead className="text-primary">
-                      <tr>
-                        <th>Agent Name</th>
-                        <th>1 day</th>
-                        <th>7 days</th>
-                        <th>30 days</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {
-                        this.state.appointments.map((app, index) => {
-                          return (
-                            <tr key={index}>
-                              <td key={index + "-name"}>{app.name}</td>
-                              <td key={index + "-day"}>{this.pendingAppointmentsSince(app.appointments, 1)}</td>
-                              <td key={index + "-week"}>{this.pendingAppointmentsSince(app.appointments, 7)}</td>
-                              <td key={index + "-month"}>{this.pendingAppointmentsSince(app.appointments, 30)}</td>
-                            </tr>
-                          )
-                        })
-                      }
-                    </tbody>
-                  </Table>
-                </CardBody>
-              </Card> */}
             </Col>
           </Row>
           <Row style={{ justifyContent: "center" }}>
@@ -1142,7 +1020,7 @@ class Dashboard extends React.Component {
                     </thead>
                     <tbody>
                       {
-                        this.state.todays_dealer_counts.map((d, index) => {
+                        this._isMounted && this.state.todays_dealer_counts.map((d, index) => {
                           return (
                             <tr key={index} className="text-center">
                               <td key={index + "-name"}>{d.label}</td>

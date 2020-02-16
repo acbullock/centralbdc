@@ -42,7 +42,6 @@ class PaymentCalculator extends React.Component {
         super(props);
         this.state = {
             loading: false,
-            user: null,
             agent: null,
             appointmentCount: 0,
             standing: null,
@@ -56,10 +55,13 @@ class PaymentCalculator extends React.Component {
     async componentDidMount() {
         this._isMounted = true
         this._isMounted && await this.setState({ loading: true })
-        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
-
-        this._isMounted && await this.setState({ loading: false, user, agent })
+        let agent = this.props.agent
+        if(agent.department !== "sales" && agent.account_type !== "admin"){
+            this.props.history.push("/admin/dashboard");
+            this._isMounted = false
+            return;
+        }
+        this._isMounted && await this.setState({ loading: false, agent })
 
     }
     componentWillUnmount() {

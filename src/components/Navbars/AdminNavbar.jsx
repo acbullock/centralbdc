@@ -48,9 +48,6 @@ class AdminNavbar extends React.Component {
     };
     // console.log(props.mongo.mongodb)
   }
-  async componentWillMount() {
-
-  }
   async componentDidMount() {
     window.addEventListener("resize", this.updateColor);
     await this.getUserName()
