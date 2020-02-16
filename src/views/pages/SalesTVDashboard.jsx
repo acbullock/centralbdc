@@ -38,10 +38,8 @@ class SalesTVDashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            user: {},
             agent: {},
             agents: [],
-            dealerships: [],
             totalCallCountToday: 0,
             totalApptCountToday: 0,
             callSortedAgents: [],
@@ -56,7 +54,6 @@ class SalesTVDashboard extends React.Component {
         };
         this.getDepartmentCallCount = this.getDepartmentCallCount.bind(this)
         this.getDepartmentApptCount = this.getDepartmentApptCount.bind(this)
-        this.getApptsMTD = this.getApptsMTD.bind(this)
         this.getDepartmentCallCountMTD = this.getDepartmentCallCountMTD.bind(this)
         this.getMTDData = this.getMTDData.bind(this)
     }
@@ -68,24 +65,26 @@ class SalesTVDashboard extends React.Component {
             this.refreshPage()
         }, 900000);
         this._isMounted && this.setState({ loading: true })
-        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        if (user.userId == undefined) {
-            this.props.history.push("/auth/login");
-            return;
-        }
-
-        let agent = this._isMounted && await this.props.mongo.findOne("agents", { "userId": user.userId })
-        let agents = this._isMounted && await this.props.mongo.find("agents", { "department": "sales", isActive: true, account_type: "agent" })
-        agents = this._isMounted && agents.sort((a, b) => {
-            if (a.appointments.length > b.appointments.length) return -1;
-            if (a.appointments.length < b.appointments.length) return 1;
-            return 0
+        let agents = this._isMounted && await this.props.mongo.find("agents", {
+            department: "sales",
+            isActive: true,
+            account_type: "agent"
+        }, {
+            projection: {
+                name: 1,
+                inboundToday: 1,
+                outboundToday: 1,
+                inboundMTD: 1,
+                outboundMTD: 1,
+                "appointments.verified": 1,
+                callCountLastUpdated: 1,
+                personalRecord: 1
+            }
         })
-        this._isMounted && this.setState({ agent, user, agents });
+        this._isMounted && this.setState({ agent: this.props.agent, agents });
         this._isMounted && this.getMTDData();
         this._isMounted && this.getDepartmentCallCount()
         this._isMounted && this.getDepartmentApptCount()
-        this._isMounted && this.getApptsMTD()
         this._isMounted && this.getDepartmentCallCountMTD()
         this._isMounted && await this.setState({ loading: false })
 
@@ -131,12 +130,6 @@ class SalesTVDashboard extends React.Component {
             totalApptCountToday += agents[a].appointments.length
         }
         this._isMounted && await this.setState({ totalApptCountToday })
-    }
-    async getApptsMTD() {
-        this._isMounted && this.setState({ apptMtdLoading: true })
-        let apptMtdTotal = this._isMounted && await this.props.mongo.findOne("admin_dashboard", { label: "centralbdc_metrics" })
-        apptMtdTotal = apptMtdTotal.total_mtd;
-        this._isMounted && this.setState({ apptMtdLoading: false, apptMtdTotal })
     }
     refreshPage() {
         window.location.reload(false);
@@ -195,63 +188,60 @@ class SalesTVDashboard extends React.Component {
 
     }
     async getMTDData() {
-        this._isMounted && this.setState({ mtdDataLoading: true })
-        let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isSales: true, isActive: true })
-        this._isMounted && this.setState({ dealerships })
+        this._isMounted && this.setState({ mtdDataLoading: true, apptMtdLoading: false, apptMtdTotal: "Loading.." })
         let agents = this.state.agents
+        let first = new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0))
+        let sevenDaysAgo = new Date(new Date(new Date().setDate(new Date().getDate() - 7)))
+
+        let mtd_appts = await this.props.mongo.find("all_appointments", {
+            dealership_department: { "$ne": "Service" },
+            verified: { "$gte": first.toISOString() }
+        }, { projection: { _id: 1, agent_id: 1 } })
+
         this._isMounted && this.setState({ mtdDataLoading: false })
         for (let a in agents) {
-            this._isMounted && this.getAgentMTDData(agents[a])
+            mtd_appts = mtd_appts.concat(agents[a].appointments)
         }
+        this.setState({ apptMtdLoading: false, apptMtdTotal: mtd_appts.length })
+        let seven_day_apps = await this.props.mongo.find("all_appointments", {
+            dealership_department: { "$ne": "Service" },
+            verified: { "$gte": sevenDaysAgo.toISOString() }
+        }, { projection: { _id: 1, agent_id: 1 } })
+        for (let a in agents) {
+            this._isMounted && this.getAgentMTDData(agents[a], mtd_appts, seven_day_apps)
+        }
+        agents = this._isMounted && this.state.agents.slice().sort((a, b) => {
+            if (a.agent_MTD > b.agent_MTD) return -1;
+            if (a.agent_MTD < b.agent_MTD) return 1;
+            return 0;
+        })
+        this.setState({ agents })
     }
-    async getAgentMTDData(agent) {
-        let agents = this.state.agents
-        let agentIndex = agents.findIndex((a) => {
-            return a.email === agent.email
+    async getAgentMTDData(agent, mtd_apps, seven_day_apps) {
+        let first = new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0))
+        let agentAllApps = mtd_apps.filter((app) => {
+            return app.agent_id === agent._id
         })
-        let apps = agents[agentIndex].appointments.slice();
-        let all_apps = this._isMounted && await this.props.mongo.find("all_appointments", { agent_id: agent._id })
-        for (let a in all_apps) {
-            if (apps.findIndex((appoint => {
-                return new Date(appoint.verified).getTime() === new Date(all_apps[a].verified).getTime()
-            })) === -1) {
-                apps.push(all_apps[a])
-            }
-        }
-        apps = this._isMounted && apps.filter((a) => {
-            if (a.dealership_department === "Service") return false
-            return true
+        seven_day_apps = seven_day_apps.filter((app) => {
+            return app.agent_id === agent._id
         })
-        let first = new Date(new Date().setDate(1))
-        first = new Date(first.setHours(0, 0, 0, 0))
-        apps = this._isMounted && apps.filter((a) => {
-            return new Date(a.verified).getTime() >= first.getTime()
-        })
+        agent.agent_MTD = agentAllApps.length
 
-        let agent_MTD = this._isMounted && apps.filter((a) => {
-            // console.log(a.agent_id, agent._id)
-            return a.agent_id == agent._id
-        })
-        agent.agent_MTD = agent_MTD.length;
-        first = new Date().setDate(1)
-        first = new Date(first).setHours(1, 1, 1, 1)
-        // let daysElapsed = (new Date().getTime() - new Date(first).getTime()) / (1000 * 3600 * 24)
-        // agent.agent_MTD_Avg = Math.round(10 * agent.agent_MTD / daysElapsed) / 10;
 
-        // let sevenDaysAgo = new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0, 0, 0, 0)
-        // let sevenElapsed = (new Date().getTime() - new Date(sevenDaysAgo).getTime()) / (1000 * 3600 * 24)
+        let daysElapsed = (new Date().getTime() - new Date(first).getTime()) / (1000 * 3600 * 24)
+        agent.agent_MTD_Avg = Math.round(10 * agent.agent_MTD / daysElapsed) / 10;
 
-        // let sevenDaysTD = agent_MTD.filter((a) => {
-        //     return new Date(a.verified).getTime() >= new Date(sevenDaysAgo).getTime()
-        // })
-        // agent.seven_day_avg = Math.round(10 * sevenDaysTD.length / (sevenElapsed)) / 10;
 
+        let sevenDaysAgo = new Date(new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0, 0, 0, 0))
+        let sevenElapsed = (new Date().getTime() - new Date(sevenDaysAgo).getTime()) / (1000 * 3600 * 24)
+        let sevenDaysTD = seven_day_apps
+        agent.seven_day_avg = Math.round(10 * sevenDaysTD.length / (sevenElapsed)) / 10;
         //get mtd high
         let dayMs = 1000 * 60 * 60 * 24;
         let dict = {};
         let max = 0;
-        for (let a in agent_MTD) {
-            let verified = new Date(agent_MTD[a].verified)
+        for (let a in agentAllApps) {
+            let verified = new Date(agentAllApps[a].verified)
             let key = `${verified.getMonth()}_${verified.getDate()}_${verified.getFullYear()}`
             if (dict[key] === undefined) {
                 dict[key] = 0
@@ -261,63 +251,24 @@ class SalesTVDashboard extends React.Component {
                 max = dict[key]
             }
         }
-        let total = 0
-        let days = 0;
-        for (let i = 0; i < 7; i++) {
-            let currDay = new Date()
-            currDay = new Date(currDay.setDate(currDay.getDate() - i))
-            let key = `${currDay.getMonth()}_${currDay.getDate()}_${currDay.getFullYear()}`
-            if (dict[key] === undefined || dict[key] === 0) {
-                total += 0;
-            }
-            else {
-                total += dict[key]
-                days++;
-            }
-
-        }
-        agent.seven_day_avg = Math.round(10 * total / days) / 10
-        if (isNaN(agent.seven_day_avg)) {
-            agent.seven_day_avg = 0;
-        }
-        // console.log("\n", total, days, agent.name, total / days)
-        days = 0;
-        total = 0;
-        for (let i = 0; i < Object.keys(dict).length; i++) {
-            let currDay = new Date()
-            currDay = new Date(currDay.setDate(currDay.getDate() - i))
-            let key = `${currDay.getMonth()}_${currDay.getDate()}_${currDay.getFullYear()}`
-            if (dict[key] === undefined || dict[key] === 0) {
-                total += 0;
-            }
-            else {
-                total += dict[key]
-                days++;
-            }
-
-        }
-        agent.agent_MTD_Avg = Math.round(10 * total / days) / 10;
-        if (isNaN(agent.agent_MTD_Avg)) {
-            agent.agent_MTD_Avg = 0;
-        }
         agent.mtdHigh = max;
+
+
+
+        let { agents } = this.state
         for (let a in agents) {
             if (agents[a].name === agent.name) {
                 agents[a] = agent;
                 break;
             }
         }
-        this._isMounted && agents.sort((a, b) => {
-            return b.agent_MTD - a.agent_MTD
-        })
-        this._isMounted && this.setState({ agents })
         let todayAge = this._isMounted && agents.slice().sort((a, b) => {
             if (a.appointments.length > b.appointments.length) return -1;
             if (a.appointments.length < b.appointments.length) return 1;
             return 0;
         })
-        this._isMounted && this.setState({ todayAgents: todayAge })
-        // console.log(agents)
+        this._isMounted && this.setState({ todayAgents: todayAge, agents })
+
     }
     render() {
 
@@ -364,49 +315,11 @@ class SalesTVDashboard extends React.Component {
                                     <h3 style={{ color: "white" }}><strong>Total Appointments</strong></h3>
                                     <h3 style={{ color: "white" }}>Today: <strong>{this.state.totalApptCountToday}</strong></h3>
                                     <h3 style={{ color: "white" }}>MTD: <strong>{this.state.apptMtdTotal}</strong></h3>
-                                    {/* <h3 style={{ color: "white" }}>Close Ratio Today: <strong>{Math.round(1000 * this.state.totalApptCountToday / this.state.totalCallCountToday) / 10}%</strong></h3>
-                                    <h3 style={{ color: "white" }}>Close Ratio MTD: <strong>{Math.round(1000 * this.state.apptMtdTotal / this.state.totalCallCountMTD) / 10}%</strong></h3> */}
                                 </CardBody>
                             </Card>
                         </Col>
                     </Row>
-                    <Row style={{ justifyContent: "center", textAlign: "center" }}>
-                        <Col md="10">
-                            <Card className="card-raised card-white text-center" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
-                                <CardTitle>
-                                    <h3 style={{ color: "white" }}><strong>Calls Today</strong></h3>
-                                </CardTitle>
-                                <CardBody>
-                                    <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.callsMtdLoading} />
-                                    <Table striped hidden={this.state.callsMtdLoading}>
-                                        <thead>
-                                            <tr>
-                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>#</th>
-                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Name</th>
-                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Inbound</th>
-                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Outbound</th>
-                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Total</th>
-                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Last Updated</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {this._isMounted && this.state.callSortedAgents.map((a, i) => {
-                                                if (i > 9) return null
-                                                return (<tr key={i}>
-                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
-                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
-                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.inboundToday}</strong></p></td>
-                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.outboundToday}</strong></p></td>
-                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.inboundToday + a.outboundToday}</strong></p></td>
-                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
-                                                </tr>)
-                                            })}
-                                        </tbody>
-                                    </Table>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                    </Row>
+
                     <Row style={{ justifyContent: "center", textAlign: "center" }}>
                         <Col md="10">
                             <Card className="card-raised card-white text-center" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
@@ -446,6 +359,43 @@ class SalesTVDashboard extends React.Component {
                                 </CardBody>
                             </Card>
 
+                        </Col>
+                    </Row>
+                    <Row style={{ justifyContent: "center", textAlign: "center" }}>
+                        <Col md="10">
+                            <Card className="card-raised card-white text-center" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <CardTitle>
+                                    <h3 style={{ color: "white" }}><strong>Calls Today</strong></h3>
+                                </CardTitle>
+                                <CardBody>
+                                    <CardImg top width="100%" src={this.props.utils.loading} hidden={!this.state.callsMtdLoading} />
+                                    <Table striped hidden={this.state.callsMtdLoading}>
+                                        <thead>
+                                            <tr>
+                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>#</th>
+                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Name</th>
+                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Inbound</th>
+                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Outbound</th>
+                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Total</th>
+                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Last Updated</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this._isMounted && this.state.callSortedAgents.map((a, i) => {
+                                                if (i > 9) return null
+                                                return (<tr key={i}>
+                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
+                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
+                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.inboundToday}</strong></p></td>
+                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.outboundToday}</strong></p></td>
+                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.inboundToday + a.outboundToday}</strong></p></td>
+                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
+                                                </tr>)
+                                            })}
+                                        </tbody>
+                                    </Table>
+                                </CardBody>
+                            </Card>
                         </Col>
                     </Row>
                     <Row style={{ justifyContent: "center", textAlign: "center" }}>
@@ -514,6 +464,7 @@ class SalesTVDashboard extends React.Component {
 
                         </Col>
                     </Row>
+
                 </div>
             </>
         );

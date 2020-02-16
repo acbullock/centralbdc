@@ -59,7 +59,6 @@ class Dashboard extends React.Component {
       top5: [],
       mtdTop5: [],
       todays_appts: [],
-      todays_dealer_counts: [],
       elements: [],
       selected_agent: { label: "", value: "" },
       counts: {},
@@ -97,9 +96,7 @@ class Dashboard extends React.Component {
             "fileBinary": 1,
             name: 1,
             department: 1,
-            account_type: 1,
             "appointments.verified": 1,
-            "appointments.dealership.label": 1
           }
         })
 
@@ -137,7 +134,6 @@ class Dashboard extends React.Component {
       // this._isMounted && await this.getChartData()
       // this._isMounted && await this.getBarChartData()
       this._isMounted && await this.getCountData()
-      this._isMounted && await this.renderCount()
       this._isMounted && await this.getTop5()
       this._isMounted && await this.getMtdTop5()
       this._isMounted && this.setState({ loading: false })
@@ -415,49 +411,13 @@ class Dashboard extends React.Component {
   async getCountData() {
     this.setState({ loading: true })
     let agents = this.state.agents
-    let dealerships = this._isMounted && await this.props.mongo.find("dealerships", {}, { projection: { label: 1, value: 1 } });
     let todays_appts = []
     let today = new Date()
     today.setHours(0, 0, 0, 0)
     for (let a in agents) {
       todays_appts = this._isMounted && todays_appts.concat(agents[a].appointments)
     }
-    let todays_dealer_counts = []
-    let newObj = {}
-    for (let d in dealerships) {
-      newObj = { label: dealerships[d].label, count: 0 }
-      todays_dealer_counts[dealerships[d].label] = 0;
-      for (let a in todays_appts) {
-        if (todays_appts[a].dealership.label == dealerships[d].label) {
-          newObj.count++;
-
-        }
-      }
-      todays_dealer_counts.push(newObj)
-    }
-    this._isMounted && this.setState({ todays_appts: todays_appts, todays_dealer_counts: todays_dealer_counts, loading: false })
-
-  }
-  async renderCount() {
-    let elements = []
-
-    let counts = this.state.todays_dealer_counts
-    this._isMounted && counts.sort((a, b) => {
-      if (a.count > b.count) return -1
-      if (a.count < b.count) return 1
-      return 0
-    })
-    for (let a in counts) {
-      if (counts[a].label != undefined && counts[a].count != undefined)
-        elements.push(<p>{counts[a].label}: {counts[a].count}</p>)
-    }
-
-    // for(let d in dealerships){
-    //   elements.push(<p key={dealerships[d]._id}>{dealerships[d].label}: {this.state.todays_dealer_counts[dealerships[d].label]}</p>)
-    // }
-    this._isMounted && this.setState({ elements: elements })
-    // return elements
-
+    this._isMounted && this.setState({ todays_appts: todays_appts, loading: false })
 
   }
   async getTop5() {
@@ -502,7 +462,7 @@ class Dashboard extends React.Component {
     let allAgents = this.state.agents;
     let allApps = []
     let apps = []
-    let totalApps = this._isMounted && await this.props.mongo.find("all_appointments", { dealership_department: { "$ne": "Service" }, verified: { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)) } }, { projection: { verified: 1, agent_id: 1 } })
+    let totalApps = this._isMounted && await this.props.mongo.find("all_appointments", { dealership_department: { "$ne": "Service" }, verified: { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)) } }, { projection: {  agent_id: 1 } })
     for (let a in allAgents) {
       apps = allAgents[a].appointments;
       allApps = this._isMounted && totalApps.filter((aps) => { return aps.agent_id === allAgents[a]._id })
@@ -987,44 +947,12 @@ class Dashboard extends React.Component {
                     <tbody>
                       {
                         this._isMounted && this.state.agents.map((agent, index) => {
-                          if (agent.appointments.length === 0 || agent.appointments.length < agent.personalRecord || agent.account_type !== "agent") return null;
+                          if (agent.appointments.length === 0 || agent.appointments.length <= agent.personalRecord || agent.account_type !== "agent") return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
                               <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? 'https://dummyimage.com/50x50/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.appointments.length}</strong></p></td>
-                            </tr>
-                          )
-                        })
-                      }
-                    </tbody>
-                  </Table>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
-          <Row style={{ justifyContent: "center" }}>
-            <Col lg="12">
-              <Card className="card-raised card-white" hidden={!this.state.isAdmin || !["lexliveslife@gmail.com", "marc@centralbdc.com"].includes(this.state.agent.email)}>
-                <CardHeader>
-                  <CardTitle tag="h3">Today's Appointments <strong>total: {this.state.todays_appts.length}</strong></CardTitle>
-                </CardHeader>
-                <CardBody >
-                  <Table>
-                    <thead className="text-primary">
-                      <tr>
-                        {/* <th className="text-center"></th> */}
-                        <th className="text-center">Dealership Name</th>
-                        <th className="text-center">Appointment Count</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {
-                        this._isMounted && this.state.todays_dealer_counts.map((d, index) => {
-                          return (
-                            <tr key={index} className="text-center">
-                              <td key={index + "-name"}>{d.label}</td>
-                              <td key={index + "-count"}>{d.count}</td>
                             </tr>
                           )
                         })
