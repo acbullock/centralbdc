@@ -48,13 +48,12 @@ class Sidebar extends React.Component {
     });
     return initialState;
   };
-  async getCurrentUser(){
+  async getCurrentUser() {
     // console.log("why")
-    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
-    await this.setState({user})
+    await this.setState({ user: this.props.user })
     // let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});
-    let agent = await this.props.mongo.findOne("agents", {"userId": user.userId})
-    await this.setState({agent, isAdmin: agent.account_type === "admin"})
+    let agent = this.props.agent
+    await this.setState({ agent, isAdmin: agent.account_type === "admin" })
     // console.log(this.state.isAdmin)
   }
   // this verifies if any of the collapses should be default opened on a rerender of this component
@@ -97,22 +96,22 @@ class Sidebar extends React.Component {
               {prop.icon !== undefined ? (
                 <>
                   <i className={prop.icon} />
-                  <p style={{fontWeight: "bolder"}}><strong>
+                  <p style={{ fontWeight: "bolder" }}><strong>
                     {rtlActive ? prop.rtlName : prop.name}</strong>
                     <b className="caret" />
                   </p>
                 </>
               ) : (
-                <>
-                  <span className="sidebar-mini-icon">
-                    {rtlActive ? prop.rtlMini : prop.mini}
-                  </span>
-                  <span className="sidebar-normal">
-                    {rtlActive ? prop.rtlName : prop.name}
-                    <b className="caret" />
-                  </span>
-                </>
-              )}
+                  <>
+                    <span className="sidebar-mini-icon">
+                      {rtlActive ? prop.rtlMini : prop.mini}
+                    </span>
+                    <span className="sidebar-normal">
+                      {rtlActive ? prop.rtlName : prop.name}
+                      <b className="caret" />
+                    </span>
+                  </>
+                )}
             </a>
             <Collapse isOpen={this.state[prop.state]}>
               <ul className="nav">{this.createLinks(prop.views)}</ul>
@@ -126,18 +125,18 @@ class Sidebar extends React.Component {
             {prop.icon !== undefined ? (
               <>
                 <i className={prop.icon} />
-                <p style={{fontWeight: "bolder"}}><strong>{rtlActive ? prop.rtlName : prop.name}</strong></p>
+                <p style={{ fontWeight: "bolder" }}><strong>{rtlActive ? prop.rtlName : prop.name}</strong></p>
               </>
             ) : (
-              <>
-                <span className="sidebar-mini-icon">
-                  {rtlActive ? prop.rtlMini : prop.mini}
-                </span>
-                <span className="sidebar-normal">
-                  {rtlActive ? prop.rtlName : prop.name}
-                </span>
-              </>
-            )}
+                <>
+                  <span className="sidebar-mini-icon">
+                    {rtlActive ? prop.rtlMini : prop.mini}
+                  </span>
+                  <span className="sidebar-normal">
+                    {rtlActive ? prop.rtlName : prop.name}
+                  </span>
+                </>
+              )}
           </NavLink>
         </li>
       );
@@ -147,20 +146,7 @@ class Sidebar extends React.Component {
   activeRoute = routeName => {
     return this.props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
   };
-  async componentWillMount(){
-    
-    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    if(user.userId == undefined){
-      this.props.history.push("/auth/login")
-      return;
-    }
-  }
   async componentDidMount() {
-    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    if(user.userId == undefined){
-      this.props.history.push("/auth/login")
-      return
-    }
     // if you are using a Windows Machine, the scrollbars will have a Mac look
     if (navigator.platform.indexOf("Win") > -1) {
       ps = new PerfectScrollbar(this.refs.sidebar);
@@ -226,7 +212,6 @@ class Sidebar extends React.Component {
       }
     }
     return (
-      
       <div className="sidebar" data={activeColor}>
         <div className="sidebar-wrapper" ref="sidebar">
           {logoImg !== null || logoText !== null ? (

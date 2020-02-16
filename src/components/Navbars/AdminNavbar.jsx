@@ -44,15 +44,12 @@ class AdminNavbar extends React.Component {
       color: "navbar-transparent",
       mongo: props.mongo,
       email: "",
-      imageUrl:""
+      imageUrl: ""
     };
     // console.log(props.mongo.mongodb)
   }
   async componentWillMount() {
-    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    if (user.userId == undefined) {
-      this.props.history.push("/auth/login")
-    }
+
   }
   async componentDidMount() {
     window.addEventListener("resize", this.updateColor);
@@ -96,7 +93,7 @@ class AdminNavbar extends React.Component {
   };
   getUserName = async () => {
 
-    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
+    let user = this.props.user
     // console.log(user)
     // this.props.mongo.db.collection("agents").findOne({userId: user.userId})
     // .then((res)=>{
@@ -106,12 +103,12 @@ class AdminNavbar extends React.Component {
     // .catch((err)=>{
     //   this.props.history.push("/auth/login")
     // })
-    let agent = await this.props.mongo.findOne("agents", { "userId": user.userId })
+    let agent = this.props.agent
     if (!agent) {
       await this.props.history.push("/auth/login")
       return
     }
-    let imageUrl=""
+    let imageUrl = ""
     if (agent.fileBinary !== undefined) {
       imageUrl = await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
     }
@@ -194,7 +191,7 @@ class AdminNavbar extends React.Component {
                     {/* <div className="photo"> */}
                     <div>
                       {/* <img alt="..." src={require("../../assets/img/mike.jpg")} /> */}
-                      <h4>Logged in as: {this.state.name}  <img style={{display: this.state.imageUrl.length < 1?"none":""}} src={this.state.imageUrl} className="rounded-circle" height="50" width="50" /></h4>
+                      <h4>Logged in as: {this.state.name}  <img style={{ display: this.state.imageUrl.length < 1 ? "none" : "" }} src={this.state.imageUrl} className="rounded-circle" height="50" width="50" /></h4>
 
                     </div>
                     <b className="caret d-none d-lg-block d-xl-block" />
@@ -202,7 +199,7 @@ class AdminNavbar extends React.Component {
                   </DropdownToggle>
                   <DropdownMenu className="dropdown-navbar" right tag="ul">
                     <DropdownItem divider tag="li" />
-                    <NavLink tag="li" onClick={(e) => { e.preventDefault(); this.props.mongo.handleLogout(this.props.mongo.client).then((res) => { this.props.history.push("/auth/login") }); }}>
+                    <NavLink tag="li" onClick={(e) => { e.preventDefault(); this.props.mongo.handleLogout(this.props.mongo.client).then((res) => { this.setState({ agent: null, user: undefined }); this.props.history.push("/auth/login") }); }}>
                       <DropdownItem className="nav-item">Log out</DropdownItem>
                     </NavLink>
                   </DropdownMenu>

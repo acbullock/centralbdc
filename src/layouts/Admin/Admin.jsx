@@ -43,23 +43,28 @@ class Admin extends React.Component {
       mongo: props.mongo,
       utils: props.utils,
       isAdmin: false,
-      agent: {}
+      agent: null
     };
     this._isMounted = false
+    this.getAgent = this.getAgent.bind(this)
     // console.log(props.mongo.mongodb.proxy.service.requestClient.activeUserAuthInfo)
   }
-  async componentWillMount() {
-    let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    let agent = await this.props.mongo.findOne("agents", { "userId": user.userId })
-    if (user.userId == undefined || agent._id == undefined) {
+  getAgent = async () => {
+
+    let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
+    let agent = this._isMounted && await this.props.mongo.find("agents", { userId: user.userId, isActive: true }, { projection: { skills: 1, name: 1, email: 1, department: 1, account_type: 1, "appointments.verified": 1, fileBinary: 1 } })
+    agent = agent[0]
+    return { agent, user }
+  }
+  async componentDidMount() {
+    this._isMounted = true;
+    let agentUser = this._isMounted && await this.getAgent();
+    let user = agentUser.user
+    if (user.userId == undefined) {
+      this.state.agent = null
       this.props.history.push("/auth/login")
-      return;
     }
-    // let agents = await this.props.mongo.getCollection("agents")
-    // let agent = await agents.findOne({userId: user.userId})
-    
-    
-    this.setState({ agent: agent, isAdmin: agent.account_type === "admin" })
+    this._isMounted && this.setState({ agent: agentUser.agent, isAdmin: agentUser.agent.account_type === "admin", user: agentUser.user })
 
     if (navigator.platform.indexOf("Win") > -1) {
       document.documentElement.className += " perfect-scrollbar-on";
@@ -70,11 +75,7 @@ class Admin extends React.Component {
         ps = new PerfectScrollbar(tables[i]);
       }
     }
-    window.addEventListener("scroll", this.showNavbarButton);
-    if (agent.isActive === false) {
-      this.props.history.push("/auth/login")
-      return;
-    }
+    this._isMounted && window.addEventListener("scroll", this.showNavbarButton);
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -83,10 +84,7 @@ class Admin extends React.Component {
       document.documentElement.className += " perfect-scrollbar-off";
       document.documentElement.classList.remove("perfect-scrollbar-on");
     }
-    window.removeEventListener("scroll", this.showNavbarButton);
-  }
-  componentDidMount() {
-    this._isMounted = true;
+    this._isMounted && window.removeEventListener("scroll", this.showNavbarButton);
   }
   componentDidUpdate(e) {
     if (e.location.pathname !== e.history.location.pathname) {
@@ -102,13 +100,18 @@ class Admin extends React.Component {
     }
   }
   showNavbarButton = () => {
+    if (!this.refs.mainPanel) {
+      return
+    }
     if (
+      this._isMounted &&
       document.documentElement.scrollTop > 50 ||
       document.scrollingElement.scrollTop > 50 ||
       this.refs.mainPanel.scrollTop > 50
     ) {
       this._isMounted && this.setState({ opacity: 1 });
     } else if (
+      this._isMounted &&
       document.documentElement.scrollTop <= 50 ||
       document.scrollingElement.scrollTop <= 50 ||
       this.refs.mainPanel.scrollTop <= 50
@@ -118,18 +121,19 @@ class Admin extends React.Component {
   };
   getRoutes = routes => {
 
-    return routes.map((prop, key) => {
+    return this._isMounted && routes.map((prop, key) => {
       if (prop.collapse) {
         return this.getRoutes(prop.views);
       }
       if (prop.layout === "/admin") {
         let C = prop.component
+        if (!this.state.agent) return null
         return (
           <Route
             path={prop.layout + prop.path}
             // component={prop.component}
             render={(props) => <C {...props}
-              mongo={this.state.mongo} utils={this.state.utils} />}
+              mongo={this.state.mongo} utils={this.state.utils} agent={this.state.agent} />}
             key={key}
           />
         );
@@ -194,6 +198,7 @@ class Admin extends React.Component {
     document.documentElement.classList.remove("nav-open");
   };
   render() {
+    if (this.state.agent === null || this.state.user === undefined) return null
     return (
       <div className="wrapper">
         <div className="rna-container">
@@ -220,6 +225,8 @@ class Admin extends React.Component {
             text: "CentralBDC",
             imgSrc: logo
           }}
+          user={this.state.user}
+          agent={this.state.agent}
           closeSidebar={this.closeSidebar}
         />
         <div
@@ -234,6 +241,8 @@ class Admin extends React.Component {
             brandText={this.state.isAdmin ? "Admin Dashboard" : "Agent Dashboard"}
             sidebarOpened={this.state.sidebarOpened}
             toggleSidebar={this.toggleSidebar}
+            agent={this.state.agent}
+            user={this.state.user}
           />
           <Switch>{this.getRoutes(routes)}</Switch>
           {// we don't want the Footer to be rendered on full screen maps page
