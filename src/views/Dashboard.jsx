@@ -33,6 +33,7 @@ import {
   Tooltip
 } from "reactstrap";
 import Select from "react-select"
+import defaultLogo from "../assets/img/default-logo.png"
 class Dashboard extends React.Component {
 
   constructor(props) {
@@ -791,7 +792,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong>{this.state.mtdloadnew ? " (still loading)" : null}</p></CardTitle>
-                  <img src={(this.state.agent.imageUrl == undefined || this.state.agent.imageUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
+                  <img src={(this.state.agent.imageUrl == undefined || this.state.agent.imageUrl.length < 1) ? defaultLogo : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
                   {/* style={{ background: 'url("https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image")' }}  */}
                 </CardHeader>
                 <CardBody>
@@ -880,7 +881,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -916,7 +917,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" >
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -950,7 +951,7 @@ class Dashboard extends React.Component {
                           if (agent.appointments.length === 0 || agent.appointments.length <= agent.personalRecord || agent.account_type !== "agent") return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
-                              <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? 'https://dummyimage.com/50x50/1d67a8/ffffff&text=No+Image' : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.appointments.length}</strong></p></td>
                             </tr>

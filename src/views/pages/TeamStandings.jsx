@@ -139,9 +139,9 @@ class TeamStandings extends React.Component {
                                         #1: <strong>{this.state.sortedTeams[0].name}</strong>
                                     </h3>
                                     <hr style={{ border: "solid 1px white" }} />
-                                    <h4 className="text-white text-center">MTD Count: <strong>{this.state.sortedTeams[0].mtd}</strong></h4>
-                                    <h4 className="text-white text-center">Agents: <strong>{this.state.teams[this.state.sortedTeams[0].name].length}</strong></h4>
-                                    <h4 className="text-white text-center">MTD Average: <strong>{this.state.sortedTeams[0].mtdAvg}</strong></h4>
+                                    <h4 className="text-white text-center" style={{ margin: 0 }}>MTD Average: <strong>{this.state.sortedTeams[0].mtdAvg}</strong></h4>
+                                    <h4 className="text-white text-center" style={{ margin: 0 }}>MTD Count: <strong>{this.state.sortedTeams[0].mtd}</strong></h4>
+                                    <h4 className="text-white text-center" style={{ margin: 0 }}>Agents: <strong>{this.state.teams[this.state.sortedTeams[0].name].length}</strong></h4>
                                 </CardBody>
 
                             </Card>
@@ -184,9 +184,10 @@ class TeamStandings extends React.Component {
                                         #2: <strong>{this.state.sortedTeams[1].name}</strong>
                                     </h4>
                                     <hr style={{ border: "solid 1px white" }} />
-                                    <h5 className="text-white text-center">MTD Count: <strong>{this.state.sortedTeams[1].mtd}</strong></h5>
-                                    <h5 className="text-white text-center">Agents: <strong>{this.state.teams[this.state.sortedTeams[1].name].length}</strong></h5>
-                                    <h5 className="text-white text-center">MTD Average: <strong>{this.state.sortedTeams[1].mtdAvg}</strong></h5>
+                                    <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Average: <strong>{this.state.sortedTeams[1].mtdAvg}</strong></h5>
+                                    <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Count: <strong>{this.state.sortedTeams[1].mtd}</strong></h5>
+                                    <h5 className="text-white text-center" style={{ margin: 0 }}>Agents: <strong>{this.state.teams[this.state.sortedTeams[1].name].length}</strong></h5>
+
                                 </CardBody>
                             </Card>
                             <Modal className="modal-primary" hidden={this.state[this.state.sortedTeams[1].name] !== true && this.state[this.state.sortedTeams[1].name] !== false} isOpen={this.state[this.state.sortedTeams[1].name]} toggle={() => { this.setState({ [this.state[this.state.sortedTeams[1].name]]: !this.state[this.state.sortedTeams[1].name] }) }}>
@@ -235,9 +236,10 @@ class TeamStandings extends React.Component {
                                                 #{i + 1}: <strong>{team.name}</strong>
                                             </p>
                                             <hr style={{ border: "solid 1px white" }} />
-                                            <p className="text-white text-center">MTD Count: <strong>{team.mtd}</strong></p>
-                                            <p className="text-white text-center">Agents: <strong>{this.state.teams[team.name].length}</strong></p>
-                                            <p className="text-white text-center">MTD Average: <strong>{team.mtdAvg}</strong></p>
+                                            <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Average: <strong>{team.mtdAvg}</strong></h5>
+                                            <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Count: <strong>{team.mtd}</strong></h5>
+                                            <h5 className="text-white text-center" style={{ margin: 0 }}>Agents: <strong>{this.state.teams[team.name].length}</strong></h5>
+
                                         </CardBody>
                                         <Modal className="modal-primary" hidden={this.state[team.name] !== true && this.state[team.name] !== false} isOpen={this.state[team.name]} toggle={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
                                             <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
