@@ -64,15 +64,72 @@ class AdminDashboard extends React.Component {
             latestLoading: false,
             selected_dlr: { label: "", value: "" },
             dlrtop5loading: false,
-            dlrTop5: []
+            dlrTop5: [],
+            monthLabels: [],
+            monthData: [],
+            hourlyLabels: [],
+            hourlyData: []
         };
         this.sortLastAppts = this.sortLastAppts.bind(this);
         this.getTodayAppts = this.getTodayAppts.bind(this);
         this.getTop10 = this.getTop10.bind(this);
         this.getAgentTop5 = this.getAgentTop5.bind(this)
         this.getDealerTop5 = this.getDealerTop5.bind(this)
+        this.getMonthChart = this.getMonthChart.bind(this)
+        this.getHourlyApps = this.getHourlyApps.bind(this)
     }
     _isMounted = false;
+    async getMonthChart() {
+        let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+        let labels = []
+        let data = []
+        let todayApps = []
+        for (let a in this.state.agents) {
+            todayApps = this._isMounted && todayApps.concat(this.state.agents[a].appointments)
+        }
+        for (let i = 0; i < 12; i++) {
+            let curMonth = new Date(new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).setMonth(new Date().getMonth() - i))
+            let nextMonth = new Date(new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).setMonth(new Date().getMonth() - (i - 1)))
+            labels[11 - i] = months[curMonth.getMonth()]
+            let curApps = await this.props.mongo.count("all_appointments", {
+                "dealership_department": { "$ne": "Service" },
+                "verified": {
+                    "$gte": curMonth.toISOString(),
+                    "$lt": nextMonth.toISOString(),
+                }
+            })
+            data[11 - i] = curApps.count;
+            if (i < 1) {
+                console.log(curApps.count, todayApps.length, curMonth.toISOString(), nextMonth.toISOString())
+
+                data[5 - i] += todayApps.length
+            }
+
+        }
+        console.log(data, labels)
+
+        this.setState({ monthLabels: labels, monthData: data })
+        this.getHourlyApps(todayApps)
+    }
+    async getHourlyApps(todayApps) {
+        let labels = [];
+        let data = []
+        for (let i = 0; i < 12; i++) {
+            let startHour = new Date().getHours() - i
+            let endHour = new Date().getHours() - i + 1
+
+            let startDate = new Date(new Date().setHours(startHour, 0, 0, 0))
+            let endDate = new Date(new Date().setHours(endHour, 0, 0, 0, 0))
+            let curTotal = todayApps.filter((a) => {
+                return new Date(a.verified).getTime() >= startDate.getTime() &&
+                    new Date(a.verified).getTime() < endDate.getTime()
+            })
+            labels[11 - i] = startDate.toLocaleTimeString('en-US', { hour: '2-digit' }) + "-" + endDate.toLocaleTimeString('en-US', { hour: '2-digit' })
+            data[11 - i] = curTotal.length
+            console.log("start", startHour, "end", endHour)
+        }
+        this.setState({ hourlyLabels: labels, hourlyData: data })
+    }
     async componentDidMount() {
         this._isMounted = true;
         this._isMounted && this.setState({ loading: true });
@@ -95,6 +152,7 @@ class AdminDashboard extends React.Component {
             this._isMounted && this.getTodayAppts();
             this._isMounted && this.sortLastAppts();
             this._isMounted && this.getTop10();
+            this._isMounted && this.getMonthChart()
         }
         this._isMounted && this.setState({ loading: false });
     }
@@ -164,12 +222,17 @@ class AdminDashboard extends React.Component {
         let days = now.getDate()
         let metrics = this._isMounted && await this.props.mongo.findOne("admin_dashboard", { label: "centralbdc_metrics" }, { projection: { total_lifetime: 1 } })
         let lifetime_appts = this._isMounted && await this.props.mongo.count("all_appointments", {})
-        let month_appts = this._isMounted && await this.props.mongo.count("all_appointments", { verified: { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)) } })
+        let month_appts = this._isMounted && await this.props.mongo.count("all_appointments", {
+            "dealership_department": { "$ne": "Service" },
+            verified: {
+                "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
+            }
+        })
         let today_appts = 0;
         for (let a in this.state.agents) {
             today_appts += this.state.agents[a].appointments.length
         }
-        lifetime_appts = lifetime_appts.count + today_appts
+        lifetime_appts = lifetime_appts.count + today_appts + 397740
         month_appts = month_appts.count + today_appts
         let projected_today = Math.round(today_appts / elapsed * hrs)
         let projected_month = Math.round(month_appts / days * 26)
@@ -600,6 +663,61 @@ class AdminDashboard extends React.Component {
                         </Col>
 
                     </Row>
+                    <Row style={{ justifyContent: "center" }} className="text-center">
+                        <Col lg="8">
+                            <Card className="card-raised card-white blur" color="white" style={{ padding: "20px", background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <Card>
+                                    <Bar
+                                        data={
+                                            {
+                                                labels: this.state.hourlyLabels,
+                                                datasets: [{ label: "Total Sales Appts", backgroundColor: '#1d67a8', borderColor: '#1d67a8', data: this.state.hourlyData }]
+                                            }
+                                        }
+                                        options={
+                                            {
+                                                title: {
+                                                    display: true,
+                                                    text: "# of Sales Appointments Each Hour",
+                                                    fontSize: 24,
+                                                },
+
+                                            }
+                                        }
+                                    />
+                                </Card>
+                            </Card>
+                        </Col>
+                        <Col lg="8">
+                            <Card className="card-raised card-white blur" color="white" style={{ padding: "20px", background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+
+                                <Card className="card-raised card-white blur" color="white">
+
+                                    <Bar
+                                        data={
+                                            {
+                                                labels: this.state.monthLabels,
+                                                datasets: [{ label: "Total Sales Appts", backgroundColor: '#1d67a8', borderColor: '#1d67a8', data: this.state.monthData }]
+                                            }
+                                        }
+                                        options={
+                                            {
+                                                title: {
+                                                    display: true,
+                                                    text: "# of Sales Appointments Each Month",
+                                                    fontSize: 24,
+                                                },
+
+                                            }
+                                        }
+                                    />
+
+                                </Card>
+                            </Card>
+                        </Col>
+
+                    </Row>
+
                 </div>
             </>
         );
