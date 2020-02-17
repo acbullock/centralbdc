@@ -85,7 +85,7 @@ class AdminDashboard extends React.Component {
         let data = []
         let todayApps = []
         for (let a in this.state.agents) {
-            todayApps = this._isMounted && todayApps.concat(this.state.agents[a].appointments)
+            todayApps = this._isMounted && await todayApps.concat(this.state.agents[a].appointments)
         }
         for (let i = 0; i < 12; i++) {
             let curMonth = new Date(new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).setMonth(new Date().getMonth() - i))
@@ -100,13 +100,10 @@ class AdminDashboard extends React.Component {
             })
             data[11 - i] = curApps.count;
             if (i < 1) {
-                console.log(curApps.count, todayApps.length, curMonth.toISOString(), nextMonth.toISOString())
-
-                data[5 - i] += todayApps.length
+                data[11 - i] += todayApps.length
             }
 
         }
-        console.log(data, labels)
 
         this.setState({ monthLabels: labels, monthData: data })
         this.getHourlyApps(todayApps)
@@ -126,7 +123,6 @@ class AdminDashboard extends React.Component {
             })
             labels[11 - i] = startDate.toLocaleTimeString('en-US', { hour: '2-digit' }) + "-" + endDate.toLocaleTimeString('en-US', { hour: '2-digit' })
             data[11 - i] = curTotal.length
-            console.log("start", startHour, "end", endHour)
         }
         this.setState({ hourlyLabels: labels, hourlyData: data })
     }
@@ -148,7 +144,7 @@ class AdminDashboard extends React.Component {
                 if (a.name < b.name) return -1;
                 return 0;
             })
-            this._isMounted && this.setState({ dealerships, agents });
+            this._isMounted && await this.setState({ dealerships, agents });
             this._isMounted && this.getTodayAppts();
             this._isMounted && this.sortLastAppts();
             this._isMounted && this.getTop10();
