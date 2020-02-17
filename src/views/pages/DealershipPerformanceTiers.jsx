@@ -238,7 +238,7 @@ class DealershipPerformanceTiers extends React.Component {
                                         {this._isMounted && this.state.dealership3.map((d, i) => {
                                             return (
                                                 <tr key={i}>
-                                                    <td><p style={{ color: d.progressColor }}><strong>{d.progressValue}</strong></p></td>
+                                                    <td><p style={{ color: d.progressColor }}><strong>{d.progressValue}%</strong></p></td>
                                                     {/* <td ><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td> */}
                                                     <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>

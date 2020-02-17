@@ -90,6 +90,7 @@ class Dashboard extends React.Component {
         },
         {
           projection: {
+            account_type: 1,
             personalRecord: 1,
             inboundToday: 1,
             outboundToday: 1,
@@ -463,7 +464,7 @@ class Dashboard extends React.Component {
     let allAgents = this.state.agents;
     let allApps = []
     let apps = []
-    let totalApps = this._isMounted && await this.props.mongo.find("all_appointments", { dealership_department: { "$ne": "Service" }, verified: { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)) } }, { projection: {  agent_id: 1 } })
+    let totalApps = this._isMounted && await this.props.mongo.find("all_appointments", { dealership_department: { "$ne": "Service" }, verified: { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)) } }, { projection: { agent_id: 1 } })
     for (let a in allAgents) {
       apps = allAgents[a].appointments;
       allApps = this._isMounted && totalApps.filter((aps) => { return aps.agent_id === allAgents[a]._id })
@@ -756,7 +757,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
-                  <img src={(this.state.agent.imageUrl == undefined || this.state.agent.imageUrl.length < 1) ? 'https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image' : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
+                  <img src={(this.state.agent.imageUrl == undefined || this.state.agent.imageUrl.length < 1) ? defaultLogo : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
                 </CardHeader>
                 <CardBody>
                   {
@@ -948,7 +949,7 @@ class Dashboard extends React.Component {
                     <tbody>
                       {
                         this._isMounted && this.state.agents.map((agent, index) => {
-                          if (agent.appointments.length === 0 || agent.appointments.length <= agent.personalRecord || agent.account_type !== "agent") return null;
+                          if (agent.appointments.length === 0 || agent.appointments.length < agent.personalRecord || agent.account_type !== "agent") return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
                               <td style={{ borderBottom: "1px solid white" }}><img src={(agent.imageUrl == undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
