@@ -26,6 +26,10 @@ import gold from "../../assets/img/gold.png"
 import silver from "../../assets/img/silver.png"
 import bronze from "../../assets/img/bronze.png"
 import FailedTexts from "./FailedTexts";
+import deathRowLogo from "../../assets/img/deathrow.png"
+import newZealandLogo from "../../assets/img/newzealand.png"
+import dreamchaserLogo from "../../assets/img/dream-chasers.png"
+import defaultLogo from "../../assets/img/default-logo.png"
 class TeamStandings extends React.Component {
     constructor(props) {
         super(props)
@@ -136,7 +140,21 @@ class TeamStandings extends React.Component {
                                 <CardBody onClick={() => { this.setState({ [this.state.sortedTeams[0].name]: !this.state[this.state.sortedTeams[0].name] }) }}>
                                     <h3 className="text-white text-center" style={{ verticalAlign: "center" }}>
                                         <img src={gold} style={{ width: "50px" }} />
-                                        #1: <strong>{this.state.sortedTeams[0].name}</strong>
+                                        {"  #1:"} <strong>{this.state.sortedTeams[0].name}</strong>{"  "}
+                                        <img src={
+                                            (() => {
+                                                if (this.state.sortedTeams[0].name === "DeathRow") {
+                                                    return deathRowLogo
+                                                }
+                                                else if (this.state.sortedTeams[0].name === "New Zealand") {
+                                                    return newZealandLogo
+                                                }
+                                                else if (this.state.sortedTeams[0].name === "DreamChaser") {
+                                                    return dreamchaserLogo
+                                                }
+                                                else { return defaultLogo }
+                                            })()
+                                        } style={{ width: "50px" }} />
                                     </h3>
                                     <hr style={{ border: "solid 1px white" }} />
                                     <h4 className="text-white text-center" style={{ margin: 0 }}>MTD Average: <strong>{this.state.sortedTeams[0].mtdAvg}</strong></h4>
@@ -147,7 +165,21 @@ class TeamStandings extends React.Component {
                             </Card>
                             <Modal className="modal-primary" hidden={this.state[this.state.sortedTeams[0].name] !== true && this.state[this.state.sortedTeams[0].name] !== false} isOpen={this.state[this.state.sortedTeams[0].name]} toggle={() => { this.setState({ [this.state[this.state.sortedTeams[0].name]]: !this.state[this.state.sortedTeams[0].name] }) }}>
                                 <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [this.state.sortedTeams[0].name]: !this.state[this.state.sortedTeams[0].name] }) }}>
-                                    <strong>{this.state.sortedTeams[0].name}</strong>
+                                    <strong>{this.state.sortedTeams[0].name}</strong>{" "}
+                                    <img src={
+                                        (() => {
+                                            if (this.state.sortedTeams[0].name === "DeathRow") {
+                                                return deathRowLogo
+                                            }
+                                            else if (this.state.sortedTeams[0].name === "New Zealand") {
+                                                return newZealandLogo
+                                            }
+                                            else if (this.state.sortedTeams[0].name === "DreamChaser") {
+                                                return dreamchaserLogo
+                                            }
+                                            else { return defaultLogo }
+                                        })()
+                                    } style={{ height: "50px" }} />
                                 </ModalHeader>
                                 <ModalBody>
                                     <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
@@ -181,7 +213,21 @@ class TeamStandings extends React.Component {
                                 <CardBody onClick={() => { this.setState({ [this.state.sortedTeams[1].name]: !this.state[this.state.sortedTeams[1].name] }) }}>
                                     <h4 className="text-white text-center" style={{ verticalAlign: "center" }}>
                                         <img src={silver} style={{ width: "30px" }} />
-                                        #2: <strong>{this.state.sortedTeams[1].name}</strong>
+                                        {" "}#2: <strong>{this.state.sortedTeams[1].name}</strong>{" "}
+                                        <img src={
+                                            (() => {
+                                                if (this.state.sortedTeams[1].name === "DeathRow") {
+                                                    return deathRowLogo
+                                                }
+                                                else if (this.state.sortedTeams[1].name === "New Zealand") {
+                                                    return newZealandLogo
+                                                }
+                                                else if (this.state.sortedTeams[1].name === "DreamChaser") {
+                                                    return dreamchaserLogo
+                                                }
+                                                else { return defaultLogo }
+                                            })()
+                                        } style={{ width: "50px" }} />
                                     </h4>
                                     <hr style={{ border: "solid 1px white" }} />
                                     <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Average: <strong>{this.state.sortedTeams[1].mtdAvg}</strong></h5>
@@ -192,7 +238,21 @@ class TeamStandings extends React.Component {
                             </Card>
                             <Modal className="modal-primary" hidden={this.state[this.state.sortedTeams[1].name] !== true && this.state[this.state.sortedTeams[1].name] !== false} isOpen={this.state[this.state.sortedTeams[1].name]} toggle={() => { this.setState({ [this.state[this.state.sortedTeams[1].name]]: !this.state[this.state.sortedTeams[1].name] }) }}>
                                 <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [this.state.sortedTeams[1].name]: !this.state[this.state.sortedTeams[1].name] }) }}>
-                                    <strong>{this.state.sortedTeams[1].name}</strong>
+                                    <strong>{this.state.sortedTeams[1].name}</strong>{" "}
+                                    <img src={
+                                        (() => {
+                                            if (this.state.sortedTeams[1].name === "DeathRow") {
+                                                return deathRowLogo
+                                            }
+                                            else if (this.state.sortedTeams[1].name === "New Zealand") {
+                                                return newZealandLogo
+                                            }
+                                            else if (this.state.sortedTeams[1].name === "DreamChaser") {
+                                                return dreamchaserLogo
+                                            }
+                                            else { return defaultLogo }
+                                        })()
+                                    } style={{ height: "50px" }} />
                                 </ModalHeader>
                                 <ModalBody>
                                     <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
@@ -233,7 +293,21 @@ class TeamStandings extends React.Component {
                                         <CardBody onClick={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
                                             <p className="text-white text-center" style={{ verticalAlign: "center" }}>
                                                 <img hidden={i !== 2} src={bronze} style={{ width: "25px" }} />
-                                                #{i + 1}: <strong>{team.name}</strong>
+                                                {" "} #{i + 1}: <strong>{team.name}</strong>{" "}
+                                                <img src={
+                                                    (() => {
+                                                        if (team.name === "DeathRow") {
+                                                            return deathRowLogo
+                                                        }
+                                                        else if (team.name === "New Zealand") {
+                                                            return newZealandLogo
+                                                        }
+                                                        else if (team.name === "DreamChaser") {
+                                                            return dreamchaserLogo
+                                                        }
+                                                        else { return defaultLogo }
+                                                    })()
+                                                } style={{ height: "25px" }} />
                                             </p>
                                             <hr style={{ border: "solid 1px white" }} />
                                             <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Average: <strong>{team.mtdAvg}</strong></h5>
@@ -243,7 +317,21 @@ class TeamStandings extends React.Component {
                                         </CardBody>
                                         <Modal className="modal-primary" hidden={this.state[team.name] !== true && this.state[team.name] !== false} isOpen={this.state[team.name]} toggle={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
                                             <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
-                                                <strong>{team.name}</strong>
+                                                <strong>{team.name}</strong>{" "}
+                                                <img src={
+                                                    (() => {
+                                                        if (team.name === "DeathRow") {
+                                                            return deathRowLogo
+                                                        }
+                                                        else if (team.name === "New Zealand") {
+                                                            return newZealandLogo
+                                                        }
+                                                        else if (team.name === "DreamChaser") {
+                                                            return dreamchaserLogo
+                                                        }
+                                                        else { return defaultLogo }
+                                                    })()
+                                                } style={{ height: "50px" }} />
                                             </ModalHeader>
                                             <ModalBody>
                                                 <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
