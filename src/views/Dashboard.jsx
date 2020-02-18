@@ -597,6 +597,7 @@ class Dashboard extends React.Component {
                       else if (parseInt(rank) === 5) {
                         bonus = 500
                       }
+                      console.log(bonus)
                       return (
                         <div key={i}>
                           <h4 style={{ color: "white" }}>Appointment Count: <strong>{thisAgent.count}</strong></h4>

@@ -14,37 +14,9 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-// import VectorMap from "./views/maps/VectorMap.jsx";
-// import GoogleMaps from "./views/maps/GoogleMaps.jsx";
-// import FullScreenMap from "./views/maps/FullScreenMap.jsx";
-// import ReactTables from "./views/tables/ReactTables.jsx";
-// import RegularTables from "./views/tables/RegularTables.jsx";
-// import ExtendedTables from "./views/tables/ExtendedTables.jsx";
-// import Wizard from "./views/forms/Wizard.jsx";
-// import ValidationForms from "./views/forms/ValidationForms.jsx";
-// import ExtendedForms from "./views/forms/ExtendedForms.jsx";
-// import RegularForms from "./views/forms/RegularForms.jsx";
-// import Calendar from "./views/Calendar.jsx";
-// import Widgets from "./views/Widgets.jsx";
-// import Charts from "./views/Charts.jsx";
 import Dashboard from "./views/Dashboard.jsx";
-// import Buttons from "./views/components/Buttons.jsx";
-// import SweetAlert from "./views/components/SweetAlert.jsx";
-// import Notifications from "./views/components/Notifications.jsx";
-// import Grid from "./views/components/Grid.jsx";
-// import Typography from "./views/components/Typography.jsx";
-// import Panels from "./views/components/Panels.jsx";
-// import Icons from "./views/components/Icons.jsx";
-// import Pricing from "./views/pages/Pricing.jsx";
-import Register from "./views/pages/Register.jsx";
-// import Timeline from "./views/pages/Timeline.jsx";
-// import User from "./views/pages/User.jsx";
 import Login from "./views/pages/Login.jsx";
 import CreateAppointment from "./views/pages/CreateAppointment.jsx"
-// import Approve from "./views/pages/Approve.jsx"
-// import Rejected from "./views/pages/Rejected.jsx"
-import Dealerships from "./views/pages/Dealerships.jsx"
-import Users from "./views/pages/Users.jsx"
 import Sources from "./views/pages/Sources.jsx"
 import Scenarios from "./views/pages/Scenarios.jsx"
 import Teams from "./views/pages/Teams.jsx"
@@ -52,10 +24,8 @@ import Assistance from "./views/pages/Assistance.jsx"
 import ApproveAssistance from "./views/pages/ApproveAssistance.jsx"
 import RejectedAssistance from "./views/pages/RejectedAssistance.jsx"
 import AppointmentHistory from "./views/pages/AppointmentHistory.jsx"
-// import DealershipHistory from "./views/pages/DealershipHistory.jsx"
 import DealershipHistoryNew from "./views/pages/DealershipHistoryNew.jsx"
 import FailedTexts from "./views/pages/FailedTexts.jsx"
-// import AppointmentSearch from "./views/pages/AppointmentSearch.jsx"
 import AppointmentSearchNew from "./views/pages/AppointmentSearchNew.jsx"
 import DealershipManagement from "./views/pages/DealershipManagement.jsx"
 import UserManagement from "./views/pages/UserManagement.jsx"
@@ -70,14 +40,11 @@ import AdminReports from "./views/pages/AdminReports.jsx"
 import ServiceDashboard from "./views/ServiceDashboard.jsx"
 import ServiceTVDashboard from "./views/pages/ServicceTVDashboard.jsx"
 import SalesTVDashboard from "./views/pages/SalesTVDashboard.jsx"
-// import Recordings from "./views/pages/Recordings.jsx"
 import CustomerSearch from "./views/pages/CustomerSearch.jsx"
 import DealershipProfile from "./views/pages/DealershipProfile.jsx"
 import AgentProfile from "./views/pages/AgentProfile.jsx"
 import Leads from "./views/pages/Leads.jsx"
 import PaymentCalculator from "./views/pages/PaymentCalculator.jsx"
-// import Rtl from "./views/pages/Rtl.jsx";
-// import Lock from "./views/pages/Lock.jsx";
 import MojoDealershipProfile from "./views/pages/MojoDealershipProfile.jsx"
 import Justin from "./views/pages/Justin.jsx"
 import TeamStandings from "./views/pages/TeamStandings"
