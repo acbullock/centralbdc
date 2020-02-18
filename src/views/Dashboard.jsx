@@ -119,12 +119,12 @@ class Dashboard extends React.Component {
       }
       for (let a in agents) {
         let imageUrl = ""
-        if (!!agents[a].fileBinary) {
+        if (agents[a].fileBinary !== undefined) {
           imageUrl = this._isMounted && await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agents[a].fileBinary.data))
         }
         agents[a].imageUrl = imageUrl;
       }
-      if (!!agent.fileBinary) {
+      if (agent.fileBinary !== undefined) {
         let imageUrl = this._isMounted && await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
         agent.imageUrl = imageUrl
       }
@@ -193,7 +193,7 @@ class Dashboard extends React.Component {
       }
 
       for (let b in allAgents[a].appointments) {
-        if (!!allAgents[a].appointments[b].verified) {
+        if (allAgents[a].appointments[b].verified !== undefined) {
           let curr = new Date()
           curr.setHours(0, 0, 0, 0)
           if (new Date(allAgents[a].appointments[b].verified).getTime() >= curr.getTime() &&
@@ -471,23 +471,23 @@ class Dashboard extends React.Component {
                     <tbody>
                       <tr>
                         <td>Appointments</td>
-                        <td><p style={!this.state.counts[7] ? {} : { color: this.state.counts[7].color }}><strong>{!this.state.counts[7] ? 0 : this.state.counts[7].count}</strong></p></td>
-                        <td><p style={!this.state.counts[8] ? {} : { color: this.state.counts[8].color }}><strong>{!this.state.counts[8] ? 0 : this.state.counts[8].count}</strong></p></td>
-                        <td><p style={!this.state.counts[9] ? {} : { color: this.state.counts[9].color }}><strong>{!this.state.counts[9] ? 0 : this.state.counts[9].count}</strong></p></td>
-                        <td><p style={!this.state.counts[10] ? {} : { color: this.state.counts[10].color }}><strong>{!this.state.counts[10] ? 0 : this.state.counts[10].count}</strong></p></td>
-                        <td><p style={!this.state.counts[11] ? {} : { color: this.state.counts[11].color }}><strong>{!this.state.counts[11] ? 0 : this.state.counts[11].count}</strong></p></td>
-                        <td><p style={!this.state.counts[12] ? {} : { color: this.state.counts[12].color }}><strong>{!this.state.counts[12] ? 0 : this.state.counts[12].count}</strong></p></td>
-                        <td><p style={!this.state.counts[13] ? {} : { color: this.state.counts[13].color }}><strong>{!this.state.counts[13] ? 0 : this.state.counts[13].count}</strong></p></td>
-                        <td><p style={!this.state.counts[14] ? {} : { color: this.state.counts[14].color }}><strong>{!this.state.counts[14] ? 0 : this.state.counts[14].count}</strong></p></td>
-                        <td><p style={!this.state.counts[15] ? {} : { color: this.state.counts[15].color }}><strong>{!this.state.counts[15] ? 0 : this.state.counts[15].count}</strong></p></td>
-                        <td><p style={!this.state.counts[16] ? {} : { color: this.state.counts[16].color }}><strong>{!this.state.counts[16] ? 0 : this.state.counts[16].count}</strong></p></td>
-                        <td><p style={!this.state.counts[17] ? {} : { color: this.state.counts[17].color }}><strong>{!this.state.counts[17] ? 0 : this.state.counts[17].count}</strong></p></td>
-                        <td><p style={!this.state.counts[18] ? {} : { color: this.state.counts[18].color }}><strong>{!this.state.counts[18] ? 0 : this.state.counts[18].count}</strong></p></td>
-                        <td><p style={!this.state.counts[19] ? {} : { color: this.state.counts[19].color }}><strong>{!this.state.counts[19] ? 0 : this.state.counts[19].count}</strong></p></td>
-                        <td><p style={!this.state.counts[20] ? {} : { color: this.state.counts[20].color }}><strong>{!this.state.counts[20] ? 0 : this.state.counts[20].count}</strong></p></td>
-                        <td><p style={!this.state.counts[21] ? {} : { color: this.state.counts[21].color }}><strong>{!this.state.counts[21] ? 0 : this.state.counts[21].count}</strong></p></td>
-                        <td><p style={!this.state.counts["total"] ? {} : { color: this.state.counts["total"].color }}><strong>{!this.state.counts["total"] ? 0 : this.state.counts["total"].count}</strong></p></td>
-                        <td><strong>{!this.state.counts["total"] ? 0 : this.getProjection(this.state.counts["total"].count)}</strong></td>
+                        <td><p style={this.state.counts[7] === undefined ? {} : { color: this.state.counts[7].color }}><strong>{this.state.counts[7] === undefined ? 0 : this.state.counts[7].count}</strong></p></td>
+                        <td><p style={this.state.counts[8] === undefined ? {} : { color: this.state.counts[8].color }}><strong>{this.state.counts[8] === undefined ? 0 : this.state.counts[8].count}</strong></p></td>
+                        <td><p style={this.state.counts[9] === undefined ? {} : { color: this.state.counts[9].color }}><strong>{this.state.counts[9] === undefined ? 0 : this.state.counts[9].count}</strong></p></td>
+                        <td><p style={this.state.counts[10] === undefined ? {} : { color: this.state.counts[10].color }}><strong>{this.state.counts[10] === undefined ? 0 : this.state.counts[10].count}</strong></p></td>
+                        <td><p style={this.state.counts[11] === undefined ? {} : { color: this.state.counts[11].color }}><strong>{this.state.counts[11] === undefined ? 0 : this.state.counts[11].count}</strong></p></td>
+                        <td><p style={this.state.counts[12] === undefined ? {} : { color: this.state.counts[12].color }}><strong>{this.state.counts[12] === undefined ? 0 : this.state.counts[12].count}</strong></p></td>
+                        <td><p style={this.state.counts[13] === undefined ? {} : { color: this.state.counts[13].color }}><strong>{this.state.counts[13] === undefined ? 0 : this.state.counts[13].count}</strong></p></td>
+                        <td><p style={this.state.counts[14] === undefined ? {} : { color: this.state.counts[14].color }}><strong>{this.state.counts[14] === undefined ? 0 : this.state.counts[14].count}</strong></p></td>
+                        <td><p style={this.state.counts[15] === undefined ? {} : { color: this.state.counts[15].color }}><strong>{this.state.counts[15] === undefined ? 0 : this.state.counts[15].count}</strong></p></td>
+                        <td><p style={this.state.counts[16] === undefined ? {} : { color: this.state.counts[16].color }}><strong>{this.state.counts[16] === undefined ? 0 : this.state.counts[16].count}</strong></p></td>
+                        <td><p style={this.state.counts[17] === undefined ? {} : { color: this.state.counts[17].color }}><strong>{this.state.counts[17] === undefined ? 0 : this.state.counts[17].count}</strong></p></td>
+                        <td><p style={this.state.counts[18] === undefined ? {} : { color: this.state.counts[18].color }}><strong>{this.state.counts[18] === undefined ? 0 : this.state.counts[18].count}</strong></p></td>
+                        <td><p style={this.state.counts[19] === undefined ? {} : { color: this.state.counts[19].color }}><strong>{this.state.counts[19] === undefined ? 0 : this.state.counts[19].count}</strong></p></td>
+                        <td><p style={this.state.counts[20] === undefined ? {} : { color: this.state.counts[20].color }}><strong>{this.state.counts[20] === undefined ? 0 : this.state.counts[20].count}</strong></p></td>
+                        <td><p style={this.state.counts[21] === undefined ? {} : { color: this.state.counts[21].color }}><strong>{this.state.counts[21] === undefined ? 0 : this.state.counts[21].count}</strong></p></td>
+                        <td><p style={this.state.counts["total"] === undefined ? {} : { color: this.state.counts["total"].color }}><strong>{this.state.counts["total"] === undefined ? 0 : this.state.counts["total"].count}</strong></p></td>
+                        <td><strong>{this.state.counts["total"] === undefined ? 0 : this.getProjection(this.state.counts["total"].count)}</strong></td>
                       </tr>
                       <tr>
                         <td>Calls</td>
@@ -506,8 +506,8 @@ class Dashboard extends React.Component {
                         <td>-</td>
                         <td>-</td>
                         <td>-</td>
-                        <td><strong>{!this.state.selected_agent.outboundToday || !this.state.selected_agent.inboundToday ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday}</strong></td>
-                        <td><strong>{this.getProjection(!this.state.selected_agent.outboundToday || !this.state.selected_agent.inboundToday ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday)}</strong></td>
+                        <td><strong>{this.state.selected_agent.outboundToday === undefined || this.state.selected_agent.inboundToday === undefined ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday}</strong></td>
+                        <td><strong>{this.getProjection(this.state.selected_agent.outboundToday === undefined || this.state.selected_agent.inboundToday === undefined ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday)}</strong></td>
                       </tr>
 
                     </tbody>
@@ -522,7 +522,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
-                  <img alt="profile" src={(!this.state.agent.imageUrl || this.state.agent.imageUrl.length < 1) ? defaultLogo : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
+                  <img alt="profile" src={(this.state.agent.imageUrl === undefined || this.state.agent.imageUrl.length < 1) ? defaultLogo : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
                 </CardHeader>
                 <CardBody>
                   {
@@ -554,7 +554,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong>{this.state.mtdloadnew ? " (still loading)" : null}</p></CardTitle>
-                  <img alt="profile" src={(!this.state.agent.imageUrl || this.state.agent.imageUrl.length < 1) ? defaultLogo : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
+                  <img alt="profile" src={(this.state.agent.imageUrl === undefined || this.state.agent.imageUrl.length < 1) ? defaultLogo : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
                   {/* style={{ background: 'url("https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image")' }}  */}
                 </CardHeader>
                 <CardBody>
@@ -568,7 +568,7 @@ class Dashboard extends React.Component {
                         return ag.name === this.state.agent.name
                       })
                       thisAgent = thisAgent[0];
-                      if (!thisAgent) {
+                      if (thisAgent === undefined) {
                         return null;
                       }
                       if (i > 0) return null;
@@ -597,7 +597,6 @@ class Dashboard extends React.Component {
                       else if (parseInt(rank) === 5) {
                         bonus = 500
                       }
-                      console.log(bonus)
                       return (
                         <div key={i}>
                           <h4 style={{ color: "white" }}>Appointment Count: <strong>{thisAgent.count}</strong></h4>
@@ -645,7 +644,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={(!agent.imageUrl || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={(agent.imageUrl === undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -681,7 +680,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" >
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={(!agent.imageUrl || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={(agent.imageUrl === undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -715,7 +714,7 @@ class Dashboard extends React.Component {
                           if (agent.appointments.length === 0 || agent.appointments.length < agent.personalRecord || agent.account_type !== "agent") return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
-                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={(!agent.imageUrl || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={(agent.imageUrl === undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.appointments.length}</strong></p></td>
                             </tr>
