@@ -60,7 +60,7 @@ class Admin extends React.Component {
     this._isMounted = true;
     let agentUser = this._isMounted && await this.getAgent();
     let user = agentUser.user
-    if (user.userId == undefined) {
+    if (user.userId === undefined || agentUser.agent === undefined) {
       this.state.agent = null
       this.props.history.push("/auth/login")
       return;
