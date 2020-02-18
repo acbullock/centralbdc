@@ -21,15 +21,8 @@ import {
     Button,
     Card,
     CardBody,
-    CardFooter,
     CardImg,
-    CardTitle,
-    ListGroupItem,
-    ListGroup,
-    Progress,
     Input,
-    Image,
-    Label,
     Form,
     Container,
     Row,
@@ -84,7 +77,6 @@ class AppointmnetSearchNew extends React.Component {
         this.setState({ loading: true })
         let total_apps = []
         let total_asst = []
-        let agent_apps = []
         let phone_apps = []
         let phone_asst = []
         let today_apps = []
@@ -320,7 +312,7 @@ class AppointmnetSearchNew extends React.Component {
                                     <CardBody>
                                         {this.state.asst_results.map((a, i) => {
                                             return (
-                                                <Card color="transparent" className="card-raised card-white" color="transparent" key={i}>
+                                                <Card color="transparent" className="card-raised card-white" key={i}>
                                                     <CardBody style={{ whiteSpace: "pre-wrap" }}>
                                                         <p style={{ color: "white" }}><strong>{i + 1}.</strong></p>
                                                         <p style={{ color: "white" }}>Dealership: <strong>{a.dealership.label}</strong></p>

@@ -15,23 +15,14 @@
 
 */
 import React from "react";
-// react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
 // reactstrap components
 import {
-    Button,
     Card,
     CardImg,
     Container,
-    CardHeader,
-    CardBody,
     CardTitle,
-    Table,
-    Input,
-    Form, FormGroup, Label,
     Row,
-    Col,
-    CustomInput,
+    Col
 } from "reactstrap";
 import Select from "react-select"
 import logo from "../../assets/img/logo.png";

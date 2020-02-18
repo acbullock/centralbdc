@@ -2,21 +2,16 @@ import React from "react";
 // reactstrap components
 import {
     Button,
-    Label,
     Card,
     CardImg,
     Container,
     CardBody,
     Row,
     Col,
-    Modal,
-    ModalHeader,
-    ModalBody,
     Input,
     FormGroup,
     Form,
     Tooltip,
-    InputGroup
 } from "reactstrap";
 import Select from 'react-select'
 import ReactDateTime from "react-datetime";
@@ -110,7 +105,6 @@ class MojoDealershipProfile extends React.Component {
             editMojoActive: false,
             editDealerName: "",
             editDealerAddress: "",
-            regMondayOpen: null,
             editMondayOpen: null,
             editMondayClose: null,
             editMondayClosed: false,

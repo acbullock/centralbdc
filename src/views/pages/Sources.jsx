@@ -6,12 +6,9 @@ import {
     CardImg,
     Label,
     Card,
-    CardHeader,
     CardBody,
-    CardFooter,
     CardTitle,
-    InputGroup, InputGroupAddon, InputGroupText, Form,
-    Collapse,
+    Form,
     FormGroup,
     Row,
     Col,
@@ -23,7 +20,6 @@ import {
     // UncontrolledTooltip
 } from "reactstrap";
 import Select from "react-select"
-import classnames from "classnames";
 
 class SourceManagement extends React.Component {
     constructor(props) {
@@ -81,7 +77,7 @@ class SourceManagement extends React.Component {
     }
     async removeSource() {
         this._isMounted && this.setState({ loading: true });
-        let source = this._isMounted && await this.props.mongo.findOneAndDelete("sources", { value: this.state.selected_source.value });
+        this._isMounted && await this.props.mongo.findOneAndDelete("sources", { value: this.state.selected_source.value });
         this._isMounted && await this.getSources()
         this._isMounted && this.setState({ loading: false, selected_source: { label: "", value: "" } });
     }

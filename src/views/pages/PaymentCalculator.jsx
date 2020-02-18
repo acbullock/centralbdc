@@ -16,22 +16,18 @@
 */
 import React from "react";
 // react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
 // reactstrap components
 import {
     Button,
     Card,
     CardImg,
     Container,
-    CardHeader,
     CardBody,
     CardTitle,
-    Table,
     Input,
     Form, FormGroup, Label,
     Row,
     Col,
-    CustomInput,
 } from "reactstrap";
 import Select from "react-select"
 import logo from "../../assets/img/logo.png";
@@ -56,7 +52,7 @@ class PaymentCalculator extends React.Component {
         this._isMounted = true
         this._isMounted && await this.setState({ loading: true })
         let agent = this.props.agent
-        if(agent.department !== "sales" && agent.account_type !== "admin"){
+        if (agent.department !== "sales" && agent.account_type !== "admin") {
             this.props.history.push("/admin/dashboard");
             this._isMounted = false
             return;
@@ -73,8 +69,8 @@ class PaymentCalculator extends React.Component {
             this._isMounted && this.setState({ errorText: "Appointment Count must be a number" });
             return
         }
-        else{
-            this._isMounted && this.setState({ errorText: ""})
+        else {
+            this._isMounted && this.setState({ errorText: "" })
         }
     }
     clearForm() {
@@ -87,7 +83,7 @@ class PaymentCalculator extends React.Component {
     }
     calculatePay() {
 
-        
+
         if (isNaN(parseInt(this.state.appointmentCount))) {
             this._isMounted && this.setState({ errorText: "Appointment Count must be a number" });
             return
@@ -149,7 +145,7 @@ class PaymentCalculator extends React.Component {
                         </Col>
                     </Row>
                     <br />
-                    <Row style={{justifyContent:"center"}}>
+                    <Row style={{ justifyContent: "center" }}>
                         <Col md="8" >
                             <Card style={{ padding: "20px", background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardTitle>
@@ -163,7 +159,7 @@ class PaymentCalculator extends React.Component {
                                             <Input type="number"
                                                 style={{ backgroundColor: "white" }}
                                                 value={this.state.appointmentCount}
-                                                onChange={(e) => { this._isMounted && this.setState({ payment: undefined }); this.onValueChange("appointmentCount", e.target.value);  }}
+                                                onChange={(e) => { this._isMounted && this.setState({ payment: undefined }); this.onValueChange("appointmentCount", e.target.value); }}
                                             />
                                         </FormGroup>
                                         <FormGroup>

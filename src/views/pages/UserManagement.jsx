@@ -120,7 +120,7 @@ class UserManagement extends React.Component {
         this._isMounted = false
     }
     toggle(modal_name) {
-        if (this.state[modal_name] == false) {
+        if (this.state[modal_name] === false) {
             this.clearAddValues()
         }
         this._isMounted && this.setState({ [modal_name]: !this.state[modal_name] })
@@ -251,7 +251,6 @@ class UserManagement extends React.Component {
             if (a.name < b.name) return -1;
             return 0;
         })
-        let users = []
         for (let a in agents) {
             agents[a].label = agents[a].name;
             agents[a].value = agents[a]._id
@@ -428,7 +427,7 @@ class UserManagement extends React.Component {
                                                         this.state.addUserName.length === 0 ||
                                                         this.state.addUserEmail.length === 0 ||
                                                         this.state.addUserPhone.length !== 10 ||
-                                                        this.state.addUserTeam.label == undefined ||
+                                                        this.state.addUserTeam.label === undefined ||
                                                         this.state.addActive.length === 0 ||
                                                         this.state.addType.length === 0 ||
                                                         this.state.addDepartment.length === 0
@@ -455,7 +454,7 @@ class UserManagement extends React.Component {
                                         onChange={(e) => { this.onValueChange("editUser", e); }}
                                     />
                                     <br />
-                                    <Button color="neutral" disabled={this.state.editUser.label.length == 0} onClick={async () => {
+                                    <Button color="neutral" disabled={this.state.editUser.label.length === 0} onClick={async () => {
                                         this._isMounted && this.setState({ loading: true })
                                         console.log("!@#", this.state.editUser)
                                         let u = this._isMounted && await this.props.mongo.findOne("agents", { _id: this.state.editUser.value })
@@ -466,7 +465,7 @@ class UserManagement extends React.Component {
                                             editUserTeam: u.team,
                                             editType: u.account_type,
                                             editDepartment: u.department,
-                                            editActive: u.isActive == true ? "active" : "inactive",
+                                            editActive: u.isActive === true ? "active" : "inactive",
                                             editSkills: u.skills || {
                                                 sales: {
                                                     newLeads: false,
@@ -1458,7 +1457,7 @@ class UserManagement extends React.Component {
                                             this.state.addUserName.length === 0 ||
                                             this.state.addUserEmail.length === 0 ||
                                             this.state.addUserPhone.length !== 10 ||
-                                            this.state.addUserTeam.label == undefined ||
+                                            this.state.addUserTeam.label === undefined ||
                                             this.state.addActive.length === 0 ||
                                             this.state.addType.length === 0 ||
                                             this.state.addDepartment.length === 0

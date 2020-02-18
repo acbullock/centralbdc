@@ -10,11 +10,6 @@ import {
     Row,
     Col,
     Table,
-    Progress,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Input,
     FormGroup,
     Form,
     CardHeader
@@ -85,7 +80,7 @@ class Reports extends React.Component {
         this._isMounted && this.setState({ loading: true, clicked: false })
         let appointments = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": this.state.selected_dealership.value });
         // appointments = appointments.appointments;
-        let verifieds = this._isMounted && appointments.map((a)=>{return a.verified})
+        let verifieds = this._isMounted && appointments.map((a) => { return a.verified })
         let agents = this._isMounted && await this.props.mongo.find("agents")
         let agent_apps = [];
         for (let a in agents) {
@@ -94,8 +89,8 @@ class Reports extends React.Component {
         agent_apps = this._isMounted && agent_apps.filter((a) => {
             return a.dealership.value === this.state.selected_dealership.value
         })
-        for(let a in agent_apps){
-            if(verifieds.indexOf(agent_apps[a].verified) === -1){
+        for (let a in agent_apps) {
+            if (verifieds.indexOf(agent_apps[a].verified) === -1) {
                 appointments.push(agent_apps[a])
             }
         }

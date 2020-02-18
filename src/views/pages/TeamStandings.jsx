@@ -1,8 +1,6 @@
 import React from "react";
 // reactstrap components
 import {
-    Button,
-    Label,
     Card,
     CardImg,
     Container,
@@ -13,19 +11,12 @@ import {
     Modal,
     ModalHeader,
     ModalBody,
-    Input,
-    FormGroup,
-    Form,
-    Tooltip,
-    InputGroup,
-    CardTitle,
+
 } from "reactstrap";
-import Select from 'react-select'
-import ReactDateTime from "react-datetime";
+
 import gold from "../../assets/img/gold.png"
 import silver from "../../assets/img/silver.png"
 import bronze from "../../assets/img/bronze.png"
-import FailedTexts from "./FailedTexts";
 import deathRowLogo from "../../assets/img/deathrow.png"
 import newZealandLogo from "../../assets/img/newzealand.png"
 import dreamchaserLogo from "../../assets/img/dream-chasers.png"
@@ -125,7 +116,7 @@ class TeamStandings extends React.Component {
                     <div className="content">
                         <Container>
                             <Col className="ml-auto mr-auto text-center" md="6">
-                                <CardImg top width="100%" src={this.props.utils.loading} />
+                                <CardImg alt="loading" top width="100%" src={this.props.utils.loading} />
                             </Col>
                         </Container>
                     </div>
@@ -140,9 +131,9 @@ class TeamStandings extends React.Component {
                             <Card id="test123" style={{ background: "linear-gradient(0deg, #000000 0%, #D4AF37 100%)", marginBottom: 20, cursor: "pointer", height: "45vh" }}>
                                 <CardBody onClick={() => { this.setState({ [this.state.sortedTeams[0].name]: !this.state[this.state.sortedTeams[0].name] }) }}>
                                     <h3 className="text-white text-center" style={{ verticalAlign: "center" }}>
-                                        <img src={gold} style={{ width: "50px" }} />
+                                        <img alt="gold trophy" src={gold} style={{ width: "50px" }} />
                                         {"  #1:"} <strong>{this.state.sortedTeams[0].name}</strong>{"  "}
-                                        <img src={
+                                        <img alt="team logo " src={
                                             (() => {
                                                 if (this.state.sortedTeams[0].name === "DeathRow") {
                                                     return deathRowLogo
@@ -170,7 +161,7 @@ class TeamStandings extends React.Component {
                             <Modal className="modal-primary" hidden={this.state[this.state.sortedTeams[0].name] !== true && this.state[this.state.sortedTeams[0].name] !== false} isOpen={this.state[this.state.sortedTeams[0].name]} toggle={() => { this.setState({ [this.state[this.state.sortedTeams[0].name]]: !this.state[this.state.sortedTeams[0].name] }) }}>
                                 <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [this.state.sortedTeams[0].name]: !this.state[this.state.sortedTeams[0].name] }) }}>
                                     <strong>{this.state.sortedTeams[0].name}</strong>{" "}
-                                    <img src={
+                                    <img alt="team logo" src={
                                         (() => {
                                             if (this.state.sortedTeams[0].name === "DeathRow") {
                                                 return deathRowLogo
@@ -219,9 +210,9 @@ class TeamStandings extends React.Component {
                             <Card style={{ background: "linear-gradient(0deg, #000000 0%, #C0C0C0 100%)", marginBottom: 0, cursor: "pointer", height: "30vh" }}>
                                 <CardBody onClick={() => { this.setState({ [this.state.sortedTeams[1].name]: !this.state[this.state.sortedTeams[1].name] }) }}>
                                     <h4 className="text-white text-center" style={{ verticalAlign: "center" }}>
-                                        <img src={silver} style={{ width: "30px" }} />
+                                        <img alt="silver trophy" src={silver} style={{ width: "30px" }} />
                                         {" "}#2: <strong>{this.state.sortedTeams[1].name}</strong>{" "}
-                                        <img src={
+                                        <img alt="team logo" src={
                                             (() => {
                                                 if (this.state.sortedTeams[1].name === "DeathRow") {
                                                     return deathRowLogo
@@ -249,7 +240,7 @@ class TeamStandings extends React.Component {
                             <Modal className="modal-primary" hidden={this.state[this.state.sortedTeams[1].name] !== true && this.state[this.state.sortedTeams[1].name] !== false} isOpen={this.state[this.state.sortedTeams[1].name]} toggle={() => { this.setState({ [this.state[this.state.sortedTeams[1].name]]: !this.state[this.state.sortedTeams[1].name] }) }}>
                                 <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [this.state.sortedTeams[1].name]: !this.state[this.state.sortedTeams[1].name] }) }}>
                                     <strong>{this.state.sortedTeams[1].name}</strong>{" "}
-                                    <img src={
+                                    <img alt="team logo" src={
                                         (() => {
                                             if (this.state.sortedTeams[1].name === "DeathRow") {
                                                 return deathRowLogo
@@ -305,9 +296,9 @@ class TeamStandings extends React.Component {
                                     <Card style={{ whiteSpace: "pre-wrap", background: i === 2 ? "linear-gradient(0deg, #000000 0%, #cd7f32 100%)" : "linear-gradient(0deg, #000000 0%, #1d67a8 100%)", marginBottom: 10, cursor: "pointer", height: i === 2 ? "27vh" : "24vh" }}>
                                         <CardBody onClick={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
                                             <p className="text-white text-center" style={{ verticalAlign: "center" }}>
-                                                <img hidden={i !== 2} src={bronze} style={{ width: "25px" }} />
+                                                <img alt="bronze trophy" hidden={i !== 2} src={bronze} style={{ width: "25px" }} />
                                                 {" "} #{i + 1}: <strong>{team.name}</strong>{" "}
-                                                <img src={
+                                                <img alt="team logo" src={
                                                     (() => {
                                                         if (team.name === "DeathRow") {
                                                             return deathRowLogo
@@ -334,7 +325,7 @@ class TeamStandings extends React.Component {
                                         <Modal className="modal-primary" hidden={this.state[team.name] !== true && this.state[team.name] !== false} isOpen={this.state[team.name]} toggle={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
                                             <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
                                                 <strong>{team.name}</strong>{" "}
-                                                <img src={
+                                                <img alt="team logo" src={
                                                     (() => {
                                                         if (team.name === "DeathRow") {
                                                             return deathRowLogo

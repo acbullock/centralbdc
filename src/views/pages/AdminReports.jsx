@@ -11,9 +11,6 @@ import {
     Col,
     Table,
     Progress,
-    Modal,
-    ModalHeader,
-    ModalBody,
     Input,
     FormGroup,
     Form
@@ -183,7 +180,7 @@ class AdminReports extends React.Component {
     }
     async getAppCount() {
         this._isMounted && this.setState({ loading: true });
-        let appointments = this._isMounted && await this.props.mongo.find("all_appointments", {agent_id: this.state.selected_agent._id});
+        let appointments = this._isMounted && await this.props.mongo.find("all_appointments", { agent_id: this.state.selected_agent._id });
         let allApps = appointments.concat(this.state.selected_agent.appointments)
         // for (let a in appointments) {
         //     allApps = allApps.concat(appointments[a].appointments)

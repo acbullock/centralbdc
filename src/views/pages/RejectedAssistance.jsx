@@ -28,7 +28,6 @@ import {
     // CardText,
     Input,
     Button,
-    FormGroup,
     Container, CardImg,
 
 
@@ -180,7 +179,7 @@ class RejectedAssistance extends React.Component {
 
         //find current agent's appointment that needs to be updated
         let x = this._isMounted && this.state.agent.assistance.filter((a) => {
-            return new Date(a.created).getTime() != new Date(old.created).getTime()
+            return new Date(a.created).getTime() !== new Date(old.created).getTime()
 
         })
         new_app = Object.assign(old, new_app)
@@ -329,7 +328,7 @@ class RejectedAssistance extends React.Component {
                                                                     this.state.loading ||
                                                                     this.state.fixed_customer_first_name.length === 0 ||
                                                                     this.state.fixed_customer_last_name.length === 0 ||
-                                                                    this.state.fixed_customer_phone.length != 10 ||
+                                                                    this.state.fixed_customer_phone.length !== 10 ||
                                                                     isNaN(this.state.fixed_customer_phone)} onClick={() => {
                                                                         this.resendAssistance()
                                                                     }}>Resubmit for Approval</Button>

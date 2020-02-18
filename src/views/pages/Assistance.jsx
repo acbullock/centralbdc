@@ -18,7 +18,7 @@ import React from "react";
 
 // reactstrap components
 import {
-    Col, Row, Card,
+    Col, Card,
     CardHeader,
     CardBody,
     // Collapse,
@@ -158,13 +158,12 @@ class Assistance extends React.Component {
     }
     async sendText(appointment) {
         this._isMounted && this.setState({ loading: true })
-        let data = new FormData();
         // await this.setState({loading: true})
         let contacts = appointment.dealership.contacts
         let token = this._isMounted && await axios.post("https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/gettoken", {}, {})
         token = token.data
         for (let i = 0; i < contacts.length; i++) {
-            let x = this._isMounted && await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
+            this._isMounted && await axios.post(`https://webhooks.mongodb-stitch.com/api/client/v2.0/app/centralbdc-bwpmi/service/RingCentral/incoming_webhook/sendsms?toNumber=1${contacts[i]}&fromNumber=1${appointment.dealership.textFrom}&token=${token}`, {
                 text: appointment.internal_msg
             }, {
                 headers: {
@@ -254,13 +253,13 @@ class Assistance extends React.Component {
                                         disabled={
                                             this.state.error.length > 0 ||
                                             this.state.loading ||
-                                            this.state.firstName.length == 0 ||
-                                            this.state.lastName.length == 0 ||
-                                            this.state.phone.length != 10 ||
+                                            this.state.firstName.length === 0 ||
+                                            this.state.lastName.length === 0 ||
+                                            this.state.phone.length !== 10 ||
                                             isNaN(this.state.phone) ||
-                                            this.state.dealership.label.length == 0 ||
-                                            // this.state.source.label.length == 0 ||
-                                            this.state.message.length == 0
+                                            this.state.dealership.label.length === 0 ||
+                                            // this.state.source.label.length === 0 ||
+                                            this.state.message.length === 0
                                         }
                                         onClick={this.addToPending}
                                     >

@@ -6,14 +6,11 @@ import {
     Card,
     CardHeader,
     CardBody,
-    CardFooter,
     CardTitle,
-    InputGroup, InputGroupAddon, InputGroupText, Form,
-    Collapse,
+    InputGroup, Form,
     Row,
     Col,
     Modal,
-    ModalHeader,
     ModalBody,
     ModalFooter,
     Input,
@@ -63,13 +60,13 @@ class Scenarios extends React.Component {
         this._isMounted = true
         this._isMounted && await this.cleanUpDepartments()
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        if (user.userId == undefined) {
+        if (user.userId === undefined) {
             this.props.history.push("/admin/dashboard")
         }
         // let agents = await this.props.mongo.getCollection("agents")
         // let agent = await agents.findOne({ userId: user.userId })
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
-        if (agent.account_type != "admin") {
+        if (agent.account_type !== "admin") {
             this.props.history.push("/admin/dashboard")
         }
         // let scenarios = await this.props.mongo.getCollection("scenarios")
@@ -83,7 +80,7 @@ class Scenarios extends React.Component {
         for (let d in deps) {
             found = false
             for (let s in scens) {
-                if (scens[s].type == deps[d].label) {
+                if (scens[s].type === deps[d].label) {
                     found = true
                     break;
                 }
@@ -139,7 +136,7 @@ class Scenarios extends React.Component {
         }
         if (!found) {
             let x = this._isMounted && await this.props.mongo.insertOne("departments", { label: this.state.editScenarioType })
-            let newdep = this._isMounted && await this.props.mongo.findOneAndUpdate("departments", { label: this.state.editScenarioType }, { label: this.state.editScenarioType, value: x.insertedId })
+            this._isMounted && await this.props.mongo.findOneAndUpdate("departments", { label: this.state.editScenarioType }, { label: this.state.editScenarioType, value: x.insertedId })
         }
         this._isMounted && await this.cleanUpDepartments()
         this._isMounted && await this.getScenarios()
@@ -159,7 +156,7 @@ class Scenarios extends React.Component {
         let deps = this._isMounted && await this.props.mongo.find("departments")
         let found = false
         for (let d in deps) {
-            if (deps[d].label == this.state.newScenarioType) {
+            if (deps[d].label === this.state.newScenarioType) {
                 found = true;
                 break;
             }
@@ -290,7 +287,7 @@ class Scenarios extends React.Component {
                                         </Button>
 
                                             </div>
-                                            <Card className="card-info" color="red" hidden={this.state.err.message == ""}>
+                                            <Card className="card-info" color="red" hidden={this.state.err.message === ""}>
                                                 <CardBody>
                                                     <p><strong>{this.state.err.message}</strong></p>
                                                 </CardBody>
@@ -359,8 +356,8 @@ class Scenarios extends React.Component {
                                                                     </Button>
                                                             <Button color="primary" onClick={this.editScenario} disabled={
                                                                 this.state.loading ||
-                                                                this.state.editScenarioName.length == 0 ||
-                                                                this.state.editScenarioType.length == 0
+                                                                this.state.editScenarioName.length === 0 ||
+                                                                this.state.editScenarioType.length === 0
                                                             }>
                                                                 Save changes
                                                                     </Button>

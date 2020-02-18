@@ -21,19 +21,11 @@ import {
     Button,
     Card,
     CardBody,
-    CardFooter,
     CardImg,
-    CardTitle,
-    ListGroupItem,
-    ListGroup,
-    Progress,
-    Input,
-    Label,
     Container,
     Row,
     Col
 } from "reactstrap";
-import Select from "react-select"
 
 class FailedTexts extends React.Component {
     constructor(props) {
@@ -142,7 +134,7 @@ class FailedTexts extends React.Component {
                             <Col lg="12" md="12">
                                 <h2>Failed Text Count: {this.state.failed_texts.length}</h2>
                                 <Button disabled={this.state.loading} onClick={() => { this.refreshList() }}>Refresh</Button>
-                                <Button disabled={this.state.loading || this.state.failed_texts.length == 0} color="info" onClick={() => { this.resendAll() }}>Resend All</Button>
+                                <Button disabled={this.state.loading || this.state.failed_texts.length === 0} color="info" onClick={() => { this.resendAll() }}>Resend All</Button>
                                 <Card className="card-warning card-raised card-white" >
                                     <CardBody >
                                         {

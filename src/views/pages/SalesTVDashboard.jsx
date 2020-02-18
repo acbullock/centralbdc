@@ -16,22 +16,17 @@
 */
 import React from "react";
 
-// react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
 // reactstrap components
 import {
-    Button,
     Card,
     CardImg,
     Container,
-    CardHeader,
     CardBody,
     CardTitle,
     Table,
     Row,
     Col,
 } from "reactstrap";
-import Select from "react-select"
 import logo from "../../assets/img/logo.png";
 class SalesTVDashboard extends React.Component {
 
@@ -112,7 +107,7 @@ class SalesTVDashboard extends React.Component {
         let { agents } = this.state;
         let totalCallCountMTD = 0;
         for (let a in agents) {
-            if (agents[a].inboundMTD == undefined || agents[a].outboundMTD == undefined) { continue }
+            if (agents[a].inboundMTD === undefined || agents[a].outboundMTD === undefined) { continue }
             totalCallCountMTD += agents[a].inboundMTD + agents[a].outboundMTD
         }
         this._isMounted && await this.setState({ totalCallCountMTD })
@@ -155,7 +150,7 @@ class SalesTVDashboard extends React.Component {
             let count = this._isMounted && appointments.filter((a) => {
                 return new Date(a.verified).getTime() >= start.getTime() && new Date(a.verified).getTime() < end.getTime()
             })
-            if (count.length == 2) {
+            if (count.length === 2) {
                 color = "yellow"
             }
             if (count.length > 2) {
@@ -237,7 +232,6 @@ class SalesTVDashboard extends React.Component {
         let sevenDaysTD = seven_day_apps
         agent.seven_day_avg = Math.round(10 * sevenDaysTD.length / (sevenElapsed)) / 10;
         //get mtd high
-        let dayMs = 1000 * 60 * 60 * 24;
         let dict = {};
         let max = 0;
         for (let a in agentAllApps) {

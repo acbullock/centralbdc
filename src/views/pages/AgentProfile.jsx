@@ -15,25 +15,16 @@
 
 */
 import React from "react";
-// react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
 // reactstrap components
 import {
     Button,
     Card,
     CardImg,
     Container,
-    CardHeader,
-    CardBody,
     CardTitle,
-    Table,
-    Input,
-    Form, FormGroup, Label,
     Row,
     Col,
-    CustomInput,
 } from "reactstrap";
-import Select from "react-select"
 import logo from "../../assets/img/logo.png";
 
 class AgentProfile extends React.Component {
@@ -73,7 +64,6 @@ class AgentProfile extends React.Component {
     async imageToBuffer() {
 
         var reader = new FileReader();
-        let buff = null
         reader.onload = e => {
             let arrayBuffer = reader.result;
             console.log(arrayBuffer)
@@ -127,7 +117,7 @@ class AgentProfile extends React.Component {
                                     <Col md="6" >
                                         <h3 className="text-white"><strong>Profile Picture</strong></h3>
                                         {/* <img className="img-thumbnail" width="200" height="200" style={{ background: 'url("https://dummyimage.com/200x200/000000/ffffff&text=Upload+Image")' }} src={this.state.editImageUrl.length < 1 ? null : this.state.editImageUrl} /> */}
-                                        <img className="img-thumbnail" width="200" height="200" style={{ backgroundColor: "transparent" }} src={this.state.editImageUrl.length < 1 ? 'https://dummyimage.com/200x200/1d67a8/ffffff&text=No+Image' : this.state.editImageUrl} />
+                                        <img alt="profile" className="img-thumbnail" width="200" height="200" style={{ backgroundColor: "transparent" }} src={this.state.editImageUrl.length < 1 ? 'https://dummyimage.com/200x200/1d67a8/ffffff&text=No+Image' : this.state.editImageUrl} />
                                         <br />
                                         <Button color="info" onClick={() => { this.inputRef.current.click() }}>
                                             <input style={{ display: "none" }} ref={this.inputRef} accept="image/png, image/jpeg" type="file" id="exampleCustomFileBrowser" name="customFile" value={this.state.newImage} onChange={async (e) => {

@@ -6,14 +6,11 @@ import {
     Card,
     CardHeader,
     CardBody,
-    CardFooter,
     CardTitle,
     InputGroup, InputGroupAddon, InputGroupText, Form,
-    Collapse,
     Row,
     Col,
     Modal,
-    ModalHeader,
     ModalBody,
     ModalFooter,
     Input,
@@ -59,13 +56,13 @@ class Teams extends React.Component {
         // let x = await this.props.mongo.db.getUsers()
         // console.log(x)
         let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        if (user.userId == undefined) {
+        if (user.userId === undefined) {
             this.props.history.push("/admin/dashboard")
         }
         // let agents = await this.props.mongo.getCollection("agents")
         // let agent = await agents.findOne({ userId: user.userId })
         let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
-        if (agent.account_type != "admin") {
+        if (agent.account_type  !== "admin") {
 
             this.props.history.push("/admin/dashboard")
         }
@@ -222,7 +219,7 @@ class Teams extends React.Component {
                                         </Button>
 
                                             </div>
-                                            <Card className="card-info" color="red" hidden={this.state.err.message == ""}>
+                                            <Card className="card-info" color="red" hidden={this.state.err.message === ""}>
                                                 <CardBody>
                                                     <p><strong>{this.state.err.message}</strong></p>
                                                 </CardBody>
@@ -302,7 +299,7 @@ class Teams extends React.Component {
                                                             </Button>
                                                             <Button color="primary" onClick={this.editTeam} disabled={
                                                                 this.state.loading ||
-                                                                this.state.editTeamName.length == 0
+                                                                this.state.editTeamName.length === 0
                                                             }>
                                                                 Save changes
                                                                     </Button>

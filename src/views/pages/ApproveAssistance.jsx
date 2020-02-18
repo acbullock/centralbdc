@@ -29,8 +29,6 @@ import {
 
 } from "reactstrap";
 
-// wizard steps
-import axios from 'axios'
 
 
 class ApproveAssistance extends React.Component {
@@ -131,7 +129,7 @@ class ApproveAssistance extends React.Component {
         //    let owner = await agents.findOne({userId: newAssistance.userId})
         let owner = this._isMounted && await this.props.mongo.findOne("agents", { userId: newAssistance.userId })
         let ownerAssistance = this._isMounted && await owner.assistance.filter((a) => {
-            return a.text == assistance.text
+            return a.text === assistance.text
         })
         console.log(assistance.isPending)
         console.log(newAssistance.text)
@@ -164,7 +162,7 @@ class ApproveAssistance extends React.Component {
         //    let owner = await agents.findOne({userId: newAssistance.userId})
         let owner = this._isMounted && await this.props.mongo.findOne("agents", { userId: newAssistance.userId })
         let ownerAssistance = this._isMounted && await owner.assistance.filter((a) => {
-            return a.text == assistance.text
+            return a.text === assistance.text
         })
         let index = owner.assistance.indexOf(ownerAssistance[0])
         if (index !== -1) {

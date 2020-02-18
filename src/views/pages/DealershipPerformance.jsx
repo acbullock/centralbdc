@@ -1,24 +1,14 @@
 import React from "react";
 // reactstrap components
 import {
-    Button,
-    Label,
     Card,
     CardImg,
     Container,
-    CardBody,
     Row,
     Col,
     Table,
     Progress,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Input,
-    FormGroup,
-    Form
 } from "reactstrap";
-import Select from 'react-select'
 
 class DealershipPerformance extends React.Component {
     constructor(props) {
@@ -35,9 +25,9 @@ class DealershipPerformance extends React.Component {
     async componentWillMount() {
         this._isMounted = true
         this._isMounted && this.setState({ loading: true })
-        let dealerships = this._isMounted && await this.props.mongo.find("dealerships", {isActive: true}, {projection: {goal: 1, label: 1, value: 1}});
+        let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true }, { projection: { goal: 1, label: 1, value: 1 } });
         // let appointments = this._isMounted && await this.props.mongo.find("appointments");
-        let agents = this._isMounted && await this.props.mongo.find("agents", {department: "sales"}, {projection: {"appointments.dealership.label": 1, "appointments.dealership_department": 1, "appointments.dealership.value": 1}});
+        let agents = this._isMounted && await this.props.mongo.find("agents", { department: "sales" }, { projection: { "appointments.dealership.label": 1, "appointments.dealership_department": 1, "appointments.dealership.value": 1 } });
         // this.setState({appointments})
         this._isMounted && this.setState({ agents })
         this._isMounted && dealerships.sort((a, b) => {
@@ -146,13 +136,13 @@ class DealershipPerformance extends React.Component {
                                     </thead>
                                     <tbody>
                                         {this._isMounted && this.state.dealerships.map((d, i) => {
-                                            if(d.label === "Paragon Honda Used") return null
+                                            if (d.label === "Paragon Honda Used") return null
                                             return (
                                                 <tr key={i}>
                                                     <td ><Progress style={{ height: "25px", width: "150px", fontSize: "18px" }} animated value={d.progressValue} color={d.progressColor}><strong>{d.progressValue}%</strong></Progress></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.label}</p></td>
                                                     <td><p style={{ fontSize: "18px" }}>{d.totalCount}</p></td>
-                                                    <td><p style={{ fontSize: "18px" }}>{d.label ==="Paragon Honda"? parseInt(d.goal) + 1 : d.goal}</p></td>
+                                                    <td><p style={{ fontSize: "18px" }}>{d.label === "Paragon Honda" ? parseInt(d.goal) + 1 : d.goal}</p></td>
                                                     <td><i solid={"true"} style={{ fontSize: "24pt", fontWeight: "bolder", color: d.projection / d.goal >= .9 ? "green" : "red" }} className={d.projection / d.goal >= .9 ? "tim-icons icon-check-2" : "tim-icons icon-simple-remove"} /></td>
                                                 </tr>
                                             );

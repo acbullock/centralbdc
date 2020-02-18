@@ -1,25 +1,13 @@
 import React from "react";
 // reactstrap components
 import {
-    Button,
-    Label,
     Card,
     CardImg,
     Container,
-    CardBody,
     Row,
     Col,
     Table,
-    Progress,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    Input,
-    FormGroup,
-    Form
 } from "reactstrap";
-import Select from 'react-select'
-
 class DealershipPerformanceTiers extends React.Component {
     constructor(props) {
         super(props)
