@@ -105,7 +105,7 @@ class Dashboard extends React.Component {
       agents = this._isMounted && agents.map((a, i) => {
         return Object.assign(a, { label: a.name, value: i })
       })
-      agents.sort((a,b)=>{
+      this._isMounted && agents.sort((a,b)=>{
         return b.appointments.length - a.appointments.length
       })
       // agents = this._isMounted && agents.filter((a) => {
