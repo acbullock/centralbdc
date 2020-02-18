@@ -29,6 +29,7 @@ import FailedTexts from "./FailedTexts";
 import deathRowLogo from "../../assets/img/deathrow.png"
 import newZealandLogo from "../../assets/img/newzealand.png"
 import dreamchaserLogo from "../../assets/img/dream-chasers.png"
+import trendsetterLogo from "../../assets/img/trendsetters.png"
 import defaultLogo from "../../assets/img/default-logo.png"
 class TeamStandings extends React.Component {
     constructor(props) {
@@ -149,6 +150,9 @@ class TeamStandings extends React.Component {
                                                 else if (this.state.sortedTeams[0].name === "New Zealand") {
                                                     return newZealandLogo
                                                 }
+                                                else if (this.state.sortedTeams[0].name === "TrendSetters") {
+                                                    return trendsetterLogo
+                                                }
                                                 else if (this.state.sortedTeams[0].name === "DreamChaser") {
                                                     return dreamchaserLogo
                                                 }
@@ -173,6 +177,9 @@ class TeamStandings extends React.Component {
                                             }
                                             else if (this.state.sortedTeams[0].name === "New Zealand") {
                                                 return newZealandLogo
+                                            }
+                                            else if (this.state.sortedTeams[0].name === "TrendSetters") {
+                                                return trendsetterLogo
                                             }
                                             else if (this.state.sortedTeams[0].name === "DreamChaser") {
                                                 return dreamchaserLogo
@@ -222,6 +229,9 @@ class TeamStandings extends React.Component {
                                                 else if (this.state.sortedTeams[1].name === "New Zealand") {
                                                     return newZealandLogo
                                                 }
+                                                else if (this.state.sortedTeams[1].name === "TrendSetters") {
+                                                    return trendsetterLogo
+                                                }
                                                 else if (this.state.sortedTeams[1].name === "DreamChaser") {
                                                     return dreamchaserLogo
                                                 }
@@ -246,6 +256,9 @@ class TeamStandings extends React.Component {
                                             }
                                             else if (this.state.sortedTeams[1].name === "New Zealand") {
                                                 return newZealandLogo
+                                            }
+                                            else if (this.state.sortedTeams[1].name === "TrendSetters") {
+                                                return trendsetterLogo
                                             }
                                             else if (this.state.sortedTeams[1].name === "DreamChaser") {
                                                 return dreamchaserLogo
@@ -302,6 +315,9 @@ class TeamStandings extends React.Component {
                                                         else if (team.name === "New Zealand") {
                                                             return newZealandLogo
                                                         }
+                                                        else if (team.name === "TrendSetters") {
+                                                            return trendsetterLogo
+                                                        }
                                                         else if (team.name === "DreamChaser") {
                                                             return dreamchaserLogo
                                                         }
@@ -325,6 +341,9 @@ class TeamStandings extends React.Component {
                                                         }
                                                         else if (team.name === "New Zealand") {
                                                             return newZealandLogo
+                                                        }
+                                                        else if (team.name === "TrendSetters") {
+                                                            return trendsetterLogo
                                                         }
                                                         else if (team.name === "DreamChaser") {
                                                             return dreamchaserLogo
