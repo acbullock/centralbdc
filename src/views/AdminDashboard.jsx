@@ -17,7 +17,7 @@
 import React from "react";
 import axios from "axios"
 // react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 // reactstrap components
 import {
     Button,
@@ -31,7 +31,6 @@ import {
     Table,
     Row,
     Col,
-    Form
 } from "reactstrap";
 import Select from "react-select"
 class AdminDashboard extends React.Component {
@@ -134,7 +133,7 @@ class AdminDashboard extends React.Component {
         }
         else {
             let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true, isSales: true }, { projection: { label: 1, value: 1, isActive: 1 } });
-            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { lastCall: 1, "appointments.agent_id": 1, "appointments.value": 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1 } })
+            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { account_type: 1, callCountLastUpdated: 1, extension: 1, lastCall: 1, "appointments.agent_id": 1, "appointments.value": 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1 } })
             for (let a in agents) {
                 agents[a].label = agents[a].name;
                 agents[a].value = agents[a]._id
@@ -147,7 +146,7 @@ class AdminDashboard extends React.Component {
             this._isMounted && await this.setState({ dealerships, agents });
             this._isMounted && this.getTodayAppts();
             this._isMounted && this.sortLastAppts();
-            this._isMounted && this.getTop10();
+            this._isMounted && await this.getTop10();
             this._isMounted && this.getMonthChart()
         }
         this._isMounted && this.setState({ loading: false, agent: this.props.agent });
@@ -207,16 +206,12 @@ class AdminDashboard extends React.Component {
     async getTodayAppts() {
         let today = new Date();
         today = new Date(today.setHours(8, 0, 0, 0))
-        let first = new Date()
-        first = new Date(first.setDate(1))
-        first = new Date(first.setHours(0, 0, 0, 0))
         let now = new Date();
         let elapsed = now.getTime() - today.getTime();
         elapsed /= (1000 * 60 * 60)
 
         let hrs = now.getDay() === 0 ? 8 : 12
         let days = now.getDate()
-        let metrics = this._isMounted && await this.props.mongo.findOne("admin_dashboard", { label: "centralbdc_metrics" }, { projection: { total_lifetime: 1 } })
         let lifetime_appts = this._isMounted && await this.props.mongo.count("all_appointments", {})
         let month_appts = this._isMounted && await this.props.mongo.count("all_appointments", {
             "dealership_department": { "$ne": "Service" },
@@ -254,7 +249,7 @@ class AdminDashboard extends React.Component {
             agent_counts[this.state.agents[a]._id] = 0
         }
         for (let a in today_appts) {
-            if (agent_counts[today_appts[a].agent_id] != undefined) {
+            if (agent_counts[today_appts[a].agent_id] !== undefined) {
                 agent_counts[today_appts[a].agent_id]++;
             }
             else {
@@ -306,7 +301,7 @@ class AdminDashboard extends React.Component {
         let dlr_apps = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealer.value }, { projection: { agent_id: 1 } })
         let dict = {};
         for (let d in dlr_apps) {
-            if (dict[dlr_apps[d].agent_id] == undefined) {
+            if (dict[dlr_apps[d].agent_id] === undefined) {
                 dict[dlr_apps[d].agent_id] = 1;
             }
             else {
@@ -315,10 +310,10 @@ class AdminDashboard extends React.Component {
         }
         let sortable = [];
         for (let d in dict) {
-            let index = this.state.agents.findIndex((a) => { return a._id == d })
+            let index = this.state.agents.findIndex((a) => { return a._id === d })
             if (index === -1) { continue }
             // let name = this._isMounted && await this.props.mongo.findOne("agents", { _id: d })
-            let name = this.state.agents[this.state.agents.findIndex((a) => { return a._id == d })]
+            let name = this.state.agents[this.state.agents.findIndex((a) => { return a._id === d })]
             sortable.push({ name: name.name, count: dict[d] })
         }
         this._isMounted && sortable.sort((a, b) => {
@@ -421,7 +416,7 @@ class AdminDashboard extends React.Component {
                                                 if (i > 9) return null;
                                                 let name = "Unavailable"
                                                 for (let b in this.state.agents) {
-                                                    if (this.state.agents[b]._id == a[0]) {
+                                                    if (this.state.agents[b]._id === a[0]) {
                                                         name = this.state.agents[b].name
                                                     }
                                                 }
@@ -477,7 +472,6 @@ class AdminDashboard extends React.Component {
                                                 let stales = []
                                                 for (let l in this.state.last_appts) {
                                                     if (l > 9) break;
-                                                    let dealer = {};
                                                     for (let dealership in this.state.dealerships) {
                                                         if (this.state.dealerships[dealership].value === this.state.last_appts[l].dealership) {
                                                             stales.push(this.state.dealerships[dealership].label)
@@ -546,7 +540,7 @@ class AdminDashboard extends React.Component {
 
 
                     </Row>
-                    <Row style={{ justifyContent: "center" }} className="text-center" hidden={this.state.agent == undefined ? true : (this.state.agent.name !== "Admin User" && this.state.agent.name !== "Marc Vertus")}>
+                    <Row style={{ justifyContent: "center" }} className="text-center" hidden={this.state.agent === undefined ? true : (this.state.agent.name !== "Admin User" && this.state.agent.name !== "Marc Vertus")}>
                         <Col lg="6" style={{ justifyContent: "center" }} className="text-center">
                             <Card className="card-raised card-white shadow" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader>
@@ -564,7 +558,7 @@ class AdminDashboard extends React.Component {
                                         </thead>
                                         <tbody>
                                             {(() => {
-                                                let agents = this._isMounted && this.state.agents.filter((a) => { return a.lastCall !== null && !isNaN(new Date(a.lastCall).getTime()) })
+                                                let agents = this._isMounted && this.state.agents.filter((a) => { return a.lastCall !== null && !isNaN(new Date(a.lastCall).getTime()) && a.account_type === "agent" })
                                                 for (let a in agents) {
                                                     agents[a].elapsed = Math.round(10 * ((new Date().getTime() - new Date(agents[a].lastCall).getTime()) / (60000))) / 10
                                                     // console.log(Math.round(10 * (new Date().getTime() - new Date(agents[a].lastCall).getTime()) / (1000 * 60)) / 10)
@@ -575,7 +569,9 @@ class AdminDashboard extends React.Component {
                                                     return 0;
                                                 })
                                                 return this._isMounted && agents.map((a, i) => {
-                                                    if (a.lastCall === null) return null
+                                                    if (a.lastCall === null) {
+                                                        return null
+                                                    }
                                                     return (
                                                         <tr key={i}>
                                                             <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
@@ -602,7 +598,7 @@ class AdminDashboard extends React.Component {
                                                                 let outbound = this._isMounted && records.filter(r => { return r.direction === "Outbound" })
                                                                 let inbound = this._isMounted && records.filter(r => { return r.direction === "Inbound" && r.result === "Accepted" })
                                                                 this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { name: a.name }, { inboundToday: inbound.length, outboundToday: outbound.length, callCountLastUpdated: new Date(), lastCall: lastTime })
-                                                                let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { lastCall: 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1 })
+                                                                let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { account_type: 1, lastCall: 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1, extension: 1, callCountLastUpdated: 1 } })
                                                                 this._isMounted && this.setState({ agents })
                                                                 //force update
                                                                 setTimeout(() => {

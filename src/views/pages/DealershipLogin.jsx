@@ -149,7 +149,7 @@ class DealershipLogin extends React.Component {
                       color="info"
                       href="#pablo"
                       onClick={()=>this.resetPassword()}
-                      disabled={this.state.loading || this.state.email.length == 0}
+                      disabled={this.state.loading || this.state.email.length === 0}
                     >
                       Reset Password</Button>
                     <Card color="warning" hidden={this.state.error.length === 0} style={{padding: 10}}>

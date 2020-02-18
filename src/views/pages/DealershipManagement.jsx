@@ -118,7 +118,7 @@ class DealershipManagement extends React.Component {
         this._isMounted = false
     }
     toggle(modal_name) {
-        if (this.state[modal_name] == false) {
+        if (this.state[modal_name] === false) {
             this.clearAddValues()
         }
         this._isMounted && this.setState({ [modal_name]: !this.state[modal_name] })
@@ -129,13 +129,13 @@ class DealershipManagement extends React.Component {
     }
     addToTextList(phoneNumber) {
         let arr = this.state.addTextList
-        if (arr.indexOf(phoneNumber) == -1)
+        if (arr.indexOf(phoneNumber) === -1)
             arr.push(phoneNumber)
         this._isMounted && this.setState({ addTextList: arr, newTextContact: "" })
     }
     addToServiceList(phoneNumber) {
         let arr = this.state.addServiceTextList
-        if (arr.indexOf(phoneNumber) == -1)
+        if (arr.indexOf(phoneNumber) === -1)
             arr.push(phoneNumber)
         this._isMounted && this.setState({ addServiceTextList: arr, newServiceContact: "" })
     }
@@ -153,13 +153,13 @@ class DealershipManagement extends React.Component {
     }
     async addToEditTextList(phoneNumber) {
         let arr = this.state.editTextList
-        if (arr.indexOf(phoneNumber) == -1)
+        if (arr.indexOf(phoneNumber) === -1)
             arr.push(phoneNumber)
         this._isMounted && this.setState({ editTextList: arr, newEditTextContact: "" })
     }
     async addToEditServiceList(phoneNumber) {
         let arr = this.state.editServiceTextList
-        if (arr.indexOf(phoneNumber) == -1)
+        if (arr.indexOf(phoneNumber) === -1)
             arr.push(phoneNumber)
         this._isMounted && this.setState({ editServiceTextList: arr, newEditServiceContact: "" })
     }
@@ -688,7 +688,7 @@ class DealershipManagement extends React.Component {
                                                     this.addNewDealershp()
                                                 }} color="success" disabled={
                                                     this.state.addDealershipName.length === 0 ||
-                                                    this.state.addDealershipGroup.label == undefined ||
+                                                    !this.state.addDealershipGroup.label ||
                                                     // this.state.addTextList.length === 0 ||
                                                     // this.state.addServiceTextList.length === 0 ||
                                                     this.state.addDealershipPhone.length != 10 ||
@@ -765,8 +765,8 @@ class DealershipManagement extends React.Component {
                                         onChange={(e) => { this.onValueChange("editDealershipGroup", e); this._isMounted && this.setState({ editGroupValue: e.value }) }}
                                     />
                                     <br />
-                                    {/* <Button color="warning" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.deleteGroup() }}>Delete Group Name</Button> */}
-                                    <Button color="neutral" disabled={this.state.editDealershipGroup.label.length == 0} onClick={() => { this.toggle("editGroupModal"); this._isMounted && this.setState({ editGroupName: this.state.editDealershipGroup.label }) }}>Edit Group Name</Button>
+                                    {/* <Button color="warning" disabled={this.state.editDealershipGroup.label.length === 0} onClick={() => { this.deleteGroup() }}>Delete Group Name</Button> */}
+                                    <Button color="neutral" disabled={this.state.editDealershipGroup.label.length === 0} onClick={() => { this.toggle("editGroupModal"); this._isMounted && this.setState({ editGroupName: this.state.editDealershipGroup.label }) }}>Edit Group Name</Button>
                                     <Modal isOpen={this.state.editGroupModal} toggle={() => { this.toggle("editGroupModal") }} style={{ 'maxHeight': 'calc(100vh - 210px)' }}>
                                         <ModalHeader toggle={() => { this.toggle("editGroupModal") }}>Edit Group</ModalHeader>
                                         <ModalBody>
@@ -797,8 +797,8 @@ class DealershipManagement extends React.Component {
                                         onChange={(e) => { this.onValueChange("editDealership", e); this._isMounted && this.setState({ editDealershipValue: e.value }) }}
                                     />
                                     <br />
-                                    {/* <Button color="danger" disabled={this.state.editDealership.label.length == 0} onClick={() => { this.deleteDealership() }}>Delete Dealership</Button> */}
-                                    <Button color="neutral" disabled={this.state.editDealership.label.length == 0} onClick={async () => {
+                                    {/* <Button color="danger" disabled={this.state.editDealership.label.length === 0} onClick={() => { this.deleteDealership() }}>Delete Dealership</Button> */}
+                                    <Button color="neutral" disabled={this.state.editDealership.label.length === 0} onClick={async () => {
                                         this._isMounted && this.setState({ loading: true })
                                         let d = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.editDealership.value })
                                         let group = this._isMounted && await this.getGroup(this.state.editDealership.group)
@@ -818,7 +818,7 @@ class DealershipManagement extends React.Component {
                                             editRingCentralService: this.state.editDealership.serviceTextFrom || "",
                                             editDataMining: this.state.editDealership.dataMining.substring(2, 12) || "",
                                             editSales: this.state.editDealership.sales.substring(2, 12) || "",
-                                            editIsActive: this.state.editDealership.isActive == true ? "active" : "inactive",
+                                            editIsActive: this.state.editDealership.isActive === true ? "active" : "inactive",
                                             editIsSales: this.state.editDealership.isSales,
                                             editIsService: this.state.editDealership.isService,
                                             editSalesRequired: this.state.editDealership.salesRequired || false,
@@ -1060,7 +1060,7 @@ class DealershipManagement extends React.Component {
                                                     this.updateDealership()
                                                 }} color="success" disabled={
                                                     this.state.editDealershipName.length === 0 ||
-                                                    this.state.editDealershipGroup2.label == undefined ||
+                                                    !this.state.editDealershipGroup2.label ||
                                                     isNaN(this.state.editDailyApptGoal) ||
                                                     // this.state.editTextList.length === 0 ||
                                                     // this.state.editServiceTextList.length === 0 ||

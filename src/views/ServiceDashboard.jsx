@@ -16,11 +16,8 @@
 */
 import React from "react";
 
-// react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
 // reactstrap components
 import {
-    Button,
     Card,
     CardImg,
     Container,
@@ -98,7 +95,7 @@ class ServiceDashboard extends React.Component {
             })
             if (agent.account_type !== "admin") {
                 let selected = this._isMounted && agents.filter((a) => {
-                    return a._id == agent._id
+                    return a._id === agent._id
                 })
                 selected = selected[0]
                 this.getBreakDown(agent)
@@ -156,7 +153,7 @@ class ServiceDashboard extends React.Component {
             }
             let approved_appointments = this._isMounted && appointments.filter((a) => {
 
-                return a.verified != undefined
+                return a.verified !== undefined
             })
             let recentLabels = []
             let recentData = []
@@ -259,7 +256,7 @@ class ServiceDashboard extends React.Component {
             }
 
             for (let b in allAgents[a].appointments) {
-                if (allAgents[a].appointments[b].verified != undefined) {
+                if (allAgents[a].appointments[b].verified !== undefined) {
                     if (new Date(this.state.mostRecent.time).getTime() < new Date(allAgents[a].appointments[b].verified).getTime()) {
                         this._isMounted && this.setState({ mostRecent: { name: allAgents[a].name, time: allAgents[a].appointments[b].verified, dealership: allAgents[a].appointments[b].dealership } })
                     }
@@ -359,14 +356,14 @@ class ServiceDashboard extends React.Component {
         d = new Date(d);
         d.setHours(0, 0, 0, 0)
         var day = d.getDay(),
-            diff = d.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
+            diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
         return new Date(d.setDate(diff));
     }
     createdAppointmentsSince(appts, numDays) {
         let ct = 0
         let curr = new Date()
         curr.setHours(0, 0, 0, 0)
-        if (numDays == 0) {
+        if (numDays === 0) {
             for (let appt in appts) {
                 if (new Date(appts[appt].verified).getTime() >= curr.getTime()) {
                     ct++;
@@ -374,7 +371,7 @@ class ServiceDashboard extends React.Component {
             }
             return ct;
         }
-        if (numDays == 7) {
+        if (numDays === 7) {
             let monday = this.getMonday(new Date())
             for (let appt in appts) {
                 if (new Date(appts[appt].verified).getTime() >= monday.getTime()) {
@@ -383,7 +380,7 @@ class ServiceDashboard extends React.Component {
             }
             return ct;
         }
-        if (numDays == 30) {
+        if (numDays === 30) {
             let date = new Date()
             var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
             for (let appt in appts) {
@@ -434,16 +431,19 @@ class ServiceDashboard extends React.Component {
                 continue;
             }
             let color = "red";
-            let count = this._isMounted && appointments.filter((a) => {
-                return new Date(a.verified).getTime() >= start.getTime() && new Date(a.verified).getTime() < end.getTime()
-            })
-            if (count.length == 2) {
+            let count = 0;
+            for (let a in appointments) {
+                if (new Date(appointments[a].verified).getTime() >= start.getTime() && new Date(appointments[a].verified).getTime() < end.getTime()) {
+                    count++
+                }
+            }
+            if (count === 2) {
                 color = "yellow"
             }
-            if (count.length > 2) {
+            if (count > 2) {
                 color = "green"
             }
-            counts[i + 7] = { count: count.length, color }
+            counts[i + 7] = { count: count, color }
             start = new Date(end);
             end.setHours(end.getHours() + 1, 0, 0, 0)
         }
@@ -499,8 +499,8 @@ class ServiceDashboard extends React.Component {
                                 </CardHeader>
                                 <CardBody>
                                     <Select
-                                        options={this.state.agent.account_type == "admin" ? this.state.agents : this.state.agents.filter((a) => { return a.label === this.state.agent.name })}
-                                        value={this.state.agent.account_type == "admin" ? this.state.selected_agent : this.state.agents.filter((a) => { return a.label === this.state.agent.name })[0]}
+                                        options={this.state.agent.account_type === "admin" ? this.state.agents : this.state.agents.filter((a) => { return a.label === this.state.agent.name })}
+                                        value={this.state.agent.account_type === "admin" ? this.state.selected_agent : this.state.agents.filter((a) => { return a.label === this.state.agent.name })[0]}
                                         onChange={(e) => {
                                             this.setState({ selected_agent: e })
                                             this.getBreakDown(e)
@@ -533,22 +533,22 @@ class ServiceDashboard extends React.Component {
                                         <tbody>
                                             <tr>
                                                 <td>Appointments</td>
-                                                <td><p style={this.state.counts[7] == undefined ? {} : { color: this.state.counts[7].color }}><strong>{this.state.counts[7] == undefined ? 0 : this.state.counts[7].count}</strong></p></td>
-                                                <td><p style={this.state.counts[8] == undefined ? {} : { color: this.state.counts[8].color }}><strong>{this.state.counts[8] == undefined ? 0 : this.state.counts[8].count}</strong></p></td>
-                                                <td><p style={this.state.counts[9] == undefined ? {} : { color: this.state.counts[9].color }}><strong>{this.state.counts[9] == undefined ? 0 : this.state.counts[9].count}</strong></p></td>
-                                                <td><p style={this.state.counts[10] == undefined ? {} : { color: this.state.counts[10].color }}><strong>{this.state.counts[10] == undefined ? 0 : this.state.counts[10].count}</strong></p></td>
-                                                <td><p style={this.state.counts[11] == undefined ? {} : { color: this.state.counts[11].color }}><strong>{this.state.counts[11] == undefined ? 0 : this.state.counts[11].count}</strong></p></td>
-                                                <td><p style={this.state.counts[12] == undefined ? {} : { color: this.state.counts[12].color }}><strong>{this.state.counts[12] == undefined ? 0 : this.state.counts[12].count}</strong></p></td>
-                                                <td><p style={this.state.counts[13] == undefined ? {} : { color: this.state.counts[13].color }}><strong>{this.state.counts[13] == undefined ? 0 : this.state.counts[13].count}</strong></p></td>
-                                                <td><p style={this.state.counts[14] == undefined ? {} : { color: this.state.counts[14].color }}><strong>{this.state.counts[14] == undefined ? 0 : this.state.counts[14].count}</strong></p></td>
-                                                <td><p style={this.state.counts[15] == undefined ? {} : { color: this.state.counts[15].color }}><strong>{this.state.counts[15] == undefined ? 0 : this.state.counts[15].count}</strong></p></td>
-                                                <td><p style={this.state.counts[16] == undefined ? {} : { color: this.state.counts[16].color }}><strong>{this.state.counts[16] == undefined ? 0 : this.state.counts[16].count}</strong></p></td>
-                                                <td><p style={this.state.counts[17] == undefined ? {} : { color: this.state.counts[17].color }}><strong>{this.state.counts[17] == undefined ? 0 : this.state.counts[17].count}</strong></p></td>
-                                                <td><p style={this.state.counts[18] == undefined ? {} : { color: this.state.counts[18].color }}><strong>{this.state.counts[18] == undefined ? 0 : this.state.counts[18].count}</strong></p></td>
-                                                <td><p style={this.state.counts[19] == undefined ? {} : { color: this.state.counts[19].color }}><strong>{this.state.counts[19] == undefined ? 0 : this.state.counts[19].count}</strong></p></td>
-                                                <td><p style={this.state.counts[20] == undefined ? {} : { color: this.state.counts[20].color }}><strong>{this.state.counts[20] == undefined ? 0 : this.state.counts[20].count}</strong></p></td>
-                                                <td><p style={this.state.counts[21] == undefined ? {} : { color: this.state.counts[21].color }}><strong>{this.state.counts[21] == undefined ? 0 : this.state.counts[21].count}</strong></p></td>
-                                                <td><p style={this.state.counts["total"] == undefined ? {} : { color: this.state.counts["total"].color }}><strong>{this.state.counts["total"] == undefined ? 0 : this.state.counts["total"].count}</strong></p></td>
+                                                <td><p style={this.state.counts[7] === undefined ? {} : { color: this.state.counts[7].color }}><strong>{this.state.counts[7] === undefined ? 0 : this.state.counts[7].count}</strong></p></td>
+                                                <td><p style={this.state.counts[8] === undefined ? {} : { color: this.state.counts[8].color }}><strong>{this.state.counts[8] === undefined ? 0 : this.state.counts[8].count}</strong></p></td>
+                                                <td><p style={this.state.counts[9] === undefined ? {} : { color: this.state.counts[9].color }}><strong>{this.state.counts[9] === undefined ? 0 : this.state.counts[9].count}</strong></p></td>
+                                                <td><p style={this.state.counts[10] === undefined ? {} : { color: this.state.counts[10].color }}><strong>{this.state.counts[10] === undefined ? 0 : this.state.counts[10].count}</strong></p></td>
+                                                <td><p style={this.state.counts[11] === undefined ? {} : { color: this.state.counts[11].color }}><strong>{this.state.counts[11] === undefined ? 0 : this.state.counts[11].count}</strong></p></td>
+                                                <td><p style={this.state.counts[12] === undefined ? {} : { color: this.state.counts[12].color }}><strong>{this.state.counts[12] === undefined ? 0 : this.state.counts[12].count}</strong></p></td>
+                                                <td><p style={this.state.counts[13] === undefined ? {} : { color: this.state.counts[13].color }}><strong>{this.state.counts[13] === undefined ? 0 : this.state.counts[13].count}</strong></p></td>
+                                                <td><p style={this.state.counts[14] === undefined ? {} : { color: this.state.counts[14].color }}><strong>{this.state.counts[14] === undefined ? 0 : this.state.counts[14].count}</strong></p></td>
+                                                <td><p style={this.state.counts[15] === undefined ? {} : { color: this.state.counts[15].color }}><strong>{this.state.counts[15] === undefined ? 0 : this.state.counts[15].count}</strong></p></td>
+                                                <td><p style={this.state.counts[16] === undefined ? {} : { color: this.state.counts[16].color }}><strong>{this.state.counts[16] === undefined ? 0 : this.state.counts[16].count}</strong></p></td>
+                                                <td><p style={this.state.counts[17] === undefined ? {} : { color: this.state.counts[17].color }}><strong>{this.state.counts[17] === undefined ? 0 : this.state.counts[17].count}</strong></p></td>
+                                                <td><p style={this.state.counts[18] === undefined ? {} : { color: this.state.counts[18].color }}><strong>{this.state.counts[18] === undefined ? 0 : this.state.counts[18].count}</strong></p></td>
+                                                <td><p style={this.state.counts[19] === undefined ? {} : { color: this.state.counts[19].color }}><strong>{this.state.counts[19] === undefined ? 0 : this.state.counts[19].count}</strong></p></td>
+                                                <td><p style={this.state.counts[20] === undefined ? {} : { color: this.state.counts[20].color }}><strong>{this.state.counts[20] === undefined ? 0 : this.state.counts[20].count}</strong></p></td>
+                                                <td><p style={this.state.counts[21] === undefined ? {} : { color: this.state.counts[21].color }}><strong>{this.state.counts[21] === undefined ? 0 : this.state.counts[21].count}</strong></p></td>
+                                                <td><p style={this.state.counts["total"] === undefined ? {} : { color: this.state.counts["total"].color }}><strong>{this.state.counts["total"] === undefined ? 0 : this.state.counts["total"].count}</strong></p></td>
                                                 <td><strong>{this.state.counts["total"] === undefined ? 0 : this.getProjection(this.state.counts["total"].count)}</strong></td>
                                             </tr>
                                             <tr>
@@ -568,8 +568,8 @@ class ServiceDashboard extends React.Component {
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-                                                <td><strong>{this.state.selected_agent.outboundToday == undefined || this.state.selected_agent.inboundToday == undefined ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday}</strong></td>
-                                                <td><strong>{this.getProjection(this.state.selected_agent.outboundToday == undefined || this.state.selected_agent.inboundToday == undefined ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday)}</strong></td>
+                                                <td><strong>{this.state.selected_agent.outboundToday === undefined || this.state.selected_agent.inboundToday === undefined ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday}</strong></td>
+                                                <td><strong>{this.getProjection(this.state.selected_agent.outboundToday === undefined || this.state.selected_agent.inboundToday === undefined ? 0 : this.state.selected_agent.outboundToday + this.state.selected_agent.inboundToday)}</strong></td>
                                             </tr>
 
                                         </tbody>
@@ -589,10 +589,6 @@ class ServiceDashboard extends React.Component {
                                     {
 
                                         this._isMounted && this.state.top5.map((a, i) => {
-                                            let namecount = {
-                                                name: this.state.agent.name,
-                                                count: 0
-                                            }
                                             if (i > 0) return null;
                                             let rank = 1
                                             for (let agent in this.state.top5) {

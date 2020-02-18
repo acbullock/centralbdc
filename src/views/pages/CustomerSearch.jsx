@@ -21,12 +21,8 @@ import {
     Button,
     Card,
     CardBody,
-    CardFooter,
     CardImg,
     CardTitle,
-    ListGroupItem,
-    ListGroup,
-    Progress,
     Input,
     Label,
     Container,
@@ -35,9 +31,7 @@ import {
     Row,
     Col
 } from "reactstrap";
-import Select from "react-select"
 import axios from "axios"
-import ReactPlayer from 'react-player'
 class CustomerSearch extends React.Component {
     constructor(props) {
         super(props);
@@ -92,26 +86,26 @@ class CustomerSearch extends React.Component {
         let dealer = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.agent.dealership })
         let group = this._isMounted && await this.props.mongo.findOne("dealership_groups", { value: dealer.group })
         let dealersInGroup = this._isMounted && this.state.dealerships.filter((d) => {
-            return d.group == group.value
+            return d.group === group.value
         })
         let validNumbers = [];
-        if (this.state.agent.access == "store") {
+        if (this.state.agent.access === "store") {
             validNumbers.push(dealer.dataMining.substring(1, 12))
             validNumbers.push(dealer.sales.substring(1, 12))
         }
-        else if (this.state.agent.access == "group") {
+        else if (this.state.agent.access === "group") {
             for (let d in dealersInGroup) {
-                if (dealersInGroup[d].dataMining.length == 12)
+                if (dealersInGroup[d].dataMining.length === 12)
                     validNumbers.push(dealersInGroup[d].dataMining.substring(1, 12))
-                if (dealersInGroup[d].sales.length == 12)
+                if (dealersInGroup[d].sales.length === 12)
                     validNumbers.push(dealersInGroup[d].sales.substring(1, 12))
             }
         }
-        else if (this.state.agent.access == "admin") {
+        else if (this.state.agent.access === "admin") {
             for (let d in this.state.dealerships) {
-                if (this.state.dealerships[d].dataMining.length == 12)
+                if (this.state.dealerships[d].dataMining.length === 12)
                     validNumbers.push(this.state.dealerships[d].dataMining.substring(1, 12))
-                if (this.state.dealerships[d].sales.length == 12)
+                if (this.state.dealerships[d].sales.length === 12)
                     validNumbers.push(this.state.dealerships[d].sales.substring(1, 12))
             }
         }
@@ -139,11 +133,11 @@ class CustomerSearch extends React.Component {
         results = this._isMounted && results.filter((r) => {
             let useMe = false;
             for (let v in validNumbers) {
-                if (r.to.phoneNumber == undefined || r.from.phoneNumber == undefined || r.recording == undefined) {
+                if (r.to.phoneNumber === undefined || r.from.phoneNumber === undefined || r.recording === undefined) {
                     continue;
                 }
-                useMe = r.to.phoneNumber.indexOf(validNumbers[v]) != -1 ||
-                    r.from.phoneNumber.indexOf(validNumbers[v]) != -1;
+                useMe = r.to.phoneNumber.indexOf(validNumbers[v]) !== -1 ||
+                    r.from.phoneNumber.indexOf(validNumbers[v]) !== -1;
                 if (useMe) {
                     break;
                 }
@@ -208,7 +202,7 @@ class CustomerSearch extends React.Component {
                                             </FormGroup>
                                             <FormGroup>
                                                 <Button disabled={this.state.searchPhone.length < 1} color="danger" onClick={() => { this.setState({ searchPhone: "" }) }}>Clear Form</Button>
-                                                <Button disabled={this.state.searchPhone.length != 10} color="success" type="submit" >Search</Button>
+                                                <Button disabled={this.state.searchPhone.length !== 10} color="success" type="submit" >Search</Button>
                                             </FormGroup>
                                         </Form>
                                     </CardBody>

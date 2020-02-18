@@ -16,18 +16,12 @@
 */
 import React from "react";
 
-// react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
 // reactstrap components
 import {
-  Button,
   Card,
-  CardImg,
-  Container,
   CardHeader,
   CardBody,
   CardTitle,
-  Table,
   Row,
   Col,
   FormGroup,
@@ -397,7 +391,7 @@ class DealershipDashboard extends React.Component {
                         return <strong>Loading..</strong>
                       }
                       else {
-                        return <strong>{this.state.showType == "sales" ? this.state.todaySalesApps : this.state.todayServiceApps}</strong>;
+                        return <strong>{this.state.showType === "sales" ? this.state.todaySalesApps : this.state.todayServiceApps}</strong>;
                       }
                     })()}</h1>
                   </CardBody>
@@ -419,7 +413,7 @@ class DealershipDashboard extends React.Component {
                         return <strong>Loading..</strong>
                       }
                       else {
-                        return <strong>{this.state.showType == "sales" ? this.state.tomorrowSalesApps : this.state.tomorrowServiceApps}</strong>;
+                        return <strong>{this.state.showType === "sales" ? this.state.tomorrowSalesApps : this.state.tomorrowServiceApps}</strong>;
                       }
                     })()}</h1>
                   </CardBody>
@@ -461,7 +455,7 @@ class DealershipDashboard extends React.Component {
                         return <strong>Loading..</strong>
                       }
                       else {
-                        return <strong>{this.state.showType == "sales" ? this.state.thisMonthSalesApps : this.state.thisMonthServiceApps}</strong>;
+                        return <strong>{this.state.showType === "sales" ? this.state.thisMonthSalesApps : this.state.thisMonthServiceApps}</strong>;
                       }
                     })()}</h1>
                   </CardBody>
@@ -497,7 +491,7 @@ class DealershipDashboard extends React.Component {
                         return <strong>Loading..</strong>
                       }
                       else {
-                        return <strong>{this.state.showType == "sales" ? this.state.lastMonthSalesApps : this.state.lastMonthServiceApps}</strong>;
+                        return <strong>{this.state.showType === "sales" ? this.state.lastMonthSalesApps : this.state.lastMonthServiceApps}</strong>;
                       }
                     })()}</h1>
                   </CardBody>

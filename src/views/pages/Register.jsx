@@ -47,19 +47,19 @@ class Register extends React.Component {
       fullName: "",
       adminChecked: false,
       approverChecked: false,
-      error:"",
+      error: "",
       loading: false
     };
   }
   async componentDidMount() {
     document.body.classList.toggle("register-page");
     let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb);
-    if(user.userId === undefined){
+    if (user.userId === undefined) {
       this.props.history.push("/auth/login")
     }
-    else{
-      let agent = await this.props.mongo.db.collection("agents").findOne({userId: user.userId});
-      if(agent.account_type!=="admin"){
+    else {
+      let agent = await this.props.mongo.db.collection("agents").findOne({ userId: user.userId });
+      if (agent.account_type !== "admin") {
         this.props.history.push("/admin/dashboard")
       }
     }
@@ -67,27 +67,28 @@ class Register extends React.Component {
   componentWillUnmount() {
     document.body.classList.toggle("register-page");
   }
-  async registerUser(){
-    this.setState({loading: true})
-    let {db} = this.props.mongo;
-    
+  async registerUser() {
+    this.setState({ loading: true })
+    let { db } = this.props.mongo;
+
     let pass = true;
-    await this.props.mongo.handleRegister(this.state.email, this.state.password).catch((err)=>{pass = false; console.log(err); this.setState({email: "", phone: "", fullName: "", password: "", error: err})})
-    
-      
-      if(pass){
+    await this.props.mongo.handleRegister(this.state.email, this.state.password).catch((err) => { pass = false; console.log(err); this.setState({ email: "", phone: "", fullName: "", password: "", error: err }) })
+
+
+    if (pass) {
       await db.collection("agents").insertOne({
         email: this.state.email,
         phone: this.state.phone,
         name: this.state.fullName,
-        account_type: this.state.adminChecked === true ?  "admin": "agent",
+        account_type: this.state.adminChecked === true ? "admin" : "agent",
         appointments: [],
         isApprover: this.state.adminChecked === true || this.state.approverChecked === true,
       })
-      this.props.history.push("/admin/dashboard")}
-    this.setState({loading: false})
-    
-    
+      this.props.history.push("/admin/dashboard")
+    }
+    this.setState({ loading: false })
+
+
   }
   render() {
     return (
@@ -102,7 +103,7 @@ class Register extends React.Component {
                     <img
                       alt="logo"
                       src={require("../../assets/img/logo.png")}
-                      style={{padding: 10}}
+                      style={{ padding: 10 }}
                     />
                   </CardHeader>
                   <CardBody>
@@ -113,7 +114,7 @@ class Register extends React.Component {
                             <i className="tim-icons icon-single-02" />
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input placeholder="Full Name" type="text" value={this.state.fullName} onChange={(e)=>{e.preventDefault(); this.setState({fullName: e.target.value})}}/>
+                        <Input placeholder="Full Name" type="text" value={this.state.fullName} onChange={(e) => { e.preventDefault(); this.setState({ fullName: e.target.value }) }} />
                       </InputGroup>
                       <InputGroup>
                         <InputGroupAddon addonType="prepend">
@@ -121,7 +122,7 @@ class Register extends React.Component {
                             <i className="tim-icons icon-email-85" />
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input placeholder="Email" type="email"   value={this.state.email} onChange={(e)=>{e.preventDefault(); this.setState({email: e.target.value.toLowerCase()})}} />
+                        <Input placeholder="Email" type="email" value={this.state.email} onChange={(e) => { e.preventDefault(); this.setState({ email: e.target.value.toLowerCase() }) }} />
                       </InputGroup>
                       <InputGroup>
                         <InputGroupAddon addonType="prepend">
@@ -129,7 +130,7 @@ class Register extends React.Component {
                             <i className="tim-icons icon-mobile" />
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input placeholder="Phone" type="tel"   value={this.state.phone} onChange={(e)=>{e.preventDefault(); this.setState({phone: e.target.value})}} />
+                        <Input placeholder="Phone" type="tel" value={this.state.phone} onChange={(e) => { e.preventDefault(); this.setState({ phone: e.target.value }) }} />
                       </InputGroup>
                       <InputGroup>
                         <InputGroupAddon addonType="prepend">
@@ -137,28 +138,28 @@ class Register extends React.Component {
                             <i className="tim-icons icon-lock-circle" />
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input placeholder="Password" type="password" value={this.state.password} onChange={(e)=>{e.preventDefault(); this.setState({password: e.target.value})}}/>
+                        <Input placeholder="Password" type="password" value={this.state.password} onChange={(e) => { e.preventDefault(); this.setState({ password: e.target.value }) }} />
                       </InputGroup>
                       <FormGroup check className="text-left">
                         <Label check>
-                          <Input type="checkbox" checked={this.state.adminChecked} onChange={()=>{ this.setState({adminChecked: !this.state.adminChecked})}}/>
+                          <Input type="checkbox" checked={this.state.adminChecked} onChange={() => { this.setState({ adminChecked: !this.state.adminChecked }) }} />
                           <span className="form-check-sign" />User is ADMIN
                         </Label>
                       </FormGroup>
                       <FormGroup check className="text-left">
                         <Label check>
-                          <Input type="checkbox" checked={this.state.approverChecked} onChange={()=>{ this.setState({approverChecked: !this.state.approverChecked})}}/>
+                          <Input type="checkbox" checked={this.state.approverChecked} onChange={() => { this.setState({ approverChecked: !this.state.approverChecked }) }} />
                           <span className="form-check-sign" />User is an APPROVER
                         </Label>
                       </FormGroup>
                     </Form>
                   </CardBody>
                   <CardFooter>
-                  <Button
+                    <Button
                       className="btn-round float-left"
                       color="info"
                       href="#pablo"
-                      onClick={e =>{ e.preventDefault(); this.props.history.push("/admin/dashboard")}}
+                      onClick={e => { e.preventDefault(); this.props.history.push("/admin/dashboard") }}
                       size="lg"
                       disabled={this.state.loading}
                     >
@@ -168,14 +169,14 @@ class Register extends React.Component {
                       className="btn-round float-right"
                       color="primary"
                       href="#pablo"
-                      onClick={e => {e.preventDefault(); this.registerUser()}}
+                      onClick={e => { e.preventDefault(); this.registerUser() }}
                       size="lg"
-                      disabled={this.state.loading || this.state.email.length ===0 ||
-                      this.state.fullName.legnth === 0 || this.state.phone.length != 10 || isNaN(this.state.phone)}
+                      disabled={this.state.loading || this.state.email.length === 0 ||
+                        this.state.fullName.legnth === 0 || this.state.phone.length != 10 || isNaN(this.state.phone)}
                     >
                       Create User
                     </Button>
-                    <Card color="warning" hidden={this.state.error.length === 0} style={{padding: 10}}>
+                    <Card color="warning" hidden={this.state.error.length === 0} style={{ padding: 10 }}>
                       <CardText color="white">
                         {this.state.error.message}
                       </CardText>

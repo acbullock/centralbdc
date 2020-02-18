@@ -96,7 +96,7 @@ class DealershipUsers extends React.Component {
         this._isMounted = false
     }
     toggle(modal_name) {
-        if (this.state[modal_name] == false) {
+        if (this.state[modal_name] === false) {
             this.clearAddValues()
         }
         this._isMounted && this.setState({ [modal_name]: !this.state[modal_name] })
@@ -140,7 +140,6 @@ class DealershipUsers extends React.Component {
             if (a.name < b.name) return -1;
             return 0;
         })
-        let users = []
         for (let a in agents) {
             agents[a].label = agents[a].email;
             agents[a].value = agents[a]._id
@@ -315,7 +314,7 @@ class DealershipUsers extends React.Component {
                                                         this.state.addUserName.length === 0 ||
                                                         this.state.addUserEmail.length === 0 ||
                                                         this.state.addUserPhone.length !== 10 ||
-                                                        this.state.addUserDealership.label == undefined ||
+                                                        this.state.addUserDealership.label === undefined ||
                                                         this.state.addActive.length === 0 ||
                                                         this.state.addAccess.length === 0
                                                     }
@@ -353,7 +352,7 @@ class DealershipUsers extends React.Component {
 
                                     </Form>
                                     <br />
-                                    <Button color="primary" disabled={this.state.editUser.label.length == 0} onClick={async () => {
+                                    <Button color="primary" disabled={this.state.editUser.label.length === 0} onClick={async () => {
                                         this._isMounted && this.setState({ loading: true })
                                         let u = this._isMounted && await this.props.mongo.findOne("dealership_users", { _id: this.state.editUser.value })
                                         let d = this._isMounted && await this.props.mongo.findOne("dealerships", { value: u.dealership })
@@ -364,7 +363,7 @@ class DealershipUsers extends React.Component {
                                             editUserTitle: u.title || "",
                                             editUserDealership: d,
                                             editAccess: u.access,
-                                            editActive: u.isActive == true ? "active" : "inactive"
+                                            editActive: u.isActive === true ? "active" : "inactive"
                                         })
                                         this._isMounted && this.setState({ loading: false })
                                         this.toggle("editUserModal");
