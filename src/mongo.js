@@ -13,7 +13,7 @@ let mongodb = client.getServiceClient(
     RemoteMongoClient.factory,
     "mongodb-atlas"
 );
-let db = mongodb.db("CentralBDC2");
+// let db = mongodb.db("CentralBDC2");
 
 let SERVER_URL = "https://guarded-castle-33109.herokuapp.com"
 // let SERVER_URL = "http://localhost:3001"
@@ -60,7 +60,6 @@ async function handleDealerLogin(email, password) {
 }
 
 async function handleRemoveUser(email) {
-    let agents = await this.getCollection("agents")
     await axios.post(`${SERVER_URL}/findOneAndDelete`, { "collection": "agents", "query": { email } }).catch((err) => console.log(err))
     // await agents.findOneAndDelete({email})
     console.log("delete done")
