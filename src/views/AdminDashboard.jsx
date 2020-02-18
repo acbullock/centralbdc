@@ -150,7 +150,7 @@ class AdminDashboard extends React.Component {
             this._isMounted && this.getTop10();
             this._isMounted && this.getMonthChart()
         }
-        this._isMounted && this.setState({ loading: false });
+        this._isMounted && this.setState({ loading: false, agent: this.props.agent });
     }
     componentWillUnmount() {
         this._isMounted = false
@@ -303,7 +303,7 @@ class AdminDashboard extends React.Component {
     }
     async getDealerTop5(dealer) {
         this._isMounted && this.setState({ dlrtop5loading: true })
-        let dlr_apps = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.label": dealer.label }, { projection: { agent_id: 1 } })
+        let dlr_apps = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealer.value }, { projection: { agent_id: 1 } })
         let dict = {};
         for (let d in dlr_apps) {
             if (dict[dlr_apps[d].agent_id] == undefined) {
