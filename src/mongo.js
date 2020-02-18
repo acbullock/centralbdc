@@ -31,6 +31,9 @@ async function handleLogin(email, password) {
     // let agent = await db.collection("agents").findOne({email});
     let agent = await axios.post(`${SERVER_URL}/findOne`, { "collection": "agents", "query": { email } }).catch((err) => { console.log(err) })
     agent = agent.data
+    if (agent === "") {
+        return;
+    }
     if (agent.userId === undefined) {
         await axios.post(`${SERVER_URL}/findOneAndUpdate`, { "collection": "agents", "query": { email }, "update": { userId } }).catch((err) => { console.log(err) })
         // agent = Object.assign(agent, {userId})
@@ -45,6 +48,9 @@ async function handleDealerLogin(email, password) {
     // let agent = await db.collection("agents").findOne({email});
     let agent = await axios.post(`${SERVER_URL}/findOne`, { "collection": "dealership_users", "query": { email } }).catch((err) => { console.log(err) })
     agent = agent.data
+    if (agent === "") {
+        return;
+    }
     if (agent.userId === undefined) {
         await axios.post(`${SERVER_URL}/findOneAndUpdate`, { "collection": "dealership_users", "query": { email }, "update": { userId } }).catch((err) => { console.log(err) })
         // agent = Object.assign(agent, {userId})
@@ -75,7 +81,12 @@ async function handleLogout(client) {
     let auth = await client.auth.logout();
     return auth;
 }
-
+async function aggregate(collection, pipeline, options) {
+    let req_pipeline = pipeline || {}
+    let req_options = options || {}
+    let arr = await axios.post(`${SERVER_URL}/aggregate`, { "collection": collection, "pipeline": req_pipeline, options: req_options })
+    return arr.data
+}
 async function find(collection, query, options) {
     let req_query = query || {}
     let req_options = options || {}
@@ -140,6 +151,7 @@ export default {
     getActiveUser,
     handleRegister,
     handleRemoveUser,
+    aggregate,
     find,
     findOne,
     findOneAndUpdate,
