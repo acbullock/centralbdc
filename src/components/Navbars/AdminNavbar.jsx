@@ -90,7 +90,6 @@ class AdminNavbar extends React.Component {
   };
   getUserName = async () => {
 
-    let user = this.props.user
     // console.log(user)
     // this.props.mongo.db.collection("agents").findOne({userId: user.userId})
     // .then((res)=>{
@@ -188,7 +187,7 @@ class AdminNavbar extends React.Component {
                     {/* <div className="photo"> */}
                     <div>
                       {/* <img alt="..." src={require("../../assets/img/mike.jpg")} /> */}
-                      <h4>Logged in as: {this.state.name}  <img style={{ display: this.state.imageUrl.length < 1 ? "none" : "" }} src={this.state.imageUrl} className="rounded-circle" height="50" width="50" /></h4>
+                      <h4>Logged in as: {this.state.name}  <img alt="profile img" style={{ display: this.state.imageUrl.length < 1 ? "none" : "" }} src={this.state.imageUrl} className="rounded-circle" height="50" width="50" /></h4>
 
                     </div>
                     <b className="caret d-none d-lg-block d-xl-block" />

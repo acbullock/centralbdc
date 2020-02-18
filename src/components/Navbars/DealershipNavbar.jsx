@@ -19,7 +19,6 @@ import React from "react";
 import classNames from "classnames";
 // reactstrap components
 import {
-  CardImg,
   Button,
   Collapse,
   DropdownToggle,
@@ -50,7 +49,7 @@ class DealershipNavbar extends React.Component {
   }
   async componentWillMount(){
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    if(user.userId == undefined){
+    if(!user.userId){
       this.props.history.push("/authentication/login")
     }
   }

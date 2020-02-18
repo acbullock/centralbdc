@@ -104,20 +104,20 @@ class Admin extends React.Component {
     if (!this.refs.mainPanel) {
       return
     }
-    if (
-      this._isMounted &&
-      document.documentElement.scrollTop > 50 ||
-      document.scrollingElement.scrollTop > 50 ||
-      this.refs.mainPanel.scrollTop > 50
-    ) {
-      this._isMounted && this.setState({ opacity: 1 });
-    } else if (
-      this._isMounted &&
-      document.documentElement.scrollTop <= 50 ||
-      document.scrollingElement.scrollTop <= 50 ||
-      this.refs.mainPanel.scrollTop <= 50
-    ) {
-      this._isMounted && this.setState({ opacity: 0 });
+    if (this._isMounted) {
+      if (
+        document.documentElement.scrollTop > 50 ||
+        document.scrollingElement.scrollTop > 50 ||
+        this.refs.mainPanel.scrollTop > 50
+      ) {
+        this._isMounted && this.setState({ opacity: 1 });
+      } else if (
+        document.documentElement.scrollTop <= 50 ||
+        document.scrollingElement.scrollTop <= 50 ||
+        this.refs.mainPanel.scrollTop <= 50
+      ) {
+        this._isMounted && this.setState({ opacity: 0 });
+      }
     }
   };
   getRoutes = routes => {

@@ -97,7 +97,7 @@ class Pages extends React.Component {
   };
   async componentWillMount(){
     let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    if(user.userId == undefined){
+    if(!user.userId){
       this.props.history.push("/auth/login")
     }
   }

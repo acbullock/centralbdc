@@ -141,13 +141,13 @@ class DealershipManagement extends React.Component {
     }
     removeFromTextList(phoneNumber) {
         let arr = this.state.addTextList
-        if (arr.indexOf(phoneNumber) != -1)
+        if (arr.indexOf(phoneNumber) !== -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
         this._isMounted && this.setState({ addTextList: arr, newTextContact: "" })
     }
     removeFromServiceList(phoneNumber) {
         let arr = this.state.addServiceTextList
-        if (arr.indexOf(phoneNumber) != -1)
+        if (arr.indexOf(phoneNumber) !== -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
         this._isMounted && this.setState({ addServiceTextList: arr, newServiceContact: "" })
     }
@@ -165,13 +165,13 @@ class DealershipManagement extends React.Component {
     }
     removeFromEditTextList(phoneNumber) {
         let arr = this.state.editTextList
-        if (arr.indexOf(phoneNumber) != -1)
+        if (arr.indexOf(phoneNumber) !== -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
         this._isMounted && this.setState({ editTextList: arr, newEditTextContact: "" })
     }
     removeFromEditServiceList(phoneNumber) {
         let arr = this.state.editServiceTextList
-        if (arr.indexOf(phoneNumber) != -1)
+        if (arr.indexOf(phoneNumber) !== -1)
             arr.splice(arr.indexOf(phoneNumber), 1);
         this._isMounted && this.setState({ editServiceTextList: arr, newEditServiceContact: "" })
     }
@@ -568,10 +568,10 @@ class DealershipManagement extends React.Component {
                                                         })
                                                     }
                                                     <Input value={this.state.newTextContact} onChange={(e) => { this.onValueChange("newTextContact", e.target.value) }} type="tel" />
-                                                    <Button disabled={this.state.newTextContact.length != 10} color="danger" onClick={(e) => { this.removeFromTextList(this.state.newTextContact) }}>
+                                                    <Button disabled={this.state.newTextContact.length !== 10} color="danger" onClick={(e) => { this.removeFromTextList(this.state.newTextContact) }}>
                                                         <i className="tim-icons icon-simple-remove" />
                                                     </Button>
-                                                    <Button disabled={this.state.newTextContact.length != 10} color="primary" onClick={(e) => { this.addToTextList(this.state.newTextContact) }}>
+                                                    <Button disabled={this.state.newTextContact.length !== 10} color="primary" onClick={(e) => { this.addToTextList(this.state.newTextContact) }}>
                                                         <i className="tim-icons icon-simple-add" />
                                                     </Button>
                                                 </FormGroup>
@@ -584,10 +584,10 @@ class DealershipManagement extends React.Component {
                                                         })
                                                     }
                                                     <Input value={this.state.newServiceContact} onChange={(e) => { this.onValueChange("newServiceContact", e.target.value) }} type="tel" />
-                                                    <Button disabled={this.state.newServiceContact.length != 10} color="danger" onClick={(e) => { this.removeFromServiceList(this.state.newServiceContact) }}>
+                                                    <Button disabled={this.state.newServiceContact.length !== 10} color="danger" onClick={(e) => { this.removeFromServiceList(this.state.newServiceContact) }}>
                                                         <i className="tim-icons icon-simple-remove" />
                                                     </Button>
-                                                    <Button disabled={this.state.newServiceContact.length != 10} color="primary" onClick={(e) => { this.addToServiceList(this.state.newServiceContact) }}>
+                                                    <Button disabled={this.state.newServiceContact.length !== 10} color="primary" onClick={(e) => { this.addToServiceList(this.state.newServiceContact) }}>
                                                         <i className="tim-icons icon-simple-add" />
                                                     </Button>
                                                 </FormGroup>
@@ -691,7 +691,7 @@ class DealershipManagement extends React.Component {
                                                     !this.state.addDealershipGroup.label ||
                                                     // this.state.addTextList.length === 0 ||
                                                     // this.state.addServiceTextList.length === 0 ||
-                                                    this.state.addDealershipPhone.length != 10 ||
+                                                    this.state.addDealershipPhone.length !== 10 ||
                                                     isNaN(this.state.addDealershipPhone) ||
                                                     this.state.avgMonthlyLeadCount.length === 0 ||
                                                     isNaN(this.state.avgMonthlyLeadCount) ||
@@ -701,13 +701,13 @@ class DealershipManagement extends React.Component {
                                                     this.state.avgMonthlyPhoneUps.length === 0 ||
                                                     isNaN(this.state.avgMonthlyPhoneUps) ||
                                                     isNaN(this.state.dailyApptGoal) ||
-                                                    // this.state.addRingCentral.length != 10 ||
+                                                    // this.state.addRingCentral.length !== 10 ||
                                                     // isNaN(this.state.addRingCentral) ||
-                                                    // this.state.addRingCentralService.length != 10 ||
+                                                    // this.state.addRingCentralService.length !== 10 ||
                                                     // isNaN(this.state.addRingCentralService) ||
-                                                    this.state.addDataMining.length != 10 ||
+                                                    this.state.addDataMining.length !== 10 ||
                                                     isNaN(this.state.addDataMining) ||
-                                                    this.state.addSales.length != 10 ||
+                                                    this.state.addSales.length !== 10 ||
                                                     isNaN(this.state.addSales) ||
                                                     this.state.addIsActive.length === 0 ||
                                                     (this.state.addIsSales === false && this.state.addIsService === false)
@@ -935,10 +935,10 @@ class DealershipManagement extends React.Component {
                                                         })
                                                     }
                                                     <Input value={this.state.newEditTextContact} onChange={(e) => { this.onValueChange("newEditTextContact", e.target.value) }} type="tel" />
-                                                    <Button disabled={this.state.newEditTextContact.length != 10} color="danger" onClick={(e) => { this.removeFromEditTextList(this.state.newEditTextContact) }}>
+                                                    <Button disabled={this.state.newEditTextContact.length !== 10} color="danger" onClick={(e) => { this.removeFromEditTextList(this.state.newEditTextContact) }}>
                                                         <i className="tim-icons icon-simple-remove" />
                                                     </Button>
-                                                    <Button disabled={this.state.newEditTextContact.length != 10} color="primary" onClick={(e) => { this.addToEditTextList(this.state.newEditTextContact) }}>
+                                                    <Button disabled={this.state.newEditTextContact.length !== 10} color="primary" onClick={(e) => { this.addToEditTextList(this.state.newEditTextContact) }}>
                                                         <i className="tim-icons icon-simple-add" />
                                                     </Button>
                                                 </FormGroup>
@@ -951,10 +951,10 @@ class DealershipManagement extends React.Component {
                                                         })
                                                     }
                                                     <Input value={this.state.newEditServiceContact} onChange={(e) => { this.onValueChange("newEditServiceContact", e.target.value) }} type="tel" />
-                                                    <Button disabled={this.state.newEditServiceContact.length != 10} color="danger" onClick={(e) => { this.removeFromEditServiceList(this.state.newEditServiceContact) }}>
+                                                    <Button disabled={this.state.newEditServiceContact.length !== 10} color="danger" onClick={(e) => { this.removeFromEditServiceList(this.state.newEditServiceContact) }}>
                                                         <i className="tim-icons icon-simple-remove" />
                                                     </Button>
-                                                    <Button disabled={this.state.newEditServiceContact.length != 10} color="primary" onClick={(e) => { this.addToEditServiceList(this.state.newEditServiceContact) }}>
+                                                    <Button disabled={this.state.newEditServiceContact.length !== 10} color="primary" onClick={(e) => { this.addToEditServiceList(this.state.newEditServiceContact) }}>
                                                         <i className="tim-icons icon-simple-add" />
                                                     </Button>
                                                 </FormGroup>
@@ -1064,7 +1064,7 @@ class DealershipManagement extends React.Component {
                                                     isNaN(this.state.editDailyApptGoal) ||
                                                     // this.state.editTextList.length === 0 ||
                                                     // this.state.editServiceTextList.length === 0 ||
-                                                    this.state.editDealershipPhone.length != 10 ||
+                                                    this.state.editDealershipPhone.length !== 10 ||
                                                     isNaN(this.state.editDealershipPhone) ||
                                                     this.state.editAvgMonthlyLeadCount.length === 0 ||
                                                     isNaN(this.state.editAvgMonthlyLeadCount) ||

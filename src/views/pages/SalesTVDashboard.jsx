@@ -129,40 +129,6 @@ class SalesTVDashboard extends React.Component {
     refreshPage() {
         window.location.reload(false);
     }
-    getBreakDown(agent) {
-        let appointments = agent.appointments
-        let start = new Date()
-        let end = new Date();
-        let now = new Date();
-        let counts = {
-
-        }
-        start.setHours(7, 0, 0, 0)
-        end.setHours(8, 0, 0, 0)
-
-        for (let i = 0; i < 15; i++) {
-
-            if (now.getTime() < start.getTime()) {
-                counts[i + 7] = { count: "", color: "red" }
-                continue;
-            }
-            let color = "red";
-            let count = this._isMounted && appointments.filter((a) => {
-                return new Date(a.verified).getTime() >= start.getTime() && new Date(a.verified).getTime() < end.getTime()
-            })
-            if (count.length === 2) {
-                color = "yellow"
-            }
-            if (count.length > 2) {
-                color = "green"
-            }
-            counts[i + 7] = { count: count.length, color }
-            start = new Date(end);
-            end.setHours(end.getHours() + 1, 0, 0, 0)
-        }
-        counts["total"] = { count: appointments.length, color: "black" }
-        this._isMounted && this.setState({ counts })
-    }
     getProjection(curr) {
         let now = new Date();
         let isSunday = now.getDay() === 0;
