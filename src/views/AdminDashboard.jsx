@@ -17,7 +17,7 @@
 import React from "react";
 import axios from "axios"
 // react plugin used to create charts
-import { Bar } from "react-chartjs-2";
+import { Bar, Pie } from "react-chartjs-2";
 // reactstrap components
 import {
     Button,
@@ -67,7 +67,11 @@ class AdminDashboard extends React.Component {
             monthLabels: [],
             monthData: [],
             hourlyLabels: [],
-            hourlyData: []
+            hourlyData: [],
+            followupLabels: [],
+            followupData: [],
+            followupByAgent: [],
+            followupColors: ["white", "black"]
         };
         this.sortLastAppts = this.sortLastAppts.bind(this);
         this.getTodayAppts = this.getTodayAppts.bind(this);
@@ -76,15 +80,65 @@ class AdminDashboard extends React.Component {
         this.getDealerTop5 = this.getDealerTop5.bind(this)
         this.getMonthChart = this.getMonthChart.bind(this)
         this.getHourlyApps = this.getHourlyApps.bind(this)
+        this.getFollowupChart = this.getFollowupChart.bind(this)
     }
     _isMounted = false;
+    async getFollowupChart(todayAsst) {
+        console.log(todayAsst)
+        let labels = [];
+        let data = []
+        let today = new Date(new Date().setHours(0, 0, 0, 0))
+        todayAsst = todayAsst.filter((a) => {
+            return new Date(a.created).getTime() >= new Date(today).getTime()
+        })
+        console.log(todayAsst)
+        for (let i = 0; i < 12; i++) {
+            let startHour = new Date().getHours() - i
+            let endHour = new Date().getHours() - i + 1
+
+            let startDate = new Date(new Date().setHours(startHour, 0, 0, 0))
+            let endDate = new Date(new Date().setHours(endHour, 0, 0, 0, 0))
+            let curTotal = todayAsst.filter((a) => {
+                return new Date(a.created).getTime() >= startDate.getTime() &&
+                    new Date(a.created).getTime() < endDate.getTime()
+            })
+            labels[11 - i] = startDate.toLocaleTimeString('en-US', { hour: '2-digit' }) + "-" + endDate.toLocaleTimeString('en-US', { hour: '2-digit' })
+            data[11 - i] = curTotal.length
+        }
+
+        let dict = {}
+        for (let a in todayAsst) {
+            if (dict[todayAsst[a].userId] === undefined) {
+                dict[todayAsst[a].userId] = 1;
+            }
+            else {
+                dict[todayAsst[a].userId]++
+            }
+        }
+        console.log(dict)
+        let sortable = []
+        for (let a in dict) {
+            let name = await this.props.mongo.findOne("agents", { userId: a }, { projection: { name: 1 } })
+            sortable.push({ agent: name.name, count: dict[a] })
+        }
+
+        let colors = []
+        for(let a in sortable){
+            colors.push('#' + Math.floor(Math.random() * 16777215).toString(16));
+        }
+        console.log(colors)
+        this.setState({ followupLabels: labels, followupData: data, followupByAgent: sortable, followupColors: colors })
+
+    }
     async getMonthChart() {
         let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         let labels = []
         let data = []
         let todayApps = []
+        let todayAsst = []
         for (let a in this.state.agents) {
             todayApps = this._isMounted && await todayApps.concat(this.state.agents[a].appointments)
+            todayAsst = this._isMounted && await todayAsst.concat(this.state.agents[a].assistance)
         }
         for (let i = 0; i < 12; i++) {
             let curMonth = new Date(new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).setMonth(new Date().getMonth() - i))
@@ -106,6 +160,7 @@ class AdminDashboard extends React.Component {
 
         this.setState({ monthLabels: labels, monthData: data })
         this.getHourlyApps(todayApps)
+        this.getFollowupChart(todayAsst)
     }
     async getHourlyApps(todayApps) {
         let labels = [];
@@ -133,7 +188,7 @@ class AdminDashboard extends React.Component {
         }
         else {
             let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true, isSales: true }, { projection: { label: 1, value: 1, isActive: 1 } });
-            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { account_type: 1, callCountLastUpdated: 1, extension: 1, lastCall: 1, "appointments.agent_id": 1, "appointments.value": 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1 } })
+            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { "assistance.created": 1, "assistance.userId": 1, account_type: 1, callCountLastUpdated: 1, extension: 1, lastCall: 1, "appointments.agent_id": 1, "appointments.value": 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1 } })
             for (let a in agents) {
                 agents[a].label = agents[a].name;
                 agents[a].value = agents[a]._id
@@ -598,7 +653,7 @@ class AdminDashboard extends React.Component {
                                                                 let outbound = this._isMounted && records.filter(r => { return r.direction === "Outbound" })
                                                                 let inbound = this._isMounted && records.filter(r => { return r.direction === "Inbound" && r.result === "Accepted" })
                                                                 this._isMounted && await this.props.mongo.findOneAndUpdate("agents", { name: a.name }, { inboundToday: inbound.length, outboundToday: outbound.length, callCountLastUpdated: new Date(), lastCall: lastTime })
-                                                                let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { account_type: 1, lastCall: 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1, extension: 1, callCountLastUpdated: 1 } })
+                                                                let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { "assistance.created": 1, "assistance.userId": 1, account_type: 1, lastCall: 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1, extension: 1, callCountLastUpdated: 1 } })
                                                                 this._isMounted && this.setState({ agents })
                                                                 //force update
                                                                 setTimeout(() => {
@@ -707,7 +762,68 @@ class AdminDashboard extends React.Component {
                                 </Card>
                             </Card>
                         </Col>
-
+                        <Col lg="6">
+                            <Card className="card-raised card-white blur" color="white" style={{ padding: "20px", background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <Card className="card-raised card-white blur" color="white">
+                                    <Bar
+                                        data={
+                                            {
+                                                labels: this.state.followupLabels,
+                                                datasets: [{ label: "Total Follow-ups", backgroundColor: '#1d67a8', borderColor: '#1d67a8', data: this.state.followupData }]
+                                            }
+                                        }
+                                        labels={this.state.followupLabels}
+                                        options={
+                                            {
+                                                title: {
+                                                    display: true,
+                                                    text: "# of Follow-ups Each Hour",
+                                                    fontSize: 24
+                                                }
+                                            }
+                                        }
+                                    />
+                                </Card>
+                            </Card>
+                        </Col>
+                        <Col lg="6">
+                            <Card className="card-raised card-white blur" color="white" style={{ padding: "20px", background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <Card className="card-raised card-white blur" color="white">
+                                    <Pie
+                                        data={
+                                            {
+                                                datasets: [{
+                                                    backgroundColor: this.state.followupColors,
+                                                    data: (() => {
+                                                        let counts = [];
+                                                        for (let a in this.state.followupByAgent) {
+                                                            counts.push(this.state.followupByAgent[a].count)
+                                                        }
+                                                        return counts
+                                                    })()
+                                                }],
+                                                labels: (() => {
+                                                    let l = [];
+                                                    for (let a in this.state.followupByAgent) {
+                                                        l.push(this.state.followupByAgent[a].agent)
+                                                    }
+                                                    return l
+                                                })()
+                                            }
+                                        }
+                                        options={
+                                            {
+                                                title: {
+                                                    display: true,
+                                                    text: "Today's Follow-ups by Agent",
+                                                    fontSize: 24
+                                                }
+                                            }
+                                        }
+                                    />
+                                </Card>
+                            </Card>
+                        </Col>
                     </Row>
 
                 </div>

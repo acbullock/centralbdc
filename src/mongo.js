@@ -98,8 +98,9 @@ async function count(collection, query) {
     return arr.data
 }
 
-async function findOne(collection, query) {
-    let res = await axios.post(`${SERVER_URL}/findOne`, { "collection": collection, "query": query })
+async function findOne(collection, query, options) {
+    let req_options = options || {}
+    let res = await axios.post(`${SERVER_URL}/findOne`, { "collection": collection, "query": query, "options": req_options })
     return res.data
 }
 

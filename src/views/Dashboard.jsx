@@ -28,7 +28,7 @@ import {
   Col
 } from "reactstrap";
 import Select from "react-select"
-import defaultLogo from "../assets/img/default-logo.png"
+const defaultLogo = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png"
 class Dashboard extends React.Component {
 
   constructor(props) {
