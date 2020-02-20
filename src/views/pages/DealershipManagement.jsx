@@ -365,7 +365,8 @@ class DealershipManagement extends React.Component {
             salesRequired: this.state.addSalesRequired,
             serviceToSalesRequired: this.state.addServiceToSalesRequired,
             serviceRequired: this.state.addServiceRequired,
-            textEmailRequired: this.state.addTextEmailRequired
+            textEmailRequired: this.state.addTextEmailRequired,
+            activated: new Date()
         }
         //insert dealer
         let inserted = this._isMounted && await this.props.mongo.insertOne("dealerships", newDealership)
@@ -411,6 +412,11 @@ class DealershipManagement extends React.Component {
             serviceToSalesRequired: this.state.editServiceToSalesRequired,
             serviceRequired: this.state.editServiceRequired,
             textEmailRequired: this.state.editTextEmailRequired
+        }
+        //see if dealer went from inactive to active, and update activated field
+        let currDlr = this._isMounted && await this.props.mongo.findOne("dealerships", { value: this.state.editDealership.value }, { projection: { isActive: 1 } })
+        if (currDlr.isActive === false && update.isActive === true) {
+            update.activated = new Date()
         }
         //update dealer
         this._isMounted && await this.props.mongo.findOneAndUpdate("dealerships", { value: update_value }, update)

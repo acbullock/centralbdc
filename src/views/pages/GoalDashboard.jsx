@@ -42,9 +42,9 @@ class GoalDashboard extends React.Component {
     }
     async componentWillMount() {
         this._isMounted = true
-        this.setState({ loading: true })
-        await this.getDealerships()
-        await this.getMTDApps()
+        this._isMounted && this.setState({ loading: true })
+        this._isMounted && await this.getDealerships()
+        this._isMounted && await this.getMTDApps()
         this.getDealerCounts()
         this._isMounted && this.setState({ loading: false })
 
@@ -64,7 +64,6 @@ class GoalDashboard extends React.Component {
         let now = new Date()
         let first = new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0))
         // let daysElapsed2 = now.getDate()
-        let daysElapsed = (now.getTime() - first.getTime()) / (1000 * 3600 * 24)
         for (let dealer in dealerships) {
             let dlrCount = 0;
             for (let app in this.state.mtdApps) {
@@ -72,29 +71,39 @@ class GoalDashboard extends React.Component {
                     dlrCount++
                 }
             }
+            let daysElapsed = new Date(dealerships[dealer].activated).getTime() > new Date(first).getTime() ? (now.getTime() - new Date(dealerships[dealer].activated).getTime()) / (1000 * 3600 * 24) : (now.getTime() - first.getTime()) / (1000 * 3600 * 24)
             dealerCounts.push({
                 label: dealerships[dealer].label,
                 goal: parseInt(dealerships[dealer].goal),
                 goalMTD: Math.round(10 * parseInt(dealerships[dealer].goal) * daysElapsed) / 10,
                 count: dlrCount,
                 percentage: Math.round(1000 * dlrCount / (parseInt(dealerships[dealer].goal) * daysElapsed)) / 10,
-                goalDistance: Math.round(10 * ((parseInt(dealerships[dealer].goal) * daysElapsed) - dlrCount)) / 10
-            })
-            for (let d in dealerCounts) {
-                let color = "red";
-                if (dealerCounts[d].percentage > 33) {
-                    color = "yellow"
-                }
-                if (dealerCounts[d].percentage >= 100) {
-                    color = "green"
-                }
-                dealerCounts[d].color = color
-            }
-            dealerCounts.sort((a, b) => {
-                return b.goalDistance - a.goalDistance
+                goalDistance: Math.round(10 * ((parseInt(dealerships[dealer].goal) * daysElapsed) - dlrCount)) / 10,
+                activated: dealerships[dealer].activated
             })
         }
-        this.setState({ dealerCounts })
+        for (let d in dealerCounts) {
+            let color = "red";
+            if (dealerCounts[d].percentage > 33) {
+                color = "yellow"
+            }
+            if (dealerCounts[d].percentage >= 100) {
+                color = "green"
+            }
+            dealerCounts[d].color = color
+
+            if (new Date(dealerCounts[d].activated).getTime() > new Date(first).getTime()) {
+                dealerCounts[d].isNew = true
+            }
+            else {
+                dealerCounts[d].isNew = false
+            }
+        }
+
+        this._isMounted && await dealerCounts.sort((a, b) => {
+            return a.percentage - b.percentage
+        })
+        this._isMounted && this.setState({ dealerCounts })
         let totalGoal = 0;
         let totalCount = 0
         for (let d in dealerCounts) {
@@ -104,10 +113,10 @@ class GoalDashboard extends React.Component {
             }
         }
         let totalPercentage = Math.round(1000 * (totalCount / totalGoal)) / 10
-        this.setState({ totalCount, totalGoal: Math.round(10 * totalGoal) / 10, totalPercentage })
+        this._isMounted && this.setState({ totalCount, totalGoal: Math.round(10 * totalGoal) / 10, totalPercentage })
     }
     async getDealerships() {
-        let dealerships = await this.props.mongo.find("dealerships",
+        let dealerships = this._isMounted && await this.props.mongo.find("dealerships",
             {
                 isActive: true,
                 isSales: true
@@ -117,13 +126,14 @@ class GoalDashboard extends React.Component {
                     label: 1,
                     value: 1,
                     goal: 1,
+                    activated: 1
                 }
             }
         )
-        this.setState({ dealerships })
+        this._isMounted && this.setState({ dealerships })
     }
     async getMTDApps() {
-        let allApps = await this.props.mongo.find("all_appointments",
+        let allApps = this._isMounted && await this.props.mongo.find("all_appointments",
             {
                 dealership_department: {
                     "$ne": "Service"
@@ -138,7 +148,7 @@ class GoalDashboard extends React.Component {
                 }
             }
         )
-        let agents = await this.props.mongo.find("agents",
+        let agents = this._isMounted && await this.props.mongo.find("agents",
             {
                 department: "sales"
             },
@@ -157,8 +167,8 @@ class GoalDashboard extends React.Component {
                 }
             }
         }
-        allApps = await allApps.concat(agentApps)
-        this.setState({ mtdApps: allApps })
+        allApps = this._isMounted && await allApps.concat(agentApps)
+        this._isMounted && this.setState({ mtdApps: allApps })
     }
     refreshPage() {
         window.location.reload(false);
@@ -184,7 +194,7 @@ class GoalDashboard extends React.Component {
                         <Col lg="12">
                             <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardTitle>
-                                    <h1 className="text-center text-white" style={{margin: 20}}>Dealership Goals MTD</h1>
+                                    <h1 className="text-center text-white" style={{ margin: 20 }}>Dealership Goals MTD</h1>
                                     <h3 className="text-center text-white" style={{ marginBottom: 0 }}>Total Count MTD: <strong>{this.state.totalCount}</strong></h3>
                                     <h3 className="text-center text-white" style={{ marginBottom: 0 }}>Total Goal MTD: <strong>{this.state.totalGoal}</strong></h3>
                                     {(() => {
@@ -211,14 +221,14 @@ class GoalDashboard extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.dealerCounts.map((d, i) => {
+                                            {this._isMounted && this.state.dealerCounts.map((d, i) => {
                                                 return (
                                                     <tr key={i}>
-                                                        <td style={{ borderBottom: "solid 1px white" }}><p className="text-white text-center">{d.label}</p></td>
+                                                        <td style={{ borderBottom: "solid 1px white" }}><p className="text-white text-center"><span hidden={!d.isNew} style={{ color: "#CD5C5C" }}><strong> NEW</strong></span> {d.label}</p></td>
                                                         <td style={{ borderBottom: "solid 1px white" }}><p className="text-white text-center">{d.goal}</p></td>
                                                         <td style={{ borderBottom: "solid 1px white" }}><p className="text-white text-center"><strong>{d.count}</strong></p></td>
                                                         <td style={{ borderBottom: "solid 1px white" }}><p className="text-white text-center"><strong>{d.goalMTD}</strong></p></td>
-                                                        <td style={{ borderBottom: "solid 1px white" }}><Progress style={{ height: "20px", width: "150px", fontSize: "18px" }} animated color={d.color} value={d.percentage}>{d.percentage}%</Progress></td>
+                                                        <td style={{ borderBottom: "solid 1px white" }}><Progress style={{ height: "20px", width: "150px", fontSize: "18px" }} color={d.color} value={d.percentage}><strong>{d.percentage}%</strong></Progress></td>
                                                         <td style={{ borderBottom: "solid 1px white" }}><p className="text-white text-center">{d.goalDistance}</p></td>
                                                     </tr>
                                                 )
@@ -226,6 +236,7 @@ class GoalDashboard extends React.Component {
                                         </tbody>
                                     </Table>
                                 </CardBody>
+
                             </Card>
                         </Col>
                     </Row>
