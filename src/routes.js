@@ -47,7 +47,8 @@ import Leads from "./views/pages/Leads.jsx"
 import PaymentCalculator from "./views/pages/PaymentCalculator.jsx"
 import MojoDealershipProfile from "./views/pages/MojoDealershipProfile.jsx"
 import Justin from "./views/pages/Justin.jsx"
-import TeamStandings from "./views/pages/TeamStandings"
+import TeamStandings from "./views/pages/TeamStandings.jsx"
+import GoalDashboard from "./views/pages/GoalDashboard.jsx"
 
 const routes = [
   {
@@ -77,6 +78,14 @@ const routes = [
         rtlName: "لوحة القيادة",
         icon: "tim-icons icon-chart-pie-36",
         component: Dashboard,
+        layout: "/admin"
+      },
+      {
+        path: "/goal_dashboard",
+        name: "Goal Dashbaord",
+        icon: "tim-icons icon-bullet-list-67",
+        adminOnly: true,
+        component: GoalDashboard,
         layout: "/admin"
       },
       {
