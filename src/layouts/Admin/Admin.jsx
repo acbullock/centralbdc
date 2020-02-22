@@ -52,8 +52,8 @@ class Admin extends React.Component {
   getAgent = async () => {
 
     let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
-    let agent = this._isMounted && await this.props.mongo.find("agents", { userId: user.userId, isActive: true }, { projection: { skills: 1, name: 1, email: 1, department: 1, account_type: 1, "appointments.verified": 1, fileBinary: 1 } })
-    agent = agent[0]
+    let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId, isActive: true  })
+    // agent = agent[0]
     return { agent, user }
   }
   async componentDidMount() {
