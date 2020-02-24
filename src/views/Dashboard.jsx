@@ -90,10 +90,10 @@ class Dashboard extends React.Component {
             inboundToday: 1,
             outboundToday: 1,
             callCountLastUpdated: 1,
-            "fileBinary": 1,
             name: 1,
             department: 1,
             "appointments.verified": 1,
+            userId: 1,
           }
         })
 
@@ -116,17 +116,6 @@ class Dashboard extends React.Component {
         let selected = agents[index]
         this._isMounted && this.getBreakDown(agent)
         this._isMounted && this.setState({ selected_agent: selected })
-      }
-      for (let a in agents) {
-        let imageUrl = ""
-        if (agents[a].fileBinary !== undefined) {
-          imageUrl = this._isMounted && await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agents[a].fileBinary.data))
-        }
-        agents[a].imageUrl = imageUrl;
-      }
-      if (agent.fileBinary !== undefined) {
-        let imageUrl = this._isMounted && await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
-        agent.imageUrl = imageUrl
       }
       this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
       this._isMounted && await this.getAppointmentData()
@@ -187,9 +176,9 @@ class Dashboard extends React.Component {
     let nums = []
     for (let a in allAgents) {
       let user = {
+        userId: allAgents[a].userId,
         name: allAgents[a].name,
         count: 0,
-        imageUrl: allAgents[a].imageUrl
       }
 
       for (let b in allAgents[a].appointments) {
@@ -231,9 +220,9 @@ class Dashboard extends React.Component {
       let first = new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0))
       let currApps = allApps
       let user = {
+        userId: allAgents[a].userId,
         name: allAgents[a].name,
         count: currApps.length,
-        imageUrl: allAgents[a].imageUrl,
         mtdProj: Math.round(10 * 26 * (currApps.length / ((new Date().getTime() - first.getTime()) / (1000 * 60 * 60 * 24)))) / 10
       }
       if (allAgents[a]._id === this.state.agent._id)
@@ -522,7 +511,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
-                  <img alt="profile" src={(this.state.agent.imageUrl === undefined || this.state.agent.imageUrl.length < 1) ? defaultLogo : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
+                  <img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${this.state.agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="100" width="100" />
                 </CardHeader>
                 <CardBody>
                   {
@@ -554,7 +543,7 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong>{this.state.mtdloadnew ? " (still loading)" : null}</p></CardTitle>
-                  <img alt="profile" src={(this.state.agent.imageUrl === undefined || this.state.agent.imageUrl.length < 1) ? defaultLogo : this.state.agent.imageUrl} className="rounded-circle" height="100" width="100" />
+                  <img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${this.state.agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="100" width="100" />
                   {/* style={{ background: 'url("https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image")' }}  */}
                 </CardHeader>
                 <CardBody>
@@ -645,7 +634,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={(agent.imageUrl === undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -681,7 +670,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" >
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={(agent.imageUrl === undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -715,7 +704,7 @@ class Dashboard extends React.Component {
                           if (agent.appointments.length === 0 || agent.appointments.length < agent.personalRecord || agent.account_type !== "agent") return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
-                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={(agent.imageUrl === undefined || agent.imageUrl.length < 1) ? defaultLogo : agent.imageUrl} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.appointments.length}</strong></p></td>
                             </tr>

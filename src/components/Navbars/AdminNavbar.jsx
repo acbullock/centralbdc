@@ -44,7 +44,6 @@ class AdminNavbar extends React.Component {
       color: "navbar-transparent",
       mongo: props.mongo,
       email: "",
-      imageUrl: ""
     };
     // console.log(props.mongo.mongodb)
   }
@@ -104,11 +103,7 @@ class AdminNavbar extends React.Component {
       await this.props.history.push("/auth/login")
       return
     }
-    let imageUrl = ""
-    if (agent.fileBinary !== undefined) {
-      imageUrl = await this.props.utils.imageUrlFromBuffer(this.props.utils.toArrayBuffer(agent.fileBinary.data))
-    }
-    this.setState({ email: agent.email, name: agent.name, imageUrl })
+    this.setState({ email: agent.email, name: agent.name })
 
   }
   render() {
@@ -187,7 +182,7 @@ class AdminNavbar extends React.Component {
                     {/* <div className="photo"> */}
                     <div>
                       {/* <img alt="..." src={require("../../assets/img/mike.jpg")} /> */}
-                      <h4>Logged in as: {this.state.name}  <img alt="profile img" style={{ display: this.state.imageUrl.length < 1 ? "none" : "" }} src={this.state.imageUrl} className="rounded-circle" height="50" width="50" /></h4>
+                      <h4>Logged in as: {this.state.name}  <img alt="profile img" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${this.props.agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="50" width="50" /></h4>
 
                     </div>
                     <b className="caret d-none d-lg-block d-xl-block" />
