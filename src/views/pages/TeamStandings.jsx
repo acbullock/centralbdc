@@ -21,6 +21,7 @@ import deathRowLogo from "../../assets/img/deathrow.png"
 import newZealandLogo from "../../assets/img/newzealand.png"
 import dreamchaserLogo from "../../assets/img/dream-chasers.png"
 import trendsetterLogo from "../../assets/img/trendsetters.png"
+import immortalsLogo from "../../assets/img/immortals.png"
 import defaultLogo from "../../assets/img/default-logo.png"
 class TeamStandings extends React.Component {
     constructor(props) {
@@ -147,6 +148,9 @@ class TeamStandings extends React.Component {
                                                 else if (this.state.sortedTeams[0].name === "DreamChaser") {
                                                     return dreamchaserLogo
                                                 }
+                                                else if (this.state.sortedTeams[0].name === "The Immortals") {
+                                                    return immortalsLogo
+                                                }
                                                 else { return defaultLogo }
                                             })()
                                         } style={{ width: "50px" }} />
@@ -174,6 +178,9 @@ class TeamStandings extends React.Component {
                                             }
                                             else if (this.state.sortedTeams[0].name === "DreamChaser") {
                                                 return dreamchaserLogo
+                                            }
+                                            else if (this.state.sortedTeams[0].name === "The Immortals") {
+                                                return immortalsLogo
                                             }
                                             else { return defaultLogo }
                                         })()
@@ -226,6 +233,9 @@ class TeamStandings extends React.Component {
                                                 else if (this.state.sortedTeams[1].name === "DreamChaser") {
                                                     return dreamchaserLogo
                                                 }
+                                                else if (this.state.sortedTeams[1].name === "The Immortals") {
+                                                    return immortalsLogo
+                                                }
                                                 else { return defaultLogo }
                                             })()
                                         } style={{ width: "50px" }} />
@@ -253,6 +263,9 @@ class TeamStandings extends React.Component {
                                             }
                                             else if (this.state.sortedTeams[1].name === "DreamChaser") {
                                                 return dreamchaserLogo
+                                            }
+                                            else if (this.state.sortedTeams[1].name === "The Immortals") {
+                                                return immortalsLogo
                                             }
                                             else { return defaultLogo }
                                         })()
@@ -312,6 +325,9 @@ class TeamStandings extends React.Component {
                                                         else if (team.name === "DreamChaser") {
                                                             return dreamchaserLogo
                                                         }
+                                                        else if (team.name === "The Immortals") {
+                                                            return immortalsLogo
+                                                        }
                                                         else { return defaultLogo }
                                                     })()
                                                 } style={{ height: "25px" }} />
@@ -338,6 +354,9 @@ class TeamStandings extends React.Component {
                                                         }
                                                         else if (team.name === "DreamChaser") {
                                                             return dreamchaserLogo
+                                                        }
+                                                        else if (team.name === "The Immortals") {
+                                                            return immortalsLogo
                                                         }
                                                         else { return defaultLogo }
                                                     })()
