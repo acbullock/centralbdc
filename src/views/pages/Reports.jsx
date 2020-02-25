@@ -78,27 +78,15 @@ class Reports extends React.Component {
     }
     async appCountReport() {
         this._isMounted && this.setState({ loading: true, clicked: false })
-        let appointments = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": this.state.selected_dealership.value });
-        // appointments = appointments.appointments;
-        let verifieds = this._isMounted && appointments.map((a) => { return a.verified })
-        let agents = this._isMounted && await this.props.mongo.find("agents")
-        let agent_apps = [];
-        for (let a in agents) {
-            agent_apps = agent_apps.concat(agents[a].appointments);
-        }
-        agent_apps = this._isMounted && agent_apps.filter((a) => {
-            return a.dealership.value === this.state.selected_dealership.value
-        })
-        for (let a in agent_apps) {
-            if (verifieds.indexOf(agent_apps[a].verified) === -1) {
-                appointments.push(agent_apps[a])
+        let appointments = this._isMounted && await this.props.mongo.find("all_appointments", {
+            "dealership": this.state.selected_dealership.value,
+            verified: {
+                "$gte": new Date(this.state.fromDate).toISOString(),
+                "$lt": new Date(this.state.toDate).toISOString()
             }
-        }
+        });
+        // appointments = appointments.appointments;
         // appointments = appointments.concat(agent_apps)
-        appointments = this._isMounted && appointments.filter((a) => {
-            return (new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() &&
-                new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()) && a.dealership_department !== "Service"
-        })
         this._isMounted && appointments.sort((a, b) => {
             if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return 1;
             if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return -1;
