@@ -78,7 +78,7 @@ class CreateAppointment extends React.Component {
             customer_last_name,
             customer_phone
         }
-        let appointment_date = data.appointment.date
+        let appointment_date = new Date(data.appointment.date).toISOString()
         let appointment_dealership = data.appointment.dealership.label
         let appointment_department = data.appointment.department.label
         let appointment_scenario = data.appointment.scenario.label
@@ -91,22 +91,17 @@ class CreateAppointment extends React.Component {
             appointment_source
         }
 
-        let user = await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        // let agents = await this.props.mongo.getCollection("agents")
-        // let agent = await agents.findOne({ userId: user.userId })
-        let agent = await this.props.mongo.findOne("agents", { userId: user.userId })
+        let agent = this.props.agent
 
-        let agentAppts = [];
-        agent.appointments != undefined ? agentAppts = agent.appointments : agentAppts = []
         let new_app = {
             isPending: true,
             isRejected: false,
-            created: new Date(),
+            created: new Date().toISOString(),
             appointment_date: appointment.appointment_date,
             customer_firstname: customer_first_name,
             customer_lastname: customer_last_name,
             customer_phone: customer_phone,
-            dealership: data.appointment.dealership,
+            dealership: data.appointment.dealership.value,
             dealership_source: appointment.appointment_source,
             dealership_department: appointment.appointment_department,
             dealership_scenario: appointment.appointment_scenario,
@@ -114,10 +109,6 @@ class CreateAppointment extends React.Component {
             customer_msg: messages.customer_message,
             agent_id: agent._id
         }
-        agentAppts.push(new_app)
-        agent.appointments = agentAppts
-        // await agents.findOneAndUpdate({ userId: user.userId }, agent)
-        await this.props.mongo.findOneAndUpdate("agents", { userId: user.userId }, { appointments: agent.appointments })
 
         //hotfix!!
         await this.acceptAppointment(new_app)
@@ -173,34 +164,28 @@ class CreateAppointment extends React.Component {
     //HOT FIX
     async acceptAppointment(appointment) {
         //update appointment to be ispending false, verified is now
+        let dealershipIndex = await this.state.dealerships.findIndex((d) => { return d.value === appointment.dealership })
+        let dealership = this.state.dealerships[dealershipIndex]
         this.setState({ loading: true })
         let new_app = appointment;
         new_app.isPending = false;
-        new_app.verified = new Date()
+        new_app.verified = new Date().toISOString()
         // let agents = await this.props.mongo.getCollection("agents")
         // let agent = await agents.findOne({ _id: appointment.agent_id })
-        let agent = await this.props.mongo.findOne("agents", { _id: appointment.agent_id })
-
-        let apps = await agent.appointments.filter((a) => {
-            return new Date(a.created).getTime() !== new Date(appointment.created).getTime();
-
-        })
-
-        agent.appointments = apps
-        // agent.appointments = x
-        agent.appointments.push(new_app)
         // await agents.findOneAndReplace({ _id: appointment.agent_id }, agent)
-        await this.props.mongo.findOneAndUpdate("agents", { _id: appointment.agent_id }, { appointments: agent.appointments })
         // await this.getPendingAppointments()
         await this.sendText(appointment)
-        if (appointment.dealership.label !== "West Palm Beach Nissan")
+        if (dealership.label !== "West Palm Beach Nissan")
             await this.sendCustText(appointment)
+        await this.props.mongo.insertOne("all_appointments", new_app)
         this.setState({ loading: false })
     }
     async sendText(appointment) {
         this.setState({ loading: true })
-        let contacts = appointment.dealership_department === "Service" ? appointment.dealership.serviceContacts : appointment.dealership.contacts
-        let textFrom = appointment.dealership_department === "Service" ? appointment.dealership.serviceTextFrom : appointment.dealership.textFrom
+        let dealershipIndex = await this.state.dealerships.findIndex((d) => { return d.value === appointment.dealership })
+        let dealership = this.state.dealerships[dealershipIndex]
+        let contacts = appointment.dealership_department === "Service" ? dealership.serviceContacts : dealership.contacts
+        let textFrom = appointment.dealership_department === "Service" ? dealership.serviceTextFrom : dealership.textFrom
         let arr = []
         let used_arr = []
         let token = await this.props.mongo.getToken()
@@ -231,7 +216,7 @@ class CreateAppointment extends React.Component {
             this.props.mongo.sendGroupText("1" + textFrom, appointment.internal_msg, arr, token)
         }
         //generate new token?
-        if (USED_DEALERS.indexOf(appointment.dealership.label) != -1) {
+        if (USED_DEALERS.indexOf(dealership.label) != -1) {
             if (appointment.dealership_scenario.toLowerCase().indexOf("used") != -1) {
                 for (let u in USED_CONTACTS) {
                     used_arr = []
@@ -247,7 +232,7 @@ class CreateAppointment extends React.Component {
                 }
             }
             else {
-                console.log("appointment.dealership_department")
+                console.log(appointment.dealership_department)
             }
         }
 
@@ -255,9 +240,11 @@ class CreateAppointment extends React.Component {
 
     }
     async sendCustText(appointment) {
-        if (appointment.dealership.value === "5deaa83728eac700174a760a" && appointment.dealership_department === "Service to Sales") return;
+        let dealershipIndex = await this.state.dealerships.findIndex((d) => { return d.value === appointment.dealership })
+        let dealership = this.state.dealerships[dealershipIndex]
+        if (appointment.dealership === "5deaa83728eac700174a760a" && appointment.dealership_department === "Service to Sales") return;
         this.setState({ loading: true })
-        let textFrom = appointment.dealership_department === "Service" ? appointment.dealership.serviceTextFrom : appointment.dealership.textFrom
+        let textFrom = appointment.dealership_department === "Service" ? dealership.serviceTextFrom : dealership.textFrom
         let to = []
         to.push("1" + appointment.customer_phone)
         // let token = await this.props.mongo.getToken()
