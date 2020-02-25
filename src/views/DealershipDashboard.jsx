@@ -209,24 +209,8 @@ class DealershipDashboard extends React.Component {
 
     let dealership = this._isMounted && await this.props.mongo.findOne("dealerships", { value })
     this._isMounted && this.setState({ dealership })
-    let appointments = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealership.value });
-    let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, "$where": "this.appointments.length > 0" });
-    let agent_apps = [];
-    for (let a in agents) {
-      agent_apps = agent_apps.concat(agents[a].appointments)
-    }
-    agent_apps = this._isMounted && agent_apps.filter((a) => {
-      return a.dealership.value === dealership.value
-    })
+    let appointments = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership": dealership.value });
 
-    let appt_verifieds = this._isMounted && appointments.map(a => {
-      return a.verified
-    })
-    for (let a in agent_apps) {
-      if (appt_verifieds.indexOf(agent_apps[a].verified) === -1) {
-        appointments.push(agent_apps[a])
-      }
-    }
     // appointments = appointments.concat(agent_apps);
     console.log(appointments.length)
     let todayApps = this._isMounted && appointments.filter((a) => {

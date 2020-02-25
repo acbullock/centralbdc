@@ -67,7 +67,7 @@ class GoalDashboard extends React.Component {
         for (let dealer in dealerships) {
             let dlrCount = 0;
             for (let app in this.state.mtdApps) {
-                if (this.state.mtdApps[app].dealership.value === dealerships[dealer].value) {
+                if (this.state.mtdApps[app].dealership === dealerships[dealer].value) {
                     dlrCount++
                 }
             }
@@ -144,30 +144,10 @@ class GoalDashboard extends React.Component {
             },
             {
                 projection: {
-                    "dealership.value": 1
+                    "dealership": 1
                 }
             }
         )
-        let agents = this._isMounted && await this.props.mongo.find("agents",
-            {
-                department: "sales"
-            },
-            {
-                projection: {
-                    "appointments.dealership_department": 1,
-                    "appointments.dealership.value": 1
-                }
-            }
-        )
-        let agentApps = [];
-        for (let a in agents) {
-            for (let b in agents[a].appointments) {
-                if (agents[a].appointments[b].dealership_department !== "Service") {
-                    agentApps.push(agents[a].appointments[b])
-                }
-            }
-        }
-        allApps = this._isMounted && await allApps.concat(agentApps)
         this._isMounted && this.setState({ mtdApps: allApps })
     }
     refreshPage() {
