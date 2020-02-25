@@ -39,17 +39,39 @@ class AppointmentHistory extends React.Component {
   }
   _isMounted = false
   async componentDidMount() {
-    this.setState({loading: true})
+    this.setState({ loading: true })
     this._isMounted = true
-    let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-    let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
-    this._isMounted && await this.setState({ agent: agent })
-    let appts = this.state.agent.appointments
-    this._isMounted && appts.sort((a, b) => {
-      if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return -1
-      if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1
-      return 0
-    })
+    this._isMounted && await this.setState({ agent: this.props.agent })
+// 5dd961d7f802400017dd5716
+    let appts = await this.props.mongo.aggregate("all_appointments", [
+      {
+        "$match": {
+          "agent_id": this.props.agent._id,
+          "verified": {
+            "$gte": "2020-02-25T05:00:000Z"
+          }
+        }
+      },
+      {
+        "$group": {
+          "_id": {"agent_id": "$agent_id", "verified": "$verified"},
+          "verified": {"$first": "$verified"},
+          "internal_msg": {"$first": "$internal_msg"}
+        }
+      },
+      {
+        "$sort": {
+          "verified": -1
+        }
+      }
+    ])
+    console.log(appts)
+    // let appts = this.state.agent.appointments
+    // this._isMounted && appts.sort((a, b) => {
+    //   if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return -1
+    //   if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return 1
+    //   return 0
+    // })
     let today = new Date()
     today.setHours(0, 0, 0, 0)
     appts = this._isMounted && appts.filter((a) => {
