@@ -37,12 +37,7 @@ class Dashboard extends React.Component {
       mtdTooltip: false,
       bigChartData: "data1",
       barData: {},
-      user: {
-        userId: ""
-      },
-      agent: {
-
-      },
+      agent: this.props.agent,
       labels: [],
       datasets: [],
       isAdmin: false,
@@ -60,70 +55,65 @@ class Dashboard extends React.Component {
       counts: {},
       mtdtop5loading: false,
       mtdloadnew: false,
-      payment: 0
+      payment: 0,
+      agentRank: 0
     };
-    this.getAppointmentData = this.getAppointmentData.bind(this)
     this.getBreakDown = this.getBreakDown.bind(this)
     this.getMtdTop5 = this.getMtdTop5.bind(this)
     this.getProjection = this.getProjection.bind(this)
     this.calculatePay = this.calculatePay.bind(this)
   }
   _isMounted = false;
-  async componentDidMount() {
-    this._isMounted = true
-    this._isMounted && this.setState({ loading: true })
+  async componentWillMount() {
     let agent = this.props.agent
     if (agent.department === "service" && agent.account_type !== "admin") {
       this._isMounted = false;
       this.props.history.push("/admin/service_dashboard")
+      return;
     }
-    else {
-      let agents = this._isMounted && await this.props.mongo.find("agents",
-        {
-          isActive: true,
-          department: "sales"
-        },
-        {
-          projection: {
-            account_type: 1,
-            personalRecord: 1,
-            inboundToday: 1,
-            outboundToday: 1,
-            callCountLastUpdated: 1,
-            name: 1,
-            department: 1,
-            "appointments.verified": 1,
-            userId: 1,
-          }
-        })
+  }
+  async componentDidMount() {
+    this._isMounted = true
+    this._isMounted && this.setState({ loading: true })
 
-      agents = this._isMounted && agents.map((a, i) => {
-        return Object.assign(a, { label: a.name, value: i })
+
+    let agents = this._isMounted && await this.props.mongo.find("agents",
+      {
+        isActive: true,
+        department: "sales"
+      },
+      {
+        projection: {
+          _id: 1,
+          name: 1,
+          callCountLastUpdated: 1,
+          inboundToday: 1,
+          outboundToday: 1,
+          personalRecord: 1
+        }
       })
-      this._isMounted && agents.sort((a, b) => {
-        return b.appointments.length - a.appointments.length
-      })
-      // agents = this._isMounted && agents.filter((a) => {
-      //   return a.department === "sales" || a.account_type === "admin"
-      // })
-      // this._isMounted && agents.sort((a, b) => {
-      //   if (a.label > b.label) return 1;
-      //   if (a.label < b.label) return -1;
-      //   return 0;
-      // })
-      if (agent.account_type !== "admin") {
-        let index = this._isMounted && agents.findIndex((a) => { return a._id === agent._id })
-        let selected = agents[index]
-        this._isMounted && this.getBreakDown(agent)
-        this._isMounted && this.setState({ selected_agent: selected })
-      }
-      this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
-      this._isMounted && await this.getAppointmentData()
-      this._isMounted && await this.getCountData()
-      this._isMounted && await this.getTop5()
-      this._isMounted && await this.getMtdTop5()
-      this._isMounted && this.setState({ loading: false })
+
+    agents = this._isMounted && agents.map((a, i) => {
+      return Object.assign(a, { label: a.name, value: i })
+    })
+
+
+    this._isMounted && agents.sort((a, b) => {
+      if (a.label > b.label) return 1;
+      if (a.label < b.label) return -1;
+      return 0;
+    })
+    let agent = this.props.agent
+    if (agent.account_type !== "admin") {
+      let index = this._isMounted && agents.findIndex((a) => { return a._id === agent._id })
+      let selected = agents[index]
+      this._isMounted && this.getBreakDown(agent)
+      this._isMounted && this.setState({ selected_agent: selected })
     }
+    this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
+    this._isMounted && await this.getTop5()
+    this._isMounted && await this.getMtdTop5()
+    this._isMounted && this.setState({ loading: false })
   }
   componentWillUnmount() {
     this._isMounted = false
@@ -157,124 +147,114 @@ class Dashboard extends React.Component {
     }
     this._isMounted && this.setState({ payment })
   }
-  async getCountData() {
-    this.setState({ loading: true })
-    let agents = this.state.agents
-    let todays_appts = []
-    let today = new Date()
-    today.setHours(0, 0, 0, 0)
-    for (let a in agents) {
-      todays_appts = this._isMounted && todays_appts.concat(agents[a].appointments)
-    }
-    this._isMounted && this.setState({ todays_appts: todays_appts, loading: false })
-
-  }
   async getTop5() {
     this._isMounted && this.setState({ loading: true })
-    // let allAgents = this._isMounted && await this.state.agents.find().toArray()
-    let allAgents = this.state.agents
-    let nums = []
-    for (let a in allAgents) {
-      let user = {
-        userId: allAgents[a].userId,
-        name: allAgents[a].name,
-        count: 0,
-      }
-
-      for (let b in allAgents[a].appointments) {
-        if (allAgents[a].appointments[b].verified !== undefined) {
-          let curr = new Date()
-          curr.setHours(0, 0, 0, 0)
-          if (new Date(allAgents[a].appointments[b].verified).getTime() >= curr.getTime() &&
-            new Date(allAgents[a].appointments[b].verified).getTime() < (curr.getTime() + (24 * 3600 * 1000))) {
-            user.count++;
+    let groupedAppts = await this.props.mongo.aggregate("all_appointments", [
+      {
+        "$match": {
+          "dealership_department": {
+            "$ne": "Service"
+          },
+          "verified": {
+            "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
           }
         }
+      },
+      {
+        "$group": {
+          "_id": "$agent_id",
+          "count": {
+            "$sum": 1
+          }
+        }
+      },
+      {
+        "$sort": {
+          "count": -1
+        }
       }
-      nums.push(user)
+    ])
+
+    let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { userId: 1, name: 1, _id: 1 } })
+    let agentsRanked = []
+    let lastVal = -1
+    let curRank = 0;
+    for (let a in groupedAppts) {
+
+      if (groupedAppts[a].count !== lastVal) {
+        lastVal = groupedAppts[a].count;
+        curRank++;
+      }
+      let agentIndex = agents.findIndex((ap) => {
+        return ap._id === groupedAppts[a]._id
+      })
+      if (agentIndex === -1) continue;
+      let user = {
+        count: groupedAppts[a].count,
+        name: agents[agentIndex].name,
+        userId: agents[agentIndex].userId,
+        _id: agents[agentIndex]._id,
+        rank: curRank
+      }
+      agentsRanked.push(user)
     }
-    this._isMounted && await nums.sort((a, b) => {
-      if (a.count > b.count) {
-        return -1;
-      }
-      if (a.count < b.count) {
-        return 1
-      }
-      return 0;
-    })
-    this._isMounted && this.setState({ top5: nums, loading: false })
+    console.log(agentsRanked)
+    this._isMounted && this.setState({ top5: agentsRanked, loading: false })
 
   }
   async getMtdTop5() {
-    this._isMounted && this.setState({ loading: true, mtdloadnew: true })
-    //will need to get rid of this when appts are no longer a part of agent record
-    let allAgents = this.state.agents;
-    let allApps = []
-    let apps = []
-    let totalApps = this._isMounted && await this.props.mongo.find("all_appointments", { dealership_department: { "$ne": "Service" }, verified: { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)) } }, { projection: { agent_id: 1 } })
-    for (let a in allAgents) {
-      apps = allAgents[a].appointments;
-      allApps = this._isMounted && totalApps.filter((aps) => { return aps.agent_id === allAgents[a]._id })
-      allApps = this._isMounted && allApps.concat(apps)
-      let nums = this.state.mtdTop5;
-      let first = new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0))
-      let currApps = allApps
-      let user = {
-        userId: allAgents[a].userId,
-        name: allAgents[a].name,
-        count: currApps.length,
-        mtdProj: Math.round(10 * 26 * (currApps.length / ((new Date().getTime() - first.getTime()) / (1000 * 60 * 60 * 24)))) / 10
-      }
-      if (allAgents[a]._id === this.state.agent._id)
-        this.calculatePay(Math.round(user.mtdProj))
-      nums.push(user)
-
-      this._isMounted && await nums.sort((a, b) => {
-        if (a.count > b.count) {
-          return -1;
-        }
-        if (a.count < b.count) {
-          return 1
-        }
-        return 0;
-      })
-      this._isMounted && this.setState({ mtdTop5: nums })
-    }
-    this._isMounted && this.setState({ loading: false, mtdloadnew: false })
-  }
-  async getAppointmentData() {
     this._isMounted && this.setState({ loading: true })
-    let agents;
-    if (this.state.isAdmin === true) {
-      // agents = this._isMounted && await this.props.mongo.db.collection("agents").find({}).asArray();
-      agents = this.state.agents
+    let groupedAppts = await this.props.mongo.aggregate("all_appointments", [
+      {
+        "$match": {
+          "dealership_department": {
+            "$ne": "Service"
+          },
+          "verified": {
+            "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
+          }
+        }
+      },
+      {
+        "$group": {
+          "_id": "$agent_id",
+          "count": {
+            "$sum": 1
+          }
+        }
+      },
+      {
+        "$sort": {
+          "count": -1
+        }
+      }
+    ])
 
+    let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { userId: 1, name: 1, _id: 1 } })
+    let agentsRanked = []
+    let lastVal = -1
+    let curRank = 0;
+    for (let a in groupedAppts) {
+      if (groupedAppts[a].count !== lastVal) {
+        lastVal = groupedAppts[a].count;
+        curRank++;
+      }
+      let agentIndex = agents.findIndex((ap) => {
+        return ap._id === groupedAppts[a]._id
+      })
+      if (agentIndex === -1) continue;
+      let user = {
+        count: groupedAppts[a].count,
+        name: agents[agentIndex].name,
+        userId: agents[agentIndex].userId,
+        _id: agents[agentIndex]._id,
+        rank: curRank
+      }
+      agentsRanked.push(user)
     }
-    else {
-      // agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
-      agents = this.state.agent
-    }
-    // let agents = this._isMounted && await this.props.mongo.db.collection("agents").find({}).asArray();
-    if (this.state.isAdmin === true) {
-      let appointments = []
-      this._isMounted && await agents.map((agent) => {
-
-        let appt = { name: agent.name, appointments: agent.appointments }
-        appointments.push(appt);
-        return agent;
-      });
-      appointments = this._isMounted && await appointments.sort(function (a, b) {
-        return (b.appointments.length - a.appointments.length)
-      });
-      this._isMounted && this.setState({ appointments, loading: false });
-    }
-    else {
-      let appt = { name: agents.name, appointments: agents.appointments }
-      let appointments = [];
-      appointments.push(appt)
-      this._isMounted && this.setState({ appointments, loading: false })
-    }
+    this._isMounted && this.setState({ mtdTop5: agentsRanked, loading: false })
   }
+
   getMonday(d) {
     d = new Date(d);
     d.setHours(0, 0, 0, 0)
@@ -336,8 +316,13 @@ class Dashboard extends React.Component {
 
     return ret;
   }
-  getBreakDown(agent) {
-    let appointments = agent.appointments
+  async getBreakDown(agent) {
+    let appointments = await this.props.mongo.find("all_appointments", {
+      agent_id: agent._id,
+      verified: {
+        "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+      }
+    }, { projection: { verified: 1 } })
     let start = new Date()
     let end = new Date();
     let now = new Date();
@@ -511,31 +496,20 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
-                  <img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${this.state.agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="100" width="100" />
+                  <img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${this.state.agent.userId}.jpeg`} onError={(e) => { e.target.src = defaultLogo }} className="rounded-circle" height="100" width="100" />
                 </CardHeader>
                 <CardBody>
-                  {
-
-                    this._isMounted && this.state.top5.map((a, i) => {
-                      if (i > 0) return null;
-                      let rank = 1
-                      for (let agent in this.state.top5) {
-                        if (this.state.top5[agent].count > this.state.agent.appointments.length) {
-                          rank++;
-                        }
-                        else {
-                          break;
-                        }
-                      }
-                      return (
-                        <div key={i}>
-                          <h4 style={{ color: "white" }}>Appointment Count: <strong>{this.state.agent.appointments.length}</strong></h4>
-                          <h4 hidden={true} className="text-white">Daily Projection: <strong>{this.getProjection(this.state.agent.appointments.length)}</strong></h4>
-                          <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{rank}</strong></h4>
-                        </div>
-                      );
-                    })
-                  }
+                  {(() => {
+                    let agentIndex = this.state.top5.findIndex((u) => { return u._id === this.props.agent._id })
+                    if (agentIndex === -1) return null
+                    return (
+                      <div >
+                        <h4 style={{ color: "white" }}>Appointment Count: <strong>{this.state.top5[agentIndex].count}</strong></h4>
+                        <h4 hidden={true} className="text-white">Daily Projection: <strong>{this.getProjection(this.state.agent.appointments.length)}</strong></h4>
+                        <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{this.state.top5[agentIndex].rank}</strong></h4>
+                      </div>
+                    );
+                  })()}
                 </CardBody>
               </Card>
             </Col>
@@ -543,61 +517,23 @@ class Dashboard extends React.Component {
               <Card className="text-center card-raised card-white" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                 <CardHeader>
                   <CardTitle tag="h3"><p style={{ color: "white" }}><strong>MTD Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong>{this.state.mtdloadnew ? " (still loading)" : null}</p></CardTitle>
-                  <img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${this.state.agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="100" width="100" />
+                  <img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${this.state.agent.userId}.jpeg`} onError={(e) => { e.target.src = defaultLogo }} className="rounded-circle" height="100" width="100" />
                   {/* style={{ background: 'url("https://dummyimage.com/100x100/1d67a8/ffffff&text=No+Image")' }}  */}
                 </CardHeader>
                 <CardBody>
                   <CardImg top width="100%" hidden={!this.state.mtdtop5loading} src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
-
-                  {
-
-                    this._isMounted && this.state.mtdTop5.map((a, i) => {
-
-                      let thisAgent = this._isMounted && this.state.mtdTop5.filter((ag) => {
-                        return ag.name === this.state.agent.name
-                      })
-                      thisAgent = thisAgent[0];
-                      if (thisAgent === undefined) {
-                        return null;
-                      }
-                      if (i > 0) return null;
-                      let rank = 1
-                      for (let agent in this.state.mtdTop5) {
-                        if (this.state.mtdTop5[agent].count > thisAgent.count) {
-                          rank++;
-                        }
-                        else {
-                          break;
-                        }
-                      }
-                      let bonus = 0;
-                      if (parseInt(rank) === 1) {
-                        bonus = 2500
-                      }
-                      else if (parseInt(rank) === 2) {
-                        bonus = 2000
-                      }
-                      else if (parseInt(rank) === 3) {
-                        bonus = 1500
-                      }
-                      else if (parseInt(rank) === 4) {
-                        bonus = 1000
-                      }
-                      else if (parseInt(rank) === 5) {
-                        bonus = 500
-                      }
-                      console.log(bonus)
-                      return (
-                        <div key={i}>
-                          <h4 style={{ color: "white" }}>Appointment Count: <strong>{thisAgent.count}</strong></h4>
-                          {/* <h4 className="text-white">MTD Projection: <strong>{thisAgent.mtdProj} = <span style={{ color: "green" }}>${this.state.payment + bonus}</span></strong></h4> */}
-                          <h4 hidden={true} id="mtdProjection" className="text-white">MTD Projection: <strong>{thisAgent.mtdProj}</strong></h4>
-                          {/* <Tooltip isOpen={this.state.mtdTooltip} target="mtdProjection" toggle={() => { this._isMounted && this.setState({ mtdTooltip: !this.state.mtdTooltip }) }}>This estimate is based on working 26 days in the month.</Tooltip>  */}
-                          <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{rank}</strong></h4>
-                        </div>
-                      );
-                    })
-                  }
+                  {(() => {
+                    let agentIndex = this.state.mtdTop5.findIndex((u) => { return u._id === this.props.agent._id })
+                    console.log(agentIndex)
+                    if (agentIndex === -1) return null
+                    return (
+                      <div >
+                        <h4 style={{ color: "white" }}>Appointment Count: <strong>{this.state.mtdTop5[agentIndex].count}</strong></h4>
+                        {/* <h4 hidden={true} className="text-white">Daily Projection: <strong>{this.getProjection(this.state.agent.appointments.length)}</strong></h4> */}
+                        <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{this.state.mtdTop5[agentIndex].rank}</strong></h4>
+                      </div>
+                    );
+                  })()}
                 </CardBody>
               </Card>
             </Col>
@@ -633,8 +569,8 @@ class Dashboard extends React.Component {
                           if (index > 9) return null;
                           return (
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
-                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.rank}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${agent.userId}.jpeg`} onError={(e) => { e.target.src = defaultLogo }} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -670,7 +606,7 @@ class Dashboard extends React.Component {
                           return (
                             <tr key={index} className="text-center" >
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{index + 1}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${agent.userId}.jpeg`} onError={(e) => { e.target.src = defaultLogo }} className="rounded-circle" height="50" width="50" /></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
                               <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.count}</strong></p></td>
                             </tr>
@@ -699,18 +635,24 @@ class Dashboard extends React.Component {
                       </tr>
                     </thead>
                     <tbody>
-                      {
-                        this._isMounted && this.state.agents.map((agent, index) => {
-                          if (agent.appointments.length === 0 || agent.appointments.length < agent.personalRecord || agent.account_type !== "agent") return null;
-                          return (
+                      {(() => {
+                        let arr = []
+                        for (let a in this.state.agents) {
+                          let index = this.state.top5.findIndex((ap) => {
+                            return ap._id === this.state.agents[a]._id
+                          })
+                          if (index === -1) continue
+                          if (this.state.top5[index].count <= this.state.agents[a].personalRecord) continue
+                          arr.push((
                             <tr key={index} className="text-center" style={{ borderTop: "1px solid white" }}>
-                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${agent.userId}.jpeg`} onError={(e) => { e.target.src = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png" }} className="rounded-circle" height="50" width="50" /></td>
-                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.name}</strong></p></td>
-                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{agent.appointments.length}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><img alt="profile" src={`https://centralbdc-bwpmi.mongodbstitch.com/profile-images/${this.state.agents[a].userId}.jpeg`} onError={(e) => { e.target.src = defaultLogo }} className="rounded-circle" height="50" width="50" /></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong> {this.state.agents[a].name}</strong></p></td>
+                              <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{this.state.top5[index].count}</strong></p></td>
                             </tr>
-                          )
-                        })
-                      }
+                          ))
+                        }
+                        return arr;
+                      })()}
                     </tbody>
                   </Table>
                 </CardBody>
