@@ -30,9 +30,7 @@ class DealershipPerformanceTiers extends React.Component {
         let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true }, { projection: { goal: 1, label: 1, value: 1 } });
 
         // let appointments = this._isMounted && await this.props.mongo.find("appointments");
-        let agents = this._isMounted && await this.props.mongo.find("agents", {}, { projection: { "appointments.dealership.label": 1, "appointments.dealership.value": 1, "appointments.dealership_department": 1 } });
         // this.setState({appointments})
-        this._isMounted && this.setState({ agents })
         this._isMounted && dealerships.sort((a, b) => {
             if (parseInt(a.goal) > parseInt(b.goal)) return -1;
             if (parseInt(a.goal) < parseInt(b.goal)) return 1;
@@ -57,22 +55,38 @@ class DealershipPerformanceTiers extends React.Component {
                 dealership4.push(dealerships[i])
             }
         }
-
         this._isMounted && this.setState({ dealerships, dealership1, dealership2, dealership3, dealership4 })
+        let apps = await this.props.mongo.find("all_appointments",
+            {
+                dealership_department: {
+                    "$ne": "Service"
+                },
+                verified: {
+                    "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+                }
+            },
+            {
+                projection: {
+                    goal: 1,
+                    dealership: 1
+
+                }
+            })
+
         for (let d in dealerships) {
-            this._isMounted && await this.todayDealerCount(dealerships[d], "dealerships")
+            this._isMounted && await this.todayDealerCount(dealerships[d], "dealerships", apps)
         }
         for (let d in dealership1) {
-            this._isMounted && await this.todayDealerCount(dealership1[d], "dealership1")
+            this._isMounted && await this.todayDealerCount(dealership1[d], "dealership1", apps)
         }
         for (let d in dealership2) {
-            this._isMounted && await this.todayDealerCount(dealership2[d], "dealership2")
+            this._isMounted && await this.todayDealerCount(dealership2[d], "dealership2", apps)
         }
         for (let d in dealership3) {
-            this._isMounted && await this.todayDealerCount(dealership3[d], "dealership3")
+            this._isMounted && await this.todayDealerCount(dealership3[d], "dealership3", apps)
         }
         for (let d in dealership4) {
-            this._isMounted && await this.todayDealerCount(dealership4[d], "dealership4")
+            this._isMounted && await this.todayDealerCount(dealership4[d], "dealership4", apps)
         }
         this._isMounted && this.setState({ loading: false })
     }
@@ -82,15 +96,10 @@ class DealershipPerformanceTiers extends React.Component {
     componentWillUnmount() {
         this._isMounted = false
     }
-    async todayDealerCount(dealership, dealerships) {
-        let apps = [];
-        for (let a in this.state.agents) {
-            for (let b in this.state.agents[a].appointments) {
-                if (this.state.agents[a].appointments[b].dealership.value === dealership.value && this.state.agents[a].appointments[b].dealership_department !== "Service") {
-                    apps.push(this.state.agents[a].appointments[b])
-                }
-            }
-        }
+    async todayDealerCount(dealership, dealerships, appointments) {
+        let apps = appointments.filter((a) => {
+            return a.dealership === dealership.value
+        });
         let dlr = this._isMounted && this.state[dealerships].map((d) => {
             if (d.value === dealership.value) {
                 let progressValue = Math.round(apps.length * 10 / d.goal * 100) / 10;
