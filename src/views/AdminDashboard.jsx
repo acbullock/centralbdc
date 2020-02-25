@@ -84,14 +84,14 @@ class AdminDashboard extends React.Component {
     }
     _isMounted = false;
     async getFollowupChart(todayAsst) {
-        console.log(todayAsst)
+
         let labels = [];
         let data = []
         let today = new Date(new Date().setHours(0, 0, 0, 0))
         todayAsst = todayAsst.filter((a) => {
             return new Date(a.created).getTime() >= new Date(today).getTime()
         })
-        console.log(todayAsst)
+
         for (let i = 0; i < 12; i++) {
             let startHour = new Date().getHours() - i
             let endHour = new Date().getHours() - i + 1
@@ -115,7 +115,7 @@ class AdminDashboard extends React.Component {
                 dict[todayAsst[a].userId]++
             }
         }
-        console.log(dict)
+
         let sortable = []
         for (let a in dict) {
             let name = await this.props.mongo.findOne("agents", { userId: a }, { projection: { name: 1 } })
@@ -123,10 +123,10 @@ class AdminDashboard extends React.Component {
         }
 
         let colors = []
-        for(let a in sortable){
+        for (let a in sortable) {
             colors.push('#' + Math.floor(Math.random() * 16777215).toString(16));
         }
-        console.log(colors)
+
         this.setState({ followupLabels: labels, followupData: data, followupByAgent: sortable, followupColors: colors })
 
     }
@@ -134,10 +134,9 @@ class AdminDashboard extends React.Component {
         let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         let labels = []
         let data = []
-        let todayApps = []
+        let todayApps = await this.props.mongo.find("all_appointments", { verified: { "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString() } }, { projection: { verified: 1 } })
         let todayAsst = []
         for (let a in this.state.agents) {
-            todayApps = this._isMounted && await todayApps.concat(this.state.agents[a].appointments)
             todayAsst = this._isMounted && await todayAsst.concat(this.state.agents[a].assistance)
         }
         for (let i = 0; i < 12; i++) {
@@ -180,30 +179,38 @@ class AdminDashboard extends React.Component {
         }
         this.setState({ hourlyLabels: labels, hourlyData: data })
     }
+    async componentWillMount() {
+        if (this.props.agent.account_type !== "admin") {
+            this._isMounted && this.props.history.push("/admin/dashboard")
+            return;
+        }
+    }
     async componentDidMount() {
         this._isMounted = true;
         this._isMounted && this.setState({ loading: true });
-        if (this.props.agent.account_type !== "admin") {
-            this._isMounted && this.props.history.push("/admin/dashboard")
+
+
+        let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true, isSales: true }, { projection: { label: 1, value: 1, isActive: 1 } });
+        let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { "assistance.created": 1, "assistance.userId": 1, account_type: 1, callCountLastUpdated: 1, extension: 1, lastCall: 1, "appointments.agent_id": 1, "appointments.value": 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1 } })
+        for (let a in agents) {
+            agents[a].label = agents[a].name;
+            agents[a].value = agents[a]._id
         }
-        else {
-            let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true, isSales: true }, { projection: { label: 1, value: 1, isActive: 1 } });
-            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { "assistance.created": 1, "assistance.userId": 1, account_type: 1, callCountLastUpdated: 1, extension: 1, lastCall: 1, "appointments.agent_id": 1, "appointments.value": 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1 } })
-            for (let a in agents) {
-                agents[a].label = agents[a].name;
-                agents[a].value = agents[a]._id
-            }
-            this._isMounted && agents.sort((a, b) => {
-                if (a.name > b.name) return 1;
-                if (a.name < b.name) return -1;
-                return 0;
-            })
-            this._isMounted && await this.setState({ dealerships, agents });
-            this._isMounted && this.getTodayAppts();
-            this._isMounted && this.sortLastAppts();
-            this._isMounted && await this.getTop10();
-            this._isMounted && this.getMonthChart()
-        }
+        // //do this with aggregation..
+        this._isMounted && agents.sort((a, b) => {
+            if (a.name > b.name) return 1;
+            if (a.name < b.name) return -1;
+            return 0;
+        })
+        this._isMounted && await this.setState({ dealerships, agents });
+        this._isMounted && this.getTodayAppts();
+        this._isMounted && this.sortLastAppts();
+        this._isMounted && await this.getTop10();
+        this._isMounted && this.getMonthChart()
+        // }
+
+
+
         this._isMounted && this.setState({ loading: false, agent: this.props.agent });
     }
     componentWillUnmount() {
@@ -211,52 +218,54 @@ class AdminDashboard extends React.Component {
     }
     async sortLastAppts() {
         this._isMounted && this.setState({ lastAppsLoading: true })
-
-        let allApps = this._isMounted && await this.props.mongo.find("all_appointments", {
-            dealership_department: {
-                "$ne": "Service"
-            },
-            verified: {
-                "$gte": new Date(new Date().setDate(new Date().getDate() - 2)).toISOString()
-            }
+        let dealerships = await this.props.mongo.find("dealerships", {
+            isActive: true,
+            isSales: true
         }, {
             projection: {
-                "verified": 1,
-                "dealership.value": 1,
-                "dealership.label": 1,
-                agent_id: 1
+                "label": 1,
+                value: 1
             }
         })
-        for (let a in this.state.agents) {
-            allApps = this._isMounted && await allApps.concat(this.state.agents[a].appointments);
-        }
-        this._isMounted && allApps.sort((a, b) => {
-            return new Date(b.verified).getTime() - new Date(a.verified).getTime()
-        })
-        let dict = {}
-        for (let d in this.state.dealerships) {
-            if (dict[this.state.dealerships[d].value] === undefined) {
-                dict[this.state.dealerships[d].value] = []
+        let groupedApps = await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$project": {
+                    "dealership": 1,
+                    "verified": 1
+                }
+            },
+            {
+                "$sort": {
+                    "dealership": 1, "verified": -1
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$dealership",
+                    "recent": { "$first": "$verified" }
+                }
+            },
+            {
+                "$sort": {
+                    "recent": 1
+                }
             }
-        }
-        for (let a in allApps) {
-            if (dict[allApps[a].dealership.value] !== undefined) {
-                // if (allApps[a].dealership.value === "5dcedce9271f627094b0849c") { console.log(allApps[a]) }
-                dict[allApps[a].dealership.value].push(allApps[a].verified)
-            }
-        }
+        ])
         let last_appts = []
-        for (let d in dict) {
-            this._isMounted && await dict[d].sort((a, b) => {
-                return new Date(b).getTime() - new Date(a).getTime()
+        for (let a in groupedApps) {
+            let index = dealerships.findIndex((d) => {
+                return d.value === groupedApps[a]._id
             })
-            last_appts.push({ dealership: d, time_elapsed_hrs: Math.round(10 * (new Date().getTime() - new Date(dict[d][0]).getTime()) / (1000 * 60 * 60)) / 10 })
+            if (index === -1) continue;
+            let obj = {
+                name: dealerships[index].label,
+                dealership: groupedApps[a]._id,
+                time_elapsed_hrs: Math.round(10 * ((new Date().getTime() - new Date(groupedApps[a].recent).getTime()) / (1000 * 60 * 60))) / 10
+            }
+            last_appts.push(obj)
         }
-        this._isMounted && await last_appts.sort((a, b) => {
-            return b.time_elapsed_hrs - a.time_elapsed_hrs
-        })
-        this.setState({ last_appts })
-        this._isMounted && await this.setState({ lastAppsLoading: false })
+
+        this._isMounted && await this.setState({ last_appts, lastAppsLoading: false })
     }
     async getTodayAppts() {
         let today = new Date();
@@ -274,10 +283,13 @@ class AdminDashboard extends React.Component {
                 "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
             }
         })
-        let today_appts = 0;
-        for (let a in this.state.agents) {
-            today_appts += this.state.agents[a].appointments.length
-        }
+        let today_appts = this._isMounted && await this.props.mongo.count("all_appointments", {
+            "dealership_department": { "$ne": "Service" },
+            verified: {
+                "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+            }
+        })
+        today_appts = today_appts.count
         lifetime_appts = lifetime_appts.count + today_appts + 397740
         month_appts = month_appts.count + today_appts
         let projected_today = Math.round(today_appts / elapsed * hrs)
@@ -292,53 +304,73 @@ class AdminDashboard extends React.Component {
     }
     async getTop10() {
         this._isMounted && this.setState({ top10Loading: true })
-        let agents = this.state.agents
-
-        let today_appts = [];
-        for (let a in agents) {
-            today_appts = this._isMounted && today_appts.concat(agents[a].appointments)
-        }
-
-        let agent_counts = {}
-        for (let a in this.state.agents) {
-            agent_counts[this.state.agents[a]._id] = 0
-        }
-        for (let a in today_appts) {
-            if (agent_counts[today_appts[a].agent_id] !== undefined) {
-                agent_counts[today_appts[a].agent_id]++;
+        let groupedAppts = await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    "dealership_department": {
+                        "$ne": "Service"
+                    },
+                    "verified": {
+                        "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$agent_id",
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "count": -1
+                }
             }
-            else {
-                agent_counts[today_appts[a].agent_id] = 1
+        ])
+        let agents = await this.props.mongo.find("agents", {
+            department: "sales",
+        }, {
+            projection: {
+                _id: 1,
+                name: 1
             }
-        }
-        let sortable = []
-        for (let a in agent_counts) {
-            sortable.push([a, agent_counts[a]])
-        }
-        this._isMounted && sortable.sort((a, b) => {
-            return b[1] - a[1]
         })
-        this._isMounted && this.setState({ top10: sortable, top10Loading: false })
+        let newArr = []
+        for (let a in groupedAppts) {
+            let index = agents.findIndex((ag) => {
+                return ag._id === groupedAppts[a]._id
+            })
+            if (index === -1) continue;
+            let obj = groupedAppts[a];
+            obj.name = agents[index].name
+            newArr.push(obj)
+        }
+        this._isMounted && this.setState({ top10: newArr, top10Loading: false })
     }
     async getAgentTop5(agent) {
         //get appointments for selected agent..
         this._isMounted && this.setState({ agent5Loading: true })
-        let agent_appts = this._isMounted && await this.props.mongo.find("all_appointments", { agent_id: agent._id }, { projection: { "dealership.label": 1, "dealership.value": 1, "dealership.isActive": 1 } })
+        let agent_appts = this._isMounted && await this.props.mongo.find("all_appointments", { agent_id: agent._id }, { projection: { "dealership": 1 } })
         let dealer_counts = {}
         let active;
         for (let a in agent_appts) {
             active = false;
+            let index = -1;
             for (let d in this.state.dealerships) {
-                if (this.state.dealerships[d].value === agent_appts[a].dealership.value) {
+                if (this.state.dealerships[d].value === agent_appts[a].dealership) {
                     active = this.state.dealerships[d].isActive;
+                    index = d
                     break;
                 }
             }
-            if (dealer_counts[agent_appts[a].dealership.label] !== undefined && active) {
-                dealer_counts[agent_appts[a].dealership.label]++;
+            if (index === -1) continue;
+            if (dealer_counts[this.state.dealerships[index].label] !== undefined && active) {
+                dealer_counts[this.state.dealerships[index].label]++;
             }
             else {
-                dealer_counts[agent_appts[a].dealership.label] = 1;
+                dealer_counts[this.state.dealerships[index].label] = 1;
             }
         }
         let sortable = []
@@ -353,7 +385,7 @@ class AdminDashboard extends React.Component {
     }
     async getDealerTop5(dealer) {
         this._isMounted && this.setState({ dlrtop5loading: true })
-        let dlr_apps = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealer.value }, { projection: { agent_id: 1 } })
+        let dlr_apps = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership": dealer.value }, { projection: { agent_id: 1 } })
         let dict = {};
         for (let d in dlr_apps) {
             if (dict[dlr_apps[d].agent_id] === undefined) {
@@ -418,21 +450,11 @@ class AdminDashboard extends React.Component {
                                             {
                                                 this._isMounted && this.state.last_appts.map((a, i) => {
                                                     if (i > 9) return null
-                                                    let dealership_name = ""
-                                                    for (let d in this.state.dealerships) {
-                                                        if (this.state.dealerships[d].value === a.dealership) {
-                                                            dealership_name = this.state.dealerships[d].label
-                                                            if (!this.state.dealerships[d].isActive) {
-                                                                dealership_name = "Inactive"
-                                                            }
-                                                        }
-                                                    }
-                                                    // let dealership_name = this._isMounted && await this.props.mongo.findOne("dealerships", { value: a.dealership })
                                                     return (
                                                         <tr key={a.dealership}>
                                                             <td>
-                                                                <p style={{ color: "red" }} hidden={a.time_elapsed_hrs < 1}>{dealership_name}</p>
-                                                                <p hidden={a.time_elapsed_hrs >= 1}>{dealership_name}</p>
+                                                                <p style={{ color: "red" }} hidden={a.time_elapsed_hrs < 1}>{a.name}</p>
+                                                                <p hidden={a.time_elapsed_hrs >= 1}>{a.name}</p>
                                                             </td>
                                                             <td >
                                                                 <p style={{ color: "red" }} hidden={a.time_elapsed_hrs < 1}>{a.time_elapsed_hrs + " hours"}</p>
@@ -469,17 +491,11 @@ class AdminDashboard extends React.Component {
                                         <tbody>
                                             {this._isMounted && this.state.top10.map((a, i) => {
                                                 if (i > 9) return null;
-                                                let name = "Unavailable"
-                                                for (let b in this.state.agents) {
-                                                    if (this.state.agents[b]._id === a[0]) {
-                                                        name = this.state.agents[b].name
-                                                    }
-                                                }
                                                 return (
-                                                    <tr key={a[0]}>
+                                                    <tr key={i}>
                                                         <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
-                                                        <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{name}</strong></p></td>
-                                                        <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a[1]}</strong></p></td>
+                                                        <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
+                                                        <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a.count}</strong></p></td>
                                                     </tr>
                                                 )
                                             })}
@@ -624,6 +640,7 @@ class AdminDashboard extends React.Component {
                                                     return 0;
                                                 })
                                                 return this._isMounted && agents.map((a, i) => {
+                                                    if (i > 9) return null
                                                     if (a.lastCall === null) {
                                                         return null
                                                     }
