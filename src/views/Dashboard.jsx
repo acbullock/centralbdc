@@ -75,33 +75,45 @@ class Dashboard extends React.Component {
   async componentDidMount() {
     this._isMounted = true
     this._isMounted && this.setState({ loading: true })
-
-
-    let agents = this._isMounted && await this.props.mongo.find("agents",
+    let agents = await this.props.mongo.aggregate("agents", [
       {
-        isActive: true,
-        department: "sales"
+        "$match": {
+          "isActive": true,
+          "department": "sales"
+        }
       },
       {
-        projection: {
-          _id: 1,
-          name: 1,
-          callCountLastUpdated: 1,
-          inboundToday: 1,
-          outboundToday: 1,
-          personalRecord: 1
+        "$group": {
+          "_id": "$_id",
+          "userId": {
+            "$first": "$userId"
+          },
+          "name": {
+            "$first": "$name"
+          },
+          'personalRecord': {
+            "$first": "$personalRecord"
+          },
+          'inboundToday': {
+            "$first": "$inboundToday"
+          },
+          'outboundToday': {
+            "$first": "$outboundToday"
+          },
+          'callCountLastUpdated': {
+            "$first": "$callCountLastUpdated"
+          }
         }
-      })
+      },
+      {
+        "$sort": {
+          "personalRecord": -1
+        }
+      }
+    ])
 
     agents = this._isMounted && agents.map((a, i) => {
-      return Object.assign(a, { label: a.name, value: i })
-    })
-
-
-    this._isMounted && agents.sort((a, b) => {
-      if (a.label > b.label) return 1;
-      if (a.label < b.label) return -1;
-      return 0;
+      return Object.assign(a, { label: a.name, value: a._id })
     })
     let agent = this.props.agent
     if (agent.account_type !== "admin") {
@@ -175,6 +187,7 @@ class Dashboard extends React.Component {
       }
     ])
 
+
     let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { userId: 1, name: 1, _id: 1 } })
     let agentsRanked = []
     let lastVal = -1
@@ -198,7 +211,6 @@ class Dashboard extends React.Component {
       }
       agentsRanked.push(user)
     }
-    console.log(agentsRanked)
     this._isMounted && this.setState({ top5: agentsRanked, loading: false })
 
   }

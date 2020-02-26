@@ -41,10 +41,13 @@ class GoalDashboard extends React.Component {
         this.getDealerCounts = this.getDealerCounts.bind(this)
     }
     async componentWillMount() {
+        if(this.props.agent.account_type !== "admin"){
+            this.props.history.push("/admin/dashboard")
+            return;
+        }
         this._isMounted = true
         this._isMounted && this.setState({ loading: true })
         this._isMounted && await this.getDealerships()
-        this._isMounted && await this.getMTDApps()
         this.getDealerCounts()
         this._isMounted && this.setState({ loading: false })
 
@@ -59,28 +62,47 @@ class GoalDashboard extends React.Component {
         this._isMounted = false
     }
     async getDealerCounts() {
-        let { dealerships } = this.state;
-        let dealerCounts = []
-        let now = new Date()
-        let first = new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0))
-        // let daysElapsed2 = now.getDate()
-        for (let dealer in dealerships) {
-            let dlrCount = 0;
-            for (let app in this.state.mtdApps) {
-                if (this.state.mtdApps[app].dealership === dealerships[dealer].value) {
-                    dlrCount++
+        let groupedApps = await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    "dealership_department": {
+                        "$ne": "Service"
+                    },
+                    "verified": { "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString() }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$dealership",
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "count": -1
                 }
             }
-            let daysElapsed = new Date(dealerships[dealer].activated).getTime() > new Date(first).getTime() ? (now.getTime() - new Date(dealerships[dealer].activated).getTime()) / (1000 * 3600 * 24) : (now.getTime() - first.getTime()) / (1000 * 3600 * 24)
-            dealerCounts.push({
-                label: dealerships[dealer].label,
-                goal: parseInt(dealerships[dealer].goal),
-                goalMTD: Math.round(10 * parseInt(dealerships[dealer].goal) * daysElapsed) / 10,
-                count: dlrCount,
-                percentage: Math.round(1000 * dlrCount / (parseInt(dealerships[dealer].goal) * daysElapsed)) / 10,
-                goalDistance: Math.round(10 * ((parseInt(dealerships[dealer].goal) * daysElapsed) - dlrCount)) / 10,
-                activated: dealerships[dealer].activated
+        ])
+        let dealerCounts = [];
+        let first = new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0))
+        let now = new Date();
+        for (let a in groupedApps) {
+            let index = this.state.dealerships.findIndex((d) => {
+                return d.value === groupedApps[a]._id
             })
+            if (index === -1) continue;
+            let daysElapsed = new Date(this.state.dealerships[index].activated).getTime() > new Date(first).getTime() ? (now.getTime() - new Date(this.state.dealerships[index].activated).getTime()) / (1000 * 3600 * 24) : (now.getTime() - first.getTime()) / (1000 * 3600 * 24)
+
+            let obj = groupedApps[a]
+            obj.label = this.state.dealerships[index].label
+            obj.goal = this.state.dealerships[index].goal
+            obj.goalMTD = Math.round(10 * parseInt(this.state.dealerships[index].goal) * daysElapsed) / 10
+            obj.percentage = Math.round(1000 * groupedApps[a].count / (parseInt(this.state.dealerships[index].goal) * daysElapsed)) / 10
+            obj.goalDistance = Math.round(10 * ((parseInt(this.state.dealerships[index].goal) * daysElapsed) - groupedApps[a].count)) / 10
+            obj.activated = this.state.dealerships[index].activated
+            dealerCounts.push(obj)
         }
         for (let d in dealerCounts) {
             let color = "red";
