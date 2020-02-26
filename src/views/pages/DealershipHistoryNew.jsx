@@ -62,8 +62,7 @@ class DealershipHistoryNew extends React.Component {
     _isMounted = false
     async componentWillMount() {
         this._isMounted = true;
-        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
-        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId })
+        let agent = this.props.agent
         if (agent.account_type !== "admin") {
             this._isMounted = false
             this.props.history.push('/admin/dashboard')
@@ -75,36 +74,78 @@ class DealershipHistoryNew extends React.Component {
     async componentDidMount() {
         this._isMounted = true
         this._isMounted && this.setState({ loading: true })
-        let dealerships = this._isMounted && await this.props.mongo.find("dealerships", { isActive: true, isSales: true })
-        let agents = this._isMounted && await this.props.mongo.find("agents", { department: "sales" })
-        this._isMounted && dealerships.sort((a, b) => {
-            if (a.label > b.label) return 1;
-            if (a.label < b.label) return -1;
-            return 0;
-        })
+        let dealerships = this._isMounted && await this.props.mongo.aggregate("dealerships", [
+            {
+                "$match": {
+                    isActive: true,
+                    isSales: true
+                }
+            },
+            {
+                "$group": {
+                    _id: "$value",
+                    label: { "$first": "$label" },
+                    value: { "$first": "$value" }
+                }
+            },
+            {
+                "$sort": {
+                    "label": 1
+                }
+            }
+        ])
+        let agents = this._isMounted && await this.props.mongo.aggregate("agents", [
+            {
+                "$match": {
+                    department: "sales"
+                }
+            },
+            {
+                "$group": {
+                    _id: "$_id",
+                    name: { "$first": "$name" },
+                    assistance: { "$first": "$assistance" }
+                }
+            }
+        ])
         this._isMounted && this.setState({ loading: false, dealerships, agents })
 
     }
     async loadHistory(dealer) {
         this._isMounted && this.setState({ historyLoading: true })
         let agents = this.state.agents
-        let appts = []
         let assistance = []
         for (let a in agents) {
-            appts = appts.concat(agents[a].appointments)
             assistance = assistance.concat(agents[a].assistance)
         }
-        appts = this._isMounted && appts.filter((a) => {
-            return a.dealership.value === dealer.value
-        })
         assistance = assistance.filter((a) => {
             return a.dealership.value === dealer.value
         })
-        let all_appts = this._isMounted && await this.props.mongo.find("all_appointments", { "dealership.value": dealer.value })
-        appts = appts.concat(all_appts)
-        appts = this._isMounted && appts.filter((a) => {
-            return a.dealership_department !== "Service"
-        })
+        let appts = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    dealership: dealer.value,
+                    dealership_department: {
+                        "$ne": "Service"
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$verified",
+                    "dealership": { "$first": "$dealership" },
+                    "internal_msg": { "$first": "$internal_msg" },
+                    "created": { "$first": "$created" },
+                    "agent_id": { "$first": "$agent_id" },
+                    "verified": {"$first": "$verified"}
+                }
+            },
+            {
+                "$sort": {
+                    "_id": -1
+                }
+            }
+        ])
         this._isMounted && this.setState({ historyLoading: false, history: appts, historyAssistance: assistance })
 
     }
@@ -115,11 +156,6 @@ class DealershipHistoryNew extends React.Component {
         let results = this._isMounted && this.state.history.filter((a) => {
             let verified = new Date(a.verified)
             return verified.getTime() >= new Date(from).getTime() && verified.getTime() <= new Date(to).getTime()
-        })
-        this._isMounted && results.sort((a, b) => {
-            if (new Date(a.verified).getTime() > new Date(b.verified).getTime()) return 1;
-            if (new Date(a.verified).getTime() < new Date(b.verified).getTime()) return -1;
-            return 0
         })
 
         let resultsAssistance = this._isMounted && this.state.historyAssistance.filter((a) => {
