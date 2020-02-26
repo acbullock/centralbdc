@@ -34,323 +34,162 @@ class ServiceDashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            bigChartData: "data1",
-            barData: {},
-            user: {
-                userId: ""
-            },
             agent: {
 
             },
-            labels: [],
-            datasets: [],
             isAdmin: false,
             appointments: [],
             loading: false,
             agents: [],
             dealerships: [],
-            data: {},
-            options: {},
             top5: [],
             mtdTop5: [],
-            mostRecent: {
-                name: "no one",
-                time: new Date(0), dealership: ""
-            },
-            isOld: true,
             todays_appts: [],
             todays_dealer_counts: [],
-            elements: [],
             selected_agent: { label: "", value: "" },
             counts: {},
             mtdtop5loading: false
         };
-        this.getAppointmentData = this.getAppointmentData.bind(this)
         this.getBreakDown = this.getBreakDown.bind(this)
         this.getMtdTop5 = this.getMtdTop5.bind(this)
         this.getProjection = this.getProjection.bind(this)
     }
     _isMounted = false;
+    componentWillMount() {
+        if (this.props.agent.account_type !== 'admin' && this.props.agent.department !== "service") {
+            this.props.history.push("/admin/dashboard");
+            return;
+        }
+    }
     async componentDidMount() {
         this._isMounted = true
         this._isMounted && this.setState({ loading: true })
         let agent = this.props.agent
-        if (agent.department === "sales" && agent.account_type !== "admin") {
-            this.props.history.push("/admin/dashboard")
-            this._isMounted = false;
-            return
-        }
-        else {
-            let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true }, { projection: { account_type: 1, department: 1, "name": 1, "appointments.verified": 1, "appointments.dealership_department": 1, "appointments.agent_id": 1 } })
-            agents = this._isMounted && agents.map((a, i) => {
-                return Object.assign(a, { label: a.name, value: i })
-            })
-            agents = this._isMounted && agents.filter((a) => {
-                return a.department === "service" || a.account_type === "admin"
-            })
-            this._isMounted && agents.sort((a, b) => {
-                if (a.label > b.label) return 1;
-                if (a.label < b.label) return -1;
-                return 0;
-            })
-            if (agent.account_type !== "admin") {
-                let selected = this._isMounted && agents.filter((a) => {
-                    return a._id === agent._id
-                })
-                selected = selected[0]
-                this.getBreakDown(agent)
-                this.setState({ selected_agent: selected })
+        let agents = this._isMounted && await this.props.mongo.aggregate("agents", [
+            {
+                "$match": {
+                    isActive: true,
+                    department: "service"
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id",
+                    "name": { "$first": "$name" },
+                    "label": { "$first": "$name" },
+                    "value": { "$first": "$_id" },
+                    "inboundToday": { "$first": "$inboundToday" },
+                    "outboundToday": { "$first": "$outboundToday" },
+                    "callCountLastUpdated": { "$first": "$callCountLastUpdated" }
+                }
+            },
+            {
+                "$sort": {
+                    "label": 1
+                }
             }
-            this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
-            this._isMounted && await this.getAppointmentData()
-            this._isMounted && this.getTop5()
-            this._isMounted && this.getMtdTop5()
-            this._isMounted && await this.isOld()
-            this._isMounted && this.setState({ loading: false })
+        ])
+        if (agent.account_type !== "admin") {
+            let selected = this._isMounted && agents.filter((a) => {
+                return a._id === agent._id
+            })
+            selected = selected[0]
+            this.getBreakDown(agent)
+            this.setState({ selected_agent: selected })
         }
+        this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
+        this._isMounted && await this.getTop5()
+        this._isMounted && await this.getMtdTop5()
+        this._isMounted && this.setState({ loading: false })
+
     }
     componentWillUnmount() {
         this._isMounted = false
     }
-
-
-    isOld() {
-        this._isMounted && this.setState({ loading: true })
-        let time = this.state.mostRecent.time
-        let twoHoursAgo = new Date(new Date().getTime() - (3600 * 1000 + 1800 * 1000))
-        if (new Date(time).getTime() < twoHoursAgo.getTime()) {
-
-            this._isMounted && this.setState({ isOld: true })
-        }
-        else {
-
-            this._isMounted && this.setState({ isOld: false })
-        }
-        this._isMounted && this.setState({ loading: false })
-    }
-    async getChartData() {
-        // let allAgents = []
-        this._isMounted && this.setState({ loading: true })
-        // let allAgents = this._isMounted && await this.state.agents.find().toArray()
-        let allAgents = this.state.agents
-        const data = (canvas) => {
-            var ctx = canvas.getContext("2d");
-
-            var gradientStroke = ctx.createLinearGradient(500, 0, 100, 0);
-            gradientStroke.addColorStop(0, '#80b6f4');
-            gradientStroke.addColorStop(1, '#FFFFFF');
-
-            var gradientFill = ctx.createLinearGradient(0, 170, 0, 50);
-            gradientFill.addColorStop(0, "rgba(128, 182, 244, 0)");
-            gradientFill.addColorStop(1, "rgba(249, 99, 59, 0.40)");
-
-
-            let appointments = []
-            for (let agent in allAgents) {
-                for (let a in allAgents[agent].appointments) {
-                    appointments.push(allAgents[agent].appointments[a])
-                }
-            }
-            let approved_appointments = this._isMounted && appointments.filter((a) => {
-
-                return a.verified !== undefined
-            })
-            let recentLabels = []
-            let recentData = []
-            for (let i = 14; i >= 0; i--) {
-                let now = new Date()
-                now.setHours(0, 0, 0, 0)
-                let day = 24 * 3600 * 1000
-                let currDay = new Date(now.getTime() - (i * day))
-                recentLabels.push(currDay.toLocaleDateString())
-                let count = 0;
-                for (let a in approved_appointments) {
-
-                    if (new Date(approved_appointments[a].verified).getTime() >= currDay.getTime() && new Date(approved_appointments[a].verified).getTime() <= (currDay.getTime() + day)) {
-                        count++;
-
-                    }
-                }
-                recentData.push(count)
-
-            }
-            return {
-                labels: recentLabels,
-                datasets: [{
-                    label: "Approved Count\n",
-                    borderColor: "#f96332",
-                    pointBorderColor: "#FFF",
-                    pointBackgroundColor: "#f96332",
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 4,
-                    pointHoverBorderWidth: 1,
-                    pointRadius: 4,
-                    fill: true,
-                    backgroundColor: gradientFill,
-                    borderWidth: 2,
-                    data: recentData
-                }]
-            }
-        };
-        const options = {
-            maintainAspectRatio: false,
-            legend: {
-                display: false
-            },
-            tooltips: {
-                bodySpacing: 4,
-                mode: "nearest",
-                intersect: 0,
-                position: "nearest",
-                xPadding: 10,
-                yPadding: 10,
-                caretPadding: 10,
-            },
-            responsive: 1,
-            scales: {
-                yAxes: [{
-                    display: 1,
-                    ticks: {
-                        display: true
-                    },
-                    gridLines: {
-                        zeroLineColor: "transparent",
-                        drawTicks: false,
-                        display: true,
-                        drawBorder: false
-                    }
-                }],
-                xAxes: [{
-                    display: 1,
-                    ticks: {
-                        display: false
-                    },
-                    gridLines: {
-                        zeroLineColor: "transparent",
-                        drawTicks: false,
-                        display: false,
-                        drawBorder: false
-                    }
-                }]
-            },
-            layout: {
-                padding: { left: 15, right: 15, top: 15, bottom: 15 }
-            }
-
-
-        };
-
-        this._isMounted && this.setState({ options, data, loading: false })
-
-    }
     async getTop5() {
         this._isMounted && this.setState({ loading: true })
-        // let allAgents = this._isMounted && await this.state.agents.find().toArray()
-        let allAgents = this.state.agents
-        let nums = []
-        for (let a in allAgents) {
-            let user = {
-                name: allAgents[a].name,
-                count: 0,
-                type: allAgents[a].account_type
-            }
-
-            for (let b in allAgents[a].appointments) {
-                if (allAgents[a].appointments[b].verified !== undefined) {
-                    if (new Date(this.state.mostRecent.time).getTime() < new Date(allAgents[a].appointments[b].verified).getTime()) {
-                        this._isMounted && this.setState({ mostRecent: { name: allAgents[a].name, time: allAgents[a].appointments[b].verified, dealership: allAgents[a].appointments[b].dealership } })
-                    }
-                    let curr = new Date()
-                    curr.setHours(0, 0, 0, 0)
-                    if (new Date(allAgents[a].appointments[b].verified).getTime() >= curr.getTime() &&
-                        new Date(allAgents[a].appointments[b].verified).getTime() < (curr.getTime() + (24 * 3600 * 1000))) {
-                        user.count++;
+        let agentNames = await this.props.mongo.find("agents", { department: "service", isActive: true }, { projection: { name: 1, account_type: 1 } })
+        let grouped = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    dealership_department: "Service",
+                    verified: {
+                        "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
                     }
                 }
+            },
+            {
+                "$group": {
+                    "_id": "$agent_id",
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            }, {
+                "$sort": {
+                    "count": -1
+                }
             }
-            nums.push(user)
+        ])
+        let top5 = []
+        for (let ap in grouped) {
+            let name = agentNames[agentNames.findIndex((a) => {
+                return a._id === grouped[ap]._id
+            })].name
+            let type = agentNames[agentNames.findIndex((a) => {
+                return a._id === grouped[ap]._id
+            })].account_type
+            let obj = {
+                count: grouped[ap].count,
+                type,
+                name
+            }
+            top5.push(obj)
         }
-        this._isMounted && await nums.sort((a, b) => {
-            if (a.count > b.count) {
-                return -1;
-            }
-            if (a.count < b.count) {
-                return 1
-            }
-            return 0;
-        })
-        this._isMounted && this.setState({ top5: nums, loading: false })
+        this._isMounted && this.setState({ top5, loading: false })
 
     }
     async getMtdTop5() {
         this._isMounted && this.setState({ loading: true, mtdtop5loading: true })
-        let allAgents = this.state.agents.slice()
-        let allApps = this._isMounted && await this.props.mongo.find("all_appointments", {
-            dealership_department: "Service", verified: {
-                "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
+        let agentNames = await this.props.mongo.find("agents", { department: "service", isActive: true }, { projection: { name: 1, account_type: 1 } })
+        let grouped = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    dealership_department: "Service",
+                    verified: {
+                        "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$agent_id",
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            }, {
+                "$sort": {
+                    "count": -1
+                }
             }
-        }, {
-            projection: {
-                agent_id: 1,
-                "dealership.value": 1,
-
-            }
-        })
-
-        let nums = []
-        for (let a in allAgents) {
-            allApps = allApps.concat(allAgents[a].appointments)
-
-            let agentApps = this._isMounted && allApps.slice().filter((ap) => {
-                return ap.agent_id === allAgents[a]._id
+        ])
+        let mtdTop5 = []
+        for (let ap in grouped) {
+            let index = agentNames.findIndex((a) => {
+                return a._id === grouped[ap]._id
             })
-            let user = {
-                name: allAgents[a].name,
-                count: agentApps.length,
-                type: allAgents[a].account_type
+            if (index === -1) continue;
+            let name = agentNames[index].name
+            let type = agentNames[index].account_type
+            let obj = {
+                count: grouped[ap].count,
+                type,
+                name
             }
-
-            nums.push(user)
+            mtdTop5.push(obj)
         }
-        this._isMounted && nums.sort((a, b) => {
-            if (a.count > b.count) return -1;
-            if (a.count < b.count) return 1;
-            return 0
-        })
-        this._isMounted && this.setState({ loading: false, mtdtop5loading: false, mtdTop5: nums })
-    }
-
-    async getAppointmentData() {
-        this._isMounted && this.setState({ loading: true })
-        let agents;
-        if (this.state.isAdmin === true) {
-            // agents = this._isMounted && await this.props.mongo.db.collection("agents").find({}).asArray();
-            agents = this.state.agents
-
-        }
-        else {
-            // agents = this._isMounted && await this.props.mongo.db.collection("agents").findOne({ userId: this.state.user.userId });
-            agents = this.state.agent
-        }
-        if (this.state.isAdmin === true) {
-            let appointments = []
-            this._isMounted && await agents.map((agent) => {
-
-                let appt = { name: agent.name, appointments: agent.appointments }
-                appointments.push(appt);
-                return agent;
-            });
-            appointments = this._isMounted && await appointments.sort(function (a, b) {
-                return (b.appointments.length - a.appointments.length)
-            });
-            this._isMounted && this.setState({ appointments, loading: false });
-        }
-        else {
-            let appt = { name: agents.name, appointments: agents.appointments }
-            let appointments = [];
-            appointments.push(appt)
-            this._isMounted && this.setState({ appointments, loading: false })
-        }
+        this._isMounted && this.setState({ loading: false, mtdtop5loading: false, mtdTop5 })
     }
     getMonday(d) {
         d = new Date(d);
@@ -391,15 +230,6 @@ class ServiceDashboard extends React.Component {
             return ct;
         }
         return 0
-        // let someDay = new Date();
-        // let ret = 0;
-        // someDay.setDate(someDay.getDate() + (-1 * numDays));
-        // for (let appt in appts) {
-        //   if (new Date(appts[appt].verified).getTime() >= someDay.getTime() && appts[appt].isPending === false) {
-        //     ret++;
-        //   }
-        // }
-        // return ret;
     }
     pendingAppointmentsSince(appts, numDays) {
         let someDay = new Date();
@@ -413,8 +243,13 @@ class ServiceDashboard extends React.Component {
 
         return ret;
     }
-    getBreakDown(agent) {
-        let appointments = agent.appointments
+    async getBreakDown(agent) {
+        let appointments = this._isMounted && await this.props.mongo.find("all_appointments", {
+            agent_id: agent._id,
+            verified: {
+                "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+            }
+        }, { projection: { verified: 1 } })
         let start = new Date()
         let end = new Date();
         let now = new Date();
@@ -586,27 +421,25 @@ class ServiceDashboard extends React.Component {
                                     <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Daily Performance Report for </strong></p><p style={{ color: "white" }}><strong>{this.state.agent.name}</strong></p></CardTitle>
                                 </CardHeader>
                                 <CardBody>
-                                    {
-
-                                        this._isMounted && this.state.top5.map((a, i) => {
-                                            if (i > 0) return null;
-                                            let rank = 1
-                                            for (let agent in this.state.top5) {
-                                                if (this.state.top5[agent].count > this.state.agent.appointments.length) {
-                                                    rank++;
-                                                }
-                                                else {
-                                                    break;
-                                                }
-                                            }
-                                            return (
-                                                <div key={i}>
-                                                    <h4 style={{ color: "white" }}>Appointment Count: <strong>{this.state.agent.appointments.length}</strong></h4>
-                                                    <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{rank}</strong></h4>
-                                                </div>
-                                            );
+                                    {(() => {
+                                        let index = this.state.top5.findIndex((ag) => {
+                                            return ag.name === this.state.agent.name
                                         })
-                                    }
+
+                                        let rank = index + 1;
+                                        if (rank === 0) {
+                                            rank = this.state.top5.length + 1;
+
+                                        }
+                                        return (
+                                            <div>
+                                                <h4 style={{ color: "white" }}>Appointment Count: <strong>{index === -1 ? 0 : this.state.top5[index].count}</strong></h4>
+                                                <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{rank}</strong></h4>
+                                            </div>
+                                        );
+
+
+                                    })()}
                                 </CardBody>
                             </Card>
                         </Col>
@@ -617,12 +450,33 @@ class ServiceDashboard extends React.Component {
                                 </CardHeader>
                                 <CardBody>
                                     <CardImg top width="100%" hidden={!this.state.mtdtop5loading} src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
+                                    {(() => {
+                                        let index = this.state.mtdTop5.findIndex((ag) => {
+                                            return ag.name === this.state.agent.name
+                                        })
 
-                                    {
+                                        let rank = index + 1;
+                                        if (rank === 0) {
+                                            rank = this.state.mtdTop5.length + 1;
+
+                                        }
+                                        return (
+                                            <div>
+                                                <h4 style={{ color: "white" }}>Appointment Count: <strong>{index === -1 ? 0 : this.state.mtdTop5[index].count}</strong></h4>
+                                                <h4 style={{ color: "white" }}>Call Center Rank: <strong>#{rank}</strong></h4>
+                                            </div>
+                                        );
+
+
+                                    })()}
+                                    {/* {
 
                                         this._isMounted && this.state.mtdTop5.map((a, i) => {
+                                            let index = this.state.mtdTop5.findIndex((ag)=>{
+                                                return ag._id === this.props.agent._id
+                                            })
                                             let thisAgent = this._isMounted && this.state.mtdTop5.filter((a) => {
-                                                return a.name === this.state.agent.name
+                                                return a._id === this.state.agent._id
                                             })
                                             thisAgent = thisAgent[0]
                                             if (i > 0) return null;
@@ -642,7 +496,7 @@ class ServiceDashboard extends React.Component {
                                                 </div>
                                             );
                                         })
-                                    }
+                                    } */}
                                 </CardBody>
                             </Card>
                         </Col>
@@ -726,114 +580,29 @@ class ServiceDashboard extends React.Component {
                     </Row>
                     <Row style={{ justifyContent: "center" }}>
                         <Col lg="12">
-
-                            {/* <Card hidden={!this.state.isAdmin}>
-                <CardHeader>
-                  <div className="tools float-right">
-                  </div>
-                  <CardTitle tag="h3">Approved Appointments</CardTitle>
-                </CardHeader>
-                <CardBody >
-                  
-                  <Line
-                    data={this.state.data}
-                    options={this.state.options}
-                    height={100}
-
-                  />
-                </CardBody>
-              </Card> */}
-                            {/* <Card hidden={!this.state.isAdmin}>
-                <CardHeader>
-                  <CardTitle tag="h3">Approved Appointments <strong>today</strong></CardTitle>
-                </CardHeader>
-                <CardBody >
-                 <Bar
-                    data={this.state.barData}
-                    width={100}
-                    height={50}
-                    options={this.state.barOptions}
-                  />
-                </CardBody>
-              </Card>
-               */}
                             <Card className="card-raised card-white" hidden={!this.state.isAdmin} style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader>
 
-                                    {/* <div className="tools float-right">
-                    <Button
-                      onClick={(e) => { e.preventDefault(); this.getAppointmentData() }}
-                    >
 
-                      <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02 "} />
-                    </Button>
-                  </div> */}
-                                    {/* <div className="tools float-right">
-                    <UncontrolledDropdown>
-                      <DropdownToggle
-                        caret
-                        className="btn-icon"
-                        color="link"
-                        data-toggle="dropdown"
-                        type="button"
-                      >
-                        <i className="tim-icons icon-settings-gear-63" />
-                      </DropdownToggle>
-                      <DropdownMenu right>
-                        <DropdownItem
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Action
-                        </DropdownItem>
-                        <DropdownItem
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Another action
-                        </DropdownItem>
-                        <DropdownItem
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Something else
-                        </DropdownItem>
-                        <DropdownItem
-                          className="text-danger"
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          Remove Data
-                        </DropdownItem>
-                      </DropdownMenu>
-                    </UncontrolledDropdown>
-                  </div> */}
                                     <CardTitle tag="h3"><p style={{ color: "white" }}><strong>Created Appointments</strong></p></CardTitle>
                                 </CardHeader>
                                 <CardBody>
                                     <Table responsive>
                                         <thead className="text-primary">
                                             <tr>
-                                                {/* <th className="text-center"></th> */}
+
                                                 <th style={{ color: "white", borderBottom: "1px solid white" }}>Agent Name</th>
                                                 <th style={{ color: "white", borderBottom: "1px solid white" }}>Today</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {
-                                                this._isMounted && this.state.appointments.map((app, index) => {
+                                                this._isMounted && this.state.top5.map((app, index) => {
                                                     return (
                                                         <tr key={index}>
-                                                            {/* <td className="text-center">
-                              <div className="photo">
-                                <img
-                                  alt="..."
-                                  src={require("../assets/img/tania.jpg")}
-                                />
-                              </div>
-                              </td> */}
+
                                                             <td key={index + "-name"} style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{app.name}</strong></p></td>
-                                                            <td key={index + "-day"} style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{this.createdAppointmentsSince(app.appointments, 0)}</strong></p></td>
+                                                            <td key={index + "-day"} style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{app.count}</strong></p></td>
                                                         </tr>
                                                     )
                                                 })
@@ -842,47 +611,7 @@ class ServiceDashboard extends React.Component {
                                     </Table>
                                 </CardBody>
                             </Card>
-                            {/* <Card>
-                <CardHeader>
-                  <div className="tools float-right">
-                    <Button
-                      onClick={(e) => { e.preventDefault(); this.getAppointmentData(); }}
-                    >
 
-                      <i className={this.state.loading ? "tim-icons icon-refresh-02 tim-icons-is-spinning" : "tim-icons icon-refresh-02"} />
-                    </Button>
-                  </div>
-                  
-                  <CardTitle tag="h3">Pending Appointments</CardTitle>
-
-                </CardHeader>
-                <CardBody>
-                  <Table responsive>
-                    <thead className="text-primary">
-                      <tr>
-                        <th>Agent Name</th>
-                        <th>1 day</th>
-                        <th>7 days</th>
-                        <th>30 days</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {
-                        this.state.appointments.map((app, index) => {
-                          return (
-                            <tr key={index}>
-                              <td key={index + "-name"}>{app.name}</td>
-                              <td key={index + "-day"}>{this.pendingAppointmentsSince(app.appointments, 1)}</td>
-                              <td key={index + "-week"}>{this.pendingAppointmentsSince(app.appointments, 7)}</td>
-                              <td key={index + "-month"}>{this.pendingAppointmentsSince(app.appointments, 30)}</td>
-                            </tr>
-                          )
-                        })
-                      }
-                    </tbody>
-                  </Table>
-                </CardBody>
-              </Card> */}
                         </Col>
                     </Row>
                 </div>
