@@ -50,10 +50,9 @@ class ApproveAssistance extends React.Component {
     async componentWillMount() {
         this._isMounted = true;
         this._isMounted && this.setState({ loading: true })
-        let currUser = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         // let agent = await this.props.mongo.getCollection("agents")
         // agent = await agent.findOne({ userId: currUser.userId })
-        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: currUser.userId })
+        let agent = this.props.agent
         this._isMounted && this.setState({ isApprover: agent.isApprover })
         if (agent.isApprover === true) {
 
@@ -61,7 +60,7 @@ class ApproveAssistance extends React.Component {
         }
         this._isMounted && this.setState({ loading: false })
     }
-    componentWillUnmount(){
+    componentWillUnmount() {
         this._isMounted = false
     }
     // with this function we create an array with the opened collapses
@@ -84,7 +83,7 @@ class ApproveAssistance extends React.Component {
         this._isMounted && this.setState({ loading: true })
         // let agents = await this.props.mongo.getCollection("agents")
         // agents = await agents.find().toArray()
-        let agents = this._isMounted && await this.props.mongo.find("agents")
+        let agents = this._isMounted && await this.props.mongo.find("agents", {}, { projection: { team: 1, name: 1, email: 1, assistance: 1 } })
         let assistance = []
         //loop thru agents
         for (let agent in agents) {
