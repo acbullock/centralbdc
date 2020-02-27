@@ -31,7 +31,7 @@ import {
 } from "reactstrap";
 import Select from "react-select"
 import ReactDatetime from "react-datetime";
-class AppointmnetSearchNew extends React.Component {
+class ApptSearch extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -49,20 +49,49 @@ class AppointmnetSearchNew extends React.Component {
         this.clearForm = this.clearForm.bind(this)
     }
     _isMounted = false
+    componentWillMount() {
+        if (this.props.agent.account_type !== "admin") {
+            this.props.history.push("/admin/dashboard");
+            return
+        }
+    }
     async componentDidMount() {
         this._isMounted = true
         this._isMounted && this.setState({ loading: true })
-        let agents = this._isMounted && await this.props.mongo.find("agents");
-        agents = this._isMounted && agents.map((a) => {
-            a.label = a.name;
-            a.value = a._id;
-            return a;
-        })
-        this._isMounted && agents.sort((a, b) => {
-            if (a.label > b.label) return 1;
-            if (a.label < b.label) return -1;
-            return 0;
-        })
+        let agents = await this.props.mongo.aggregate("agents", [
+            {
+                "$group": {
+                    _id: "$_id",
+                    label: { "$first": "$name" },
+                    name: { "$first": "$name" },
+                    value: { "$first": "$_id" },
+                    assistance: { "$first": "$assistance" },
+                    userId: { "$first": "$userId" }
+                }
+            },
+            {
+                "$sort": {
+                    label: 1
+                }
+            },
+            {
+                "$project": {
+                    _id: 1,
+                    label: 1,
+                    value: 1,
+                    userId: 1,
+                    name: 1,
+                    "assistance.dealership.label": 1,
+                    "assistance.message": 1,
+                    "assistance.customer_firstname": 1,
+                    "assistance.customer_lastname": 1,
+                    "assistance.customer_phone": 1,
+                    "assistance.source.label": 1,
+                    "assistance.created": 1,
+                    "assistance.userId": 1
+                }
+            }
+        ])
         this._isMounted && this.setState({ loading: false, agents })
 
     }
@@ -75,102 +104,77 @@ class AppointmnetSearchNew extends React.Component {
     }
     async searchForAppt() {
         this.setState({ loading: true })
-        let total_apps = []
-        let total_asst = []
-        let phone_apps = []
-        let phone_asst = []
-        let today_apps = []
-        let today_asst = []
-        let agentIndex = -1;
-
-        let total_assistance = []
-        for (let a in this.state.agents) {
-            total_assistance = total_assistance.concat(this.state.agents[a].assistance);
-        }
-        //get today appts
+        let fromDate = new Date(new Date(this.state.fromDate).setHours(0, 0, 0, 0)).toISOString()
+        let toDate = new Date(new Date(this.state.toDate).setHours(23, 59, 59, 999)).toISOString()
+        let userId;
         if (this.state.search_agent.label.length > 0) {
-            agentIndex = this.state.agents.findIndex((a) => {
-                return a.name === this.state.search_agent.label
+            let age = await this.props.mongo.findOne("agents", { _id: this.state.search_agent.value }, { projection: { userId: 1 } })
+            userId = age.userId
+        }
+        let verifiedMatch = {
+            "$gte": fromDate,
+            "$lte": toDate
+        }
+        let total_asst = []
+        for (let ag in this.state.agents) {
+            total_asst = this._isMounted && await total_asst.concat(this.state.agents[ag].assistance)
+        }
+        //if theres just a  phone..
+        let match;
+        if (this.state.search_phone.length === 10 && this.state.search_agent.label.length === 0) {
+            match =
+            {
+                "$match": {
+                    "customer_phone": this.state.search_phone,
+                    "verified": verifiedMatch
+                }
+            }
+            total_asst = total_asst.filter((a) => {
+                return a.customer_phone === this.state.search_phone &&
+                    new Date(a.created).toISOString() >= fromDate &&
+                    new Date(a.created).toISOString() <= toDate
             })
-            today_apps = this.state.agents[agentIndex].appointments
-            today_asst = this.state.agents[agentIndex].assistance
-
         }
-        else {
-            for (let a in this.state.agents) {
-                today_apps = today_apps.concat(this.state.agents[a].appointments)
-                today_asst = today_asst.concat(this.state.agents[a].assistance)
-            }
-        }
-        let from = new Date(new Date(this.state.fromDate).setHours(0, 0, 0, 0))
-        let to = new Date(new Date(this.state.toDate).setHours(23, 59, 59, 999))
-        //get phone apps
-        if (this.state.search_phone.length === 10) {
-            phone_apps = await this.props.mongo.find("all_appointments", {
-                customer_phone: this.state.search_phone, verified: {
-                    "$gte": new Date(from).toISOString(),
-                    "$lte": new Date(to).toISOString()
-                }
-            });
-            let today_phone = phone_apps.concat(today_apps.filter((a) => {
-                return a.customer_phone.indexOf(this.state.search_phone) !== -1
-            }))
-            for (let a in today_phone) {
-                if (phone_apps.findIndex(app => { return app.verified === today_phone[a].verified }) === -1) {
-                    phone_apps.push(today_phone[a])
+        //if theres just an agent
+        else if (this.state.search_phone.length !== 10 && this.state.search_agent.label.length > 0) {
+            match = {
+                "$match": {
+                    "agent_id": this.state.search_agent.value,
+                    "verified": verifiedMatch
                 }
             }
-            phone_asst = today_asst.filter((a) => {
-                return a.customer_phone === this.state.search_phone
+            total_asst = total_asst.filter((a) => {
+                return a.userId === userId &&
+                    a.created >= fromDate &&
+                    a.created <= toDate
             })
-
         }
-
-
-
-        if (this.state.search_phone.length === 10) {
-            total_apps = phone_apps
-            total_asst = phone_asst
-            if (this.state.search_agent.label.length > 0) {
-                total_apps = total_apps.filter((a) => { return a.agent_id === this.state.search_agent._id })
-                total_asst = total_asst.filter((a) => { return a.agent_email === this.state.search_agent.email })
+        //if theres both
+        else if (this.state.search_phone.length === 10 && this.state.search_agent.label.length > 0) {
+            match = {
+                "$match": {
+                    "customer_phone": this.state.search_phone,
+                    "agent_id": this.state.search_agent.value,
+                    "verified": verifiedMatch
+                }
             }
-        }
-        else {
-            total_apps = today_apps
-            total_asst = today_asst.slice().filter((asst) => {
-                return new Date(asst.created).getTime() >= new Date(from).getTime() && new Date(asst.created).getTime() <= new Date(to).getTime()
+            total_asst = total_asst.filter((a) => {
+                return a.customer_phone === this.state.search_phone && a.userId === userId &&
+                    new Date(a.created).toISOString() >= fromDate &&
+                    new Date(a.created).toISOString() <= toDate
             })
-            let all_agent_apps = await this.props.mongo.find("all_appointments", {
-                agent_id: this.state.search_agent.value, verified: {
-                    "$gte": new Date(from).toISOString(),
-                    "$lte": new Date(to).toISOString()
-                }
-            });
-            for (let a in all_agent_apps) {
-                if (total_apps.findIndex((app) => { return app.verified === all_agent_apps[a].verified }) === -1) {
-                    total_apps.push(all_agent_apps[a])
-                }
-            }
+        }
+        let results = await this.props.mongo.aggregate("all_appointments", [
+            match
+        ])
 
-        }
-        total_apps.sort((a, b) => {
-            if (new Date(a.created).getTime() > new Date(b.created).getTime()) return -1;
-            if (new Date(a.created).getTime() < new Date(b.created).getTime()) return 1;
-            return 0;
-        })
-        total_asst.sort((a, b) => {
-            if (new Date(a.created).getTime() > new Date(b.created).getTime()) return -1;
-            if (new Date(a.created).getTime() < new Date(b.created).getTime()) return 1;
-            return 0;
-        })
-        let final = []
-        for (let a in total_apps) {
-            if (final.findIndex(app => { return app.verified === total_apps[a].verified }) === -1) {
-                final.push(total_apps[a])
-            }
-        }
-        this.setState({ appt_results: final, asst_results: total_asst, loading: false })
+
+
+
+
+
+
+        this.setState({ loading: false, appt_results: results, asst_results: total_asst })
     }
     async clearForm() {
         this.setState({
@@ -337,4 +341,4 @@ class AppointmnetSearchNew extends React.Component {
     }
 }
 
-export default AppointmnetSearchNew;
+export default ApptSearch;
