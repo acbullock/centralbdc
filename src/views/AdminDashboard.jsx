@@ -139,10 +139,10 @@ class AdminDashboard extends React.Component {
         for (let a in this.state.agents) {
             todayAsst = this._isMounted && await todayAsst.concat(this.state.agents[a].assistance)
         }
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 6; i++) {
             let curMonth = new Date(new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).setMonth(new Date().getMonth() - i))
             let nextMonth = new Date(new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).setMonth(new Date().getMonth() - (i - 1)))
-            labels[11 - i] = months[curMonth.getMonth()]
+            labels[5 - i] = months[curMonth.getMonth()]
             let curApps = await this.props.mongo.count("all_appointments", {
                 "dealership_department": { "$ne": "Service" },
                 "verified": {
@@ -150,9 +150,9 @@ class AdminDashboard extends React.Component {
                     "$lt": nextMonth.toISOString(),
                 }
             })
-            data[11 - i] = curApps.count;
+            data[5 - i] = curApps.count;
             if (i < 1) {
-                data[11 - i] += todayApps.length
+                data[5 - i] += todayApps.length
             }
 
         }
@@ -283,6 +283,7 @@ class AdminDashboard extends React.Component {
                 "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
             }
         })
+        month_appts = month_appts.count
         let today_appts = this._isMounted && await this.props.mongo.count("all_appointments", {
             "dealership_department": { "$ne": "Service" },
             verified: {
@@ -291,7 +292,6 @@ class AdminDashboard extends React.Component {
         })
         today_appts = today_appts.count
         lifetime_appts = lifetime_appts.count + today_appts + 397740
-        month_appts = month_appts.count + today_appts
         let projected_today = Math.round(today_appts / elapsed * hrs)
         let projected_month = Math.round(month_appts / days * 26)
         if (elapsed >= hrs) {
