@@ -76,6 +76,40 @@ class SalesTVDashboard extends React.Component {
                 personalRecord: 1
             }
         })
+        let groupedToday = await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    dealership_department: {
+                        "$ne": "Service"
+                    },
+                    verified: {
+                        "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$agent_id",
+                    "count": {
+                        "$sum": 1
+                    },
+                    "name": { "$first": "$_id" }
+                }
+            },
+            {
+                "$sort": {
+                    "count": -1
+                }
+            }
+        ])
+        for(let ap in groupedToday){
+            let index = agents.findIndex((ag)=>{
+                return ag._id === groupedToday[ap]._id
+            })
+            if(index === -1)continue
+            groupedToday[ap].name = agents[index].name
+        }
+        this.setState({ todayAgents: groupedToday })
         this._isMounted && this.setState({ agent: this.props.agent, agents });
         this._isMounted && this.getMTDData();
         this._isMounted && this.getDepartmentCallCount()
@@ -83,6 +117,12 @@ class SalesTVDashboard extends React.Component {
         this._isMounted && this.getDepartmentCallCountMTD()
         this._isMounted && await this.setState({ loading: false })
 
+    }
+    componentWillMount() {
+        if (this.props.agent.account_type !== "admin") {
+            this.props.history.push("/admin/dashboard")
+            return;
+        }
     }
     componentWillUnmount() {
         this._isMounted = false
@@ -119,11 +159,15 @@ class SalesTVDashboard extends React.Component {
         this._isMounted && await this.setState({ callMTDSortedAgents })
     }
     async getDepartmentApptCount() {
-        let { agents } = this.state;
-        let totalApptCountToday = 0;
-        for (let a in agents) {
-            totalApptCountToday += agents[a].appointments.length
-        }
+        let totalApptCountToday = await this.props.mongo.count("all_appointments", {
+            dealership_department: {
+                "$ne": "Service"
+            },
+            verified: {
+                "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+            }
+        })
+        totalApptCountToday = totalApptCountToday.count
         this._isMounted && await this.setState({ totalApptCountToday })
     }
     refreshPage() {
@@ -160,9 +204,6 @@ class SalesTVDashboard extends React.Component {
         }, { projection: { _id: 1, agent_id: 1 } })
 
         this._isMounted && this.setState({ mtdDataLoading: false })
-        for (let a in agents) {
-            mtd_appts = mtd_appts.concat(agents[a].appointments)
-        }
         this.setState({ apptMtdLoading: false, apptMtdTotal: mtd_appts.length })
         let seven_day_apps = await this.props.mongo.find("all_appointments", {
             dealership_department: { "$ne": "Service" },
@@ -212,22 +253,6 @@ class SalesTVDashboard extends React.Component {
             }
         }
         agent.mtdHigh = max;
-
-
-
-        let { agents } = this.state
-        for (let a in agents) {
-            if (agents[a].name === agent.name) {
-                agents[a] = agent;
-                break;
-            }
-        }
-        let todayAge = this._isMounted && agents.slice().sort((a, b) => {
-            if (a.appointments.length > b.appointments.length) return -1;
-            if (a.appointments.length < b.appointments.length) return 1;
-            return 0;
-        })
-        this._isMounted && this.setState({ todayAgents: todayAge, agents })
 
     }
     render() {
@@ -414,7 +439,7 @@ class SalesTVDashboard extends React.Component {
                                                 return <tr key={i}>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.appointments.length}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.count}</strong></p></td>
                                                 </tr>
                                             })}
                                         </tbody>
