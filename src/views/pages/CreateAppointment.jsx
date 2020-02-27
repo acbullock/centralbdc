@@ -210,7 +210,6 @@ class CreateAppointment extends React.Component {
         ]
         await this.setState({ token: token })
         for (let c in contacts) {
-            contacts[c] = "1" + contacts[c]
             arr = []
             arr.push(contacts[c])
             this.props.mongo.sendGroupText("1" + textFrom, appointment.internal_msg, arr, token)
@@ -246,7 +245,7 @@ class CreateAppointment extends React.Component {
         this.setState({ loading: true })
         let textFrom = appointment.dealership_department === "Service" ? dealership.serviceTextFrom : dealership.textFrom
         let to = []
-        to.push("1" + appointment.customer_phone)
+        to.push(appointment.customer_phone)
         // let token = await this.props.mongo.getToken()
         this.props.mongo.sendGroupText("1" + textFrom, appointment.customer_msg, to, this.state.token)
         this.setState({ loading: false })
