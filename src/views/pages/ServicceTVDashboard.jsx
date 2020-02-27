@@ -42,7 +42,8 @@ class ServiceTVDashboard extends React.Component {
             apptMtdLoading: false,
             callsMtdLoading: false,
             apptMtdTotal: 0,
-            totalCallCountMTD: 0
+            totalCallCountMTD: 0,
+            grouped: []
         };
         this.getDepartmentCallCount = this.getDepartmentCallCount.bind(this)
         this.getDepartmentApptCount = this.getDepartmentApptCount.bind(this)
@@ -76,7 +77,39 @@ class ServiceTVDashboard extends React.Component {
             if ((a.inboundToday + a.outboundToday) < (b.inboundToday + b.outboundToday)) return 1;
             return 0;
         })
-        this._isMounted && this.setState({ agent, user, agents, callSortedAgents })
+        let groupedToday = await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    dealership_department: "Service",
+                    verified: {
+                        "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$agent_id",
+                    "count": {
+                        "$sum": 1
+                    },
+                    "name": { "$first": "$_id" }
+                }
+            },
+            {
+                "$sort": {
+                    "count": -1
+                }
+            }
+        ])
+        for (let ap in groupedToday) {
+            let index = agents.findIndex((ag) => {
+                return ag._id === groupedToday[ap]._id
+            })
+            if (index === -1) continue
+            groupedToday[ap].name = agents[index].name
+        }
+
+        this._isMounted && this.setState({ grouped: groupedToday, agent, user, agents, callSortedAgents })
         this._isMounted && await this.getDepartmentCallCount()
         this._isMounted && await this.getDepartmentApptCount()
         this._isMounted && await this.getApptsMTD()
@@ -107,10 +140,13 @@ class ServiceTVDashboard extends React.Component {
     }
     async getDepartmentApptCount() {
         let { agents } = this.state;
-        let totalApptCountToday = 0;
-        for (let a in agents) {
-            totalApptCountToday += agents[a].appointments.length
-        }
+        let totalApptCountToday = await this.props.mongo.count("all_appointments", {
+            dealership_department: "Service",
+            verified: {
+                "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+            }
+        })
+        totalApptCountToday = totalApptCountToday.count
         this._isMounted && await this.setState({ totalApptCountToday })
     }
     async getApptsMTD() {
@@ -252,12 +288,12 @@ class ServiceTVDashboard extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this._isMounted && this.state.agents.map((a, i) => {
+                                            {this._isMounted && this.state.grouped.map((a, i) => {
                                                 if (i > 9) return null
                                                 return <tr key={i}>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
                                                     <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
-                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.appointments.length}</strong></p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p style={{ color: "white" }}><strong>{a.count}</strong></p></td>
                                                 </tr>
                                             })}
                                         </tbody>
