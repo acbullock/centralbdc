@@ -31,7 +31,7 @@ import {
 } from "reactstrap";
 import Select from "react-select"
 import ReactDatetime from "react-datetime";
-class ApptSearch extends React.Component {
+class AppointmentSearchNew extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -341,4 +341,4 @@ class ApptSearch extends React.Component {
     }
 }
 
-export default ApptSearch;
+export default AppointmentSearchNew;

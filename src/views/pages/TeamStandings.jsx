@@ -5,6 +5,7 @@ import {
     CardImg,
     Container,
     CardBody,
+    CardTitle,
     Row,
     Col,
     Table,
@@ -28,73 +29,84 @@ class TeamStandings extends React.Component {
         super(props)
         this.state = {
             loading: false,
-            teams: {},
-            sortedTeams: []
+            teamCounts: [],
+            modalOpen: false,
+            selected_team: {},
+            all_apps: [],
+            agents: [],
+            modalTeam: []
+
         }
         this._isMounted = false
         this.refreshPage = this.refreshPage.bind(this)
     }
     async componentWillMount() {
-        this._isMounted = true
+        this._isMounted = true;
         this._isMounted && this.setState({ loading: true })
-        let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales", account_type: "agent" }, { projection: { name: 1, team: 1, "appointments.verified": 1 } })
-        let mtdApps = this._isMounted && await this.props.mongo.find("all_appointments", {
-            dealership_department: {
-                "$ne": "Service"
-            },
-            verified: {
-                "$gte": new Date(new Date(new Date().setDate(1)).setHours(0, 0, 0, 0)).toISOString()
-            }
-        }, { projection: { agent_id: 1, verified: 1 } })
-
-
-        // let mtdApps = []
-        let teams = {
+        let logos = {
+            "New Zealand": newZealandLogo,
+            "DeathRow": deathRowLogo,
+            "The Immortals": immortalsLogo,
+            "TrendSetters": trendsetterLogo,
+            "DreamChaser": dreamchaserLogo
         }
-        for (let agent in agents) {
-            mtdApps = this._isMounted && mtdApps.concat(agents[agent].appointments)
-            if (teams[agents[agent].team.label] === undefined) {
-                teams[agents[agent].team.label] = [agents[agent]]
+        let all_apps = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    "dealership_department": {
+                        "$ne": "Service"
+                    },
+                    "verified": {
+                        "$gte": "2020-02-01T05:00:000Z"
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$agent_id",
+                    "count": { "$sum": 1 }
+                }
+            },
+            {
+                "$sort": {
+                    "count": -1
+                }
+            }
+        ])
+        let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales", account_type: "agent" }, { projection: { team: 1, name: 1 } })
+        let dict = {}
+        for (let app in all_apps) {
+            let index = agents.findIndex((age) => {
+                return age._id === all_apps[app]._id
+            })
+            if (index === -1)
+                continue
+
+            let current = agents[index]
+            if (current.team.label === "Los Angeles Lakers") continue
+            if (dict[current.team.label] === undefined) {
+                dict[current.team.label] = {
+                    count: all_apps[app].count,
+                    numAgents: 1
+                }
             }
             else {
-                teams[agents[agent].team.label].push(agents[agent])
+
+                dict[current.team.label] = {
+                    count: dict[current.team.label].count + all_apps[app].count,
+                    numAgents: dict[current.team.label].numAgents + 1
+                }
             }
         }
-        for (let team in teams) {
-            for (let agent in teams[team]) {
-                let agentMTDApps = this._isMounted && await mtdApps.filter((a) => { return a.agent_id === teams[team][agent]._id })
-                teams[team][agent].mtd = agentMTDApps.length
-            }
+        let teamCounts = []
+        for (let i in dict) {
+            teamCounts.push({ name: i, count: dict[i].count, numAgents: dict[i].numAgents, logo: logos[i], avg: Math.round(10 * dict[i].count / dict[i].numAgents) / 10 })
         }
-        let sortedTeams = []
-        for (let team in teams) {
-            let mtd = 0;
-            for (let agent in teams[team]) {
-                mtd += teams[team][agent].mtd
-            }
-            sortedTeams.push({
-                name: team,
-                mtd,
-                mtdAvg: Math.round(10 * mtd / teams[team].length) / 10
-            })
-        }
-        this._isMounted && sortedTeams.sort((a, b) => {
-            if (a.mtdAvg > b.mtdAvg) return -1;
-            if (a.mtdAvg < b.mtdAvg) return 1;
-            return 0;
+        this._isMounted && await teamCounts.sort((a, b) => {
+            return b.avg - a.avg
         })
-        for (let t in teams) {
-            this._isMounted && teams[t].sort((a, b) => {
-                if (a.mtd > b.mtd) return -1;
-                if (a.mtd < b.mtd) return 1;
-                return 0;
-            })
-        }
-        for (let t in sortedTeams) {
-            this._isMounted && await this.setState({ [sortedTeams[t].name]: false })
-        }
-        this._isMounted && this.setState({ teams, sortedTeams })
-        this._isMounted && this.setState({ loading: false })
+
+        this._isMounted && this.setState({ loading: false, teamCounts, all_apps, agents })
 
     }
     componentDidMount() {
@@ -109,6 +121,24 @@ class TeamStandings extends React.Component {
     }
     refreshPage() {
         window.location.reload(false);
+    }
+    getOpenTeam(team) {
+        let curTeam = []
+        for (let app in this.state.all_apps) {
+            let index = this.state.agents.findIndex((agent) => {
+                return agent._id === this.state.all_apps[app]._id
+            })
+            if (index === -1)
+                continue
+
+            if (this.state.agents[index].team.label === team.name) {
+                curTeam.push({
+                    name: this.state.agents[index].name,
+                    count: this.state.all_apps[app].count
+                })
+            }
+        }
+        this.setState({ modalTeam: curTeam })
     }
     render() {
         if (this.state.loading) {
@@ -128,273 +158,116 @@ class TeamStandings extends React.Component {
             <div className="content">
                 <Container>
                     <Row >
-                        <Col sm="8">
-                            <Card id="test123" style={{ background: "linear-gradient(0deg, #000000 0%, #D4AF37 100%)", marginBottom: 20, cursor: "pointer", height: "45vh" }}>
-                                <CardBody onClick={() => { this.setState({ [this.state.sortedTeams[0].name]: !this.state[this.state.sortedTeams[0].name] }) }}>
-                                    <h3 className="text-white text-center" style={{ verticalAlign: "center" }}>
-                                        <img alt="gold trophy" src={gold} style={{ width: "50px" }} />
-                                        {"  #1:"} <strong>{this.state.sortedTeams[0].name}</strong>{"  "}
-                                        <img alt="team logo " src={
-                                            (() => {
-                                                if (this.state.sortedTeams[0].name === "DeathRow") {
-                                                    return deathRowLogo
-                                                }
-                                                else if (this.state.sortedTeams[0].name === "New Zealand") {
-                                                    return newZealandLogo
-                                                }
-                                                else if (this.state.sortedTeams[0].name === "TrendSetters") {
-                                                    return trendsetterLogo
-                                                }
-                                                else if (this.state.sortedTeams[0].name === "DreamChaser") {
-                                                    return dreamchaserLogo
-                                                }
-                                                else if (this.state.sortedTeams[0].name === "The Immortals") {
-                                                    return immortalsLogo
-                                                }
-                                                else { return defaultLogo }
-                                            })()
-                                        } style={{ width: "50px" }} />
-                                    </h3>
-                                    <hr style={{ border: "solid 1px white" }} />
-                                    <h4 className="text-white text-center" style={{ margin: 0 }}>MTD Average: <strong>{this.state.sortedTeams[0].mtdAvg}</strong></h4>
-                                    <h4 className="text-white text-center" style={{ margin: 0 }}>MTD Count: <strong>{this.state.sortedTeams[0].mtd}</strong></h4>
-                                    <h4 className="text-white text-center" style={{ margin: 0 }}>Agents: <strong>{this.state.teams[this.state.sortedTeams[0].name].length}</strong></h4>
-                                </CardBody>
-
-                            </Card>
-                            <Modal className="modal-primary" hidden={this.state[this.state.sortedTeams[0].name] !== true && this.state[this.state.sortedTeams[0].name] !== false} isOpen={this.state[this.state.sortedTeams[0].name]} toggle={() => { this.setState({ [this.state[this.state.sortedTeams[0].name]]: !this.state[this.state.sortedTeams[0].name] }) }}>
-                                <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [this.state.sortedTeams[0].name]: !this.state[this.state.sortedTeams[0].name] }) }}>
-                                    <strong>{this.state.sortedTeams[0].name}</strong>{" "}
-                                    <img alt="team logo" src={
-                                        (() => {
-                                            if (this.state.sortedTeams[0].name === "DeathRow") {
-                                                return deathRowLogo
-                                            }
-                                            else if (this.state.sortedTeams[0].name === "New Zealand") {
-                                                return newZealandLogo
-                                            }
-                                            else if (this.state.sortedTeams[0].name === "TrendSetters") {
-                                                return trendsetterLogo
-                                            }
-                                            else if (this.state.sortedTeams[0].name === "DreamChaser") {
-                                                return dreamchaserLogo
-                                            }
-                                            else if (this.state.sortedTeams[0].name === "The Immortals") {
-                                                return immortalsLogo
-                                            }
-                                            else { return defaultLogo }
-                                        })()
-                                    } style={{ height: "50px" }} />
-                                </ModalHeader>
-                                <ModalBody>
-                                    <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
-                                        <Table className="text-center">
-                                            <thead>
-                                                <tr>
-                                                    <th className="text-white" style={{ borderBottom: "1px solid white" }}>Team Ranking</th>
-                                                    <th className="text-white" style={{ borderBottom: "1px solid white" }}>Agent Name</th>
-                                                    <th className="text-white" style={{ borderBottom: "1px solid white" }}>MTD Appointment Count</th>
-                                                </tr>
-
-                                            </thead>
-                                            <tbody>
-                                                {this._isMounted && this.state.teams[this.state.sortedTeams[0].name].map((agent, j) => {
-                                                    return (
-                                                        <tr key={j}>
-                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white">{j + 1}</p></td>
-                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white">{agent.name}</p></td>
-                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white">{agent.mtd}</p></td>
-                                                        </tr>
-
-                                                    )
-                                                })}
-                                            </tbody>
-
-                                        </Table>
+                        <Col sm="7">
+                            <Row style={{ height: "100vh" }}>
+                                <Col sm="12" style={{ height: "100%" }}>
+                                    <Card onClick={() => { this.getOpenTeam(this.state.teamCounts[0]); this.setState({ modalOpen: true, selected_team: this.state.teamCounts[0] }) }} style={{ backgroundSize: "150px", backgroundPosition: "center", backgroundImage: "url(" + this.state.teamCounts[0].logo + "), linear-gradient(0deg, #000000 0%, #D4AF37 100%)", backgroundRepeat: "no-repeat, repeat", height: "60%", marginBottom: 10, cursor: "pointer" }} >
+                                        <CardBody style={{ backgroundColor: "rgba(255,255,255,0.6)", margin: "5%" }}>
+                                            <h3 className="text-center" style={{ fontWeight: "bolder", marginBottom: 0 }}>
+                                                <img src={gold} width="30px" />
+                                                <strong>
+                                                    #1: {this.state.teamCounts[0].name}
+                                                </strong>
+                                            </h3>
+                                            <hr />
+                                            <h3 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Average: {this.state.teamCounts[0].avg}</strong></h3>
+                                            <h3 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Count: {this.state.teamCounts[0].count}</strong></h3>
+                                            <h3 className="text-center" style={{ fontWeight: "bolder" }}><strong>Agents: {this.state.teamCounts[0].numAgents}</strong></h3>
+                                        </CardBody>
                                     </Card>
-                                </ModalBody>
-                            </Modal>
-                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #C0C0C0 100%)", marginBottom: 0, cursor: "pointer", height: "30vh" }}>
-                                <CardBody onClick={() => { this.setState({ [this.state.sortedTeams[1].name]: !this.state[this.state.sortedTeams[1].name] }) }}>
-                                    <h4 className="text-white text-center" style={{ verticalAlign: "center" }}>
-                                        <img alt="silver trophy" src={silver} style={{ width: "30px" }} />
-                                        {" "}#2: <strong>{this.state.sortedTeams[1].name}</strong>{" "}
-                                        <img alt="team logo" src={
-                                            (() => {
-                                                if (this.state.sortedTeams[1].name === "DeathRow") {
-                                                    return deathRowLogo
-                                                }
-                                                else if (this.state.sortedTeams[1].name === "New Zealand") {
-                                                    return newZealandLogo
-                                                }
-                                                else if (this.state.sortedTeams[1].name === "TrendSetters") {
-                                                    return trendsetterLogo
-                                                }
-                                                else if (this.state.sortedTeams[1].name === "DreamChaser") {
-                                                    return dreamchaserLogo
-                                                }
-                                                else if (this.state.sortedTeams[1].name === "The Immortals") {
-                                                    return immortalsLogo
-                                                }
-                                                else { return defaultLogo }
-                                            })()
-                                        } style={{ width: "50px" }} />
-                                    </h4>
-                                    <hr style={{ border: "solid 1px white" }} />
-                                    <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Average: <strong>{this.state.sortedTeams[1].mtdAvg}</strong></h5>
-                                    <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Count: <strong>{this.state.sortedTeams[1].mtd}</strong></h5>
-                                    <h5 className="text-white text-center" style={{ margin: 0 }}>Agents: <strong>{this.state.teams[this.state.sortedTeams[1].name].length}</strong></h5>
-
-                                </CardBody>
-                            </Card>
-                            <Modal className="modal-primary" hidden={this.state[this.state.sortedTeams[1].name] !== true && this.state[this.state.sortedTeams[1].name] !== false} isOpen={this.state[this.state.sortedTeams[1].name]} toggle={() => { this.setState({ [this.state[this.state.sortedTeams[1].name]]: !this.state[this.state.sortedTeams[1].name] }) }}>
-                                <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [this.state.sortedTeams[1].name]: !this.state[this.state.sortedTeams[1].name] }) }}>
-                                    <strong>{this.state.sortedTeams[1].name}</strong>{" "}
-                                    <img alt="team logo" src={
-                                        (() => {
-                                            if (this.state.sortedTeams[1].name === "DeathRow") {
-                                                return deathRowLogo
-                                            }
-                                            else if (this.state.sortedTeams[1].name === "New Zealand") {
-                                                return newZealandLogo
-                                            }
-                                            else if (this.state.sortedTeams[1].name === "TrendSetters") {
-                                                return trendsetterLogo
-                                            }
-                                            else if (this.state.sortedTeams[1].name === "DreamChaser") {
-                                                return dreamchaserLogo
-                                            }
-                                            else if (this.state.sortedTeams[1].name === "The Immortals") {
-                                                return immortalsLogo
-                                            }
-                                            else { return defaultLogo }
-                                        })()
-                                    } style={{ height: "50px" }} />
-                                </ModalHeader>
-                                <ModalBody>
-                                    <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
-                                        <Table className="text-center">
-                                            <thead>
-                                                <tr>
-                                                    <th className="text-white" style={{ borderBottom: "1px solid white" }}>Team Ranking</th>
-                                                    <th className="text-white" style={{ borderBottom: "1px solid white" }}>Agent Name</th>
-                                                    <th className="text-white" style={{ borderBottom: "1px solid white" }}>MTD Appointment Count</th>
-                                                </tr>
-
-                                            </thead>
-                                            <tbody>
-                                                {this._isMounted && this.state.teams[this.state.sortedTeams[1].name].map((agent, j) => {
-                                                    return (
-                                                        <tr key={j}>
-                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white">{j + 1}</p></td>
-                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white">{agent.name}</p></td>
-                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white">{agent.mtd}</p></td>
-                                                        </tr>
-
-                                                    )
-                                                })}
-                                            </tbody>
-
-                                        </Table>
+                                    <Card onClick={() => { this.getOpenTeam(this.state.teamCounts[1]); this.setState({ modalOpen: true, selected_team: this.state.teamCounts[1] }) }} style={{ backgroundSize: "150px", backgroundPosition: "center", backgroundImage: "url(" + this.state.teamCounts[1].logo + "), " + "linear-gradient(0deg, #000000 0%, #C0C0C0 100%)", backgroundRepeat: "no-repeat, repeat", height: "40%", marginBottom: 10, cursor: "pointer" }} >
+                                        <CardBody style={{ backgroundColor: "rgba(255,255,255,0.6)", margin: "2%" }}>
+                                            <h4 className="text-center" style={{ fontWeight: "bolder", marginBottom: 0 }}>
+                                                <img src={silver} width="30px" />
+                                                <strong>
+                                                    #2: {this.state.teamCounts[1].name}
+                                                </strong>
+                                            </h4>
+                                            <hr />
+                                            <h4 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Average: {this.state.teamCounts[1].avg}</strong></h4>
+                                            <h4 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Count: {this.state.teamCounts[1].count}</strong></h4>
+                                            <h4 className="text-center" style={{ fontWeight: "bolder" }}><strong>Agents: {this.state.teamCounts[1].numAgents}</strong></h4>
+                                        </CardBody>
                                     </Card>
-                                </ModalBody>
-                            </Modal>
-
+                                </Col>
+                            </Row>
                         </Col>
                         <Col sm="4">
-                            {this._isMounted && this.state.sortedTeams.map((team, i) => {
-                                if (team.name === "Los Angeles Lakers" || i === 0 || i === 1) return null
-                                return (<div key={i} id={team.name + "Tooltip"}>
-
-                                    <Card style={{ whiteSpace: "pre-wrap", background: i === 2 ? "linear-gradient(0deg, #000000 0%, #cd7f32 100%)" : "linear-gradient(0deg, #000000 0%, #1d67a8 100%)", marginBottom: 10, cursor: "pointer", height: i === 2 ? "27vh" : "24vh" }}>
-                                        <CardBody onClick={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
-                                            <p className="text-white text-center" style={{ verticalAlign: "center" }}>
-                                                <img alt="bronze trophy" hidden={i !== 2} src={bronze} style={{ width: "25px" }} />
-                                                {" "} #{i + 1}: <strong>{team.name}</strong>{" "}
-                                                <img alt="team logo" src={
-                                                    (() => {
-                                                        if (team.name === "DeathRow") {
-                                                            return deathRowLogo
-                                                        }
-                                                        else if (team.name === "New Zealand") {
-                                                            return newZealandLogo
-                                                        }
-                                                        else if (team.name === "TrendSetters") {
-                                                            return trendsetterLogo
-                                                        }
-                                                        else if (team.name === "DreamChaser") {
-                                                            return dreamchaserLogo
-                                                        }
-                                                        else if (team.name === "The Immortals") {
-                                                            return immortalsLogo
-                                                        }
-                                                        else { return defaultLogo }
-                                                    })()
-                                                } style={{ height: "25px" }} />
-                                            </p>
-                                            <hr style={{ border: "solid 1px white" }} />
-                                            <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Average: <strong>{team.mtdAvg}</strong></h5>
-                                            <h5 className="text-white text-center" style={{ margin: 0 }}>MTD Count: <strong>{team.mtd}</strong></h5>
-                                            <h5 className="text-white text-center" style={{ margin: 0 }}>Agents: <strong>{this.state.teams[team.name].length}</strong></h5>
-
+                            <Row style={{ height: "100vh" }}>
+                                <Col sm="12" style={{ height: "100%" }}>
+                                    <Card onClick={() => { this.getOpenTeam(this.state.teamCounts[2]); this.setState({ modalOpen: true, selected_team: this.state.teamCounts[2] }) }} style={{ backgroundSize: "75px", backgroundPosition: "center", backgroundImage: "url(" + this.state.teamCounts[2].logo + "), " + "linear-gradient(0deg, #000000 0%, #cd7f32 100%)", backgroundRepeat: "no-repeat, repeat", height: "33%", marginBottom: "1.5%", cursor: "pointer" }} >
+                                        <CardBody style={{ backgroundColor: "rgba(255,255,255,0.6)", margin: "2%" }}>
+                                            <h5 className="text-center" style={{ fontWeight: "bolder", marginBottom: 0 }}>
+                                                <img src={bronze} width="25px" />
+                                                <strong>
+                                                    #3: {this.state.teamCounts[2].name}
+                                                </strong>
+                                            </h5>
+                                            <hr />
+                                            <h5 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Average: {this.state.teamCounts[2].avg}</strong></h5>
+                                            <h5 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Count: {this.state.teamCounts[2].count}</strong></h5>
+                                            <h5 className="text-center" style={{ fontWeight: "bolder" }}><strong>Agents: {this.state.teamCounts[2].numAgents}</strong></h5>
                                         </CardBody>
-                                        <Modal className="modal-primary" hidden={this.state[team.name] !== true && this.state[team.name] !== false} isOpen={this.state[team.name]} toggle={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
-                                            <ModalHeader style={{ justifyContent: 'center' }} toggle={() => { this.setState({ [team.name]: !this.state[team.name] }) }}>
-                                                <strong>{team.name}</strong>{" "}
-                                                <img alt="team logo" src={
-                                                    (() => {
-                                                        if (team.name === "DeathRow") {
-                                                            return deathRowLogo
-                                                        }
-                                                        else if (team.name === "New Zealand") {
-                                                            return newZealandLogo
-                                                        }
-                                                        else if (team.name === "TrendSetters") {
-                                                            return trendsetterLogo
-                                                        }
-                                                        else if (team.name === "DreamChaser") {
-                                                            return dreamchaserLogo
-                                                        }
-                                                        else if (team.name === "The Immortals") {
-                                                            return immortalsLogo
-                                                        }
-                                                        else { return defaultLogo }
-                                                    })()
-                                                } style={{ height: "50px" }} />
-                                            </ModalHeader>
-                                            <ModalBody>
-                                                <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
-                                                    <Table className="text-center">
-                                                        <thead>
-                                                            <tr>
-                                                                <th className="text-white" style={{ borderBottom: "1px solid white" }}>Team Ranking</th>
-                                                                <th className="text-white" style={{ borderBottom: "1px solid white" }}>Agent Name</th>
-                                                                <th className="text-white" style={{ borderBottom: "1px solid white" }}>MTD Appointment Count</th>
-                                                            </tr>
-
-                                                        </thead>
-                                                        <tbody>
-                                                            {this._isMounted && this.state.teams[team.name].map((agent, j) => {
-                                                                return (
-                                                                    <tr key={j}>
-                                                                        <td style={{ borderBottom: "1px solid white" }}><p className="text-white">{j + 1}</p></td>
-                                                                        <td style={{ borderBottom: "1px solid white" }}><p className="text-white">{agent.name}</p></td>
-                                                                        <td style={{ borderBottom: "1px solid white" }}><p className="text-white">{agent.mtd}</p></td>
-                                                                    </tr>
-
-                                                                )
-                                                            })}
-                                                        </tbody>
-
-                                                    </Table>
-                                                </Card>
-                                            </ModalBody>
-                                        </Modal>
                                     </Card>
-                                </div>)
-                            })}
+                                    <Card onClick={() => { this.getOpenTeam(this.state.teamCounts[3]); this.setState({ modalOpen: true, selected_team: this.state.teamCounts[3] }) }} style={{ backgroundSize: "75px", backgroundPosition: "center", backgroundImage: "url(" + this.state.teamCounts[3].logo + "), " + "linear-gradient(0deg, #000000 0%, #1d67a8 100%)", backgroundRepeat: "no-repeat, repeat", height: "33%", marginBottom: "1.5%", cursor: "pointer" }} >
+                                        <CardBody style={{ backgroundColor: "rgba(255,255,255,0.6)", margin: "2%" }}>
+                                            <h5 className="text-center" style={{ fontWeight: "bolder", marginBottom: 0 }}>
+                                                <strong>
+                                                    #4: {this.state.teamCounts[3].name}
+                                                </strong>
+                                            </h5>
+                                            <hr />
+                                            <h5 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Average: {this.state.teamCounts[3].avg}</strong></h5>
+                                            <h5 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Count: {this.state.teamCounts[3].count}</strong></h5>
+                                            <h5 className="text-center" style={{ fontWeight: "bolder" }}><strong>Agents: {this.state.teamCounts[3].numAgents}</strong></h5>
+                                        </CardBody>
+                                    </Card>
+                                    <Card onClick={() => { this.getOpenTeam(this.state.teamCounts[4]); this.setState({ modalOpen: true, selected_team: this.state.teamCounts[4] }) }} style={{ backgroundSize: "75px", backgroundPosition: "center", backgroundImage: "url(" + this.state.teamCounts[4].logo + "), " + "linear-gradient(0deg, #000000 0%, #1d67a8 100%)", backgroundRepeat: "no-repeat, repeat", height: "33%", marginBottom: 10, cursor: "pointer" }} >
+                                        <CardBody style={{ backgroundColor: "rgba(255,255,255,0.6)", margin: "2%" }}>
+                                            <h5 className="text-center" style={{ fontWeight: "bolder", marginBottom: 0 }}>
+                                                <strong>
+                                                    #5: {this.state.teamCounts[4].name}
+                                                </strong>
+                                            </h5>
+                                            <hr />
+                                            <h5 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Average: {this.state.teamCounts[4].avg}</strong></h5>
+                                            <h5 className="text-center" style={{ fontWeight: "bolder" }}><strong>MTD Count: {this.state.teamCounts[4].count}</strong></h5>
+                                            <h5 className="text-center" style={{ fontWeight: "bolder" }}><strong>Agents: {this.state.teamCounts[4].numAgents}</strong></h5>
+                                        </CardBody>
+                                    </Card>
+                                </Col>
+                            </Row>
                         </Col>
                     </Row>
+                    <Modal isOpen={this.state.modalOpen} toggle={() => { this.setState({ modalOpen: !this.state.modalOpen }) }} style={{ justifyContent: "center" }}>
+                        <ModalHeader toggle={() => { this.setState({ modalOpen: !this.state.modalOpen }) }} style={{ justifyContent: "center" }}>
+                            <strong>{this.state.selected_team.name}</strong> <img src={this.state.selected_team.logo} height={"50px"} />
+                        </ModalHeader>
+                        <ModalBody>
+                            <Card style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
+                                <Table>
+                                    <thead>
+                                        <tr>
+                                            <th style={{ borderBottom: "1px solid white" }}><p className="text-center text-white">Team Ranking</p></th>
+                                            <th style={{ borderBottom: "1px solid white" }}><p className="text-center text-white">Name</p></th>
+                                            <th style={{ borderBottom: "1px solid white" }}><p className="text-center text-white">MTD Appointment Count</p></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.state.modalTeam.map((agent, i) => {
+                                            return (
+                                                <tr key={i}>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p className="text-center text-white">{i + 1}</p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p className="text-center text-white">{agent.name}</p></td>
+                                                    <td style={{ borderBottom: "1px solid white" }}><p className="text-center text-white">{agent.count}</p></td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </Table>
+                            </Card>
+                        </ModalBody>
+                    </Modal>
                 </Container>
             </div >
         );
