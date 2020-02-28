@@ -151,10 +151,6 @@ class AdminDashboard extends React.Component {
                 }
             })
             data[5 - i] = curApps.count;
-            if (i < 1) {
-                data[5 - i] += todayApps.length
-            }
-
         }
 
         this.setState({ monthLabels: labels, monthData: data })
