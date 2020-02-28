@@ -163,7 +163,8 @@ class AdminReports extends React.Component {
             selected_agent: { label: "", value: "" },
             selected_dealership: { label: "", value: "" },
             allAgents: false,
-            allDealers: false
+            allDealers: false,
+            full_results: []
         })
     }
     async getGoalForRangeFull() {
