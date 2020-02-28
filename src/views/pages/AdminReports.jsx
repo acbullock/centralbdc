@@ -51,29 +51,53 @@ class AdminReports extends React.Component {
     async componentWillMount() {
         this._isMounted = true
         this._isMounted && this.setState({ loading: true })
-        let user = this._isMounted && await this.props.mongo.getActiveUser(this.props.mongo.mongodb);
-        let agent = this._isMounted && await this.props.mongo.findOne("agents", { userId: user.userId });
-        let dealerships = this._isMounted && await this.props.mongo.find("dealerships");
-        let agents = this._isMounted && await this.props.mongo.find("agents");
-        dealerships = this._isMounted && dealerships.filter((a) => {
-            return a.isActive === true
-        })
-        agents = this._isMounted && agents.filter((a) => {
-            return a.isActive === true
-        })
-        agents = this._isMounted && agents.map((a) => {
-            return Object.assign(a, { label: a.name, value: a._id })
-        })
-        this._isMounted && dealerships.sort((a, b) => {
-            if (a.label > b.label) return 1;
-            if (a.label < b.label) return -1;
-            return 0;
-        })
-        this._isMounted && agents.sort((a, b) => {
-            if (a.label > b.label) return 1;
-            if (a.label < b.label) return -1;
-            return 0;
-        })
+        let agent = this.props.agent
+        if (this.props.agent.account_type !== "admin") {
+            this.props.history.push("/admin/dashboard")
+            return;
+        }
+        let dealerships = this._isMounted && await this.props.mongo.aggregate("dealerships", [
+            {
+                "$match": {
+                    isActive: true
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$value",
+                    "label": { "$first": "$label" },
+                    "goal": { "$first": "$goal" },
+                    "value": { "$first": "$value" }
+                }
+            },
+            {
+                "$sort": {
+                    "label": 1
+                }
+            }
+        ])
+
+        let agents = this._isMounted && await this.props.mongo.aggregate("agents", [
+            {
+                "$match": {
+                    isActive: true
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id",
+                    "name": { "$first": "$name" },
+                    "label": { "$first": "$name" },
+                    "value": { "$first": "$_id" }
+                }
+            },
+            {
+                "$sort": {
+                    "label": 1
+                }
+            }
+        ])
+
         let reports = ["Dealership Goals", "Appointment Count"];
         this._isMounted && reports.sort((a, b) => {
             if (a > b) return 1;
@@ -97,14 +121,25 @@ class AdminReports extends React.Component {
     }
     async getGoalForRange() {
         this._isMounted && this.setState({ loading: true })
-
-        let apps = this._isMounted && await this.props.mongo.findOne("appointments", { dealership: this.state.selected_dealership.value })
-        apps = apps.appointments;
-
-        //find all apps in given range..
-        apps = this._isMounted && apps.filter((a) => {
-            return a.dealership_department !== "Service" && new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() && new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
-        })
+        console.log(this.state.selected_dealership.value)
+        let apps = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    dealership_department: { "$ne": "Service" },
+                    dealership: this.state.selected_dealership.value,
+                    verified: {
+                        "$gte": new Date(this.state.fromDate).toISOString(),
+                        "$lte": new Date(this.state.toDate).toISOString()
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id"
+                }
+            }
+        ])
+        console.log(apps)
         let range = new Date(this.state.toDate).getTime() - new Date(this.state.fromDate).getTime()
         range = range / (1000 * 60 * 60 * 24);
         range = Math.round(range);
@@ -133,28 +168,46 @@ class AdminReports extends React.Component {
     }
     async getGoalForRangeFull() {
         this._isMounted && this.setState({ loading: true })
-        let apps = this._isMounted && await this.props.mongo.find("appointments")
-        let full_results = []
-        for (let a in apps) {
-            let curr_apps = apps[a].appointments;
-            let currDealer = {}
-            for (let d in this.state.dealerships) {
-                if (this.state.dealerships[d].value === apps[a].dealership) {
-                    currDealer = this.state.dealerships[d];
-                    break;
+        let grouped = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    dealership_department: {
+                        "$ne": "Service"
+                    },
+                    verified: {
+                        "$gte": new Date(this.state.fromDate).toISOString(),
+                        "$lte": new Date(this.state.toDate).toISOString()
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$dealership",
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "count": -1
                 }
             }
-            if (!currDealer.isActive) {
-                continue;
-            }
-            curr_apps = this._isMounted && curr_apps.filter((a) => {
-                return a.dealership_department !== "Service" && new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() && new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime()
-            });
+        ]);
+        let full_results = []
+        for (let a in grouped) {
+            let curr_apps = grouped[a].count;
+            let currDealer = {}
+            let index = this.state.dealerships.findIndex((d) => {
+                return d.value === grouped[a]._id
+            })
+            if (index === -1) continue
+            currDealer = this.state.dealerships[index]
             let range = new Date(this.state.toDate).getTime() - new Date(this.state.fromDate).getTime()
             range = range / (1000 * 60 * 60 * 24);
             range = Math.round(range);
             let goal = (currDealer.goal) * range;
-            let progressValue = curr_apps.length / goal * 100;
+            let progressValue = curr_apps / goal * 100;
             let progressColor = "red";
             if (progressValue > 33) {
                 progressColor = "yellow";
@@ -165,59 +218,84 @@ class AdminReports extends React.Component {
             full_results.push({
                 dealership: currDealer,
                 goal,
-                appCount: curr_apps.length,
+                appCount: curr_apps,
                 progressValue,
                 progressColor
             })
         }
+
         this._isMounted && full_results.sort((a, b) => {
-            if (parseInt(a.goal) > parseInt(b.goal)) return -1;
-            if (parseInt(a.goal) < parseInt(b.goal)) return 1;
+            if (parseInt(a.progressValue) > parseInt(b.progressValue)) return -1;
+            if (parseInt(a.progressValue) < parseInt(b.progressValue)) return 1;
             return 0;
 
         })
+        console.log(full_results)
         this._isMounted && this.setState({ loading: false, full_results, reportDone: true });
     }
     async getAppCount() {
         this._isMounted && this.setState({ loading: true });
-        let appointments = this._isMounted && await this.props.mongo.find("all_appointments", { agent_id: this.state.selected_agent._id });
-        let allApps = appointments.concat(this.state.selected_agent.appointments)
-        // for (let a in appointments) {
-        //     allApps = allApps.concat(appointments[a].appointments)
-        // }
-        allApps = this._isMounted && allApps.filter((a) => {
-            return a.agent_id === this.state.selected_agent._id
-        })
-        allApps = this._isMounted && allApps.filter((a) => {
-            return new Date(a.verified).getTime() >= new Date(this.state.fromDate).getTime() &&
-                new Date(a.verified).getTime() <= new Date(this.state.toDate).getTime() && a.dealership_department !== "Service"
+
+        let count = this._isMounted && await this.props.mongo.count("all_appointments", {
+            dealership_department: {
+                "$ne": "Service"
+            },
+            agent_id: this.state.selected_agent.value,
+            verified: {
+                "$gte": new Date(this.state.fromDate).toISOString(),
+                "$lte": new Date(this.state.toDate).toISOString()
+            }
         })
 
-        this._isMounted && this.setState({ loading: false, agentCount: allApps.length, reportDone: true });
+
+        this._isMounted && this.setState({ loading: false, agentCount: count.count, reportDone: true });
     }
     async getAppCountFull() {
         this._isMounted && this.setState({ loading: true });
         let full_results = []
-        let appointments = await this.props.mongo.find("appointments");
-        let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" })
-        let allApps = [];
-        for (let a in appointments) {
-            allApps = allApps.concat(appointments[a].appointments);
-        }
-        for (let a in agents) {
-            let currApps = this._isMounted && allApps.filter((app) => {
-                return (app.agent_id === agents[a]._id &&
-                    new Date(app.verified) >= new Date(this.state.fromDate) &&
-                    new Date(app.verified) <= new Date(this.state.toDate)) && app.dealership_department !== "Service"
-            });
+        let grouped = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    dealership_department: {
+                        "$ne": "Service"
+                    },
+                    verified: {
+                        "$gte": new Date(this.state.fromDate).toISOString(),
+                        "$lte": new Date(this.state.toDate).toISOString()
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$agent_id",
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    count: -1
+                }
+            }
+        ])
+
+
+        let agents = this.state.agents
+
+        for (let a in grouped) {
+            let index = await agents.findIndex((ag) => {
+                return ag._id === grouped[a]._id
+            })
+            if (index === -1)
+                continue
+
+            let curAgent = agents[index]
             full_results.push({
-                name: agents[a].name,
-                appCount: currApps.length
+                name: curAgent.name,
+                appCount: grouped[a].count
             })
         }
-        this._isMounted && full_results.sort((a, b) => {
-            return b.appCount - a.appCount
-        })
         this._isMounted && this.setState({ loading: false, full_results, reportDone: true });
     }
     render() {
@@ -277,7 +355,7 @@ class AdminReports extends React.Component {
                                                 }}
                                                 value={this.state.fromDate}
                                                 onChange={(value) => {
-                                                    this._isMounted && this.setState({ reportDone: false, fromDate: new Date(value) })
+                                                    this._isMounted && this.setState({ reportDone: false, fromDate: new Date(new Date(value).setHours(0, 0, 0, 0)) })
                                                 }
                                                 }
                                                 className="primary"
@@ -394,7 +472,7 @@ class AdminReports extends React.Component {
                                                 }}
                                                 value={this.state.fromDate}
                                                 onChange={(value) => {
-                                                    this._isMounted && this.setState({ reportDone: false, fromDate: new Date(value) })
+                                                    this._isMounted && this.setState({ reportDone: false, fromDate: new Date(new Date(value).setHours(0, 0, 0, 0)) })
                                                 }
                                                 }
                                                 className="primary"
