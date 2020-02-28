@@ -15,6 +15,7 @@ import {
     FormGroup,
     Form
 } from "reactstrap";
+import { Bar } from "react-chartjs-2";
 import Select from 'react-select'
 import ReactDateTime from "react-datetime";
 class AdminReports extends React.Component {
@@ -39,7 +40,8 @@ class AdminReports extends React.Component {
             full_results: [],
             allDealers: false,
             allAgents: false,
-            agentCount: 0
+            agentCount: 0,
+            officeCounts: []
         }
         this._isMounted = false;
         this.getGoalForRange = this.getGoalForRange.bind(this)
@@ -47,6 +49,7 @@ class AdminReports extends React.Component {
         this.getAppCountFull = this.getAppCountFull.bind(this)
         this.getAppCount = this.getAppCount.bind(this)
         this.clearForm = this.clearForm.bind(this)
+        this.getOfficeHistory = this.getOfficeHistory.bind(this)
     }
     async componentWillMount() {
         this._isMounted = true
@@ -98,7 +101,7 @@ class AdminReports extends React.Component {
             }
         ])
 
-        let reports = ["Dealership Goals", "Appointment Count"];
+        let reports = ["Dealership Goals", "Appointment Count", "Office History"];
         this._isMounted && reports.sort((a, b) => {
             if (a > b) return 1;
             if (a < b) return -1;
@@ -119,9 +122,77 @@ class AdminReports extends React.Component {
     componentWillUnmount() {
         this._isMounted = false
     }
+    async getOfficeHistory() {
+        this.setState({ loading: true })
+        //day high
+        let grouped = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$match": {
+                    "dealership_department": {
+                        "$ne": "Service"
+                    }
+                }
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "parts": {
+                        "$dateToParts": {
+                            "date": {
+                                "$dateFromString": {
+                                    "dateString": "$verified"
+                                }
+                            }
+                        }
+                    },
+                    "day": {
+                        "$dayOfWeek": {
+                            "$dateFromString": {
+                                "dateString": "$verified"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": { "year": "$parts.year", "month": "$parts.month", "day": "$parts.day" },
+                    "dayOfWeek": { "$first": "$day" },
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$dayOfWeek",
+                    "high": {
+                        "$max": "$count"
+                    },
+                    "avg": {
+                        "$avg": "$count"
+                    },
+                    "parts": { "$first": "$_id" }
+                }
+            },
+            {
+                "$sort": {
+                    "_id": 1
+                }
+            }
+        ])
+        let labels = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        let counts = []
+        for (let i in grouped) {
+            let dayOfWeek = i
+            counts.push({ high: grouped[i].high, avg: grouped[i].avg })
+        }
+        console.log(counts)
+        this.setState({ loading: false, officeCounts: counts })
+        //day avg
+    }
     async getGoalForRange() {
         this._isMounted && this.setState({ loading: true })
-        console.log(this.state.selected_dealership.value)
         let apps = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
             {
                 "$match": {
@@ -139,7 +210,6 @@ class AdminReports extends React.Component {
                 }
             }
         ])
-        console.log(apps)
         let range = new Date(this.state.toDate).getTime() - new Date(this.state.fromDate).getTime()
         range = range / (1000 * 60 * 60 * 24);
         range = Math.round(range);
@@ -152,8 +222,6 @@ class AdminReports extends React.Component {
         if (progressValue >= 100) {
             progressColor = "green"
         }
-
-
         this._isMounted && this.setState({ loading: false, goal, reportDone: true, appCount: apps.length, progressValue, progressColor })
     }
     clearForm() {
@@ -555,6 +623,56 @@ class AdminReports extends React.Component {
 
                         </Col>
                     </Row>
+                    <Row hidden={this.state.selected_report.label !== "Office History"}>
+                        <Col className="ml-auto mr-auto" md="12">
+                            <Card className="card-raised card-white">
+                                <CardBody>
+                                    <legend>{this.state.selected_report.label}</legend>
+                                    <Button color="success" onClick={() => { this.getOfficeHistory() }}>Get History</Button>
+
+                                    <hr />
+                                    <div style={{ display: this.state.officeCounts.length === 0? "none": "block"}}>
+                                        <Bar
+                                            data={{
+                                                labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                                                datasets: [{ label: "Total Sales Appts", backgroundColor: '#1d67a8', borderColor: '#1d67a8', data: this.state.officeCounts.map((a) => { return a.high }) }]
+                                            }}
+                                            options={
+                                                {
+                                                    title: {
+                                                        display: true,
+                                                        text: "Record Day Each Day",
+                                                        fontSize: 24,
+                                                    },
+
+                                                }
+                                            }
+                                        />
+                                        <hr />
+                                        <Bar
+                                            hidden={this.state.officeCounts.length < 1}
+                                            data={{
+                                                labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                                                datasets: [{ label: "Average Sales Appts", backgroundColor: '#1d67a8', borderColor: '#1d67a8', data: this.state.officeCounts.map((a) => { return Math.round(10 * a.avg) / 10 }) }]
+                                            }}
+                                            options={
+                                                {
+                                                    title: {
+                                                        display: true,
+                                                        text: "Average Count Each Day",
+                                                        fontSize: 24,
+                                                    },
+
+                                                }
+                                            }
+                                        />
+                                    </div>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+
+
                 </Container>
             </div>
         );
