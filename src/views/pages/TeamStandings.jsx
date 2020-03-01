@@ -57,7 +57,7 @@ class TeamStandings extends React.Component {
                         "$ne": "Service"
                     },
                     "verified": {
-                        "$gte": "2020-02-01T05:00:000Z"
+                        "$gte": new Date(new Date(new Date().setDate(1)).setHours(0,0,0,0)).toISOString()
                     }
                 }
             },
