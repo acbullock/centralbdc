@@ -220,7 +220,8 @@ class AdminDashboard extends React.Component {
         }, {
             projection: {
                 "label": 1,
-                value: 1
+                value: 1,
+                goal: 1
             }
         })
         let groupedApps = await this.props.mongo.aggregate("all_appointments", [
@@ -256,6 +257,7 @@ class AdminDashboard extends React.Component {
             let obj = {
                 name: dealerships[index].label,
                 dealership: groupedApps[a]._id,
+                goal: dealerships[index].goal,
                 time_elapsed_hrs: Math.round(10 * ((new Date().getTime() - new Date(groupedApps[a].recent).getTime()) / (1000 * 60 * 60))) / 10
             }
             last_appts.push(obj)
@@ -440,6 +442,7 @@ class AdminDashboard extends React.Component {
                                             <tr>
                                                 <th>Dealership Name</th>
                                                 <th>Time Elapsed Since Last Appointment</th>
+                                                <th>Goal</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -455,6 +458,10 @@ class AdminDashboard extends React.Component {
                                                             <td >
                                                                 <p style={{ color: "red" }} hidden={a.time_elapsed_hrs < 1}>{a.time_elapsed_hrs + " hours"}</p>
                                                                 <p hidden={a.time_elapsed_hrs >= 1}>{a.time_elapsed_hrs + " hours"}</p>
+                                                            </td>
+                                                            <td >
+                                                                <p style={{ color: "red" }} hidden={a.time_elapsed_hrs < 1}>{a.goal}</p>
+                                                                <p hidden={a.time_elapsed_hrs >= 1}>{a.goal}</p>
                                                             </td>
                                                         </tr>
                                                     )
