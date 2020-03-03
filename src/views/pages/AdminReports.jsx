@@ -920,6 +920,7 @@ class AdminReports extends React.Component {
                                         onClick={() => { this.getDealershipHistory() }}
                                     >Get History</Button>
                                     <div style={{ display: this.state.dealership_history.length === 0 ? "none" : "block" }}>
+                                        <p>Dealership Goal: {this.state.selected_dealership.goal}</p>
                                         <Bar
                                             data={{
                                                 labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
