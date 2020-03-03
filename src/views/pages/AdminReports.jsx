@@ -13,7 +13,8 @@ import {
     Progress,
     Input,
     FormGroup,
-    Form
+    Form,
+    CardHeader
 } from "reactstrap";
 import { Bar } from "react-chartjs-2";
 import Select from 'react-select'
@@ -41,7 +42,10 @@ class AdminReports extends React.Component {
             allDealers: false,
             allAgents: false,
             agentCount: 0,
-            officeCounts: []
+            officeCounts: [],
+            bestDayAgent: {},
+            dealership_history: [],
+            agent_history: []
         }
         this._isMounted = false;
         this.getGoalForRange = this.getGoalForRange.bind(this)
@@ -50,6 +54,8 @@ class AdminReports extends React.Component {
         this.getAppCount = this.getAppCount.bind(this)
         this.clearForm = this.clearForm.bind(this)
         this.getOfficeHistory = this.getOfficeHistory.bind(this)
+        this.getAgentHistory = this.getAgentHistory.bind(this)
+        this.getDealershipHistory = this.getDealershipHistory.bind(this)
     }
     async componentWillMount() {
         this._isMounted = true
@@ -62,7 +68,8 @@ class AdminReports extends React.Component {
         let dealerships = this._isMounted && await this.props.mongo.aggregate("dealerships", [
             {
                 "$match": {
-                    isActive: true
+                    isActive: true,
+                    isSales: true
                 }
             },
             {
@@ -101,7 +108,13 @@ class AdminReports extends React.Component {
             }
         ])
 
-        let reports = ["Dealership Goals", "Appointment Count", "Office History"];
+        let reports = [
+            "Dealership Goals",
+            "Appointment Count",
+            "Office History",
+            "Agent History",
+            "Dealership History"
+        ];
         this._isMounted && reports.sort((a, b) => {
             if (a > b) return 1;
             if (a < b) return -1;
@@ -140,7 +153,8 @@ class AdminReports extends React.Component {
                         "$dateToParts": {
                             "date": {
                                 "$dateFromString": {
-                                    "dateString": "$verified"
+                                    "dateString": { "$substrCP": ["$verified", 0, 23] },
+                                    "timezone": "+0500"
                                 }
                             }
                         }
@@ -148,7 +162,8 @@ class AdminReports extends React.Component {
                     "day": {
                         "$dayOfWeek": {
                             "$dateFromString": {
-                                "dateString": "$verified"
+                                "dateString": { "$substrCP": ["$verified", 0, 23] },
+                                "timezone": "+0500"
                             }
                         }
                     }
@@ -190,6 +205,165 @@ class AdminReports extends React.Component {
         console.log(counts)
         this.setState({ loading: false, officeCounts: counts })
         //day avg
+    }
+    async getAgentHistory() {
+        this.setState({ loading: true })
+        let agent = this.state.selected_agent
+        let grouped = await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$project": {
+                    "_id": 1,
+                    "agent_id": 1,
+                    "verified": 1,
+                    "parts": {
+                        "$dateToParts": {
+                            "date": {
+                                "$dateFromString": {
+                                    "dateString": { "$substrCP": ["$verified", 0, 23] },
+                                    "timezone": "+0500"
+                                }
+                            }
+                        }
+                    },
+                    "day": {
+                        "$dayOfWeek": {
+                            "$dateFromString": {
+                                "dateString": { "$substrCP": ["$verified", 0, 23] },
+                                "timezone": "+0500"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "$match": {
+                    "agent_id": agent.value,
+                    "dealership_department": { "$ne": "Service" }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "month": "$parts.month",
+                        "day": "$parts.day",
+                        "year": "$parts.year",
+                        "dayOfWeek": "$day"
+                    },
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id.dayOfWeek",
+                    "max": {
+                        "$max": "$count"
+                    },
+                    "avg": {
+                        "$avg": "$count"
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "_id": 1
+                }
+            }
+        ])
+        let agent_history = []
+        for (let i = 0; i < 7; i++) {
+            let obj = {
+                _id: i + 1,
+                max: 0,
+                avg: 0
+            }
+            agent_history.push(obj)
+        }
+        for (let i in grouped) {
+            agent_history[grouped[i]._id - 1] = grouped[i]
+        }
+
+        this.setState({ agent_history, loading: false })
+    }
+    async getDealershipHistory() {
+        this.setState({ loading: true })
+        let dealer = this.state.selected_dealership
+        let grouped = await this.props.mongo.aggregate("all_appointments", [
+            {
+                "$project": {
+                    "_id": 1,
+                    "dealership": 1,
+                    "verified": 1,
+                    "parts": {
+                        "$dateToParts": {
+                            "date": {
+                                "$dateFromString": {
+                                    "dateString": { "$substrCP": ["$verified", 0, 23] },
+                                    "timezone": "+0500"
+                                }
+                            }
+                        }
+                    },
+                    "day": {
+                        "$dayOfWeek": {
+                            "$dateFromString": {
+                                "dateString": { "$substrCP": ["$verified", 0, 23] },
+                                "timezone": "+0500"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "$match": {
+                    "dealership": dealer.value,
+                    "dealership_department": { "$ne": "Service" }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "month": "$parts.month",
+                        "day": "$parts.day",
+                        "year": "$parts.year",
+                        "dayOfWeek": "$day"
+                    },
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id.dayOfWeek",
+                    "max": {
+                        "$max": "$count"
+                    },
+                    "avg": {
+                        "$avg": "$count"
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "_id": 1
+                }
+            }
+        ])
+        let dealership_history = []
+        for (let i = 0; i < 7; i++) {
+            let obj = {
+                _id: i + 1,
+                max: 0,
+                avg: 0
+            }
+            dealership_history.push(obj)
+        }
+        for (let i in grouped) {
+            dealership_history[grouped[i]._id - 1] = grouped[i]
+        }
+        this.setState({ dealership_history, loading: false })
     }
     async getGoalForRange() {
         this._isMounted && this.setState({ loading: true })
@@ -631,7 +805,7 @@ class AdminReports extends React.Component {
                                     <Button color="success" onClick={() => { this.getOfficeHistory() }}>Get History</Button>
 
                                     <hr />
-                                    <div style={{ display: this.state.officeCounts.length === 0? "none": "block"}}>
+                                    <div style={{ display: this.state.officeCounts.length === 0 ? "none" : "block" }}>
                                         <Bar
                                             data={{
                                                 labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -671,10 +845,123 @@ class AdminReports extends React.Component {
                             </Card>
                         </Col>
                     </Row>
+                    <Row hidden={this.state.selected_report.label !== "Agent History"}>
+                        <Col className="ml-auto mr-auto" md="12">
+                            <Card className="card-raised card-white">
+                                <CardHeader>
+                                    <h2>Agent History</h2>
+                                </CardHeader>
+                                <CardBody>
+                                    <Select
+                                        options={this.state.agents}
+                                        value={this.state.selected_agent}
+                                        onChange={(e) => { this._isMounted && this.setState({ agent_history: [], reportDone: false, selected_agent: e }) }}
+                                    />
+                                    <Button
+                                        color="success"
+                                        disabled={this.state.selected_agent.label.length < 1}
+                                        onClick={() => { this.getAgentHistory() }}
+                                    >Get History</Button>
+                                    <div style={{ display: this.state.agent_history.length === 0 ? "none" : "block" }}>
+                                        <Bar
+                                            data={{
+                                                labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                                                datasets: [{ label: "Total Sales Appts", backgroundColor: '#1d67a8', borderColor: '#1d67a8', data: this.state.agent_history.map((a) => { return a.max }) }]
+                                            }}
 
+                                            options={
+                                                {
+                                                    title: {
+                                                        display: true,
+                                                        text: `Record Day Each Day for ${this.state.selected_agent.label}`,
+                                                        fontSize: 24,
+                                                    },
+
+                                                }
+                                            }
+                                        />
+                                        <Bar
+                                            data={{
+                                                labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                                                datasets: [{ label: "Average Sales Appts", backgroundColor: '#1d67a8', borderColor: '#1d67a8', data: this.state.agent_history.map((a) => { return Math.round(10 * a.avg) / 10 }) }]
+                                            }}
+
+                                            options={
+                                                {
+                                                    title: {
+                                                        display: true,
+                                                        text: `Average Each Day for ${this.state.selected_agent.label}`,
+                                                        fontSize: 24,
+                                                    },
+
+                                                }
+                                            }
+                                        />
+                                    </div>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+                    <Row hidden={this.state.selected_report.label !== "Dealership History"}>
+                        <Col className="ml-auto mr-auto" md="12">
+                            <Card className="card-raised card-white">
+                                <CardHeader>
+                                    <h2>Dealership History</h2>
+                                </CardHeader>
+                                <CardBody>
+                                    <Select
+                                        options={this.state.dealerships}
+                                        value={this.state.selected_dealership}
+                                        onChange={(e) => { this._isMounted && this.setState({ dealership_history: [], reportDone: false, selected_dealership: e }) }}
+                                    />
+                                    <Button
+                                        color="success"
+                                        disabled={this.state.selected_dealership.label.length < 1}
+                                        onClick={() => { this.getDealershipHistory() }}
+                                    >Get History</Button>
+                                    <div style={{ display: this.state.dealership_history.length === 0 ? "none" : "block" }}>
+                                        <Bar
+                                            data={{
+                                                labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                                                datasets: [{ label: "Total Sales Appts", backgroundColor: '#1d67a8', borderColor: '#1d67a8', data: this.state.dealership_history.map((a) => { return a.max }) }]
+                                            }}
+
+                                            options={
+                                                {
+                                                    title: {
+                                                        display: true,
+                                                        text: `Record Day Each Day for ${this.state.selected_dealership.label}`,
+                                                        fontSize: 24,
+                                                    },
+
+                                                }
+                                            }
+                                        />
+                                        <Bar
+                                            data={{
+                                                labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                                                datasets: [{ label: "Average Sales Appts", backgroundColor: '#1d67a8', borderColor: '#1d67a8', data: this.state.dealership_history.map((a) => { return Math.round(10 * a.avg) / 10 }) }]
+                                            }}
+
+                                            options={
+                                                {
+                                                    title: {
+                                                        display: true,
+                                                        text: `Average Each Day for ${this.state.selected_dealership.label}`,
+                                                        fontSize: 24,
+                                                    },
+
+                                                }
+                                            }
+                                        />
+                                    </div>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
 
                 </Container>
-            </div>
+            </div >
         );
     }
 }
