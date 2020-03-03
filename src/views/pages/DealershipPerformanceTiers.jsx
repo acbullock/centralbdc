@@ -98,7 +98,12 @@ class DealershipPerformanceTiers extends React.Component {
     }
     async todayDealerCount(dealership, dealerships, appointments) {
         let apps = appointments.filter((a) => {
-            return a.dealership === dealership.value
+            if (dealership.label === "Paragon Honda") {
+                return a.dealership === "5deaa83728eac700174a760a" || a.dealership === "5deaa86f2a3b080017475c73"
+            }
+            else {
+                return a.dealership === dealership.value
+            }
         });
         let dlr = this._isMounted && this.state[dealerships].map((d) => {
             if (d.value === dealership.value) {
