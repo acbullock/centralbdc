@@ -27,6 +27,7 @@ import {
   Row,
   Col
 } from "reactstrap";
+import { Pie } from "react-chartjs-2";
 import Select from "react-select"
 const defaultLogo = "https://centralbdc-bwpmi.mongodbstitch.com/profile-images/default-logo.png"
 class Dashboard extends React.Component {
@@ -56,12 +57,14 @@ class Dashboard extends React.Component {
       mtdtop5loading: false,
       mtdloadnew: false,
       payment: 0,
-      agentRank: 0
+      agentRank: 0,
+      teamCounts: []
     };
     this.getBreakDown = this.getBreakDown.bind(this)
     this.getMtdTop5 = this.getMtdTop5.bind(this)
     this.getProjection = this.getProjection.bind(this)
     this.calculatePay = this.calculatePay.bind(this)
+    this.getTeamCounts = this.getTeamCounts.bind(this)
   }
   _isMounted = false;
   async componentWillMount() {
@@ -75,7 +78,7 @@ class Dashboard extends React.Component {
   async componentDidMount() {
     this._isMounted = true
     this._isMounted && this.setState({ loading: true })
-    let agents = await this.props.mongo.aggregate("agents", [
+    let agents = this._isMounted && await this.props.mongo.aggregate("agents", [
       {
         "$match": {
           "isActive": true,
@@ -125,6 +128,7 @@ class Dashboard extends React.Component {
     this._isMounted && this.setState({ agent, agents, isAdmin: agent.account_type === "admin" })
     this._isMounted && await this.getTop5()
     this._isMounted && await this.getMtdTop5()
+    this._isMounted && await this.getTeamCounts()
     this._isMounted && this.setState({ loading: false })
   }
   componentWillUnmount() {
@@ -159,9 +163,28 @@ class Dashboard extends React.Component {
     }
     this._isMounted && this.setState({ payment })
   }
+  async getTeamCounts() {
+    this.setState({ loading: true })
+    let teamCounts = []
+    for (let a in this.state.top5) {
+      let index = teamCounts.findIndex((t) => { return t.team === this.state.top5[a].team })
+      if (index === -1) {
+        this._isMounted && await teamCounts.push({ team: this.state.top5[a].team, count: this.state.top5[a].count, color: '#' + Math.floor(Math.random() * 16777215).toString(16) })
+      }
+      else {
+        teamCounts[index].count += this.state.top5[a].count
+      }
+    }
+    this._isMounted && await teamCounts.sort((a,b)=>{
+      if(a.count > b.count) return -1
+      if(a.count < b.count) return 1
+      return 0
+    })
+    this.setState({ loading: false, teamCounts })
+  }
   async getTop5() {
     this._isMounted && this.setState({ loading: true })
-    let groupedAppts = await this.props.mongo.aggregate("all_appointments", [
+    let groupedAppts = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
       {
         "$match": {
           "dealership_department": {
@@ -188,7 +211,7 @@ class Dashboard extends React.Component {
     ])
 
 
-    let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { userId: 1, name: 1, _id: 1 } })
+    let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { userId: 1, name: 1, _id: 1, "team.label": 1 } })
     let agentsRanked = []
     let lastVal = -1
     let curRank = 0;
@@ -207,7 +230,8 @@ class Dashboard extends React.Component {
         name: agents[agentIndex].name,
         userId: agents[agentIndex].userId,
         _id: agents[agentIndex]._id,
-        rank: curRank
+        rank: curRank,
+        team: agents[agentIndex].team.label
       }
       agentsRanked.push(user)
     }
@@ -216,7 +240,7 @@ class Dashboard extends React.Component {
   }
   async getMtdTop5() {
     this._isMounted && this.setState({ loading: true })
-    let groupedAppts = await this.props.mongo.aggregate("all_appointments", [
+    let groupedAppts = this._isMounted && await this.props.mongo.aggregate("all_appointments", [
       {
         "$match": {
           "dealership_department": {
@@ -242,7 +266,7 @@ class Dashboard extends React.Component {
       }
     ])
 
-    let agents = await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { userId: 1, name: 1, _id: 1 } })
+    let agents = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { userId: 1, name: 1, _id: 1 } })
     let agentsRanked = []
     let lastVal = -1
     let curRank = 0;
@@ -329,7 +353,7 @@ class Dashboard extends React.Component {
     return ret;
   }
   async getBreakDown(agent) {
-    let appointments = await this.props.mongo.find("all_appointments", {
+    let appointments = this._isMounted && await this.props.mongo.find("all_appointments", {
       agent_id: agent._id,
       verified: {
         "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
@@ -536,7 +560,6 @@ class Dashboard extends React.Component {
                   <CardImg top width="100%" hidden={!this.state.mtdtop5loading} src={this.props.utils.loading} style={{ backgroundColor: "white" }} />
                   {(() => {
                     let agentIndex = this.state.mtdTop5.findIndex((u) => { return u._id === this.props.agent._id })
-                    console.log(agentIndex)
                     if (agentIndex === -1) return null
                     return (
                       <div >
@@ -667,6 +690,51 @@ class Dashboard extends React.Component {
                       })()}
                     </tbody>
                   </Table>
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+          <Row style={{ justifyContent: "center" }}>
+            <Col lg="12">
+              <Card className="card-raised card-white" style={{ background: "linear-gradient(0deg, #1d67a8 0%, #ffffff 100%)" }}>
+                <CardHeader>
+
+                </CardHeader>
+                <CardBody>
+                  <Pie
+                    data={
+                      {
+                        datasets: [{
+                          backgroundColor: (() => {
+                            return this.state.teamCounts.map((a) => { return a.color })
+                          })(),
+                          data: (() => {
+                            return this.state.teamCounts.map((a) => { return a.count })
+                          })()
+                        }],
+                        labels: (() => {
+                          return this.state.teamCounts.map((a) => {
+                            return a.team
+                          })
+                        })()
+                      }
+                    }
+                    options={
+                      {
+                        title: {
+                          display: true,
+                          text: "Today's Appointments by Team",
+                          fontSize: 24
+                        },
+                        legend: {
+                          display: true,
+                          labels: {
+                            fontSize: 18
+                          }
+                        }
+                      }
+                    }
+                  />
                 </CardBody>
               </Card>
             </Col>
