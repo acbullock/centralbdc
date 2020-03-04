@@ -134,7 +134,7 @@ class AdminDashboard extends React.Component {
         let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         let labels = []
         let data = []
-        let todayApps = await this.props.mongo.find("all_appointments", { verified: { "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString() } }, { projection: { verified: 1 } })
+        let todayApps = await this.props.mongo.find("all_appointments", { dealership_department: {"$ne": "Service"}, verified: { "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString() } }, { projection: { verified: 1 } })
         let todayAsst = []
         for (let a in this.state.agents) {
             todayAsst = this._isMounted && await todayAsst.concat(this.state.agents[a].assistance)
