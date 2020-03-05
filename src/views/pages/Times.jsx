@@ -28,7 +28,7 @@ class Times extends React.Component {
         this.getTimes = this.getTimes.bind(this)
         this.getExtensions = this.getExtensions.bind(this)
         this._isMounted = false
-        this.SERVER = "http://guarded-castle-33109.herokuapp.com";
+        this.SERVER = "https://guarded-castle-33109.herokuapp.com";
         this.RING_CENTRAL = "https://platform.ringcentral.com/restapi/v1.0";
     }
     async componentDidMount() {
@@ -89,7 +89,7 @@ class Times extends React.Component {
             token = token.data.voice_token;
 
             //get Earliest and latest time for that user on that day..
-            let url = `${this.RING_CENTRAL}/account/~/extension/${extensions[ext].id}/call-log?dateFrom=${day}&dateTo=${nextDay}&access_token=${token}&perPage=1000`
+            let url = `${this.RING_CENTRAL}/account/~/extension/${extensions[ext].id}/call-log?direction=Outbound&dateFrom=${day}&dateTo=${nextDay}&access_token=${token}&perPage=1000`
             let curRecords = await axios.get(url)
             curRecords = curRecords.data.records
             if (curRecords.length < 1) {
