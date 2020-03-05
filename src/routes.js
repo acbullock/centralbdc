@@ -49,7 +49,7 @@ import MojoDealershipProfile from "./views/pages/MojoDealershipProfile.jsx"
 import Justin from "./views/pages/Justin.jsx"
 import TeamStandings from "./views/pages/TeamStandings.jsx"
 import GoalDashboard from "./views/pages/GoalDashboard.jsx"
-
+import Times from "./views/pages/Times.jsx"
 const routes = [
   {
     path: "/agent_profile",
@@ -205,6 +205,13 @@ const routes = [
     name: "Justin",
     icon: "tim-icons icon-badge",
     component: Justin,
+    layout: "/auth"
+  },
+  {
+    path: "/times",
+    name: "Times",
+    icon: "tim-icons icon-badge",
+    component: Times,
     layout: "/auth"
   },
   {
