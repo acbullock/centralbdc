@@ -167,7 +167,7 @@ class Dashboard extends React.Component {
     this.setState({ loading: true })
     let teamCounts = []
     for (let a in this.state.top5) {
-      let index = teamCounts.findIndex((t) => { return t.team === this.state.top5[a].team })
+      let index = this._isMounted && teamCounts.findIndex((t) => { return t.team === this.state.top5[a].team })
       if (index === -1) {
         this._isMounted && await teamCounts.push({ team: this.state.top5[a].team, count: this.state.top5[a].count, color: '#' + Math.floor(Math.random() * 16777215).toString(16) })
       }
@@ -175,9 +175,9 @@ class Dashboard extends React.Component {
         teamCounts[index].count += this.state.top5[a].count
       }
     }
-    this._isMounted && await teamCounts.sort((a,b)=>{
-      if(a.count > b.count) return -1
-      if(a.count < b.count) return 1
+    this._isMounted && await teamCounts.sort((a, b) => {
+      if (a.count > b.count) return -1
+      if (a.count < b.count) return 1
       return 0
     })
     this.setState({ loading: false, teamCounts })
@@ -221,7 +221,7 @@ class Dashboard extends React.Component {
         lastVal = groupedAppts[a].count;
         curRank++;
       }
-      let agentIndex = agents.findIndex((ap) => {
+      let agentIndex = this._isMounted && agents.findIndex((ap) => {
         return ap._id === groupedAppts[a]._id
       })
       if (agentIndex === -1) continue;
@@ -275,10 +275,10 @@ class Dashboard extends React.Component {
         lastVal = groupedAppts[a].count;
         curRank++;
       }
-      let agentIndex = agents.findIndex((ap) => {
+      let agentIndex = this._isMounted && agents.findIndex((ap) => {
         return ap._id === groupedAppts[a]._id
       })
-      if (agentIndex === -1) continue;
+      if (agentIndex === -1 || !agentIndex) continue;
       let user = {
         count: groupedAppts[a].count,
         name: agents[agentIndex].name,
@@ -673,7 +673,7 @@ class Dashboard extends React.Component {
                       {(() => {
                         let arr = []
                         for (let a in this.state.agents) {
-                          let index = this.state.top5.findIndex((ap) => {
+                          let index = this._isMounted && this.state.top5.findIndex((ap) => {
                             return ap._id === this.state.agents[a]._id
                           })
                           if (index === -1) continue

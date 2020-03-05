@@ -35,8 +35,14 @@ class Times extends React.Component {
         this._isMounted && this.setState({ loading: true })
         this._isMounted && this.setState({ loading: false })
     }
-    componentWillMount() {
+    async componentWillMount() {
         this._isMounted = true
+        let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb)
+        let agent = await this.props.mongo.findOne("agents", { userId: user.userId }, { projection: { account_type: 1 } })
+        if(agent.account_type !== "admin"){
+            this.props.history.push("/admin/dashboard")
+            return;
+        }
     }
     componentWillUnmount() {
         this._isMounted = false
