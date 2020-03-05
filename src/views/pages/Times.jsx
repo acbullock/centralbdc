@@ -149,6 +149,7 @@ class Times extends React.Component {
                                                 <th><p className="text-white text-center">Date</p></th>
                                                 <th><p className="text-white text-center">Start Time</p></th>
                                                 <th><p className="text-white text-center">End Time</p></th>
+                                                <th><p className="text-white text-center">Hours Worked</p></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -160,6 +161,7 @@ class Times extends React.Component {
                                                             <td><p className="text-white text-center">{new Date(this.state.selected_date).toLocaleDateString()}</p></td>
                                                             <td><p className="text-white text-center">{new Date(t.start).toLocaleTimeString()}</p></td>
                                                             <td><p className="text-white text-center">{new Date(t.end).toLocaleTimeString()}</p></td>
+                                                    <td><p className="text-white text-center">{Math.round(100*(new Date(t.end).getTime() - new Date(t.start) - (1000*3600))/(1000*3600))/100}</p></td>
                                                         </tr>
                                                     )
                                                 })
