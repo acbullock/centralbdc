@@ -39,7 +39,7 @@ class Times extends React.Component {
         this._isMounted = true
         let user = this.props.mongo.getActiveUser(this.props.mongo.mongodb)
         let agent = await this.props.mongo.findOne("agents", { userId: user.userId }, { projection: { account_type: 1 } })
-        if(agent.account_type !== "admin"){
+        if (agent.account_type !== "admin") {
             this.props.history.push("/admin/dashboard")
             return;
         }
@@ -81,17 +81,24 @@ class Times extends React.Component {
         let nextDay = new Date(this.state.selected_date).getTime() + (1000 * 3600 * 24)
         nextDay = new Date(nextDay).toISOString()
         let results = []
-        let token_ids = ["5df2b825f195a16a1dbd4bf5", "5e583450576f3ada786de3c2", "5e5835a4576f3ada786de3c3"]
+        let token_ids = ["5df2b825f195a16a1dbd4bf5", "5e583450576f3ada786de3c2", "5e5835a4576f3ada786de3c3", "5e617c79ffa244127dd79adc"]
         for (let ext in extensions) {
-            await this.timeout(2000)
-            let tokenIndex = ext % 3
+            await this.timeout(1500)
+            let tokenIndex = ext % 4
             let token = await axios.post(`${this.SERVER}/findOne`, { collection: "utils", query: { _id: token_ids[tokenIndex] } })
             token = token.data.voice_token;
 
             //get Earliest and latest time for that user on that day..
             let url = `${this.RING_CENTRAL}/account/~/extension/${extensions[ext].id}/call-log?direction=Outbound&dateFrom=${day}&dateTo=${nextDay}&access_token=${token}&perPage=1000`
-            let curRecords = await axios.get(url)
-            curRecords = curRecords.data.records
+            let curRecords;
+            try {
+                curRecords = await axios.get(url)
+                curRecords = curRecords.data.records
+            } catch (error) {
+                curRecords = []
+            }
+
+
             if (curRecords.length < 1) {
                 continue;
             }
@@ -104,7 +111,7 @@ class Times extends React.Component {
             this.setState({ times: results })
 
         }
-
+        alert("done")
         this.setState({ timesLoading: false })
     }
     render() {
@@ -161,7 +168,7 @@ class Times extends React.Component {
                                                             <td><p className="text-white text-center">{new Date(this.state.selected_date).toLocaleDateString()}</p></td>
                                                             <td><p className="text-white text-center">{new Date(t.start).toLocaleTimeString()}</p></td>
                                                             <td><p className="text-white text-center">{new Date(t.end).toLocaleTimeString()}</p></td>
-                                                    <td><p className="text-white text-center">{Math.round(100*(new Date(t.end).getTime() - new Date(t.start) - (1000*3600))/(1000*3600))/100}</p></td>
+                                                            <td><p className="text-white text-center">{Math.round(100 * (new Date(t.end).getTime() - new Date(t.start) - (1000 * 3600)) / (1000 * 3600)) / 100}</p></td>
                                                         </tr>
                                                     )
                                                 })
