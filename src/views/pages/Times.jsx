@@ -71,47 +71,13 @@ class Times extends React.Component {
     }
     async getTimes() {
         this.setState({ timesLoading: true })
-        //get Extensions..
-        let extensions = await this.getExtensions()
-        extensions = extensions.filter((a) => {
-            return a.name.indexOf("S ") !== 0 && a.name.indexOf("D ") !== 0 && a.name.indexOf("Z ") !== 0
+        let times = await this.props.mongo.find("timesheet", { day: new Date(new Date(this.state.selected_date).setHours(0, 0, 0, 0)).toISOString() })
+        await times.sort((a,b)=>{
+            if(a.name > b.name) return 1;
+            if(a.name < b.name) return -1;
+            return 0
         })
-        this.setState({ extensions })
-        let day = new Date(this.state.selected_date).toISOString()
-        let nextDay = new Date(this.state.selected_date).getTime() + (1000 * 3600 * 24)
-        nextDay = new Date(nextDay).toISOString()
-        let results = []
-        let token_ids = ["5df2b825f195a16a1dbd4bf5", "5e583450576f3ada786de3c2", "5e5835a4576f3ada786de3c3", "5e617c79ffa244127dd79adc"]
-        for (let ext in extensions) {
-            await this.timeout(1500)
-            let tokenIndex = ext % 4
-            let token = await axios.post(`${this.SERVER}/findOne`, { collection: "utils", query: { _id: token_ids[tokenIndex] } })
-            token = token.data.voice_token;
-
-            //get Earliest and latest time for that user on that day..
-            let url = `${this.RING_CENTRAL}/account/~/extension/${extensions[ext].id}/call-log?direction=Outbound&dateFrom=${day}&dateTo=${nextDay}&access_token=${token}&perPage=1000`
-            let curRecords;
-            try {
-                curRecords = await axios.get(url)
-                curRecords = curRecords.data.records
-            } catch (error) {
-                curRecords = []
-            }
-
-
-            if (curRecords.length < 1) {
-                continue;
-            }
-            let obj = {
-                name: extensions[ext].name,
-                start: new Date(curRecords[curRecords.length - 1].startTime).toISOString(),
-                end: new Date(curRecords[0].startTime).toISOString()
-            }
-            await results.push(obj)
-            this.setState({ times: results })
-
-        }
-        alert("done")
+        this.setState({times})
         this.setState({ timesLoading: false })
     }
     render() {
@@ -142,7 +108,7 @@ class Times extends React.Component {
                                         <ReactDateTime
                                             timeFormat={false}
                                             value={this.state.selected_date}
-                                            onChange={(e) => { this.setState({ selected_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
+                                            onChange={(e) => { this.setState({ times: [], selected_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
                                         />
                                     </Card>
                                     <Button
