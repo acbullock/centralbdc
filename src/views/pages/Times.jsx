@@ -72,12 +72,12 @@ class Times extends React.Component {
     async getTimes() {
         this.setState({ timesLoading: true })
         let times = await this.props.mongo.find("timesheet", { day: new Date(new Date(this.state.selected_date).setHours(0, 0, 0, 0)).toISOString() })
-        await times.sort((a,b)=>{
-            if(a.name > b.name) return 1;
-            if(a.name < b.name) return -1;
+        await times.sort((a, b) => {
+            if (a.name > b.name) return 1;
+            if (a.name < b.name) return -1;
             return 0
         })
-        this.setState({times})
+        this.setState({ times })
         this.setState({ timesLoading: false })
     }
     render() {
@@ -115,14 +115,36 @@ class Times extends React.Component {
                                         disabled={this.state.selected_date === null || this.state.timesLoading}
                                         onClick={() => { this.getTimes() }}>See Times
                                     </Button>
+                                    <Button
+                                        className='float-left'
+                                        hidden={this.state.times.length < 1}
+                                        onClick={async () => {
+                                            await this.setState({ results: [], selected_date: new Date(new Date(this.state.selected_date).getTime() - (1000 * 3600 * 24)) })
+                                            await this.getTimes()
+                                        }}
+
+                                    >
+                                        Previous Day
+                                        </Button>
+                                    <Button
+                                        className="float-right"
+                                        hidden={this.state.times.length < 1}
+                                        onClick={async () => {
+                                            await this.setState({ results: [], selected_date: new Date(new Date(this.state.selected_date).getTime() + (1000 * 3600 * 24)) })
+                                            await this.getTimes()
+                                        }}
+
+                                    >
+                                        Next Day
+                                        </Button>
                                     <Table hidden={this.state.times.length < 1}>
                                         <thead>
-                                            <tr>
-                                                <th><p className="text-white text-center">Name</p></th>
-                                                <th><p className="text-white text-center">Date</p></th>
-                                                <th><p className="text-white text-center">Start Time</p></th>
-                                                <th><p className="text-white text-center">End Time</p></th>
-                                                <th><p className="text-white text-center">Hours Worked</p></th>
+                                            <tr >
+                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">Name</p></th>
+                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">Date</p></th>
+                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">Start Time</p></th>
+                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">End Time</p></th>
+                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">Hours Worked</p></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -130,18 +152,39 @@ class Times extends React.Component {
                                                 this.state.times.map((t, i) => {
                                                     return (
                                                         <tr key={i}>
-                                                            <td><p className="text-white text-center">{t.name}</p></td>
-                                                            <td><p className="text-white text-center">{new Date(this.state.selected_date).toLocaleDateString()}</p></td>
-                                                            <td><p className="text-white text-center">{new Date(t.start).toLocaleTimeString()}</p></td>
-                                                            <td><p className="text-white text-center">{new Date(t.end).toLocaleTimeString()}</p></td>
-                                                            <td><p className="text-white text-center">{Math.round(100 * (new Date(t.end).getTime() - new Date(t.start) - (1000 * 3600)) / (1000 * 3600)) / 100}</p></td>
+                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{t.name}</p></td>
+                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{new Date(this.state.selected_date).toLocaleDateString()}</p></td>
+                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{new Date(t.start).toLocaleTimeString()}</p></td>
+                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{new Date(t.end).toLocaleTimeString()}</p></td>
+                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{Math.round(100 * (new Date(t.end).getTime() - new Date(t.start) - (1000 * 3600)) / (1000 * 3600)) / 100}</p></td>
                                                         </tr>
                                                     )
                                                 })
                                             }
                                         </tbody>
                                     </Table>
+                                    <Button
+                                        className='float-left'
+                                        hidden={this.state.times.length < 1}
+                                        onClick={async () => {
+                                            await this.setState({ results: [], selected_date: new Date(new Date(this.state.selected_date).getTime() - (1000 * 3600 * 24)) })
+                                            await this.getTimes()
+                                        }}
 
+                                    >
+                                        Previous Day
+                                        </Button>
+                                    <Button
+                                        className="float-right"
+                                        hidden={this.state.times.length < 1}
+                                        onClick={async () => {
+                                            await this.setState({ results: [], selected_date: new Date(new Date(this.state.selected_date).getTime() + (1000 * 3600 * 24)) })
+                                            await this.getTimes()
+                                        }}
+
+                                    >
+                                        Next Day
+                                        </Button>
                                 </CardBody>
 
                             </Card>
