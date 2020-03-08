@@ -106,6 +106,9 @@ class Times extends React.Component {
                                 <CardBody>
                                     <Card>
                                         <ReactDateTime
+                                        isValidDate={(sel)=>{
+                                            return new Date(sel).getTime() > new Date(new Date(new Date(new Date().setFullYear(2019)).setMonth(8)).setDate(30)).getTime()
+                                        }}
                                             timeFormat={false}
                                             value={this.state.selected_date}
                                             onChange={(e) => { this.setState({ times: [], selected_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
@@ -117,7 +120,6 @@ class Times extends React.Component {
                                     </Button>
                                     <Button
                                         className='float-left'
-                                        hidden={this.state.times.length < 1}
                                         onClick={async () => {
                                             await this.setState({ results: [], selected_date: new Date(new Date(this.state.selected_date).getTime() - (1000 * 3600 * 24)) })
                                             await this.getTimes()
@@ -128,7 +130,6 @@ class Times extends React.Component {
                                         </Button>
                                     <Button
                                         className="float-right"
-                                        hidden={this.state.times.length < 1}
                                         onClick={async () => {
                                             await this.setState({ results: [], selected_date: new Date(new Date(this.state.selected_date).getTime() + (1000 * 3600 * 24)) })
                                             await this.getTimes()
