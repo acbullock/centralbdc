@@ -71,6 +71,10 @@ class Times extends React.Component {
     }
     async getTimes() {
         this.setState({ timesLoading: true })
+        if (new Date(this.state.selected_date).toISOString() < "2019-10-01T00:00:00.000Z") {
+            this.setState({ selected_date: new Date("2019-10-01T05:00:00.000Z") })
+        }
+
         let times = await this.props.mongo.find("timesheet", { day: new Date(new Date(this.state.selected_date).setHours(0, 0, 0, 0)).toISOString() })
         await times.sort((a, b) => {
             if (a.name > b.name) return 1;
@@ -106,9 +110,9 @@ class Times extends React.Component {
                                 <CardBody>
                                     <Card>
                                         <ReactDateTime
-                                        isValidDate={(sel)=>{
-                                            return new Date(sel).getTime() > new Date(new Date(new Date(new Date().setFullYear(2019)).setMonth(8)).setDate(30)).getTime()
-                                        }}
+                                            isValidDate={(sel) => {
+                                                return new Date(sel).getTime() > new Date(new Date(new Date(new Date().setFullYear(2019)).setMonth(8)).setDate(30)).getTime()
+                                            }}
                                             timeFormat={false}
                                             value={this.state.selected_date}
                                             onChange={(e) => { this.setState({ times: [], selected_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
@@ -141,11 +145,11 @@ class Times extends React.Component {
                                     <Table hidden={this.state.times.length < 1}>
                                         <thead>
                                             <tr >
-                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">Name</p></th>
-                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">Date</p></th>
-                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">Start Time</p></th>
-                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">End Time</p></th>
-                                                <th style={{borderBottom: "1px solid white"}}><p className="text-white text-center">Hours Worked</p></th>
+                                                <th style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">Name</p></th>
+                                                <th style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">Date</p></th>
+                                                <th style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">Start Time</p></th>
+                                                <th style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">End Time</p></th>
+                                                <th style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">Hours Worked</p></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -153,11 +157,11 @@ class Times extends React.Component {
                                                 this.state.times.map((t, i) => {
                                                     return (
                                                         <tr key={i}>
-                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{t.name}</p></td>
-                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{new Date(this.state.selected_date).toLocaleDateString()}</p></td>
-                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{new Date(t.start).toLocaleTimeString()}</p></td>
-                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{new Date(t.end).toLocaleTimeString()}</p></td>
-                                                            <td style={{borderBottom: "1px solid white"}}><p className="text-white text-center">{Math.round(100 * (new Date(t.end).getTime() - new Date(t.start) - (1000 * 3600)) / (1000 * 3600)) / 100}</p></td>
+                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">{t.name}</p></td>
+                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">{new Date(this.state.selected_date).toLocaleDateString()}</p></td>
+                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">{new Date(t.start).toLocaleTimeString()}</p></td>
+                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">{new Date(t.end).toLocaleTimeString()}</p></td>
+                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">{Math.round(100 * (new Date(t.end).getTime() - new Date(t.start) - (1000 * 3600)) / (1000 * 3600)) / 100}</p></td>
                                                         </tr>
                                                     )
                                                 })
