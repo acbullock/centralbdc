@@ -24,7 +24,9 @@ class Times extends React.Component {
             extensions: [],
             from_date: null,
             to_date: null,
-            times: []
+            times: [],
+            names: [],
+            selected_name: null
         }
         this.getTimes = this.getTimes.bind(this)
         this.getExtensions = this.getExtensions.bind(this)
@@ -44,7 +46,26 @@ class Times extends React.Component {
             this.props.history.push("/admin/dashboard")
             return;
         }
-        await this.getExtensions()
+        let names = this._isMounted && await this.props.mongo.aggregate("timesheet", [
+            {
+                "$group": {
+                    "_id": "$name",
+                    "label": {
+                        "$first": "$name"
+                    },
+                    "value": {
+                        "$first": "$name"
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "label": 1
+                }
+            }
+        ]);
+        this._isMounted && await this.setState({ names })
+
     }
     componentWillUnmount() {
         this._isMounted = false
@@ -64,10 +85,14 @@ class Times extends React.Component {
         let records = await axios.get(url)
         records = records.data.records;
         let extensions = records.map((r) => { return { id: r.id, name: r.name, value: r.id, label: r.name } })
-        extensions.sort((a, b) => {
+        await extensions.sort((a, b) => {
             if (a.name > b.name) return 1;
             if (a.name < b.name) return -1
             return 0
+        })
+        extensions = await extensions.filter((e) => {
+            if (e.name == undefined) return false
+            return e.name != "Amanda Schwartzmeyer" && e.name !== "Benjamin Shamsizadeh" && e.name !== "Alex Test" && e.name !== "ALL EMPLOYEES" && e.name.indexOf("S ") !== 0 && e.name.indexOf("D ") !== 0 && e.name.indexOf("Z ") !== 0
         })
         this.setState({ extensions })
         return extensions
@@ -79,7 +104,7 @@ class Times extends React.Component {
         let times = await this.props.mongo.aggregate("timesheet", [
             {
                 "$match": {
-                    "name": this.state.selected_extension.name,
+                    "name": this.state.selected_name.label,
                     "start": {
                         "$gte": new Date(new Date(this.state.from_date).setHours(0, 0, 0, 0)).toISOString(),
                         "$lte": new Date(new Date(this.state.to_date).setHours(23, 59, 59, 999)).toISOString()
@@ -125,9 +150,9 @@ class Times extends React.Component {
                                 <CardBody>
                                     <p className="text-white text-left">Agent Name:</p>
                                     <Select
-                                        options={this.state.extensions}
-                                        value={this.state.selected_extension}
-                                        onChange={(e) => { this.setState({ selected_extension: e }) }}
+                                        options={this.state.names}
+                                        value={this.state.selected_name}
+                                        onChange={(e) => { this.setState({ selected_name: e }) }}
                                     />
                                     <br />
                                     <p className="text-white text-left">From:</p>
