@@ -8,8 +8,9 @@ import {
     CardBody,
     Row,
     Col,
-    Table,
-    CardHeader
+    Collapse,
+    CardHeader,
+    Table
 
 } from "reactstrap";
 import Select from 'react-select'
@@ -24,11 +25,15 @@ class Times extends React.Component {
             extensions: [],
             from_date: null,
             to_date: null,
-            times: [],
+            timesheet: [],
             names: [],
-            selected_name: null
+            totals: [],
+            opens: [],
+            selected_name: null,
+            all_agents: false
         }
         this.getTimes = this.getTimes.bind(this)
+        this.getAllTimes = this.getAllTimes.bind(this)
         this.getExtensions = this.getExtensions.bind(this)
         this._isMounted = false
         this.SERVER = "https://guarded-castle-33109.herokuapp.com";
@@ -90,10 +95,6 @@ class Times extends React.Component {
             if (a.name < b.name) return -1
             return 0
         })
-        extensions = await extensions.filter((e) => {
-            if (e.name == undefined) return false
-            return e.name != "Amanda Schwartzmeyer" && e.name !== "Benjamin Shamsizadeh" && e.name !== "Alex Test" && e.name !== "ALL EMPLOYEES" && e.name.indexOf("S ") !== 0 && e.name.indexOf("D ") !== 0 && e.name.indexOf("Z ") !== 0
-        })
         this.setState({ extensions })
         return extensions
 
@@ -101,27 +102,96 @@ class Times extends React.Component {
     }
     async getTimes() {
         this.setState({ timesLoading: true })
-        let times = await this.props.mongo.aggregate("timesheet", [
+        let timesheet = await this.props.mongo.aggregate("timesheet", [
             {
                 "$match": {
-                    "name": this.state.selected_name.label,
-                    "start": {
-                        "$gte": new Date(new Date(this.state.from_date).setHours(0, 0, 0, 0)).toISOString(),
-                        "$lte": new Date(new Date(this.state.to_date).setHours(23, 59, 59, 999)).toISOString()
+                    name: this.state.selected_name.label,
+                    day: {
+                        "$gte": this.state.from_date,
+                        "$lte": this.state.to_date
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "name": 1,
+                    "day": 1
+                }
+            }
+        ])
+        let totals = await this.props.mongo.aggregate("timesheet", [
+            {
+                "$match": {
+                    name: this.state.selected_name.label,
+                    day: {
+                        "$gte": this.state.from_date,
+                        "$lte": this.state.to_date
                     }
                 }
             },
             {
                 "$group": {
                     "_id": "$name",
-                    "name": { "$first": "$name" },
-                    "hoursWorked": {
+                    "count": {
                         "$sum": "$hoursWorked"
                     }
                 }
+            },
+            {
+                "$sort": {
+                    "_id": 1
+                }
             }
         ])
-        this.setState({ times, timesLoading: false })
+        this.setState({ timesheet, totals, timesLoading: false })
+    }
+    async getAllTimes() {
+        this.setState({ timesLoading: true })
+        let timesheet = await this.props.mongo.aggregate("timesheet", [
+            {
+                "$match": {
+                    day: {
+                        "$gte": this.state.from_date,
+                        "$lte": this.state.to_date
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "name": 1,
+                    "day": 1
+                }
+            }
+        ])
+        let totals = await this.props.mongo.aggregate("timesheet", [
+            {
+                "$match": {
+                    day: {
+                        "$gte": this.state.from_date,
+                        "$lte": this.state.to_date
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$name",
+                    "count": {
+                        "$sum": "$hoursWorked"
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "_id": 1
+                }
+            }
+        ])
+
+        let opens = {}
+        for (let t in totals) {
+            opens[totals[t]._id] = false
+        }
+        this.setState({ timesheet, totals, opens, timesLoading: false })
     }
     render() {
         if (this.state.loading) {
@@ -148,59 +218,101 @@ class Times extends React.Component {
                                     <p className="text-white text-center" hidden={!this.state.timesLoading}>Still Loading</p>
                                 </CardHeader>
                                 <CardBody>
-                                    <p className="text-white text-left">Agent Name:</p>
+                                    <p className="text-white text-left">Agent Name:{this.state.selected_name ? this.state.selected_name.label : null}</p>
                                     <Select
                                         options={this.state.names}
                                         value={this.state.selected_name}
-                                        onChange={(e) => { this.setState({ selected_name: e }) }}
+                                        onChange={(e) => { this.setState({ timesheet: [], selected_name: e }) }}
+                                        isDisabled={this.state.all_agents}
                                     />
+                                    <br />
+                                    <p className="text-white text-left">
+                                        <input
+                                            type="checkbox"
+                                            checked={this.state.all_agents}
+                                            onChange={() => { this.setState({ timesheet: [], all_agents: !this.state.all_agents }) }}
+                                        /> All Agents</p>
                                     <br />
                                     <p className="text-white text-left">From:</p>
                                     <Card>
                                         <ReactDateTime
                                             isValidDate={(sel) => {
-                                                return new Date(sel).getTime() > new Date(new Date(new Date(new Date().setFullYear(2019)).setMonth(8)).setDate(30)).getTime()
+                                                return new Date(sel).getTime() > new Date(new Date(new Date(new Date().setFullYear(2019)).setMonth(2)).setDate(30)).getTime()
                                             }}
                                             timeFormat={false}
                                             value={this.state.selected_date}
-                                            onChange={(e) => { this.setState({ times: [], from_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
+                                            onChange={(e) => { this.setState({ timesheet: [], from_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
                                         />
                                     </Card>
                                     <p className="text-white text-left">To:</p>
                                     <Card>
                                         <ReactDateTime
                                             isValidDate={(sel) => {
-                                                return new Date(sel).getTime() > new Date(new Date(new Date(new Date().setFullYear(2019)).setMonth(8)).setDate(30)).getTime()
+                                                return new Date(sel).getTime() > new Date(new Date(new Date(new Date().setFullYear(2019)).setMonth(2)).setDate(30)).getTime()
                                             }}
                                             timeFormat={false}
                                             value={this.state.to_date}
-                                            onChange={(e) => { this.setState({ times: [], to_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
+                                            onChange={(e) => { this.setState({ timesheet: [], to_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
                                         />
                                     </Card>
                                     <Button
-                                        disabled={this.state.from_date === null || this.state.to_date === null || this.state.timesLoading}
-                                        onClick={() => { this.getTimes() }}>See Times
+                                        disabled={this.state.from_date === null || this.state.to_date === null || this.state.timesLoading || (!this.state.all_agents && !this.state.selected_name)}
+                                        onClick={() => { this.state.all_agents ? this.getAllTimes() : this.getTimes() }}>See Times
                                     </Button>
-                                    <Table hidden={this.state.times.length < 1}>
-                                        <thead>
-                                            <tr >
-                                                <th style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">Name</p></th>
-                                                <th style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">Hours Worked</p></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {
-                                                this.state.times.map((t, i) => {
-                                                    return (
-                                                        <tr key={i}>
-                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">{t.name}</p></td>
-                                                            <td style={{ borderBottom: "1px solid white" }}><p className="text-white text-center">{Math.round(100 * t.hoursWorked) / 100}</p></td>
-                                                        </tr>
-                                                    )
-                                                })
-                                            }
-                                        </tbody>
-                                    </Table>
+                                    <br />
+                                    <br />
+                                    {
+                                        this.state.totals.map((t, i) => {
+                                            return (
+                                                <div key={i}>
+                                                    <hr style={{ borderBottom: "white solid 1px" }} />
+                                                    <p className="text-white text-center" style={{ cursor: "pointer" }} onClick={() => {
+                                                        let opens = this.state.opens;
+                                                        opens[t._id] = !opens[t._id]
+                                                        this.setState({ opens })
+                                                    }}><strong>{t._id}</strong>{`\t`}{Math.round(1000 * t.count) / 1000} Hours</p>
+
+                                                    <Collapse isOpen={this.state.opens[t._id]} >
+                                                        <Card color="transparent">
+                                                            <CardBody>
+                                                                <Table>
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Name</p></th>
+                                                                            <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Day</p></th>
+                                                                            <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">In</p></th>
+                                                                            <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Out</p></th>
+                                                                            <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Hours</p></th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+
+                                                                        {this.state.timesheet.map((cur, ind) => {
+                                                                            if (cur.name !== t._id) return null
+                                                                            return (
+                                                                                <tr key={ind}>
+                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{cur.name}</p></td>
+                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.day).toLocaleDateString()}</p></td>
+                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.start).toLocaleTimeString()}</p></td>
+                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.end).toLocaleTimeString()}</p></td>
+                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{Math.round(1000 * cur.hoursWorked) / 1000}</p></td>
+                                                                                </tr>
+                                                                            )
+                                                                        })}
+
+                                                                    </tbody>
+                                                                </Table>
+                                                            </CardBody>
+                                                        </Card>
+
+                                                    </Collapse>
+                                                    <hr style={{ borderBottom: "white solid 1px" }} />
+                                                    <br />
+                                                </div>
+                                            )
+                                        })
+                                    }
+
                                 </CardBody>
 
                             </Card>
