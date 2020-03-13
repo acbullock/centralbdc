@@ -38,6 +38,96 @@ class Times extends React.Component {
         this._isMounted = false
         this.SERVER = "https://guarded-castle-33109.herokuapp.com";
         this.RING_CENTRAL = "https://platform.ringcentral.com/restapi/v1.0";
+        this.INACTIVE = [
+            "Cristhian Bedregal",
+            "Jesse Shephard",
+            "Stephanie Taboada",
+            "Giovanni West",
+            "Morgan Conway",
+            "Justin Byron",
+            "Joseph Callejo",
+            "Mike Hampton",
+            "Jason Miller",
+            "Austin Skumanich",
+            "Lexie Orr",
+            "Marc Vertus",
+            "Raina Bastien",
+            "Amanda Schwartzmeyer",
+            "Andrew Bastkowski",
+            "Astrid Poliszok",
+            "Brianna Stewart",
+            "Celine Morales",
+            "Corey Watson",
+            "Chelsea Morel",
+            "David Lowenstein",
+            "Dennis Martinez",
+            "Harvey Harvey",
+            "Jaime Marcado",
+            "JC Guerrero",
+            "Jeremy Woods",
+            "Gordon Jupiter",
+            "Kathelina Montoya",
+            "Marquis Ulysse",
+            "Larry Willis",
+            "Donny Howell",
+            "Sebastian Gargurevich",
+            "Sandie Frank",
+            "Mike Rivera",
+            "Yessli Pena",
+            "Zaire Ivory",
+            "Alissa Altidort",
+            "Victoria Montoya",
+            "TJ Kirrane",
+            "Tiffany Henderson",
+            "Taina Cruz",
+            "Mercedes Stringer",
+            "Marquianda Bonner",
+            "Peter Francillon",
+            "Salwa Al-Dasouqi",
+            "Stephanie Silva",
+            "Stephen Manning",
+            "Mica Egalite",
+            "Shae Mardy",
+            "Rovnisha Saddler",
+            "Jasmine Montes",
+            "Brian King",
+            "Jesse Sosa",
+            "Jean Sufralien",
+            "Joey Gordon",
+            "Kira Brooks",
+            "Bruna Biffani",
+            "Chris Jeffries",
+            "David White",
+            "Alysa Blackstock",
+            "Janielle Cutner",
+            "Kayla Mcneill",
+            "Michael Joseph",
+            "Amalia Arocho",
+            "Alex Bauer",
+            "Stevens Jocelyn",
+            "Priscilla Sanders",
+            "Imani Bradford",
+            "Kaya Steadman",
+            //cant find anyway..
+            "Alexis Lamers",
+            "Emanuela Beaucejour",
+            "Jimmy Colatti",
+            "Matthew Beauka ",
+            "Myrdjina Jacques",
+            "Sean Mills",
+            "Wister Ludieu",
+            "Angelo Jolteus",
+            "Devin Jackson",
+            "Presky Cius",
+            "Wesley Bradford",
+            "Dominique George",
+            "Federico Santamaria",
+            "Gianni Gonzalez",
+            "Jacob Ho",
+            "Adlin Exantus",
+            "Barbara Santos",
+            "JAMILLAH BUIE"
+        ]
     }
     async componentDidMount() {
         this._isMounted && this.setState({ loading: true })
@@ -69,6 +159,10 @@ class Times extends React.Component {
                 }
             }
         ]);
+        names = await names.filter((n) => {
+            return this.INACTIVE.indexOf(n._id) === -1
+        })
+
         this._isMounted && await this.setState({ names })
 
     }
@@ -222,7 +316,7 @@ class Times extends React.Component {
                                     <Select
                                         options={this.state.names}
                                         value={this.state.selected_name}
-                                        onChange={(e) => { this.setState({ timesheet: [], selected_name: e }) }}
+                                        onChange={(e) => { this.setState({ totals: [], timesheet: [], selected_name: e }) }}
                                         isDisabled={this.state.all_agents}
                                     />
                                     <br />
@@ -230,7 +324,7 @@ class Times extends React.Component {
                                         <input
                                             type="checkbox"
                                             checked={this.state.all_agents}
-                                            onChange={() => { this.setState({ timesheet: [], all_agents: !this.state.all_agents }) }}
+                                            onChange={() => { this.setState({ timesheet: [], totals: [], all_agents: !this.state.all_agents }) }}
                                         /> All Agents</p>
                                     <br />
                                     <p className="text-white text-left">From:</p>
@@ -241,7 +335,7 @@ class Times extends React.Component {
                                             }}
                                             timeFormat={false}
                                             value={this.state.selected_date}
-                                            onChange={(e) => { this.setState({ timesheet: [], from_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
+                                            onChange={(e) => { this.setState({ timesheet: [], totals: [], from_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
                                         />
                                     </Card>
                                     <p className="text-white text-left">To:</p>
@@ -252,7 +346,7 @@ class Times extends React.Component {
                                             }}
                                             timeFormat={false}
                                             value={this.state.to_date}
-                                            onChange={(e) => { this.setState({ timesheet: [], to_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
+                                            onChange={(e) => { this.setState({ timesheet: [], totals: [], to_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
                                         />
                                     </Card>
                                     <Button
@@ -263,9 +357,10 @@ class Times extends React.Component {
                                     <br />
                                     {
                                         this.state.totals.map((t, i) => {
+                                            if (this.INACTIVE.indexOf(t._id) !== -1) return null
                                             return (
                                                 <div key={i}>
-                                                    <hr style={{ borderBottom: "white solid 1px" }} />
+                                                    {/* <hr style={{ borderBottom: "white solid 1px" }} /> */}
                                                     <p className="text-white text-center" style={{ cursor: "pointer" }} onClick={() => {
                                                         let opens = this.state.opens;
                                                         opens[t._id] = !opens[t._id]
@@ -307,7 +402,7 @@ class Times extends React.Component {
 
                                                     </Collapse>
                                                     <hr style={{ borderBottom: "white solid 1px" }} />
-                                                    <br />
+
                                                 </div>
                                             )
                                         })
