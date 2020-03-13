@@ -133,12 +133,14 @@ class ServiceDashboard extends React.Component {
         ])
         let top5 = []
         for (let ap in grouped) {
-            let name = agentNames[agentNames.findIndex((a) => {
+            let index = agentNames.findIndex((a) => {
                 return a._id === grouped[ap]._id
-            })].name
-            let type = agentNames[agentNames.findIndex((a) => {
-                return a._id === grouped[ap]._id
-            })].account_type
+            })
+            if(index === -1){
+                continue;
+            }
+            let name = agentNames[index].name
+            let type = agentNames[index].account_type
             let obj = {
                 count: grouped[ap].count,
                 type,
