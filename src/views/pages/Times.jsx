@@ -208,10 +208,9 @@ class Times extends React.Component {
                 return `Overtime Pay: $${Math.round(100 * (.5 * hourly * (hours - 40))) / 100}`
             }
             else {
-                let actualHourly = sal / hours;
-                let diff = minwage - actualHourly
+                let pay = (minwage * hours) + (.5 * minwage * (hours - 40))
 
-                return `Overtime Pay $${Math.round(100 * ((diff * 40) + (1.5 * 8.46 * (hours - 40)))) / 100}`
+                return `Overtime Pay $${Math.round(100 * (pay - sal)) / 100}`
             }
         }
         else {
@@ -369,7 +368,7 @@ class Times extends React.Component {
                                             value={this.state.selected_date}
                                             onChange={(e) => {
                                                 this.setState({
-                                                    timesheet: [], totals: [],salaries: [], 
+                                                    timesheet: [], totals: [], salaries: [],
                                                     from_date: new Date(new Date(e).setHours(0, 0, 0, 0)),
                                                     to_date: new Date(new Date(new Date(e).setHours(0, 0, 0, 0)).getTime() + (24 * 6 * 3600000))
                                                 })
