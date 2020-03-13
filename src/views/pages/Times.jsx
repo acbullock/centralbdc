@@ -30,15 +30,18 @@ class Times extends React.Component {
             totals: [],
             opens: [],
             selected_name: null,
-            all_agents: false
+            all_agents: false,
+            salaries: []
         }
         this.getTimes = this.getTimes.bind(this)
         this.getAllTimes = this.getAllTimes.bind(this)
         this.getExtensions = this.getExtensions.bind(this)
+        this.getPay = this.getPay.bind(this)
         this._isMounted = false
         this.SERVER = "https://guarded-castle-33109.herokuapp.com";
         this.RING_CENTRAL = "https://platform.ringcentral.com/restapi/v1.0";
         this.INACTIVE = [
+            "Benjamin Shamsizadeh",
             "Cristhian Bedregal",
             "Jesse Shephard",
             "Stephanie Taboada",
@@ -163,6 +166,7 @@ class Times extends React.Component {
             return this.INACTIVE.indexOf(n._id) === -1
         })
 
+
         this._isMounted && await this.setState({ names })
 
     }
@@ -194,6 +198,33 @@ class Times extends React.Component {
 
 
     }
+    getPay(sal, hours) {
+        if (!sal || !hours) return null
+        let minwage = 8.46
+        if (hours > 40) {
+            if (sal > (minwage * hours)) {
+                let hourly = sal / hours
+                return `Overtime Pay: $${Math.round(100 * (.5 * hourly * (hours - 40))) / 100}`
+            }
+            else {
+                let actualHourly = sal / hours;
+                let diff = minwage - actualHourly
+
+                return `Overtime Pay $${Math.round(100 * ((diff * 40) + (1.5 * 8.46 * (hours - 40)))) / 100}`
+            }
+        }
+        else {
+            //make sure they at least got min wage..
+            let hourly = sal / hours
+            if (hourly >= minwage) {
+                return `Overtime Pay: $0.00`
+            }
+            else {
+                let diff = minwage - hourly
+                return `Overtime Pay: $${Math.round(100 * diff * hours) / 100}`
+            }
+        }
+    }
     async getTimes() {
         this.setState({ timesLoading: true })
         let timesheet = await this.props.mongo.aggregate("timesheet", [
@@ -201,8 +232,8 @@ class Times extends React.Component {
                 "$match": {
                     name: this.state.selected_name.label,
                     day: {
-                        "$gte": this.state.from_date,
-                        "$lte": this.state.to_date
+                        "$gte": new Date(new Date(this.state.from_date).setHours(0, 0, 0, 0)),
+                        "$lte": new Date(new Date(this.state.to_date).setHours(0, 0, 0, 0))
                     }
                 }
             },
@@ -218,8 +249,8 @@ class Times extends React.Component {
                 "$match": {
                     name: this.state.selected_name.label,
                     day: {
-                        "$gte": this.state.from_date,
-                        "$lte": this.state.to_date
+                        "$gte": new Date(new Date(this.state.from_date).setHours(0, 0, 0, 0)),
+                        "$lte": new Date(new Date(this.state.to_date).setHours(0, 0, 0, 0))
                     }
                 }
             },
@@ -245,8 +276,8 @@ class Times extends React.Component {
             {
                 "$match": {
                     day: {
-                        "$gte": this.state.from_date,
-                        "$lte": this.state.to_date
+                        "$gte": new Date(new Date(this.state.from_date).setHours(0, 0, 0, 0)),
+                        "$lte": new Date(new Date(this.state.to_date).setHours(0, 0, 0, 0))
                     }
                 }
             },
@@ -261,8 +292,8 @@ class Times extends React.Component {
             {
                 "$match": {
                     day: {
-                        "$gte": this.state.from_date,
-                        "$lte": this.state.to_date
+                        "$gte": new Date(new Date(this.state.from_date).setHours(0, 0, 0, 0)),
+                        "$lte": new Date(new Date(this.state.to_date).setHours(0, 0, 0, 0))
                     }
                 }
             },
@@ -335,18 +366,22 @@ class Times extends React.Component {
                                             }}
                                             timeFormat={false}
                                             value={this.state.selected_date}
-                                            onChange={(e) => { this.setState({ timesheet: [], totals: [], from_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
+                                            onChange={(e) => {
+                                                this.setState({
+                                                    timesheet: [], totals: [],
+                                                    from_date: new Date(new Date(e).setHours(0, 0, 0, 0)),
+                                                    to_date: new Date(new Date(new Date(e).setHours(0, 0, 0, 0)).getTime() + (24 * 6 * 3600000))
+                                                })
+
+                                            }}
                                         />
                                     </Card>
                                     <p className="text-white text-left">To:</p>
                                     <Card>
                                         <ReactDateTime
-                                            isValidDate={(sel) => {
-                                                return new Date(sel).getTime() > new Date(new Date(new Date(new Date().setFullYear(2019)).setMonth(2)).setDate(30)).getTime()
-                                            }}
+                                            inputProps={{ disabled: true }}
                                             timeFormat={false}
                                             value={this.state.to_date}
-                                            onChange={(e) => { this.setState({ timesheet: [], totals: [], to_date: new Date(new Date(e).setHours(0, 0, 0, 0)) }) }}
                                         />
                                     </Card>
                                     <Button
@@ -366,7 +401,17 @@ class Times extends React.Component {
                                                         opens[t._id] = !opens[t._id]
                                                         this.setState({ opens })
                                                     }}><strong>{t._id}</strong>{`\t`}{Math.round(1000 * t.count) / 1000} Hours</p>
-
+                                                    <p className="text-white text-center">Weekly Salary: {`\t`}
+                                                        <input
+                                                            type="text"
+                                                            // value={this.state.salaries[i]}
+                                                            onChange={(e) => {
+                                                                let sals = this.state.salaries
+                                                                sals[i] = parseFloat(e.target.value)
+                                                                this.setState({ salaries: sals })
+                                                            }}
+                                                        /></p>
+                                                    <p className="text-white text-center">{this.getPay(this.state.salaries[i], Math.round(1000 * t.count) / 1000)}</p>
                                                     <Collapse isOpen={this.state.opens[t._id]} >
                                                         <Card color="transparent">
                                                             <CardBody>
