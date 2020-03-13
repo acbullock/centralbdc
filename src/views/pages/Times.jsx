@@ -347,7 +347,7 @@ class Times extends React.Component {
                                     <Select
                                         options={this.state.names}
                                         value={this.state.selected_name}
-                                        onChange={(e) => { this.setState({ totals: [], timesheet: [], selected_name: e }) }}
+                                        onChange={(e) => { this.setState({ totals: [], salaries: [], timesheet: [], selected_name: e }) }}
                                         isDisabled={this.state.all_agents}
                                     />
                                     <br />
@@ -355,7 +355,7 @@ class Times extends React.Component {
                                         <input
                                             type="checkbox"
                                             checked={this.state.all_agents}
-                                            onChange={() => { this.setState({ timesheet: [], totals: [], all_agents: !this.state.all_agents }) }}
+                                            onChange={() => { this.setState({ timesheet: [], salaries: [], totals: [], all_agents: !this.state.all_agents }) }}
                                         /> All Agents</p>
                                     <br />
                                     <p className="text-white text-left">From:</p>
@@ -368,7 +368,7 @@ class Times extends React.Component {
                                             value={this.state.selected_date}
                                             onChange={(e) => {
                                                 this.setState({
-                                                    timesheet: [], totals: [],
+                                                    timesheet: [], totals: [],salaries: [], 
                                                     from_date: new Date(new Date(e).setHours(0, 0, 0, 0)),
                                                     to_date: new Date(new Date(new Date(e).setHours(0, 0, 0, 0)).getTime() + (24 * 6 * 3600000))
                                                 })
