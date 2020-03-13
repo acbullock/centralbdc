@@ -42,6 +42,7 @@ class Times extends React.Component {
         this.RING_CENTRAL = "https://platform.ringcentral.com/restapi/v1.0";
         this.INACTIVE = [
             "Benjamin Shamsizadeh",
+            "Benjamin Backup",
             "Cristhian Bedregal",
             "Jesse Shephard",
             "Stephanie Taboada",
