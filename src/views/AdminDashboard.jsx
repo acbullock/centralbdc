@@ -643,7 +643,7 @@ class AdminDashboard extends React.Component {
                                                     return 0;
                                                 })
                                                 return this._isMounted && agents.map((a, i) => {
-                                                    if (i > 9) return null
+                                                    // if (i > 9) return null
                                                     if (a.lastCall === null) {
                                                         return null
                                                     }
