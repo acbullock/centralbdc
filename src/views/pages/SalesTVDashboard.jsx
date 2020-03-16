@@ -367,7 +367,7 @@ class SalesTVDashboard extends React.Component {
                                         </thead>
                                         <tbody>
                                             {this._isMounted && this.state.callSortedAgents.map((a, i) => {
-                                                if (i > 9) return null
+                                                // if (i > 9) return null
                                                 return (<tr key={i}>
                                                     <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{i + 1}</strong></p></td>
                                                     <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
