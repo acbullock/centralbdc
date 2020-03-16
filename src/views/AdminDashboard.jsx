@@ -31,6 +31,7 @@ import {
     Table,
     Row,
     Col,
+    Progress
 } from "reactstrap";
 import Select from "react-select"
 class AdminDashboard extends React.Component {
@@ -39,6 +40,8 @@ class AdminDashboard extends React.Component {
         super(props);
         this.state = {
             loading: false,
+            allLoading: false,
+            allCallsPercentage: 0,
             agents: [],
             all_appointments: [],
             last_appts: [],
@@ -81,8 +84,74 @@ class AdminDashboard extends React.Component {
         this.getMonthChart = this.getMonthChart.bind(this)
         this.getHourlyApps = this.getHourlyApps.bind(this)
         this.getFollowupChart = this.getFollowupChart.bind(this)
+        this.getAllCalls = this.getAllCalls.bind(this)
     }
     _isMounted = false;
+    timeout(ms) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve()
+            }, ms);
+        })
+    }
+    async getAllCalls() {
+        await this.setState({ allLoading: true })
+        const RING_CENTRAL = "https://platform.ringcentral.com/restapi/v1.0";
+        let agents = await this.props.mongo.find("agents", { isActive: true }, { projection: { name: 1, extension: 1 } })
+        agents = await agents.filter((a) => {
+            if (a.extension == undefined) {
+                return false;
+            }
+            return a.extension.length > 0
+        })
+        let token_ids = ["5df2b825f195a16a1dbd4bf5", "5e583450576f3ada786de3c2", "5e5835a4576f3ada786de3c3", "5e617c79ffa244127dd79adc"]
+        if (!agents) return
+        for (let a in agents) {
+
+            this.setState({ allCallsPercentage: Math.round(1000 * a / agents.length) / 10 })
+            await this.timeout(2400)
+            let token = await this.props.mongo.findOne("utils", { _id: token_ids[a % 4] })
+            token = token.voice_token
+            let today = new Date();
+            today = new Date(today.setHours(0, 0, 0, 0))
+            today = today.toISOString()
+            // console.log(yesterday, today)
+            let currCount;
+            console.log(RING_CENTRAL, agents[a].extension, today, token)
+            let url = `${RING_CENTRAL}/account/~/extension/${agents[a].extension}/call-log?dateFrom=${today}&access_token=${token}&perPage=1000`
+            console.log(url)
+            try {
+
+
+                currCount = await axios.get(url)
+            } catch (error) {
+                console.log("Error Code:" + error)
+                continue;
+            }
+            let records = currCount.data.records;
+            let lastTime = null
+            for (let i in records) {
+                if (records[i].direction === "Inbound" && records[i].result === "Missed") {
+                    continue;
+                }
+                else {
+                    lastTime = new Date(new Date(records[i].startTime).getTime() + (records[i].duration * 1000));
+                    break;
+                }
+            }
+            // console.log(records.length)
+            let outbound = records.filter(r => { return r.direction === "Outbound" })
+            let inbound = records.filter(r => { return r.direction === "Inbound" && r.result === "Accepted" })
+            console.log(agents[a].name, agents[a].extension)
+            console.log("\tinbound", inbound.length)
+            console.log("\toutbound", outbound.length)
+            console.log("lastTime", lastTime)
+            await this.props.mongo.findOneAndUpdate("agents", { name: agents[a].name }, { inboundToday: inbound.length, outboundToday: outbound.length, callCountLastUpdated: new Date(), lastCall: lastTime })
+            let agents2 = this._isMounted && await this.props.mongo.find("agents", { isActive: true, department: "sales" }, { projection: { "assistance.created": 1, "assistance.userId": 1, account_type: 1, lastCall: 1, "appointments.verified": 1, "appointments.dealership": 1, name: 1, extension: 1, callCountLastUpdated: 1 } })
+            this._isMounted && await this.setState({ agents: agents2 })
+        }
+        this.setState({ allLoading: false })
+    }
     async getFollowupChart(todayAsst) {
 
         let labels = [];
@@ -134,7 +203,7 @@ class AdminDashboard extends React.Component {
         let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         let labels = []
         let data = []
-        let todayApps = await this.props.mongo.find("all_appointments", { dealership_department: {"$ne": "Service"}, verified: { "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString() } }, { projection: { verified: 1 } })
+        let todayApps = await this.props.mongo.find("all_appointments", { dealership_department: { "$ne": "Service" }, verified: { "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString() } }, { projection: { verified: 1 } })
         let todayAsst = []
         for (let a in this.state.agents) {
             todayAsst = this._isMounted && await todayAsst.concat(this.state.agents[a].assistance)
@@ -619,6 +688,12 @@ class AdminDashboard extends React.Component {
                             <Card className="card-raised card-white shadow" color="primary" style={{ background: "linear-gradient(0deg, #000000 0%, #1d67a8 100%)" }}>
                                 <CardHeader>
                                     <p style={{ color: "white" }}><strong>Agent's Most Recent Call</strong></p>
+                                    <Progress
+                                        color="success"
+                                        hidden={!this.state.allLoading}
+                                        value={this.state.allCallsPercentage}
+                                    ></Progress>
+                                    <Button disabled={this.state.allLoading || this.state.latestLoading} onClick={() => { this.getAllCalls() }}>Refresh All</Button>
                                 </CardHeader>
                                 <CardBody>
                                     <Table>
@@ -652,7 +727,7 @@ class AdminDashboard extends React.Component {
                                                             <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a.name}</strong></p></td>
                                                             <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{a.lastCall === null ? "No Calls Today" : Math.round(10 * (new Date().getTime() - new Date(a.lastCall).getTime()) / (1000 * 60)) / 10 + " min"}</strong></p></td>
                                                             <td style={{ borderBottom: "solid 1px white" }}><p style={{ color: "white" }}><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
-                                                            <td style={{ borderBottom: "solid 1px white" }}><Button color="neutral" disabled={this.state.latestLoading} onClick={async () => {
+                                                            <td style={{ borderBottom: "solid 1px white" }}><Button color="neutral" disabled={this.state.latestLoading || this.state.allLoading} onClick={async () => {
                                                                 this._isMounted && this.setState({ latestLoading: true })
                                                                 //get voice token
                                                                 let token = this._isMounted && await this.props.mongo.findOne("utils", { "_id": "5df2b825f195a16a1dbd4bf5" })
