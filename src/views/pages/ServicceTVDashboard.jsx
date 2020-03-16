@@ -254,6 +254,8 @@ class ServiceTVDashboard extends React.Component {
                                                 <th style={{ color: "white", borderBottom: "white 1px solid" }}>Outbound</th>
                                                 <th style={{ color: "white", borderBottom: "white 1px solid" }}>Inbound</th>
                                                 <th style={{ color: "white", borderBottom: "white 1px solid" }}>Total</th>
+                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Time Since Last Call</th>
+                                                <th style={{ color: "white", borderBottom: "white 1px solid" }}>Updated</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -265,6 +267,8 @@ class ServiceTVDashboard extends React.Component {
                                                     <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.outboundToday}</strong></p></td>
                                                     <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.inboundToday}</strong></p></td>
                                                     <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{a.inboundToday + a.outboundToday}</strong></p></td>
+                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{Math.round(10 * (new Date().getTime() - new Date(a.lastCall).getTime()) / (1000 * 60)) / 10} min</strong></p></td>
+                                                    <td style={{ borderBottom: "white 1px solid" }}><p style={{ color: "white" }}><strong>{new Date(a.callCountLastUpdated).toLocaleTimeString()}</strong></p></td>
                                                 </tr>)
                                             })}
                                         </tbody>
