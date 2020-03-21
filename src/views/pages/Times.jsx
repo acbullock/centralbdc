@@ -420,8 +420,9 @@ class Times extends React.Component {
                                                                         <tr>
                                                                             <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Name</p></th>
                                                                             <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Day</p></th>
-                                                                            <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">In</p></th>
-                                                                            <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Out</p></th>
+                                                                            {/* <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">In</p></th>
+                                                                            <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Out</p></th> */}
+                                                                            {/* <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Break</p></th> */}
                                                                             <th style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">Hours</p></th>
                                                                         </tr>
                                                                     </thead>
@@ -433,8 +434,9 @@ class Times extends React.Component {
                                                                                 <tr key={ind}>
                                                                                     <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{cur.name}</p></td>
                                                                                     <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.day).toLocaleDateString()}</p></td>
-                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.start).toLocaleTimeString()}</p></td>
-                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.end).toLocaleTimeString()}</p></td>
+                                                                                    {/* <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.start).toLocaleTimeString()}</p></td>
+                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.end).toLocaleTimeString()}</p></td> */}
+                                                                                    {/* <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{cur.break.breakMinutes} minutes</p></td> */}
                                                                                     <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{Math.round(1000 * cur.hoursWorked) / 1000}</p></td>
                                                                                 </tr>
                                                                             )
