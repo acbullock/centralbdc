@@ -175,7 +175,7 @@ class CreateAppointment extends React.Component {
         // await agents.findOneAndReplace({ _id: appointment.agent_id }, agent)
         // await this.getPendingAppointments()
         await this.sendText(appointment)
-        if (dealership.label !== "West Palm Beach Nissan")
+        if (dealership.label !== "West Palm Beach Nissan" && appointment.dealership_scenario.indexOf("Home Delivery") === -1)
             await this.sendCustText(appointment)
         await this.props.mongo.insertOne("all_appointments", new_app)
         this.setState({ loading: false })
