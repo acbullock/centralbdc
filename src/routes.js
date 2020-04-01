@@ -50,7 +50,7 @@ import Justin from "./views/pages/Justin.jsx"
 import TeamStandings from "./views/pages/TeamStandings.jsx"
 import GoalDashboard from "./views/pages/GoalDashboard.jsx"
 import Times from "./views/pages/Times.jsx"
-import Rooftop from "./views/pages/Rooftop.jsx"
+// import Rooftop from "./views/pages/Rooftop.jsx"
 import NewApp from "./views/pages/NewApp.jsx"
 const routes = [
   {
