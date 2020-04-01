@@ -165,7 +165,7 @@ class NewApp extends React.Component {
             customer_lastname: data.customer.lastname,
             customer_phone: data.customer.phone,
             dealership: data.appointment.selected_dealership.value,
-            dealership_source: data.appointment.selected_source.label,
+            dealership_source: !data.appointment.selected_source ? "None" : data.appointment.selected_source.label,
             dealership_department: data.appointment.selected_department.label,
             dealership_scenario: data.appointment.selected_scenario.label,
             internal_msg: this.generateInternalMessage(data),
@@ -220,7 +220,7 @@ class NewApp extends React.Component {
         if (!data.customer || !data.appointment) return "";
         let customer_message = `Hi ${data.utils.toTitleCase(data.customer.firstname)}, I scheduled your ${data.agent.department === "service" ? "Service" : "VIP"} appointment at ${data.appointment.selected_dealership.label} located at ${data.appointment.selected_dealership.address} `;
         customer_message += `for ${new Date(data.appointment.appointment_date).toLocaleDateString()} ${new Date(data.appointment.appointment_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. We are excited to assist you!`
-        if(data.agent.department !== "service"){
+        if (data.agent.department !== "service") {
             customer_message += ' Please ask for the VIP manager at the receptionist desk.'
         }
         return customer_message
