@@ -50,6 +50,8 @@ import Justin from "./views/pages/Justin.jsx"
 import TeamStandings from "./views/pages/TeamStandings.jsx"
 import GoalDashboard from "./views/pages/GoalDashboard.jsx"
 import Times from "./views/pages/Times.jsx"
+import Rooftop from "./views/pages/Rooftop.jsx"
+import NewApp from "./views/pages/NewApp.jsx"
 const routes = [
   {
     path: "/agent_profile",
@@ -65,6 +67,21 @@ const routes = [
     component: PaymentCalculator,
     layout: "/admin"
   },
+  // {
+  //   path: "/new_app",
+  //   name: "App 2.0",
+  //   icon: "tim-icons icon-money-coins",
+  //   component: NewApp,
+  //   layout: "/admin"
+  // },
+  
+  // {
+  //   name: "Rooftop",
+  //   path: "/rooftop",
+  //   icon: "tim-icons icon-send",
+  //   component: Rooftop,
+  //   layout: "/admin"
+  // },
   {
     collapse: true,
     name: "Sales Dashboards",
@@ -387,7 +404,7 @@ const routes = [
       {
         path: "/new_appointment",
         name: "Create New Appointment",
-        component: CreateAppointment,
+        component: NewApp,
         layout: "/admin",
         adminOnly: false,
         icon: "tim-icons icon-simple-add",

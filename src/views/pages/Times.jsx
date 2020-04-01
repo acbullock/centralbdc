@@ -437,7 +437,7 @@ class Times extends React.Component {
                                                                                     <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.day).toLocaleDateString()}</p></td>
                                                                                     <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.start).toLocaleTimeString()}</p></td>
                                                                                     <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{new Date(cur.end).toLocaleTimeString()}</p></td>
-                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{cur.break.breakMinutes} min.</p></td>
+                                                                                    <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{!cur.break ? 60 : !cur.break.breakMinutes ? 60 : cur.break.breakMinutes} min.</p></td>
                                                                                     <td style={{ borderBottom: "white solid 1px" }}><p className="text-white text-center">{Math.round(1000 * cur.hoursWorked) / 1000}</p></td>
                                                                                 </tr>
                                                                             )
