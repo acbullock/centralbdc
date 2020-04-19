@@ -152,7 +152,10 @@ class NewApp extends React.Component {
         //send cust text.
         if (sendCust === true) {
             let token = await data.mongo.getToken()
-            data.mongo.sendGroupText(textFrom, this.generateCustomerMessage(data), data.customer.phone, token)
+            if (data.convertLanguage === "English")
+                data.mongo.sendGroupText(textFrom, this.generateCustomerMessage(data), data.customer.phone, token)
+            else
+                data.mongo.sendGroupText(textFrom, this.generateSpanishMessage(data), data.customer.phone, token)
         }
         let createdTime = new Date().toISOString()
         //add to all_apps
@@ -225,6 +228,16 @@ class NewApp extends React.Component {
         }
         return customer_message
     }
+    generateSpanishMessage(data) {
+        if (!data) return
+        if (!data.customer || !data.appointment) return "";
+        let customer_message = `Hola ${data.utils.toTitleCase(data.customer.firstname)}, programé tu cita ${data.agent.department === "service" ? "de servicio" : "VIP"} en ${data.appointment.selected_dealership.label} ubicado en ${data.appointment.selected_dealership.address} `;
+        customer_message += `para ${new Date(data.appointment.appointment_date).toLocaleDateString()} ${new Date(data.appointment.appointment_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Estamos encantados de ayudarte!`
+        if (data.agent.department !== "service") {
+            customer_message += ' Solicite el gerente VIP en el mostrador de recepción.'
+        }
+        return customer_message
+    }
     componentWillUnmount() {
         this._isMounted = false
     }
@@ -271,9 +284,11 @@ class NewApp extends React.Component {
                                             utils: this.props.utils,
                                             internal_message: this.state.internal_message,
                                             customer_message: this.state.customer_message,
+                                            convertLanguage: "Spanish",
                                             generateInternalMessage: this.generateInternalMessage,
                                             formatPhoneNumber: this.formatPhoneNumber,
-                                            generateCustomerMessage: this.generateCustomerMessage
+                                            generateCustomerMessage: this.generateCustomerMessage,
+                                            generateSpanishMessage: this.generateSpanishMessage
                                         }}
                                     />
                                 </CardBody>

@@ -63,7 +63,7 @@ class SalesTVDashboard extends React.Component {
         let agents = this._isMounted && await this.props.mongo.find("agents", {
             department: "sales",
             // isActive: true,
-            account_type: "agent"
+            // account_type: "agent"
         }, {
             projection: {
                 name: 1,

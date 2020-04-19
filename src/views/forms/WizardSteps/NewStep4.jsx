@@ -33,9 +33,11 @@ class NewApp extends React.Component {
         this.state = {
             loading: false,
             internal_message: "",
-            customer_message: ""
+            customer_message: "",
+            convertLanguage: "Spanish"
         };
         this._isMounted = false
+        this.convertLanguage = this.convertLanguage.bind(this)
         // this.generateInternalMessage = this.generateInternalMessage.bind(this)
         // this.formatPhoneNumber = this.formatPhoneNumber(this)
     }
@@ -52,6 +54,16 @@ class NewApp extends React.Component {
     isValidated = () => {
         return true
     };
+    convertLanguage = () => {
+        if (this.state.convertLanguage === "Spanish") {
+            this.setState({ convertLanguage: "English" })
+            this.setState({ customer_message: this.props.wizardData.generateSpanishMessage(this.props.wizardData) })
+        }
+        else {
+            this.setState({ convertLanguage: "Spanish" })
+        }
+
+    }
     render() {
 
         if (this.state.loading) {
@@ -77,7 +89,8 @@ class NewApp extends React.Component {
                         </Col>
                         <Col md="5">
                             <h3 className="text-center text-primary">Customer Message</h3>
-                            <p className="text-primary" style={{ whiteSpace: "pre-wrap", border: "1px solid #1d67a8", padding: 10, margin: 10 }}>{this.props.wizardData.generateCustomerMessage(this.props.wizardData)}</p>
+                            <p className="text-primary" style={{ whiteSpace: "pre-wrap", border: "1px solid #1d67a8", padding: 10, margin: 10 }}>{this.state.convertLanguage === "Spanish"? this.props.wizardData.generateCustomerMessage(this.props.wizardData): this.props.wizardData.generateSpanishMessage(this.props.wizardData)}</p>
+                            <Button onClick={() => { this.convertLanguage() }}>Convert to {this.state.convertLanguage}</Button>
                         </Col>
                     </Row>
                 </Container>
