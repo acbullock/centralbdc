@@ -140,7 +140,7 @@ class NewApp extends React.Component {
         }
         let sendCust = true;
         //make sure not WPB Nissan ,    or home delivery, or (paragonhonda && s2s)
-        if (data.appointment.selected_dealership.label === "West Palm Beach Nissan") {
+        if (data.appointment.selected_dealership.label === "West Palm Beach Nissan" || data.appointment.selected_dealership.label === "Plaza Hyundai" || data.appointment.selected_dealership.label === "Plaza Kia" || data.appointment.selected_dealership.label === "Plaza Toyota" || data.appointment.selected_dealership.label === "Plaza Honda") {
             sendCust = false;
         }
         if (data.appointment.selected_scenario.label.toLowerCase().indexOf("home delivery") !== -1) {
@@ -152,7 +152,7 @@ class NewApp extends React.Component {
         //send cust text.
         if (sendCust === true) {
             let token = await data.mongo.getToken()
-            if (data.convertLanguage === "English")
+            if (data.review.convertLanguage === "Spanish")
                 data.mongo.sendGroupText(textFrom, this.generateCustomerMessage(data), data.customer.phone, token)
             else
                 data.mongo.sendGroupText(textFrom, this.generateSpanishMessage(data), data.customer.phone, token)
