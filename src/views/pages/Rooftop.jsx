@@ -26,7 +26,10 @@ class Rooftop extends React.Component {
             selected_sales_agent: null,
             departments: [],
             buckets: [],
-            rooftops: {},
+            rooftops: {
+                "5ddde79f1c9d4400008eb646": [],
+                "5ddde7aa1c9d4400008eb648": []
+            },
             rooftop_history: {},
             open_roofs: [], //for override,
             selected_change: null, //for override,
@@ -578,7 +581,7 @@ class Rooftop extends React.Component {
                                         <Input readOnly value={!this.state.selected_change ? "" : this.state.selected_change.agent_name} />
                                         <p>Choose Rooftop</p>
                                         <Select
-                                            options={this.state.rooftops["5ddde79f1c9d4400008eb646"]}
+                                            options={this.state.rooftops["5ddde7aa1c9d4400008eb648"].concat(this.state.rooftops["5ddde79f1c9d4400008eb646"])}
                                             value={this.state.selected_new_rooftop}
                                             onChange={(e) => { this.setState({ selected_new_rooftop: e }) }}
                                         />
