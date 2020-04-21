@@ -188,9 +188,9 @@ async function iNeedARooftop(agent, rooftops) {
                 return false
             }
             let storeOpen = top.dealership.salesHours[top.dealership.salesHours.findIndex((d) => { return d.day === today })].open
-            storeOpen = new Date(new Date().setHours(new Date(storeOpen).getHours() + top.dealership.timezoneOffset, new Date(storeOpen).getMinutes()))
+            storeOpen = new Date(new Date().setHours(new Date(storeOpen).getHours() - top.dealership.timezoneOffset, new Date(storeOpen).getMinutes()))
             let storeClose = top.dealership.salesHours[top.dealership.salesHours.findIndex((d) => { return d.day === today })].close
-            storeClose = new Date(new Date().setHours(new Date(storeClose).getHours() + top.dealership.timezoneOffset, new Date(storeClose).getMinutes()))
+            storeClose = new Date(new Date().setHours(new Date(storeClose).getHours() - top.dealership.timezoneOffset, new Date(storeClose).getMinutes()))
 
             //see if store not open yet
             if (new Date(now).getTime() < new Date(storeOpen).getTime()) {
@@ -252,6 +252,7 @@ async function iNeedARooftop(agent, rooftops) {
             }
             return true;
         })
+        console.log(agent.skills, sales_rooftops, sales_buckets)
         //loop thru high prio buckets
         for (let i = 0; i < 3; i++) {
             if (agent.skills.sales.newLeads !== true && i == 0) {
@@ -366,9 +367,9 @@ async function iNeedARooftop(agent, rooftops) {
                 return false
             }
             let storeOpen = top.dealership.salesHours[top.dealership.salesHours.findIndex((d) => { return d.day === today })].open
-            storeOpen = new Date(new Date().setHours(new Date(storeOpen).getHours() + top.dealership.timezoneOffset, new Date(storeOpen).getMinutes()))
+            storeOpen = new Date(new Date().setHours(new Date(storeOpen).getHours() - top.dealership.timezoneOffset, new Date(storeOpen).getMinutes()))
             let storeClose = top.dealership.salesHours[top.dealership.salesHours.findIndex((d) => { return d.day === today })].close
-            storeClose = new Date(new Date().setHours(new Date(storeClose).getHours() + top.dealership.timezoneOffset, new Date(storeClose).getMinutes()))
+            storeClose = new Date(new Date().setHours(new Date(storeClose).getHours() - top.dealership.timezoneOffset, new Date(storeClose).getMinutes()))
 
             //see if store not open yet
             if (new Date(now).getTime() < new Date(storeOpen).getTime()) {
