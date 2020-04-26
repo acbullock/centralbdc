@@ -193,16 +193,16 @@ async function iNeedARooftop(agent, rooftops) {
             storeClose = new Date(new Date().setHours(new Date(storeClose).getHours() - top.dealership.timezoneOffset, new Date(storeClose).getMinutes()))
 
             //see if store not open yet
-            // if (new Date(now).getTime() < new Date(storeOpen).getTime()) {
-            //     return false;
-            // }
+            if (new Date(now).getTime() < (new Date(storeOpen).getTime() - (75 * 60 * 1000))) {
+                return false;
+            }
             //see if store is already closed..
             if (new Date(now).getTime() >= new Date(new Date().setHours(new Date(storeClose).getHours(), new Date(storeClose).getMinutes(), 0, 0)).getTime()) {
                 return false;
             }
             return true
         })
-        
+
         //
 
         // see if next up is available..
@@ -323,7 +323,7 @@ async function iNeedARooftop(agent, rooftops) {
             }
             return false;
         }
-        
+
     }
 
     //SERVICE TO SALES & DATAMINING
@@ -372,9 +372,9 @@ async function iNeedARooftop(agent, rooftops) {
             storeClose = new Date(new Date().setHours(new Date(storeClose).getHours() - top.dealership.timezoneOffset, new Date(storeClose).getMinutes()))
 
             //see if store not open yet
-            // if (new Date(now).getTime() < new Date(storeOpen).getTime()) {
-            //     return false;
-            // }
+            if (new Date(now).getTime() < (new Date(storeOpen).getTime() - (75 * 60 * 1000))) {
+                return false;
+            }
             //see if store is already closed..
             if (new Date(now).getTime() >= new Date(new Date().setHours(new Date(storeClose).getHours(), new Date(storeClose).getMinutes(), 0, 0)).getTime()) {
                 return false;
