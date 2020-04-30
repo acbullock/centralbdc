@@ -206,10 +206,7 @@ async function iNeedARooftop(agent, rooftops) {
         //
 
         // see if next up is available..
-        //filter out roofs that already hit goal..
-        sales_rooftops = await sales_rooftops.filter((a) => {
-            return a.dealership.projectedDistanceFromGoal > 0
-        })
+
         //filter out roofs already in history..
         sales_rooftops = await sales_rooftops.filter((s) => {
             // console.log(s)
@@ -272,7 +269,10 @@ async function iNeedARooftop(agent, rooftops) {
                 return matched[0]
             }
         }
-
+        //filter out roofs that already hit goal..
+        sales_rooftops = await sales_rooftops.filter((a) => {
+            return a.dealership.projectedDistanceFromGoal > 0
+        })
 
         //if all high prios are filled/met goal already..
         // find 5 most struggling dealers
@@ -386,10 +386,7 @@ async function iNeedARooftop(agent, rooftops) {
         //
         // see if next up is available..
 
-        //filter out roofs that already hit goal..
-        serviceToSalesRooftops = await serviceToSalesRooftops.filter((a) => {
-            return a.dealership.projectedDistanceFromGoal > 0
-        })
+
         //filter out roofs already in history..
         serviceToSalesRooftops = await serviceToSalesRooftops.filter((s) => {
             // console.log(s)
@@ -435,6 +432,10 @@ async function iNeedARooftop(agent, rooftops) {
                 return matched[0]
             }
         }
+        //filter out roofs that already hit goal..
+        serviceToSalesRooftops = await serviceToSalesRooftops.filter((a) => {
+            return a.dealership.projectedDistanceFromGoal > 0
+        })
         //if all high prios are filled/met goal already..
         // find 5 most struggling dealers
         let top5 = await serviceToSalesRooftops.filter((a, i) => {
