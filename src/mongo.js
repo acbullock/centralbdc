@@ -438,7 +438,7 @@ async function iNeedARooftop(agent, rooftops) {
         //if all high prios are filled/met goal already..
         // find 5 most struggling dealers
         let top5 = await serviceToSalesRooftops.filter((a, i) => {
-            return i < 5
+            return i < 15
         })
         //rank agents dealers (based off lifetime appt history)
         let agentHistory = await this.aggregate("all_appointments", [
