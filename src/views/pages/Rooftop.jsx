@@ -207,9 +207,28 @@ class Rooftop extends React.Component {
         this.setState({ loading: false, selected_sales_agent: null, open_roofs })
     }
     async manualRooftop() {
-        this.setState({loading: true})
-        console.log(this.state.selected_sales_agent)
-        console.log(this.state.selected_manual)
+        this.setState({ loading: true })
+
+        for (let o in this.state.open_roofs) {
+            if (this.state.open_roofs[o].agent === this.state.selected_sales_agent.value) {
+                let end = new Date().toISOString();
+                let timeSpentMinutes = new Date(end).getTime() - new Date(this.state.open_roofs[o].startTime).getTime()
+                timeSpentMinutes = Math.round(10 * (timeSpentMinutes / (1000 * 60))) / 10;
+                let appointmentCount = await this.props.mongo.count("all_appointments", {
+                    agent_id: this.state.open_roofs[o].agent,
+                    verified: {
+                        "$gte": this.state.open_roofs[o].startTime,
+                        "$lte": end,
+                    }
+                })
+                appointmentCount = appointmentCount.count
+                await this.props.mongo.findOneAndUpdate("rooftop_history", { _id: this.state.open_roofs[o]._id }, {
+                    endTime: end,
+                    timeSpentMinutes,
+                    appointmentCount
+                })
+            }
+        }
         let insert = {
             dealership: this.state.selected_manual.dealership.value,
             department: this.state.selected_manual.department,
@@ -250,8 +269,8 @@ class Rooftop extends React.Component {
             open_roofs[o].agent_name = this.state.agents[ag].label
             open_roofs[o].label = `${this.state.agents[ag].label} - ${this.state.dealerships[ind].label} - ${open_roofs[o].bucket}`
         }
-        await this.setState({ open_roofs, selected_change: null, selected_new_rooftop: null, selected_manual: null, manualRooftopModal: false,changeRooftopModal: false, loading: false })
-        this.setState({loading: false})
+        await this.setState({ open_roofs, selected_change: null, selected_new_rooftop: null, selected_manual: null, manualRooftopModal: false, changeRooftopModal: false, loading: false })
+        this.setState({ loading: false })
     }
     async changeRooftop() {
         this.setState({ loading: true })
