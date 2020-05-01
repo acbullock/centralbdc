@@ -34,7 +34,10 @@ class Rooftop extends React.Component {
             open_roofs: [], //for override,
             selected_change: null, //for override,
             changeRooftopModal: false,//for override,
-            selected_new_rooftop: null //for  override
+            selected_new_rooftop: null,//for  override,
+            available_roofs: [], //for manual,
+            manualRooftopModal: false, //for manual,
+            selected_manual: null, //for override
 
         }
         this._isMounted = false
@@ -45,6 +48,7 @@ class Rooftop extends React.Component {
         this.renderSalesBoard = this.renderSalesBoard.bind(this)
         this.renderServiceToSalesBoard = this.renderServiceToSalesBoard.bind(this)
         this.generateRooftop = this.generateRooftop.bind(this)
+        this.manualRooftop = this.manualRooftop.bind(this)
         this.changeRooftop = this.changeRooftop.bind(this)
     }
     async componentWillMount() {
@@ -92,7 +96,7 @@ class Rooftop extends React.Component {
                     label: { "$first": "$name" },
                     value: { "$first": "$_id" },
                     skills: { "$first": "$skills" },
-                    rooftopDepartment: {"$first": "$rooftopDepartment"}
+                    rooftopDepartment: { "$first": "$rooftopDepartment" }
                 }
             },
             {
@@ -140,7 +144,15 @@ class Rooftop extends React.Component {
             open_roofs[o].agent_name = agents[ag].label
             open_roofs[o].label = `${agents[ag].label} - ${dealerships[ind].label} - ${open_roofs[o].bucket}`
         }
-        this._isMounted && await this.setState({ open_roofs, loading: false })
+        let history = []
+        for (let h in this.state.rooftop_history) {
+            for (let d in this.state.rooftop_history[h])
+                history = await history.concat(this.state.rooftop_history[h][d])
+        }
+        let available_roofs = await history.filter((hs) => {
+            return hs.agent === undefined
+        })
+        this._isMounted && await this.setState({ open_roofs, available_roofs, loading: false })
     }
 
 
@@ -193,6 +205,53 @@ class Rooftop extends React.Component {
             open_roofs[o].label = `${this.state.agents[ag].label} - ${this.state.dealerships[ind].label} - ${open_roofs[o].bucket}`
         }
         this.setState({ loading: false, selected_sales_agent: null, open_roofs })
+    }
+    async manualRooftop() {
+        this.setState({loading: true})
+        console.log(this.state.selected_sales_agent)
+        console.log(this.state.selected_manual)
+        let insert = {
+            dealership: this.state.selected_manual.dealership.value,
+            department: this.state.selected_manual.department,
+            bucket: this.state.selected_manual.bucket,
+            agent: this.state.selected_sales_agent.value,
+            startTime: new Date().toISOString()
+        }
+        await this.props.mongo.insertOne("rooftop_history", insert)
+        await this.getAllRooftops()
+        await this.getRooftopHistory()
+        let open_roofs = await this.props.mongo.aggregate("rooftop_history", [
+            {
+                "$match": {
+                    startTime: {
+                        "$gte": new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+                    },
+                    endTime: null
+                }
+            },
+            {
+                "$addFields": {
+                    value: "$_id",
+                    label: "$dealership",
+                    agent_name: ""
+                }
+            }
+        ])
+        for (let o in open_roofs) {
+            let ind = await this.state.dealerships.findIndex((d) => {
+                return d.value === open_roofs[o].label
+            })
+            let ag = await this.state.agents.findIndex((a) => {
+                return a._id === open_roofs[o].agent
+            })
+            if (ind === -1 || ag === -1) {
+                continue;
+            }
+            open_roofs[o].agent_name = this.state.agents[ag].label
+            open_roofs[o].label = `${this.state.agents[ag].label} - ${this.state.dealerships[ind].label} - ${open_roofs[o].bucket}`
+        }
+        await this.setState({ open_roofs, selected_change: null, selected_new_rooftop: null, selected_manual: null, manualRooftopModal: false,changeRooftopModal: false, loading: false })
+        this.setState({loading: false})
     }
     async changeRooftop() {
         this.setState({ loading: true })
@@ -463,31 +522,31 @@ class Rooftop extends React.Component {
                 <tbody>
                     {(() => {
                         let ret = []
-                                    for (let h in history) {
-                                        let cols = []
-                                        for (let dealer in history[h]) {
-                                            // console.log(history[h][dealer].appointmentCount, "!")
-                                            if (dealer === "0") {
-                                                cols.push(<td key={h} style={{ border: "1px white solid" }}>
-                                                    <p className="text-white text-center">{history[h][dealer].dealership.label}</p>
-                                                    <p className="text-white text-center">Projected Distance From Goal: {history[h][dealer].dealership.projectedDistanceFromGoal}</p>
-                                                </td>)
-                                            }
-                                            cols.push(
-                                                <td key={dealer + "_" + h} style={{ border: "1px white solid" }}>
-                                                    <p className="text-center" style={{ color: !history[h][dealer].agent ? "red" : "white" }}><strong>{!history[h][dealer].agent ? "empty" : this.state.agents.find((ag) => { return ag._id === history[h][dealer].agent }).name}</strong></p>
-                                                    <p className="text-white text-center">{!history[h][dealer].timeSpentMinutes ? null : history[h][dealer].timeSpentMinutes + " min"}</p>
-                                                    <p className="text-white text-center">{history[h][dealer].appointmentCount === undefined ? null : history[h][dealer].appointmentCount + " appts"}</p>
-                                                </td>
-                                            )
-                                        }
-                                        ret.push(
-                                            <tr key={h}>
-                                                {cols}
-                                            </tr>
-                                        )
+                        for (let h in history) {
+                            let cols = []
+                            for (let dealer in history[h]) {
+                                // console.log(history[h][dealer].appointmentCount, "!")
+                                if (dealer === "0") {
+                                    cols.push(<td key={h} style={{ border: "1px white solid" }}>
+                                        <p className="text-white text-center">{history[h][dealer].dealership.label}</p>
+                                        <p className="text-white text-center">Projected Distance From Goal: {history[h][dealer].dealership.projectedDistanceFromGoal}</p>
+                                    </td>)
+                                }
+                                cols.push(
+                                    <td key={dealer + "_" + h} style={{ border: "1px white solid" }}>
+                                        <p className="text-center" style={{ color: !history[h][dealer].agent ? "red" : "white" }}><strong>{!history[h][dealer].agent ? "empty" : this.state.agents.find((ag) => { return ag._id === history[h][dealer].agent }).name}</strong></p>
+                                        <p className="text-white text-center">{!history[h][dealer].timeSpentMinutes ? null : history[h][dealer].timeSpentMinutes + " min"}</p>
+                                        <p className="text-white text-center">{history[h][dealer].appointmentCount === undefined ? null : history[h][dealer].appointmentCount + " appts"}</p>
+                                    </td>
+                                )
+                            }
+                            ret.push(
+                                <tr key={h}>
+                                    {cols}
+                                </tr>
+                            )
 
-                                    }
+                        }
                         return ret
                     })()}
                 </tbody>
@@ -531,6 +590,15 @@ class Rooftop extends React.Component {
                                         }}>
                                         Generate Rooftop
                                 </Button>
+                                    <Button
+                                        color="secondary"
+                                        disabled={!this.state.selected_sales_agent}
+                                        onClick={async () => {
+                                            this.setState({ manualRooftopModal: true })
+
+                                        }}>
+                                        Manual Selection
+                                    </Button>
                                 </CardBody>
                             </Card>
                             <hr />
@@ -564,6 +632,28 @@ class Rooftop extends React.Component {
                                 <br />
                                 {this.renderServiceToSalesBoard()}
                             </Card>
+                            <Modal isOpen={this.state.manualRooftopModal}>
+                                <ModalHeader toggle={() => { this.setState({ manualRooftopModal: !this.state.manualRooftopModal }) }}>
+                                    Manual Selection
+                                </ModalHeader>
+                                <ModalBody>
+                                    <p>Choose Rooftop for {!this.state.selected_sales_agent ? "agent" : this.state.selected_sales_agent.label}</p>
+                                    <Select
+                                        options={this.state.available_roofs}
+                                        value={this.state.selected_manual}
+                                        onChange={(e) => { this.setState({ selected_manual: e }) }}
+                                    />
+                                    <Button
+                                        color="neutral"
+                                        onClick={() => { this.setState({ manualRooftopModal: false }) }}
+                                    >Cancel</Button>
+                                    <Button
+                                        disabled={!this.state.selected_manual}
+                                        onClick={() => { this.manualRooftop() }}
+                                    >Confirm</Button>
+
+                                </ModalBody>
+                            </Modal>
                             <Modal isOpen={this.state.changeRooftopModal} >
                                 <ModalHeader toggle={() => { this.setState({ changeRooftopModal: !this.state.changeRooftopModal }) }}>
                                     Change Rooftop
