@@ -143,6 +143,9 @@ class NewApp extends React.Component {
         if (data.appointment.selected_dealership.label === "West Palm Beach Nissan" || data.appointment.selected_dealership.label === "Plaza Hyundai" || data.appointment.selected_dealership.label === "Plaza Kia" || data.appointment.selected_dealership.label === "Plaza Toyota" || data.appointment.selected_dealership.label === "Plaza Honda") {
             sendCust = false;
         }
+        if (data.appointment.selected_dealership.label === "Major World Chevrolet" || data.appointment.selected_dealership.label === "Major World Chrysler Dodge Jeep Ram" || data.appointment.selected_dealership.label === "Major World Used Superstore" ){
+            sendCust = false
+        }
         if (data.appointment.selected_scenario.label.toLowerCase().indexOf("home delivery") !== -1) {
             sendCust = false;
         }
