@@ -513,11 +513,21 @@ const getModelsForMake = async (make) => {
     let resp = await axios.get(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/${make.toLowerCase()}?format=json`)
     return resp.data
 }
+const adfToMojo = async (adf) => {
+    let resp = await axios.post(`${SERVER_URL}/adfToMojo`, adf)
+    return resp.data
+}
+const askMojo = async (body) => {
+    let resp = await axios.post(`${SERVER_URL}/askMojo`, body)
+    return resp.data
+}
 export default {
     client,
     mongodb,
     // db,
     // getCollection,
+    askMojo, 
+    adfToMojo,
     handleLogin,
     handleDealerLogin,
     handleLogout,

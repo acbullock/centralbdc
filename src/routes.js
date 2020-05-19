@@ -52,6 +52,7 @@ import GoalDashboard from "./views/pages/GoalDashboard.jsx"
 import Times from "./views/pages/Times.jsx"
 import Rooftop from "./views/pages/Rooftop.jsx"
 import NewApp from "./views/pages/NewApp.jsx"
+import CentralAI from "./views/pages/CentralAI.jsx"
 const routes = [
   {
     path: "/agent_profile",
@@ -74,7 +75,15 @@ const routes = [
   //   component: NewApp,
   //   layout: "/admin"
   // },
-  
+  {
+    name: "Central AI",
+    path: "/central_ai",
+    icon: "tim-icons icon-send",
+    component: CentralAI,
+    layout: "/admin",
+    adminOnly: true
+  },
+
   {
     name: "Rooftop",
     path: "/rooftop",
