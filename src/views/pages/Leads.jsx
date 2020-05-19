@@ -59,8 +59,10 @@ class AgentProfile extends React.Component {
             }
             else {
                 leads[l].contacted = true
+                leads[l] = Object.assign(leads[l], mojolead)
+                console.log(leads[l])
             }
-            console.log(x)
+
         }
         let lead_options = []
         for (let l in leads) {
@@ -157,10 +159,13 @@ class AgentProfile extends React.Component {
                                         <div key={i}>
 
                                             <Row>
-                                                <Col md="12">
-                                                    <p style={{ justifyContent: "center" }} className="text-danger" hidden={f.contacted === false}><strong>ALREADY CONTACTED</strong></p>
-
+                                                <Col md="12" hidden={f.contacted === false}>
+                                                    <p style={{ justifyContent: "center" }} className="text-danger" ><strong>ALREADY CONTACTED</strong></p>
+                                                    <a className="text-white" href={f.transcript ? f.transcript.substring(16) : "#"} target="_blank">TRANSCRIPT</a>
+                                                    <p className="text-white">Mojo score: {f.mojo_score ? f.mojo_score : ""}</p>
+                                                    <p className="text-white">Recommended Action: {f.recommended_action ? f.recommended_action : ""}</p>
                                                 </Col>
+                                                <br/>
                                                 <Col md="5">
                                                     <Card color="transparent" className="card-raised card-white">
 
