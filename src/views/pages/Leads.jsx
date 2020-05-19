@@ -65,7 +65,8 @@ class AgentProfile extends React.Component {
 
         }
         leads = await leads.filter((l) => {
-            if (!l.rules || !l.rules.origin || !l.rules.phone_number) return true
+            if(!l.rules.phone_number)return false
+            if (!l.rules || !l.rules.origin) return true
             return l.rules.phone_number.length > 0 && l.rules.origin.vendor_name.indexOf("Apollo") === -1 && l.rules.origin.vendor_name.indexOf("CallSource") === -1
         })
         let lead_options = []
