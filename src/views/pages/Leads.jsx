@@ -64,6 +64,10 @@ class AgentProfile extends React.Component {
             }
 
         }
+        leads = await leads.filter((l) => {
+            if (!l.rules || !l.rules.origin || !l.rules.phone_number) return true
+            return l.rules.phone_number.length > 0 && l.rules.origin.vendor_name.indexOf("Apollo") === -1 && l.rules.origin.vendor_name.indexOf("CallSource") === -1
+        })
         let lead_options = []
         for (let l in leads) {
             if (lead_options.findIndex((lead) => { return lead.label === leads[l].rules.dealership }) === -1) {
@@ -165,7 +169,7 @@ class AgentProfile extends React.Component {
                                                     <p className="text-white">Mojo score: {f.mojo_score ? f.mojo_score : ""}</p>
                                                     <p className="text-white">Recommended Action: {f.recommended_action ? f.recommended_action : ""}</p>
                                                 </Col>
-                                                <br/>
+                                                <br />
                                                 <Col md="5">
                                                     <Card color="transparent" className="card-raised card-white">
 
@@ -200,7 +204,7 @@ class AgentProfile extends React.Component {
                                                 if (start.message) {
                                                     alert(start.message)
                                                 }
-                                                else{
+                                                else {
                                                     alert("success")
                                                 }
                                             }}>START CHAT</Button>
