@@ -200,6 +200,9 @@ class AgentProfile extends React.Component {
                                                 if (start.message) {
                                                     alert(start.message)
                                                 }
+                                                else{
+                                                    alert("success")
+                                                }
                                             }}>START CHAT</Button>
                                             <hr style={{ border: "1px solid white" }} />
                                         </div>
