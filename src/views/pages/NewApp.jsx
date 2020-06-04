@@ -103,12 +103,12 @@ class NewApp extends React.Component {
             "6465490627",
             "5163294629",
             "3475769827",
-            "9548646379"
+            // "9548646379"
         ]
         //get s2s contacts.
         let SERVICE_TO_SALES_CONTACTS = [
             "3472656027",
-            "9548646379"
+            // "9548646379"
         ]
         //get data based on dept
         let contacts = data.appointment.selected_department.label === "Service" ? data.appointment.selected_dealership.serviceContacts : data.appointment.selected_dealership.contacts
